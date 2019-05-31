@@ -1,0 +1,21 @@
+ /system-calendar:
+    get:
+      tags:
+        - operator information
+      summary: describes the operating calendar for a system. An array of year objects defined as follows (if start/end year are omitted, then assume the start and end months do not change from year to year). [from GFBS]
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-calendar'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-calendar'
+        400:
+          description: bad input parameter
