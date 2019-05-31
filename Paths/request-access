@@ -1,0 +1,39 @@
+ /request-access/{id}:
+    put:
+      description: provides access to an asset or transport system
+      tags:
+        - trip execution
+      parameters:
+        - name: id
+          in: path  
+          description: Booking identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: access granted
+        '400':
+          description: Bad request (invalid query or body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: The booking was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
