@@ -1,0 +1,44 @@
+system-calendar:
+      required:
+        - calendars
+        - startMonth
+        - startDay
+        - endMonth
+        - endDay
+      properties:
+        calendars:
+          type: object
+          description: Array of year objects describing the system operational calendar. A minimum of one calendar object is required, which could indicate a general calendar, or multiple calendars could be present indicating arbitrary start and end dates
+          properties:
+            startMonth:
+              type: integer
+              minimum: 1
+              maximum: 12
+              description: Starting month for the system operations (1-12)
+              example: 1
+            startDay:
+              type: integer
+              minimum: 1
+              maximum: 31
+              description: Starting day for the system operations (1-31)
+              example: 1
+            startYear:
+              type: integer
+              description: Starting year for the system operations
+              example: 2019
+            endMonth:
+              type: integer
+              minimum: 1
+              maximum: 12
+              description: Ending month for the system operations (1-12)
+              example: 12
+            endDay:
+              type: integer
+              minimum: 1
+              maximum: 31
+              description: Ending day for the system operations (1-31)
+              example: 31
+            endYear:
+              type: integer
+              description: Ending year for the system operations
+              example: 2099
