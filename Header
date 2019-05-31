@@ -1,0 +1,40 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/efel85/GBFS/1.0.6
+info:
+  description: General Transport Operator API Specification
+  version: "1.0.6"
+  title: General Transport Operator API Specification
+  contact:
+    email: edoardo.felici@minienw.nl
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: operator information
+    description: gives information about systems, stations, operating hours [from GBFS]
+    
+  - name: planning
+    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS]
+    
+  - name: booking
+    description: a booking is the main object exchanged between MaaS and a
+      TSP [from MaaS-API].
+    externalDocs:
+      description: Booking scenarios
+      url: 'https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'
+      
+  - name: trip execution
+    description: provides asset location, grants access or exit from an asset or transport system, offers trip monitoring [addendum]
+    
+  - name: payment
+    description: arranges financial settlement for legs and trips
+    
+  - name: support
+    description: support for the user while the trip is being executed
+    
+security:
+  - key: []
