@@ -1,0 +1,8 @@
+ options:
+      type: object
+      description: Containing an array of available options matching the query
+      properties:
+        leg:
+          $ref: '#/components/schemas/options-leg'
+        meta:
+          $ref: '#/components/schemas/type-of-asset'
