@@ -1,0 +1,11 @@
+ options-leg:
+      type: object
+      properties:
+        startTime:
+          $ref: '#/components/schemas/timestamp'
+        endTime:
+          $ref: '#/components/schemas/timestamp'
+        from:
+          $ref: '#/components/schemas/options-coordinates'
+        to:
+          $ref: '#/components/schemas/options-coordinates'
