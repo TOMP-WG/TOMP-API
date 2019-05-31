@@ -1,0 +1,30 @@
+  /free-asset-status:
+    get:
+      tags:
+        - planning
+      summary: describes asset availability
+      description: describes assets that are available for use [free_bike_status in GBFS and amended] and returns pricing for requested leg
+      
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/free-asset-status'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/free-asset-status'
+        '400':
+          description: bad input parameter
+    parameters:
+      - name: requested-leg-options
+        in: query
+        description: added to allow looking for specific asset requirements and return cost calculation by transport operator
+        required: false
+        schema:
+          $ref: '#/components/schemas/options'
