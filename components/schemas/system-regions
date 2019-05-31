@@ -1,0 +1,19 @@
+system-regions:
+      required:
+       - regions
+       - regionID
+       - name
+      properties:
+        regions:
+          type: object
+          description: Array of region objects as defined below
+          properties:
+            regionID:
+              type: string
+              description: Unique identifier for this region
+              example: BikeRegion
+            name:
+              type: string
+              description: Public name for this region
+              example: BikeTown
+    
