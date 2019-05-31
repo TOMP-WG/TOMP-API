@@ -1,0 +1,21 @@
+customer:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: The identifier MaaS uses to identify the customer
+          type: string
+          example: 123456
+        firstName:
+          description: First name of the customer
+          type: string
+          example: John
+        lastName:
+          description: Last name of the customer
+          type: string
+          example: Doe
+        phone:
+          description: Phone number that the customer may be reached from
+          type: string
+    
