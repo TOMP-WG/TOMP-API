@@ -1,0 +1,29 @@
+ system-hours:
+      required:
+        - rentalhours
+        - userTypes
+        - days
+        - startTime
+        - endTime
+      properties:
+        rentalhours:
+          type: object
+          description: Array of hour objects as defined below. Can contain a minimum of one object identifying hours for all days of the week or a maximum of fourteen hour objects are allowed (one for each day of the week for each "member" or "nonmember" user type)
+          properties:
+            userType:
+              type: string
+              description: This indicates that this set of rental hours applies to either members or non-members only.
+              enum:
+                - member
+                - non-members
+              example: member
+            days:
+              type: array
+              items:
+                type: string
+              description: An array of abbreviations (first 3 letters) of English names of the days of the week that this hour object applies to (i.e. ["mon", "tue"]). Each day can only appear once within all of the hours objects in this feed.
+              example: ["mon", "tue", "wed", "thu", "fri"]
+            startTime:
+              $ref: '#/components/schemas/time'
+            endTime:
+              $ref: '#/components/schemas/time'
