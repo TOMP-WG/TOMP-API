@@ -1,0 +1,18 @@
+ place:
+      type: object
+      additionalProperties: true
+      required:
+        - lon
+        - lat
+      properties:
+        name:
+          description: Human readable name of the place
+          type: string
+        stopId:
+          type: string
+        stopCode:
+          type: string
+        lat:
+          $ref: '#/components/schemas/lat'
+        lon:
+          $ref: '#/components/schemas/lon'
