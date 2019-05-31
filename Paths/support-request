@@ -1,0 +1,53 @@
+/support-request/{id}:
+    put:
+      description: identifies a request for support from user via MSP
+      tags:
+        - support
+      parameters:
+        - name: id
+          in: path  
+          description: Booking identifier
+          required: true
+          schema:
+            type: string
+        - name: support type
+          in: path
+          description: type of support needed
+          required: true
+          schema:
+            enum:
+            - BrokenDown
+            - NotAtLocation
+            - NotClean
+            - NotAvailable
+            - unableToOpen
+            - unableToClose
+            - other
+      responses:
+        '200':
+          description: support request acknowledged
+        '400':
+          description: Bad request (invalid query or body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: The booking was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
