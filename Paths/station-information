@@ -1,0 +1,24 @@
+/station-information:
+    get:
+      tags:
+        - operator information
+      summary: describes all available stations
+      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare’s White House station) these should not be exposed here and their status should not be included [from GBFS]
+        
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/station-information'
+
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/station-information'
+        400:
+          description: bad input parameter
