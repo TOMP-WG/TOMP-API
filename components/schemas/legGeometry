@@ -1,0 +1,7 @@
+legGeometry:
+      type: object
+      additionalProperties: true
+      properties:
+        points:
+          type: string
+          minLength: 1
