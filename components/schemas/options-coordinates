@@ -1,0 +1,7 @@
+options-coordinates:
+      type: object
+      properties:
+        lat:
+          $ref: '#/components/schemas/lat'
+        lon:
+          $ref: '#/components/schemas/lon'
