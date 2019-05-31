@@ -1,0 +1,6 @@
+    duration:
+      description: A duration of some time (relative to time) in milliseconds
+      type: integer
+      maximum: 2147483647
+      minimum: 0
+      example: 11112
