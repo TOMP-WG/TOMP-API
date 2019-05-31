@@ -1,0 +1,13 @@
+/system-pricingplans:
+    get:
+      tags:
+       - operator information
+      summary: gives pricing information
+      description: Describes pricing of systems or assets [from GBFS]
+       
+      responses:
+        '200':
+          description: returns standard pricing plans for an operator
+          $ref: '#/components/schemas/system-pricing-plans'
+        '400':
+          description: bad input parameter
