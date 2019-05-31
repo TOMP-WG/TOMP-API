@@ -1,0 +1,43 @@
+ system-pricing-plans:
+      required:
+       - plans
+       - planID
+       - name
+       - currency
+       - price
+       - isTaxable
+       - description
+      properties:
+        plans:
+          type: object
+          description: Array of any number of plan objects as defined below
+          properties:
+            planID:
+              type: string
+              description: a unique identifier for this plan in the system
+              example: freeplan1
+            url:
+              type: string
+              description: a fully qualified URL where the customer can learn more about this particular scheme
+              example: https://www.rentmyfreebike.com/freeplan
+            name:
+              type: string
+              description: name of this pricing scheme
+              example: Free Plan
+            currency:
+              type: string
+              description: currency this pricing is in
+              format: iso_4217
+              example: XDR
+            fare:
+              $ref: '#/components/schemas/fare'
+            isTaxable:
+              type: integer
+              enum: [0, 1]
+              description: 0 indicates that no additional tax will be added (either because tax is not charged, or because it is included)
+                1 indicates that tax will be added to the base price
+              example: 0
+            description:
+              type: string
+              description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations
+              example: Unlimited plan for free bikes, as long as you don't break them!
