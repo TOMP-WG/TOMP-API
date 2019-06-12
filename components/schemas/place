@@ -1,5 +1,6 @@
     place:
       type: object
+      description: a origin or destination of a leg, non 3D. lon/lat in WGS84.
       additionalProperties: true
       required:
         - lon
@@ -8,10 +9,10 @@
         name:
           description: Human readable name of the place
           type: string
-        stopId:
-          type: string
-        stopCode:
-          type: string
+        stopReference:
+          type: array
+          items:
+            $ref: '#/components/schemas/stop-reference'
         lat:
           $ref: '#/components/schemas/lat'
         lon:
