@@ -5,7 +5,7 @@
         - booking
       parameters:
         - name: from
-          description: User's location in comma separated form e.g. 60.123,27.456
+          description: User's location in comma separated form e.g. 60.123,27.456 (lat/long, WGS84)
           in: query
           required: true
           schema:
@@ -18,7 +18,7 @@
           schema:
             type: string
         - name: to
-          description: A desired destination e.g. 60.123,27.456
+          description: A desired destination e.g. 60.123,27.456 (lat/long, WGS84)
           in: query
           required: false
           schema:
@@ -64,8 +64,7 @@
           required: true
           schema:
             type: string
-            format: enum - BOOKED - CANCELLED - PAID - UPDATEREQUESTED - UPDATED -
-              STARTED - FINISHED
+            enum: [BOOKED, CANCELLED, PAID, UPDATEREQUESTED, UPDATED, STARTED, FINISHED]
       responses:
         '200':
           description: The bookings matching the query

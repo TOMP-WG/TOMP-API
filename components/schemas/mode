@@ -1,2 +1,22 @@
     mode:
-      description: The type of the leg MaaS uses to identify the leg
+      description: The modality of the leg
+      required:
+        - modality
+      properties:
+        modality:
+          type: string
+          enum: [walk, bike, cargo-bike, moped, scooter, step, segway, car, taxi, public-bus, coach-bus, office-bus, tram, lightrail, metro, train, ferry, water-taxi, water-bus, airline]
+        fuel:
+          type: string
+          enum: [gasoline, diesel, electric, hybrid-gasoline, hybrid-diesel, hybrid-gas, hybrid-gas, hydrogen, gas, bio-mass, kerosine, other]
+        energy-label:
+          type: string
+          enum: [A,B,C,D,E]
+        co2-per-km:
+          type: number
+        brand:
+          type: string
+        model:
+          type: string
+        building-year:
+          type: number
