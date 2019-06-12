@@ -1,4 +1,4 @@
-monitor-trip/{id}:
+  /monitor-trip/{id}:
     get:
       description: monitors the current location of the asset and duration & distance of the trip
       tags:

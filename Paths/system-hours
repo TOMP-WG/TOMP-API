@@ -1,4 +1,4 @@
-/system-hours:
+  /system-hours:
     get:
       tags:
         - operator information

@@ -1,4 +1,4 @@
-leg:
+    leg:
       type: object
       description: A OpenTripPlanner compatible definition of a leg (see OpenTripPlanner docs for reference)
       additionalProperties: true

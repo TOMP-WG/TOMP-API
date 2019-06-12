@@ -1,4 +1,4 @@
-station-information:
+    station-information:
       required:
         - stations
         - stationID

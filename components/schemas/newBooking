@@ -1,4 +1,4 @@
-newBooking:
+    newBooking:
       type: object
       description: A new booking, created by MaaS POST request in 'new' state
       required:

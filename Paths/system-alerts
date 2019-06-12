@@ -1,4 +1,4 @@
-/system-alerts:
+  /system-alerts:
     get:
       tags:
       - operator information

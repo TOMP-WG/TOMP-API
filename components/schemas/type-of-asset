@@ -1,4 +1,4 @@
-type-of-asset:
+    type-of-asset:
       required:
         - typeID
         - name

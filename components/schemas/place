@@ -1,4 +1,4 @@
- place:
+    place:
       type: object
       additionalProperties: true
       required:

@@ -1,4 +1,4 @@
-/support-request/{id}:
+  /support-request/{id}:
     put:
       description: identifies a request for support from user via MSP
       tags:

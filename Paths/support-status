@@ -1,4 +1,4 @@
-support-status/{id}:
+  /support-status/{id}:
     get:
       description: identifies the current status of the support request
       tags:

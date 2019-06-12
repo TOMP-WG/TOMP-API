@@ -1,4 +1,4 @@
-/station-information:
+  /station-information:
     get:
       tags:
         - operator information

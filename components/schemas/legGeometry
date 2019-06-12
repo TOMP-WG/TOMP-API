@@ -1,4 +1,4 @@
-legGeometry:
+    legGeometry:
       type: object
       additionalProperties: true
       properties:

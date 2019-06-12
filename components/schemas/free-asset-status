@@ -1,4 +1,4 @@
-free-asset-status:
+    free-asset-status:
       required:
         - assets
         - assetID
@@ -17,9 +17,8 @@ free-asset-status:
             place:
               $ref: '#/components/schemas/place'
             isReserved:
-              type: integer
-              enum: [0, 1]
-              description: 1/0 value - is the bike currently reserved for someone else
+              type: boolean
+              description: true indicates the bike is currently reserved for someone else
             isReservedFrom:
               $ref: '#/components/schemas/timestamp' 
               description: optional addition to determine if an asset is reserved in the future
@@ -27,9 +26,8 @@ free-asset-status:
               $ref: '#/components/schemas/timestamp' 
               description: optional addition to determine when asset is available in the future
             isDisabled:
-              type: integer
-              enum: [0, 1]
-              description: 1/0 value - is the asset currently disabled (broken)
+              type: boolean
+              description: true indicates the asset is currently disabled (broken)
             pricing:
               $ref: '#/components/schemas/fare'
             rentalUrl:

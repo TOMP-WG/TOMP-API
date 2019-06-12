@@ -1,4 +1,4 @@
- /system-calendar:
+  /system-calendar:
     get:
       tags:
         - operator information

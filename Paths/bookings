@@ -1,4 +1,4 @@
-/bookings/options:
+  /bookings/options:
     get:
       description: Returns available transport options for given coordinate. Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing]
       tags:

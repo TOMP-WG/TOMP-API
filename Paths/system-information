@@ -1,4 +1,4 @@
-/system-information:
+  /system-information:
     get:
       tags:
       

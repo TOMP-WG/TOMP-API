@@ -1,4 +1,4 @@
- error:
+    error:
       type: object
       description: An error that the service may send, e.g. in case of invalid input,
         missing authorization or internal service error.

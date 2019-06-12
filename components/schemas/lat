@@ -1,4 +1,4 @@
-lat:
+    lat:
       type: number
       description: The field value must be a valid WGS84 latitude in decimal degrees format.
       minimum: -90

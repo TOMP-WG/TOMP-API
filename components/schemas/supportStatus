@@ -1,4 +1,4 @@
-  supportStatus:
+    supportStatus:
       description: the current status of support
       type: string
       properties:
