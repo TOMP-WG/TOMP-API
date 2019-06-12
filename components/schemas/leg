@@ -38,4 +38,4 @@
         agencyId:
           type: string
         legGeometry:
-          $ref: '#/components/schemas/legGeometry'
+          $ref: '#/components/schemas/leg-geometry'
