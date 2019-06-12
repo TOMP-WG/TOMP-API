@@ -1,4 +1,4 @@
-options-coordinates:
+    options-coordinates:
       type: object
       properties:
         lat:

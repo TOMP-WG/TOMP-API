@@ -1,4 +1,4 @@
-/system-regions:
+  /system-regions:
     get:
       tags:
         - operator information

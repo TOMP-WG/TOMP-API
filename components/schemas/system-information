@@ -1,4 +1,4 @@
-system-information:
+    system-information:
       description: operation successful
       required:
         - systemID

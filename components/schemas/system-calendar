@@ -1,4 +1,4 @@
-system-calendar:
+    system-calendar:
       required:
         - calendars
         - startMonth

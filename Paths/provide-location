@@ -1,4 +1,4 @@
-/provide-location/{id}:
+  /provide-location/{id}:
     get:
       description: provides location of specific asset related to a booking
       tags:

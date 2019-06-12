@@ -1,4 +1,4 @@
- system-hours:
+    system-hours:
       required:
         - rentalhours
         - userTypes

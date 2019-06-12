@@ -1,4 +1,4 @@
- system-pricing-plans:
+    system-pricing-plans:
       required:
        - plans
        - planID

@@ -1,4 +1,4 @@
-/leg-summary/{id}:
+  /leg-summary/{id}:
     get:
       description: generates a summary of the specific leg
       tags:

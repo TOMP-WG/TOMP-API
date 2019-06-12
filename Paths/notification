@@ -1,4 +1,4 @@
-/notification/{id}:
+  /notification/{id}:
     get:
       description: notification between MaaS provider and Transport operator in case of user no-show or if specific asset is not available [addendum]
       tags: 

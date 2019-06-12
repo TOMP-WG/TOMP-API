@@ -1,4 +1,4 @@
- bookingState:
+    bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
       type: string
       enum:

@@ -1,4 +1,4 @@
-/request-pause/{id}:
+  /request-pause/{id}:
     put:
       description: provides option to temporarily pause/park asset rental (in case lower fares are given for parked assets)
       tags:

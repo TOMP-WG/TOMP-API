@@ -1,4 +1,4 @@
-/request-exit/{id}:
+  /request-exit/{id}:
     put:
       description: provides exit from an asset or transport system
       tags:
