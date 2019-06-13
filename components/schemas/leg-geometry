@@ -1,7 +1,9 @@
-    legGeometry:
+    leg-geometry:
       type: object
       additionalProperties: true
       properties:
         points:
-          type: string
+          type: array
+          items: 
+            $ref: '#/components/schemas/lon-lat'
           minLength: 1
