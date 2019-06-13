@@ -4,7 +4,7 @@
       properties:
         status:
           type: string
-          enum: [PROCESSING, UPDATEREQUESTED, RESOLVED, CANCELLED]
+          enum: [PROCESSING, UPDATE-REQUESTED, RESOLVED, CANCELLED]
           example: PROCESSING
         time-to-resolution:
           type: integer

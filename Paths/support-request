@@ -15,7 +15,7 @@
           description: type of support needed
           required: true
           schema:
-            enum: [ BrokenDown, NotAtLocation, NotClean, NotAvailable, unableToOpen, unableToClose, other ]
+            enum: [ BROKEN-DOWN, NOT-AT-LOCATION, NOT-CLEAN, NOT-AVAILABLE, UNABLE-TO-OPEN, UNABLE-TO-CLOSE, OTHER ]
       responses:
         '200':
           description: support request acknowledged
