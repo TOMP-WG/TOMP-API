@@ -9,15 +9,15 @@
         - customer
         - token
       allOf:
-        - $ref: '#/components/schemas/newBooking'
+        - $ref: '#/components/schemas/new-booking'
       properties:
         id:
           description: The identifier MaaS will be using to referring to the booking
           type: string
         state:
-          $ref: '#/components/schemas/bookingState'
+          $ref: '#/components/schemas/booking-state'
         terms:
-          $ref: '#/components/schemas/bookingState'
+          $ref: '#/components/schemas/booking-state'
         token:
           $ref: '#/components/schemas/token'
         meta:

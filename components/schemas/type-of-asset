@@ -1,21 +1,21 @@
     type-of-asset:
       required:
-        - typeID
+        - type-id
         - name
       properties:
-        typeID:
+        type-id:
           type: string
           description: unique identifier of a type
         name:
           type: string
           description: name of asset type
-        travelAbroad:
+        travel-abroad:
           type: boolean
           description: true indicates asset is allowed to travel abroad
-        airconditioning:
+        air-conditioning:
           type: boolean
           description: true indicates airconditioning required
-        assetClass:
+        asset-class:
           type: string
           description: classification of the asset
         brand:
@@ -30,30 +30,21 @@
         cargo:
           type: string
           description: describes options to carry cargo  
-        easyAccessibility:
+        easy-accessibility:
           type: string
           description: describes if asset is or needs to be easily accessible 
-          enum:
-            - lift
-            - escalator
-            - ground level
-            - sightimpairment
-            - hearingimpairment
-            - wheelchair
+          enum: [LIFT, ESCALATOR, GROUND LEVEL, SIGHTIMPAIRMENT, HEARINGIMPAIRMENT, WHEELCHAIR]
         gears:
           type: integer
           description: number of gears of the asset
         gearbox:
           type: string
           description: type of gearbox
-          enum:
-            - manual
-            - automatic
-            - semiautomatic
+          enum: [MANUAL, AUTOMATIC, SEMIAUTOMATIC]
         image:
           type: string
           format: url
-        infantseat:
+        infant-seat:
           type: boolean
           description: true indicates infant seat required
         persons:
@@ -65,29 +56,22 @@
         propulsion:
           type: string
           description: way in which the asset is powered
-          enum:
-            - muscle
-            - electric
-            - gasoline
-            - diesel
-            - hybrid
-            - LPG
-            - hydrogen
+          enum: [MUSCLE, ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN]
         smoking:
           type: boolean
           description: true indicates smoking is allowed on asset
-        stateofcharge:
+        state-of-charge:
           type: integer
           minimum: 0
           maximum: 100
           description: percentage of charge available
-        towinghook:
+        towing-hook:
           type: boolean
           description: true indicates towing hook required
-        undergroundparking:
+        underground-parking:
           type: boolean
           description: true indicates underground parking is allowed with asset
-        wintertires:
+        winter-tires:
           type: boolean
           description: true indicates winter tires required
         other:

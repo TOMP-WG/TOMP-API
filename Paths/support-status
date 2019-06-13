@@ -16,7 +16,7 @@
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/supportStatus'
+                $ref: '#/components/schemas/support-status'
         '400':
           description: Bad request (invalid query or body parameters)
           content:

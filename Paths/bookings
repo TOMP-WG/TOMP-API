@@ -135,7 +135,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/newBooking'
+              $ref: '#/components/schemas/new-booking'
         description: New `Booking` data
         required: true
       parameters: []

@@ -5,5 +5,5 @@
         points:
           type: array
           items: 
-            $ref: '#/components/schemas/lon-lat'
+            $ref: '#/components/schemas/coordinates'
           minLength: 1

@@ -1,16 +1,12 @@
-    supportStatus:
+    support-status:
       description: the current status of support
-      type: string
+      type: object
       properties:
         status:
           type: string
-          enum:
-          - PROCESSING
-          - UPDATEREQUESTED
-          - RESOLVED
-          - CANCELLED
+          enum: [PROCESSING, UPDATEREQUESTED, RESOLVED, CANCELLED]
           example: PROCESSING
-        timetoresolution:
+        time-to-resolution:
           type: integer
           description: time in minutes to expected resolution of support request
           example: 9
