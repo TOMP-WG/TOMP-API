@@ -9,7 +9,7 @@
         type:
           type: string
           description: type of external reference (GTFS, CHB). This should be extended
-          enum: [gtfs-stop-id, gtfs-stop-code, gtfs-area-id, chb-stop-place-code, chb-quay-code, ns-code]
+          enum: [GTFS-STOP-ID, GTFS-STOP-CODE, GTFS-AREA-ID, CHB-STOP-PLACE-CODE, CHB-QUAY-CODE, NS-CODE]
         id:
           type: string
           description: this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040

@@ -1,7 +1,5 @@
     notification:
       description: notifies the MaaS operator of issues with a booking [addendum]
       type: string
-      enum: 
-       - vehiclenotavailable
-       - usernoshow
-      example: vehiclenotavailable
+      enum: [VEHICLE-NOT-AVAILABLE, USER-NO-SHOW]
+      example: VEHICLE-NOT-AVAILABLE

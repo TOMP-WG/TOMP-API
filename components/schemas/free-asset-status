@@ -1,36 +1,36 @@
     free-asset-status:
       required:
         - assets
-        - assetID
+        - asset-id
         - place
-        - isReserved
-        - isDisabled
+        - is-reserved
+        - is-disabled
         - pricing
       properties:
         assets:
           type: object
           description: Array that contains one object per asset that is currently available
           properties:
-            assetID:
+            asset-id:
               type: string
               description: unique identifier of an asset
             place:
               $ref: '#/components/schemas/place'
-            isReserved:
+            is-reserved:
               type: boolean
               description: true indicates the bike is currently reserved for someone else
-            isReservedFrom:
+            is-reserved-from:
               $ref: '#/components/schemas/timestamp' 
               description: optional addition to determine if an asset is reserved in the future
-            isReservedTo:
+            is-reserved-to:
               $ref: '#/components/schemas/timestamp' 
               description: optional addition to determine when asset is available in the future
-            isDisabled:
+            is-disabled:
               type: boolean
               description: true indicates the asset is currently disabled (broken)
             pricing:
               $ref: '#/components/schemas/fare'
-            rentalUrl:
+            rental-url:
               type: string
               description: deep-linking option from GBFS+
               format: URL

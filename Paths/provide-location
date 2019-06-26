@@ -16,7 +16,7 @@
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/options-coordinates'
+                $ref: '#/components/schemas/coordinates'
         '400':
           description: Bad request (invalid query or body parameters)
           content:

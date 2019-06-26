@@ -1,0 +1,13 @@
+    system-region:
+      required:
+       - region-id
+       - name
+      properties:
+        region-id:
+          type: string
+          description: Unique identifier for this region
+          example: BikeRegion
+        name:
+          type: string
+          description: Public name for this region
+          example: BikeTown    

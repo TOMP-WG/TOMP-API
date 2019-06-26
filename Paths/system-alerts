@@ -8,6 +8,16 @@
       responses:
         '200':
           description: returns currently active system alerts 
-          $ref: '#/components/schemas/system-alerts'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-alert'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-alert'
         '400':
           description: bad input parameter

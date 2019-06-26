@@ -1,13 +1,13 @@
     system-information:
       description: operation successful
       required:
-        - systemID
+        - system-id
         - language
         - name
         - timezone
-        - type_of_system
+        - type-of-system
       properties:
-          systemID:
+          system-id:
             description: identifier for this transport system. This should be globally unique (even between different systems)
             type: string
             example: XXTO0001
@@ -20,7 +20,7 @@
             description: Full name of the system to be displayed to customers
             type: string
             example: FreeBike
-          shortName:
+          short-name:
             description: Optional abbreviation for a system
             type: string
             example: FB
@@ -32,16 +32,16 @@
             description: The URL of the transport operator. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped.
             type: string
             example: https://www.rentmyfreebike.com
-          purchaseUrl:
+          purchase-url:
             description: A fully qualified URL where a customer can purchase a membership or learn more about purchasing memberships
             type: string
             example: https://www.rentmyfreebike.com/purchase
-          startDate:
+          start-date:
             description: String in the form YYYY-MM-DD representing the date that the system began operations
             type: string
             format: date
             example: 2019-01-01
-          phoneNumber:
+          phone-number:
             description: A single voice telephone number for the specified system. This field is a string value that presents the telephone number as typical for the system's service area. It can and should contain punctuation marks to group the digits of the number.
             type: string
             example: 555-12345
@@ -54,19 +54,15 @@
             description: The time zone where the system is located. Time zone names never contain the space character but may contain an underscore. Please refer to the "TZ" value in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of valid values
             type: string
             example: IST
-          licenseUrl:
+          license-url:
             description: A fully qualified URL of a page that defines the license terms for the GBFS data for this system, as well as any other license terms the system would like to define (including the use of corporate trademarks, etc)
             type: string
             example: https://www.rentmyfreebike.com/license
-          typeofSystem:
+          type-of-system:
             description: Describes the type of system
             type: string
-            enum:
-              - free-floating
-              - station-based
-              - virtual-station-based
+            enum: [FREE-FLOATING, STATION-BASED, VIRTUAL-STATION-BASED]
             example: free-floating
           conditions:
             description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
             type: string
-            

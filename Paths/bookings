@@ -64,7 +64,7 @@
           required: true
           schema:
             type: string
-            enum: [BOOKED, CANCELLED, PAID, UPDATEREQUESTED, UPDATED, STARTED, FINISHED]
+            enum: [BOOKED, CANCELLED, PAID, UPDATE-REQUESTED, UPDATED, STARTED, FINISHED]
       responses:
         '200':
           description: The bookings matching the query
@@ -135,7 +135,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/newBooking'
+              $ref: '#/components/schemas/new-booking'
         description: New `Booking` data
         required: true
       parameters: []
