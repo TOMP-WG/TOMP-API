@@ -1,4 +1,4 @@
-    lon-lat:
+    coordinates:
       type: object
       required:
         - lon 

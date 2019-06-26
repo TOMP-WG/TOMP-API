@@ -1,4 +1,4 @@
-    newBooking:
+    new-booking:
       type: object
       description: A new booking, created by MaaS POST request in 'new' state
       required:
@@ -8,8 +8,7 @@
         state:
           type: string
           description: The state of the booking (always new for new bookings)
-          enum:
-            - NEW
+          enum: [NEW]
         leg:
           $ref: '#/components/schemas/leg'
         customer:

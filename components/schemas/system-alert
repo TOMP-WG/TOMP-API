@@ -1,0 +1,46 @@
+    system-alert:
+      type: object
+      required:
+        - alert-id
+        - alert-type
+        - start
+        - summary
+      properties:
+        alert-id:
+          type: string
+          description: a unique identifier for this alert
+        alert-type:
+          type: string
+          enum: [SYSTEMCLOSURE, STATIONCLOSURE, STATIONMOVE, OTHER]
+        start-and-end-times:
+          description: Array of hashes with the keys "start" and "end" indicating when the alert is in effect (e.g. when the system or station is actually closed, or when it is scheduled to be moved). If this array is omitted then the alert should be displayed as long as it is in the feed.
+          type: array
+          items:
+            $ref: '#/components/schemas/period'
+        station-ids:
+          type: array
+          items:
+            type: string
+          description: Array of strings - If this is an alert that affects one or more stations, include their ids, otherwise omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
+          example: stationID0001
+        region-id:
+          type: array
+          items:
+            type: string
+          description: Array of strings - If this system has regions, and if this alert only affects certain regions, include their ids, otherwise, omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
+          example: regionID0001
+        url:
+          type: string
+          format: hostname
+          description: URL where the customer can learn more information about this alert, if there is one
+          example: http://www.rentmyfreebike.com/alerts
+        summary:
+          type: string
+          description: A short summary of this alert to be displayed to the customer
+          example: station closed
+        description:
+          type: string
+          description: Detailed text description of the alert
+          example: station closed indefinitely due to vandalism
+        last-updated:
+          $ref: '#/components/schemas/timestamp'

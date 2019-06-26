@@ -1,4 +1,4 @@
-  /support-request/{id}:
+  /support-request/{id}/{support-type}:
     put:
       description: identifies a request for support from user via MSP
       tags:
@@ -10,19 +10,12 @@
           required: true
           schema:
             type: string
-        - name: support type
+        - name: support-type
           in: path
           description: type of support needed
           required: true
           schema:
-            enum:
-            - BrokenDown
-            - NotAtLocation
-            - NotClean
-            - NotAvailable
-            - unableToOpen
-            - unableToClose
-            - other
+            enum: [ BROKEN-DOWN, NOT-AT-LOCATION, NOT-CLEAN, NOT-AVAILABLE, UNABLE-TO-OPEN, UNABLE-TO-CLOSE, OTHER ]
       responses:
         '200':
           description: support request acknowledged

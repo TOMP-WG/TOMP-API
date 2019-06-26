@@ -1,4 +1,5 @@
     options-coordinates:
+      deprecated: true
       type: object
       properties:
         lat:

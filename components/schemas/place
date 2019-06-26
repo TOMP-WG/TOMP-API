@@ -9,7 +9,7 @@
         name:
           description: Human readable name of the place
           type: string
-        stopReference:
+        stop-reference:
           type: array
           items:
             $ref: '#/components/schemas/stop-reference'
