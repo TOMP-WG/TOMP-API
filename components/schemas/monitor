@@ -2,15 +2,12 @@
       type: string
       description: provides current asset location & duration and distance of the current leg
       required:
-        - lat
-        - lon
+        - location
         - duration
         - distance
       properties:
-        lat:
-          $ref: '#/components/schemas/lat'
-        lon:
-          $ref: '#/components/schemas/lon'
+        location:
+          $ref: '#/components/schemas/coordinates'
         duration:
           $ref: '#/components/schemas/duration'
         distance:
