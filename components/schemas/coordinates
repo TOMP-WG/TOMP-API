@@ -1,10 +1,7 @@
     coordinates:
-      type: object
-      required:
-        - lon 
-        - lat
-      properties:
-        lon:
-          $ref: '#/components/schemas/lon'
-        lat:
-          $ref: '#/components/schemas/lat'
+      type: array
+      description: a lon, lat (WGS84, EPSG:4326) in an array
+      minLength: 2
+      maxLength: 2
+      items:
+        type: number
