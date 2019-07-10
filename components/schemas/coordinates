@@ -1,6 +1,6 @@
     coordinates:
       type: array
-      description: a lon, lat in an array
+      description: a lat, lon in an array
       minLength: 2
       maxLength: 2
       items:
