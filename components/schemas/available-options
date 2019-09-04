@@ -1,0 +1,21 @@
+available-options:
+      type: object
+      description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included
+      required:
+        - id
+        - leg
+        - type-of-asset
+        - pricing
+      properties:
+        id:
+          description: unique ID (TO's perspective) for this option. This ID is also used to do the `availablity-request`.
+          type: string
+        leg:
+          $ref: '#/components/schemas/options-leg'
+        type-of-asset:
+          $ref: '#/components/schemas/type-of-asset'
+        pricing:
+          $ref: '#/components/schemas/fare'
+        asset:
+          $ref: '#/components/schemas/asset'
+

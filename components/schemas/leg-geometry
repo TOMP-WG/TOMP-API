@@ -7,3 +7,4 @@
           items: 
             $ref: '#/components/schemas/coordinates'
           minLength: 1
+

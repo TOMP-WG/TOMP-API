@@ -9,3 +9,4 @@
           $ref: '#/components/schemas/coordinates'
         to:
           $ref: '#/components/schemas/coordinates'
+

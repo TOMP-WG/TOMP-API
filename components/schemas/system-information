@@ -66,3 +66,4 @@
           conditions:
             description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
             type: string
+

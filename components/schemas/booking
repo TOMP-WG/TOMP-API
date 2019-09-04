@@ -9,7 +9,7 @@
         - customer
         - token
       allOf:
-        - $ref: '#/components/schemas/new-booking'
+        - $ref: '#/components/schemas/available-request'
       properties:
         id:
           description: The identifier MaaS will be using to referring to the booking
@@ -17,9 +17,12 @@
         state:
           $ref: '#/components/schemas/booking-state'
         terms:
-          $ref: '#/components/schemas/booking-state'
+          type: string
         token:
           $ref: '#/components/schemas/token'
         meta:
           description: Arbitrary metadata that a TO can add
-          type: object
+          type: array
+          items:
+            $ref: '#/components/schemas/key-value'
+

@@ -13,10 +13,8 @@
               type: string
               description: public name of the station
               example: Island Central
-            lat:
-              $ref: '#/components/schemas/lat'
-            lon:
-              $ref: '#/components/schemas/lon'
+            coordinates:
+			  $ref: '#/components/schemas/coordinates'
             address:
               type: string
               description: Valid street number and name where station is located. This field is intended to be an actual address, not a free form text description (see "crossstreet")

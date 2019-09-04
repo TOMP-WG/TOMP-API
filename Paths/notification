@@ -3,6 +3,7 @@
       description: notification between MaaS provider and Transport operator in case of user no-show or if specific asset is not available [addendum]
       tags: 
         - trip execution
+		- MSP
       parameters:
         - name: id
           in: path  
@@ -10,6 +11,7 @@
           required: true
           schema:
             type: string
+			
       responses:
         '200':
           description: notifications available for given booking identifier

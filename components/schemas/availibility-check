@@ -1,0 +1,21 @@
+    availability-check:
+      type: object
+      description: the request for available assets
+      required:
+        - from
+      properties:
+        from:
+          description: User's location in comma separated form e.g. 60.123,27.456 (lat/long, WGS84)
+          $ref: '#/components/schemas/coordinates'
+        radius:
+          description: Maximum distance a user wants to travel to reach asset in metres, e.g. 500 metres
+          type: number
+        to:
+          description: A desired destination e.g. 60.123,27.456 (lat/long, WGS84)
+          $ref: '#/components/schemas/coordinates'
+        requirements:
+          description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf'
+          type: array
+          items:
+            $ref: '#/components/schemas/key-value'
+

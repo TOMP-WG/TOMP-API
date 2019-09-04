@@ -39,3 +39,4 @@
           type: string
         leg-geometry:
           $ref: '#/components/schemas/leg-geometry'
+

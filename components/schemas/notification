@@ -3,3 +3,4 @@
       type: string
       enum: [VEHICLE-NOT-AVAILABLE, USER-NO-SHOW]
       example: VEHICLE-NOT-AVAILABLE
+

@@ -1,6 +1,0 @@
-    lon:
-      type: number
-      description: The field value must be a valid WGS84 longitude in decimal degrees format.
-      minimum: -180
-      maximum: 180
-      example: 4.90017

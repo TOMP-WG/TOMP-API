@@ -1,7 +1,9 @@
     coordinates:
       type: array
-      description: a lon, lat (WGS84, EPSG:4326) in an array
+      description: a lon, lat (WGS84, EPSG:4326) in an array, conform geojson
       minLength: 2
       maxLength: 2
       items:
         type: number
+      example: [6.169639, 52.253279]
+        
