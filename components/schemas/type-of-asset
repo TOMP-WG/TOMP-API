@@ -77,8 +77,8 @@
         other:
           type: string
           description: free text to describe asset
-		meta:
-		  type: array
+        meta:
+          type: array
           items:
             $ref: '#/components/schemas/key-value'
-    
+

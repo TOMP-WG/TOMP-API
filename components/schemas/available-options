@@ -1,4 +1,4 @@
-available-options:
+    available-options:
       type: object
       description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included
       required:

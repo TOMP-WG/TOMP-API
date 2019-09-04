@@ -15,5 +15,5 @@
               description: Arbitrary metadata the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary)
               type: array
               items:
-				$ref: '#/components/schemas/key-value'
+                $ref: '#/components/schemas/key-value'
 
