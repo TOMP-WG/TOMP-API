@@ -2,8 +2,6 @@
       required:
         - asset-id
         - place
-        - is-reserved
-        - is-disabled
       properties:
         asset-id:
           type: string

@@ -1,8 +1,10 @@
-  /request-exit/{id}:
-    put:
-      description: provides exit from an asset or transport system
-      tags:
-        - trip execution
+  /general/notification/{id}:
+    get:
+      description: notification between MaaS provider and Transport operator in case of user no-show or if specific asset is not available [addendum]
+      tags: 
+        - general
+        - TO
+        - MSP
       parameters:
         - name: id
           in: path  
@@ -10,9 +12,14 @@
           required: true
           schema:
             type: string
+      
       responses:
         '200':
-          description: exit granted
+          description: notifications available for given booking identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/notification'
         '400':
           description: Bad request (invalid query or body parameters)
           content:

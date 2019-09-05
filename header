@@ -5,7 +5,7 @@ servers:
     url: https://virtserver.swaggerhub.com/efel85/GBFS/1.0.6
 info:
   description: General Transport Operator API Specification
-  version: "1.2.0"
+  version: "1.2.1"
   title: General Transport Operator API Specification
   contact:
     email: edoardo.felici@minienw.nl
@@ -21,8 +21,11 @@ tags:
     description: a booking is the main object exchanged between MaaS and a TSP [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a>
 
   - name: trip execution
-    description: provides asset location, grants access or exit from an asset or transport system, offers trip monitoring [addendum]
+    description: supports the complete trip execution process and offers trip monitoring [addendum]
     
+  - name: general
+    description: general operations (e.g. notifications)
+
   - name: operator information
     description: gives information about systems, stations, operating hours [from GBFS]
 
@@ -33,10 +36,10 @@ tags:
     description: support for the user while the trip is being executed
     
   - name: TO
-    description: the Transport Operator should implement this endpoint
+    description: the Transport Operator should implement these endpoints
     
   - name: MSP
-    description: the MaaS Service Provider should implement this endpoint
+    description: the MaaS Service Provider should implement these endpoints
     
 security:
   - key: []

@@ -1,7 +1,6 @@
     booking:
       type: object
-      description: The booking information describing the state and details of the
-        transaction
+      description: The booking information describing the state and details of the transaction
       required:
         - id
         - state

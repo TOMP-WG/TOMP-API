@@ -1,6 +1,6 @@
     available-options:
       type: object
-      description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included
+      description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included.
       required:
         - id
         - leg
@@ -8,7 +8,7 @@
         - pricing
       properties:
         id:
-          description: unique ID (TO's perspective) for this option. This ID is also used to do the `availablity-request`.
+          description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
           type: string
         leg:
           $ref: '#/components/schemas/options-leg'

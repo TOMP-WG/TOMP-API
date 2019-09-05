@@ -1,6 +1,12 @@
     notification:
+      type: object
       description: notifies the MaaS operator of issues with a booking [addendum]
-      type: string
-      enum: [VEHICLE-NOT-AVAILABLE, USER-NO-SHOW]
-      example: VEHICLE-NOT-AVAILABLE
+      properties:
+        type:        
+          type: string
+          enum: [VEHICLE-NOT-AVAILABLE, USER-NO-SHOW, OTHER]
+          example: VEHICLE-NOT-AVAILABLE
+        comment:
+          type: string
+          description: free text
 
