@@ -2,10 +2,10 @@ openapi: 3.0.0
 # Added by API Auto Mocking Plugin
 servers:
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/efel85/GBFS/1.0.6
+    url: https://virtserver.swaggerhub.com/efel85/GBFS/1.0.7
 info:
   description: General Transport Operator API Specification
-  version: "1.2.1"
+  version: "1.0.7"
   title: General Transport Operator API Specification
   contact:
     email: edoardo.felici@minienw.nl
