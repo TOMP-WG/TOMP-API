@@ -266,19 +266,12 @@
               schema:
                 $ref: '#/components/schemas/error'
 
-  /bookings/modify-booking/{id}:
+  /bookings/modify-booking/:
     put:
       description: This endpoint should be used to alter the booking. It is not allowed to alter the state.
       tags:
         - booking
         - TO
-      parameters:
-        - name: id
-          in: path
-          description: Booking identifier
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           application/json:
