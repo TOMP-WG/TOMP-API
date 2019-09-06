@@ -43,10 +43,105 @@
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+
+  /trip/available-assets/{id}:
+    put:
+      description: Returns available transport options for given booking id.
+      tags:
+        - trip execution
+        - TO
+      parameters:
+        - name: id
+          in: path
+          description: Booking identifier
+          required: true
+          schema:
+            type: string
+            
+      responses:
+        '200':
+          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/asset'
+        '400':
+          description: 400 Bad request. The content contains errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /trip/reserve/{id}:
+    post:
+      description: The MSP can send a request to the TO to reserve a specific asset
+      tags:
+        - trip execution
+        - TO
+      parameters:
+        - name: id
+          in: path
+          description: Identifier
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: the asset to reserve
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/asset'
+    
+      responses:
+        '200':
+          description: The trip execution status is 'RESERVED'.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '412':
+          description: Precondition required - asset cannot be used/opened
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
       
   /trip/in-use/{id}:
     post:
-      description: the TO or the MSP can send a message telling that the asset is in use. For simplicity reasons there is only one asset allowed per booking. Technically means this that a booking on MSP side is not equal to a booking on the end user side. The end user should be able to rent 3 bikes in a booking, but this will result in 3 MSP bookings, finally reflecting 3 assets.
+      description: the TO or the MSP can send a message telling that the asset is in use. For simplicity reasons there is only one asset allowed per booking. Technically means this that a booking on MSP side is not equal to a booking on the end user side. The end user should be able to rent 3 bikes in a booking, but this will result in 3 MSP bookings, finally reflecting 3 assets. This request also unlocks the asset if possible.
       tags:
         - trip execution
         - MSP
@@ -86,7 +181,7 @@
               schema:
                 $ref: '#/components/schemas/error'
         '412':
-          description: Precondition required - asset cannot be used
+          description: Precondition required - asset cannot be used/opened
           content:
             application/json:
               schema:
