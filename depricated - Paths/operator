@@ -1,0 +1,179 @@
+  /operator/stations:
+    get:
+      tags:
+        - operator information
+      summary: describes all available stations
+      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]
+        
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/station-information'
+
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/station-information'
+        400:
+          description: bad input parameter
+
+  /operator/alerts:
+    get:
+      tags:
+      - operator information
+      summary: informs customers about changes to the system outside of normal operations
+      description: This feed is intended to inform customers about changes to the system that do not fall within the normal system operations. For example, system closures due to weather would be listed here, but a system that only operated for part of the year would have that schedule listed in the system-calendar.json feed. This file is an array of alert objects defined as below. Obsolete alerts should be removed so the client application can safely present to the end user everything present in the feed. The consumer could use the start/end information to determine if this is a past, ongoing or future alert and adjust the presentation accordingly. [from GBFS]
+      
+      responses:
+        '200':
+          description: returns currently active system alerts 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-alert'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-alert'
+        '400':
+          description: bad input parameter
+          
+  /operator/operating-calendar:
+    get:
+      tags:
+        - operator information
+      summary: describes the operating calendar for a system. An array of year objects defined as follows (if start/end year are omitted, then assume the start and end months do not change from year to year). [from GFBS]
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-calendar'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-calendar'
+        400:
+          description: bad input parameter
+          
+  /operator/operating-hours:
+    get:
+      tags:
+        - operator information
+      summary: describes the system hours of operation
+      description: Describes the hours of operation of all available systems of the transport operator [from GBFS]
+      
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-hours'
+                
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-hours'
+        '400':
+          description: bad input parameter
+          
+  /operator/information:
+    get:
+      tags:
+        - operator information
+      summary: describes the system
+      description: Describes the system including System operator, System location, year implemented, URLs, contact info, time zone. [from GBFS]
+      
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-information'
+              example:
+                system-id: XXTO0001
+                language: eng
+                name: FreeBike
+                timezone: IST
+                type-of-system: free-floating
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-information'
+              example:
+                system-id: NLTO0001
+                language: eng
+                name: FreeBike
+                timezone: IST
+                type-of-system: free-floating  
+        '400':
+          description: bad input parameter
+                
+  /operator/pricing-plans:
+    get:
+      tags:
+        - operator information
+      summary: gives pricing information
+      description: Describes pricing of systems or assets [from GBFS]
+      
+      responses:
+        '200':
+          description: returns standard pricing plans for an operator
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-pricing-plan'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-pricing-plan'
+        '400':
+          description: bad input parameter
+
+  /operator/regions:
+    get:
+      tags:
+        - operator information
+      summary: describes regions for a system that is broken up by geographic or political region. It is defined as a separate feed to allow for additional region metadata (such as shape definitions). [from GBFS]
+      
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-region'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/system-region'
+        400:
+          description: bad input parameter     
+

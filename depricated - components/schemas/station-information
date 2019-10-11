@@ -1,0 +1,44 @@
+    station-information:
+      required:
+        - station-id
+        - name
+        - lat
+        - lon
+      properties:  
+        station-id:
+          type: string
+          description: unique identifier of a station
+          example: XX:Y:12345678
+        name:
+          type: string
+          description: public name of the station
+          example: Island Central
+        coordinates:
+          $ref: '#/components/schemas/coordinates'
+        address:
+          type: string
+          description: Valid street number and name where station is located. This field is intended to be an actual address, not a free form text description (see "crossstreet")
+          example: Main Road 1
+        cross-street:
+          type: string
+          description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc.
+          example: on the corner with Secondary Road 
+        region-id:
+          type: string
+          description: ID of the region where the station is located (see "system-regions")
+        postal-code:
+          type: string
+          description: Postal code where station is located
+          example: X123456
+        rental-methods:
+          type: array
+          description: Array of enumerables containing the payment methods accepted at this station. 
+          items:
+            type: string
+            enum: [KEY, CREDITCARD, PAYPASS, APPLEPAY, ANDROIDPAY, TRANSITCARD, ACCOUNTNUMBER, PHONE]
+          example: [CREDITCARD,PAYPASS,APPLEPAY]
+        rental-url:
+          type: string
+          format: URL
+          example: https://www.rentmyfreebike.com
+    

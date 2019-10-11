@@ -1,6 +1,0 @@
-    lat:
-      type: number
-      description: The field value must be a valid WGS84 latitude in decimal degrees format.
-      minimum: -90
-      maximum: 90
-      example: 52.376883

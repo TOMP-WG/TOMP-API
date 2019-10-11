@@ -1,0 +1,404 @@
+  /planning/availability-check:
+    post:
+      description: Returns available transport options for given coordinate. Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing]. <i>REF [BOOKING_STATES - Availibility check]</i>
+      tags:
+        - planning
+        - TO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/availability-check'
+            
+      responses:
+        '200':
+          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/available-options'
+        '400':
+          description: 400 Bad request. The content contains errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /bookings/availability-request:
+    post:
+      description: Creates a new `Booking` for the TSP in **Pending** state. The returned
+        object will be a reference that is passed back & forth throughout the booking life cycle.
+        The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
+        In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid. <i>REF [BOOKING_STATES - availablity-request]</i>
+      tags:
+        - booking
+        - TO
+      requestBody:
+        description: Request the (type of) asset from the available options
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/available-request'
+              
+      responses:
+        '200':
+          description: A new booking was succesfully created, status pending
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '410':
+          description: The requested (type of) asset is not available anymore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /bookings/cancel-request/{id}:
+    delete:
+      description: Cancels the booking in state 'Pending', obtained in `/bookings/availability-request`. <i>REF [BOOKING_STATES - availablity-request]</i>
+      tags:
+        - booking
+        - TO
+      parameters:
+        - name: id
+          in: path
+          description: id of the request to cancel
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: A new booking was succesfully cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '412':
+          description: Precondition required - booking not in 'Pending'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /bookings/expired-request/{id}:
+    delete:
+      description: notifies the MSP that the requested booking is expired. The TO can be derived from the header information
+      tags:
+        - booking
+        - MSP
+      parameters:
+        - name: id
+          in: path
+          description: id of the request that is expired
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: A new booking was succesfully cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /bookings/asset-request/{id}:
+    put:
+      description: confirm the booking. After this call, the asset has status 'CONFIRMED'.
+      tags:
+        - booking
+        - TO
+      parameters:
+        - name: id
+          in: path
+          description: id of the request that is expired
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: A new booking was succesfully cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '412':
+          description: Precondition required - booking not in 'Pending'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /bookings/cancel-booking/{id}:
+    delete:
+      description: Cancels the booking in state 'Confirmed', obtained in `/bookings/asset-request`. <i>REF [BOOKING_STATES - asset-request]</i>. This API endpoint should be implemented by TO AND MSP. The ID is generated by the TO and the MSP can derive the TO from the header information.
+      tags:
+        - booking
+        - TO
+        - MSP
+      parameters:
+        - name: id
+          in: path
+          description: id of the request to cancel
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: A new booking was succesfully cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '412':
+          description: Precondition required - booking not in 'Confirmed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /bookings/modify-booking/:
+    put:
+      description: This endpoint should be used to alter the booking. It is not allowed to alter the state.
+      tags:
+        - booking
+        - TO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/booking'
+        description: changed booking (e.g. cancelled)
+        required: true
+		
+      responses:
+        '200':
+          description: The booking was modified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '412':
+          description: Precondition required - not allowed to change state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /bookings/{id}:
+    get:
+      description: Returns the `Bookings` that have been created through the system.
+      tags:
+        - booking
+        - TO
+      parameters:
+        - name: id
+          in: path
+          description: Booking identifier
+          required: true
+          schema:
+            type: string
+			
+      responses:
+        '200':
+          description: The booking was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid query or body parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: The booking was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /bookings:
+    get:
+      description: Returns the `Booking` that has been created earlier
+      tags:
+        - booking
+        - TO
+      parameters:
+        - name: state
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/booking-state'
+			
+      responses:
+        '200':
+          description: The bookings matching the query
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The bookings that matched the query (zero or more)
+                minItems: 0
+                items:
+                  $ref: '#/components/schemas/booking'
+        '400':
+          description: Bad request (invalid query parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Authorization error (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      x-serverless-endpoint: echo~GET      
+

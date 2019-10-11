@@ -1,7 +1,0 @@
-    coordinates:
-      type: array
-      description: a lon, lat (WGS84, EPSG:4326) in an array
-      minLength: 2
-      maxLength: 2
-      items:
-        type: number

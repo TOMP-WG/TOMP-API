@@ -1,0 +1,10 @@
+    leg-geometry:
+      type: object
+      additionalProperties: true
+      properties:
+        points:
+          type: array
+          items: 
+            $ref: '#/components/schemas/coordinates'
+          minLength: 1
+

@@ -1,7 +1,0 @@
-    period:
-      type: object
-      properties:
-        start-time:
-          $ref: '#/components/schemas/timestamp'
-        end-time:
-          $ref: '#/components/schemas/timestamp'

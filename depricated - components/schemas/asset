@@ -1,0 +1,33 @@
+    asset:
+      required:
+        - asset-id
+        - place
+      properties:
+        asset-id:
+          type: string
+          description: unique identifier of an asset
+        place:
+          $ref: '#/components/schemas/place'
+        is-reserved:
+          type: boolean
+          description: true indicates the bike is currently reserved for someone else
+        is-reserved-from:
+          $ref: '#/components/schemas/timestamp' 
+          description: optional addition to determine if an asset is reserved in the future
+        is-reserved-to:
+          $ref: '#/components/schemas/timestamp' 
+          description: optional addition to determine when asset is available in the future
+        is-disabled:
+          type: boolean
+          description: true indicates the asset is currently disabled (broken)
+        image:
+          description: specific image, overruling asset-type image
+          type: string
+          format: URL
+          example: 'https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg'
+        rental-url:
+          type: string
+          description: deep-linking option from GBFS+
+          format: URL
+          example: https://www.rentmyfreebike.com/rental
+
