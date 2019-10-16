@@ -52,10 +52,14 @@ tags:
 # security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
+#                           OAuth2 and OpenId are also available
+# The exact ways to authenticate will be described in version 1.2
 security:
   - BasicAuth: []
   - BearerAuth: []
   - ApiKeyAuth: []
+  - OAuth: []
+  - OpenId: []
  
 paths:
   /planning-options/:
@@ -66,7 +70,7 @@ paths:
     post:
       description: Returns available transport options for given coordinate and radius. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
         During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `provide-ids`, requesting the TO to provide unique IDs to reference to during communication with the MSP.
-        <p>see (3.1) in the process flow
+        <p>see (2.1) in the process flow - planning
       tags:
         - planning
         - TO
@@ -116,7 +120,7 @@ paths:
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
         <p>The optional webhook can be used to post updates from TO to MSP. If it isn't used, the subscription possibility in this API can be used or the events can be posted directly.
-        <p> see [3.4] in the process flow
+        <p> see (3.2) in the process flow - booking
       tags:
         - booking
         - TO
@@ -211,10 +215,11 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking in state 'Pending' (see <4> in the process flow), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.3 and 3.4) in process flow)<p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. Cancelling a pending booking should be refused with 403.<br> `EXPIRE` - Typically for sending back a signal from TO to MSP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403.
+      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking)<p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. Cancelling a pending booking should be refused with 403.<br> `EXPIRE` - Typically for sending back a signal from TO to MSP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403.
       tags:
         - booking
         - MSP
+        - TO
       requestBody:
         content:
           application/json:
@@ -256,7 +261,7 @@ paths:
         schema:
           type: string
     get:
-      description: Returns the booking. See (3.5) in the process flow. In the 'meta'-field the digital tickes can be returned (see (3.3) in the process flow)
+      description: Returns the booking. See (3.5.2) in the process flow - booking. In the 'meta'-field the digital tickes can be returned (see (3.3) in the process flow - booking)
       tags:
         - booking
         - TO
@@ -280,9 +285,9 @@ paths:
         '410':
           $ref: '#/components/responses/410Gone'
     put:
-      description: Optional - This endpoint should be used to adjust the parameters of the booking. Changes not acceptable to the TO should return 400. If a booking is started and can no longer be adjusted the TO should return 403. The state of the booking should **never** be adjusted using this method. Use /bookings/{id}/events for that.
+      description: Optional - This endpoint should be used to adjust the parameters of the booking. Changes not acceptable to the TO should return 400. If a booking is started and can no longer be adjusted the TO should return 403. The state of the booking should **never** be adjusted using this method. Use /bookings/{id}/events for that. See also (7.2) in the flow diagram - booking.
       tags:
-        - booking [optional]
+        - booking
         - TO
       requestBody:
         content:
@@ -315,13 +320,6 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '409':
           $ref: '#/components/responses/409Conflict'
-    delete:
-      description: this endpoint must **not** be implemented. It should be handled by POST /bookings/{id}/events - CANCEL or /bookings/{id}/events - EXPIRE
-      tags:
-        - booking
-      responses:
-        '400':
-          $ref: '#/components/responses/400BadRequest'
 
   /bookings/{id}/subscription:
     parameters:
@@ -335,7 +333,7 @@ paths:
         schema:
           type: string
     post:
-      description: Optional - subscribe to a specific booking (=leg & (type of) asset). This is an optional endpoint
+      description: Optional - subscribe to a specific booking (=leg & (type of) asset). This is an optional endpoint. This endpoint facilitates notifications in all the phases. (see (7.1) in the flow chart - execution)
       tags:
         - booking [optional]
         - TO
@@ -764,7 +762,7 @@ paths:
         schema:
           type: string
     get:
-      description: Returns a list of available assets for the given booking. These assets can be used to POST to /legs/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.2) in the process flow.
+      description: Returns a list of available assets for the given booking. These assets can be used to POST to /legs/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.7) in the process flow. - trip execution
       tags:
         - trip execution
         - TO
@@ -801,15 +799,8 @@ paths:
         required: true
         schema:
           type: string
-    post:
-      description: this endpoint must **NOT** be implemented. The functionality to add a new leg should be in POST /bookings/{id}/events - commit. 
-      tags:
-        - trip execution
-      responses:
-        '403':
-          $ref: '#/components/responses/403Forbidden'
     get:
-      description: Retrieves the latest summary of the leg, being the execution of a portion of a journey travelled using one asset (vehicle). Every leg belongs to one booking, every booking has at most one current leg. Where the booking describes the agreement between user/MSP and TO, the leg describes the journey as it occured.
+      description: Retrieves the latest summary of the leg, being the execution of a portion of a journey travelled using one asset (vehicle). Every leg belongs to one booking, every booking has at most one current leg. Where the booking describes the agreement between user/MSP and TO, the leg describes the journey as it occured. See (4.3) in the flow chart - trip execution
       tags:
         - trip execution
         - TO
@@ -846,13 +837,6 @@ paths:
           $ref: '#/components/responses/401Unauthorized'
         '404':
           $ref: '#/components/responses/404NotFound'
-    delete:
-      description: this endpoint must **NOT** be implemented. A trip cannot be cancelled. If it's a ended trip, use POST /legs/{id}/events - FINISH, if it's a no-show, use POST /bookings/{id}/notifications.
-      tags:
-        - trip execution
-      responses:
-        '400':
-          $ref: '#/components/responses/400BadRequest'
 
   /legs/{id}/asset:
     parameters:
@@ -895,13 +879,13 @@ paths:
           type: string
     post:
       description: This endpoint must be used to alter the state of a leg.<br>
-       Operations:<br> `PREPARE` the TO can send a message telling the MSP that he is preparing the booked leg [To be implemented by the MSP] (see <1> in the process flow),<br>
-       `ASSIGN_ASSET` can assign an asset to a leg. Can be to assign an asset in case there is still an asset type assigned [Optionally implementable by the MSP]<br>
+       Operations:<br> `PREPARE` the TO can send a message telling the MSP that he is preparing the booked leg [To be implemented by the MSP] (see (7.2) in the process flow - trip execution),<br>
+       `ASSIGN_ASSET` can assign an asset to a leg. Can be to assign an asset in case there is still an asset type assigned [Optionally implementable by the MSP]. See (4.7) in the process flow - trip execution<br>
        `RESERVE` will claim an asset ahead in time [Optionally implementable by the TO],<br>
-       `SET_IN_USE` will activate the leg or resume the leg [TO and MSP] (see (4.3) in process flow),<br>
-       `PAUSE` will pause the leg [TO and MSP] (see (4.4, 4.5) in process flow),<br>
+       `SET_IN_USE` will activate the leg or resume the leg [TO and MSP] (see (4.6) in process flow),<br>
+       `PAUSE` will pause the leg [TO and MSP] (see (4.6) in process flow),<br>
        `START_FINISHING` will start the end-of-leg [Optionally implementable by TO and MSP],<br>
-       `FINISH` will end this leg (see (4.7) in process flow) [TO and MSP]
+       `FINISH` will end this leg (see (4.6) in process flow) [TO and MSP]
       tags:
         - trip execution
         - MSP
@@ -912,6 +896,21 @@ paths:
             schema:
               $ref: "#/components/schemas/leg-event"
       responses:
+        '200':
+          description: The bookings matching the query
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The bookings that matched the query (zero or more)
+                items:
+                  $ref: '#/components/schemas/leg'
+          headers:
+           'Content-Language':
+              description: ISO 639-1 two letter language code
+              example: nl
+              schema:
+                type: string
         '204':
           $ref: '#/components/responses/204NoContent'
         '400':
@@ -933,12 +932,12 @@ paths:
         schema:
           type: string
     get:
-      description: Monitors the current location of the asset and duration & distance of the leg (see (4.5) in process flow)
+      description: Monitors the current location of the asset and duration & distance of the leg (see (4.7) in process flow)
       tags:
         - trip execution
         - TO
       parameters:
-        - name: location
+        - name: location-only
           in: query 
           description: Specifies if only the location should be returned
           schema:
@@ -956,7 +955,7 @@ paths:
         '404':
           $ref: '#/components/responses/404NotFound'
     post:
-      description: Monitors the current location of the asset and duration & distance of the leg (see (4.5) in process flow)
+      description: Monitors the current location of the asset and duration & distance of the leg
       tags:
         - trip execution
         - MSP
@@ -1065,6 +1064,11 @@ components:
           description: free text
         asset:
           $ref: '#/components/schemas/asset'
+          
+    leg-state:
+      type: string
+      description: status of a leg
+      enum: [NOT_STARTED, PREPARING, IN_USE, PAUSED, FINISHING, FINISHED, ISSUE_REPORTED]
  
     planning-check:
       type: object
@@ -1263,6 +1267,8 @@ components:
           $ref: '#/components/schemas/timestamp'
         mode:
           $ref: '#/components/schemas/mode'
+        state:
+          $ref: '#/components/schemas/leg-state'           
         departure-delay:
           $ref: '#/components/schemas/duration'
         arrival-delay:
@@ -1886,7 +1892,17 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-  
+    OAuth:
+      type: oauth2
+      flows: 
+        authorizationCode:
+          authorizationUrl: /oauth/authorize  
+          tokenUrl: /oauth/token              
+          scopes: {}
+    OpenId: 
+      type: openIdConnect
+      openIdConnectUrl: https://unknownserver/.well-known/openid-configuration
+      
   responses:
     202Accepted:
       description: Request was successfully accepted for processing but has not yet completed.
