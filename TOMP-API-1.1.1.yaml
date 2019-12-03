@@ -7,7 +7,7 @@ info:
   title: Transport Operator MaaS Provider API
   description: An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/efel85/TOMP-API/">github</a>.
-  version: "1.1"
+  version: "1.1.1"
   contact:
     email: edoardo.felici@minienw.nl
   license:
@@ -215,7 +215,7 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking)<p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. Cancelling a pending booking should be refused with 403.<br> `EXPIRE` - Typically for sending back a signal from TO to MSP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403.
+      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MSP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. Cancelling a pending booking should be refused with 403.<br> `EXPIRE` - Typically for sending back a signal from TO to MSP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give garantees directly to fullfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will be come expired. Otherwise it can be commmitted when the leg is confirmed or denied (using this event). 
       tags:
         - booking
         - MSP
@@ -638,6 +638,63 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '401':
           $ref: '#/components/responses/401Unauthorized'
+
+  /payment/journal-entry:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/api'
+      - $ref: '#/components/parameters/apiVersion'
+    get:
+      tags:
+        - payment
+        - MSP
+        - TO
+      description: Returns all the journal entries that should be payed per leg
+      parameters:
+        - name: from
+          in: path 
+          description: start of the selection
+          required: true
+          schema:
+            $ref: '#/components/schemas/timestamp'
+        - name: to
+          in: path 
+          description: end of the selection
+          required: true
+          schema:
+            $ref: '#/components/schemas/timestamp'
+        - name: state
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: path
+          description: type of booking line (e.g. fare, addition costs, fines, ...)
+          required: true
+          schema:
+            type: string
+            enum: [ALL, DAMAGE, LOSS, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, OTHER]
+
+      responses:
+        '200':
+          description: journal entries
+          headers:
+            'Content-Language':
+              description: ISO 639-1 two letter language code
+              example: nl
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/journal-entry'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
  
   /payment/{id}/claim-extra-costs:
     parameters:
@@ -1017,6 +1074,10 @@ components:
         - type-of-asset
         - pricing
       properties:
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/condition'
         results:
           type: array
           items:
@@ -1033,7 +1094,87 @@ components:
                 $ref: '#/components/schemas/fare'
               asset:
                 $ref: '#/components/schemas/asset'
+              conditions:
+                description: references to the 'conditions' array (start of this object).
+                type: array
+                items:
+                  type: string
  
+    condition:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/postponed-commit-condition'
+        - $ref: '#/components/schemas/return-area-condition'
+        - $ref: '#/components/schemas/deposit-condition'
+        - $ref: '#/components/schemas/discount-condition'
+      discriminator:
+        propertyName: conditionType
+              
+    postponed-commit-condition:
+      type: object
+      required:
+        - conditionType
+      properties:
+        conditionType:
+          type: string
+          example: 'POSTPONED-COMMIT'          
+        ultimate-response-time: 
+          $ref: '#/components/schemas/timestamp'
+
+    deposit-condition:
+      type: object
+      required:
+        - conditionType
+      properties:
+        conditionType:
+          type: string
+          example: 'DEPOSIT'    
+      allOf:
+        - $ref: '#/components/schemas/amount-of-money'
+
+    discount-condition:
+      type: object
+      required:
+        - conditionType
+      properties:
+        conditionType:
+          type: string
+          example: 'DISCOUNT'    
+      allOf:
+        - $ref: '#/components/schemas/fare'
+          
+    return-area-condition:
+      type: object
+      required:
+        - conditionType
+      properties:
+        conditionType:
+          type: string
+          example: 'RETURN-AREA'      
+        name:
+          description: name of the area
+          type: string
+        station-id:
+          description: optional station id (see static information)
+          type: string
+        geometry:
+          $ref: '#/components/schemas/polygon'
+        opening-times:
+          description: the opening times of the facility
+          type: array
+          items:
+            $ref: '#/components/schemas/period'
+
+    polygon:
+      type: object
+      additionalProperties: true
+      properties:
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/coordinate'
+          minLength: 3
+
     booking-option:
       type: object
       description: A new booking, created by MaaS POST request in 'PENDING' state. The ID is generated by the TO in the 'availability-check'.
@@ -1075,19 +1216,16 @@ components:
       description: the request for available assets. User's location in comma separated form e.g. 60.123,27.456 (lat/long, WGS84)
       required:
         - from
+      allOf:
+        - $ref: '#/components/schemas/period'
       properties:
         from:
-          $ref: '#/components/schemas/coordinates'
+          $ref: '#/components/schemas/coordinate'
         radius:
           description: Maximum distance a user wants to travel to reach asset in metres, e.g. 500 metres
           type: number
         to:
-          $ref: '#/components/schemas/coordinates'
-        start-time:
-          description: see [https://github.com/efel85/TOMP-API/issues/17]
-          $ref: '#/components/schemas/timestamp'
-        end-time:
-          $ref: '#/components/schemas/timestamp'
+          $ref: '#/components/schemas/coordinate'
         travellers:
           description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
           type: number
@@ -1117,8 +1255,10 @@ components:
           type: string
         state:
           $ref: '#/components/schemas/booking-state'
-        terms:
-          type: string
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/condition'
         token:
           $ref: '#/components/schemas/token'
         webhook:
@@ -1135,10 +1275,10 @@ components:
     booking-state:
       description: The life-cycle state of the booking (from NEW to FINISHED)
       type: string
-      enum: [NEW, PENDING, RELEASED, EXPIRED, CONFIRMED, CANCELLED, STARTED, FINISHED]
+      enum: [NEW, PENDING, RELEASED, EXPIRED, CONDITIONAL-CONFIRMED, CONFIRMED, CANCELLED, STARTED, FINISHED]
       example: CONFIRMED
      
-    coordinates:
+    coordinate:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
       properties:
@@ -1200,7 +1340,30 @@ components:
           type: string
           description: A TO internal error code, used for reference
           example: 12345
-   
+
+    journal-entry:
+      type: object
+      properties:
+        id:
+          description: id of the leg
+          type: string
+        external-url:
+          description: an optional external invoice.
+          type: string
+          format: url
+        state:
+          type: string
+          enum: [OPEN, PAYED, DISCUSS]
+        expiration-date:
+          $ref: '#/components/schemas/timestamp'
+        comment:
+          type: string
+        details:
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/fare'
+            - $ref: '#/components/schemas/extra-costs'
+         
     extra-costs:
       type: object
       description: Costs that the TO is charging the MSP
@@ -1208,34 +1371,65 @@ components:
         - reason
         - description
         - amount
+      allOf:
+        - $ref: '#/components/schemas/amount-of-money'
       properties:
         reason:
           description: the reason the TO is charging
           type: string
-          enum: [DAMAGE, LOSS, EXTRA_USAGE, REFUND, OTHER_ASSET_USED, OTHER]
+          enum: [DAMAGE, LOSS, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, OTHER]
         description:
           description: free text to describe the extra costs. Mandatory in case of 'OTHER'
           type: string
-        amount:
-          $ref: '#/components/schemas/fare'
         meta:
           description: Arbitrary metadata that a TO can add, like categories
           type: array
           items:
             $ref: '#/components/schemas/key-value'
- 
+
     fare:
+      description: the total fare is the sum of all parts.
+      properties:
+        parts:
+          type: array
+          items: 
+            $ref: '#/components/schemas/fare-part'
+
+    fare-part:
+      type: object
+      description: this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are negative. 
+      example: { "amount": 9.96, "currency-code": "EUR", "tax-rate": 21.0, "type": "FLEX", "unit-type": "HOUR", "units": 1 }
+      allOf:
+        - $ref: '#/components/schemas/amount-of-money'
+      properties:
+        type: 
+          description: type of fare part
+          type: string
+          enum: [FIXED, FLEX]
+        unit-type:
+          type: string
+          description: in case of 'FLEX' mandatory. E.g. 0.5 EUR per HOUR
+          enum: [KM, MINUTE, HOUR, MILE]
+        units:
+          type: number
+
+    amount-of-money:
+      type: object
       properties:
         amount:
-          description: fare price for specific leg request [amended from MaaS-API] This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95
+          description:This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95
           type: number
           example: 9.95
         currency-code:
           description: ISO 4217 currency code
           type: string
           minLength: 3
-          maxLength: 3
- 
+          maxLength: 3 
+        tax-rate:
+          type: number
+          description: tax rate (percentage of amount)
+          example: 21.0
+
     key-value:
       type: object
       properties:
@@ -1295,7 +1489,7 @@ components:
         points:
           type: array
           items:
-            $ref: '#/components/schemas/coordinates'
+            $ref: '#/components/schemas/coordinate'
           minLength: 1
  
     mode:
@@ -1327,8 +1521,8 @@ components:
       required:
         - coordinates
       properties:
-        coordinates:
-          $ref: '#/components/schemas/coordinates'
+        coordinate:
+          $ref: '#/components/schemas/coordinate'
         duration:
           $ref: '#/components/schemas/duration'
         distance:
@@ -1348,15 +1542,13 @@ components:
  
     options-leg:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/period'
       properties:
-        start-time:
-          $ref: '#/components/schemas/timestamp'
-        end-time:
-          $ref: '#/components/schemas/timestamp'
         from:
-          $ref: '#/components/schemas/coordinates'
+          $ref: '#/components/schemas/coordinate'
         to:
-          $ref: '#/components/schemas/coordinates'
+          $ref: '#/components/schemas/coordinate'
  
     period:
       type: object
@@ -1380,8 +1572,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/stop-reference'
-        coordinates:
-          $ref: '#/components/schemas/coordinates'
+        coordinate:
+          $ref: '#/components/schemas/coordinate'
         extra-info:
           type: array
           items:
@@ -1396,8 +1588,7 @@ components:
             required:
               - station-id
               - name
-              - lat
-              - lon
+              - coordinate
             properties:
               station-id:
                 type: string
@@ -1407,11 +1598,11 @@ components:
                 type: string
                 description: public name of the station
                 example: Island Central
-              coordinates:
-                $ref: '#/components/schemas/coordinates'
+              coordinate:
+                $ref: '#/components/schemas/coordinate'
               address:
                 type: string
-                description: Valid street number and name where station is located. This field is intended to be an actual address, not a free form text description (see "crossstreet")
+                description: Valid street number and name where station is located. This field is intended to be an actual address, not a free form text description (see "cross-street")
                 example: Main Road 1
               cross-street:
                 type: string
@@ -1693,11 +1884,6 @@ components:
                 type: string
                 description: name of this pricing scheme
                 example: Free Plan
-              currency:
-                type: string
-                description: currency this pricing is in
-                format: iso_4217
-                example: XDR
               fare:
                 $ref: '#/components/schemas/fare'
               is-taxable:
@@ -1767,7 +1953,7 @@ components:
       properties:
         type-id:
           type: string
-          description: unique identifier of a type
+          description: unique identifier of a type, scope TO
         name:
           type: string
           description: name of asset type
@@ -1780,6 +1966,7 @@ components:
         asset-class:
           type: string
           description: classification of the asset
+          enum: [AIR, BUS, COACH, FERRY, METRO, RAIL, TROLLEYBUS, TRAM, WATER, CABLEWAY, FUNICULAR, LIFT, OTHER]
         brand:
           type: string
           description: brand of the asset
@@ -1853,7 +2040,7 @@ components:
       properties:
         operation:
           type: string
-          enum: [CANCEL, EXPIRE, COMMIT]
+          enum: [CANCEL, EXPIRE, DENY, COMMIT]
 
   parameters:
     acceptLanguage:
