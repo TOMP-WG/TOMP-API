@@ -1232,11 +1232,33 @@ components:
         provide-ids:
           description: default false (during planning phase). Whenever entering the booking phase to present the options to the user, set it to true to refert to this option. The returned ID can be used througout the complete process. [https://github.com/efel85/TOMP-API/issues/57]
           type: boolean
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/user'
+
+    user:
+      type: object
+      properties:
+        age:
+          type: number
+        licenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/license'
         requirements:
           description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
           type: array
           items:
             $ref: '#/components/schemas/key-value'
+ 
+    license:
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/country' 
+        asset-type:
+          $ref: '#/components/schemas/asset-class' 
  
     booking:
       type: object
@@ -1417,7 +1439,7 @@ components:
       type: object
       properties:
         amount:
-          description:This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95
+          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95   
           type: number
           example: 9.95
         currency-code:
@@ -1460,7 +1482,7 @@ components:
         end-time:
           $ref: '#/components/schemas/timestamp'
         mode:
-          $ref: '#/components/schemas/mode'
+          $ref: '#/components/schemas/type-of-asset'
         state:
           $ref: '#/components/schemas/leg-state'           
         departure-delay:
@@ -1491,29 +1513,6 @@ components:
           items:
             $ref: '#/components/schemas/coordinate'
           minLength: 1
- 
-    mode:
-      description: The modality of the leg
-      required:
-        - modality
-      properties:
-        modality:
-          type: string
-          enum: [WALK, BIKE, CARGO-BIKE, MOPED, SCOOTER, STEP, SEGWAY, CAR, TAXI, PUBLIC-BUS, COACH-BUS, OFFICE-BUS, TRAM, LIGHTRAIL, METRO, TRAIN, FERRY, WATER-TAXI, WATER-BUS, AIRLINE]
-        fuel:
-          type: string
-          enum: [GASOLINE, DIESEL, ELECTRIC, HYBRID-GASOLINE, HYBRID-DIESEL, HYBRID-GAS, HYBRID-GAS, HYDROGEN, GAS, BIO-MASS, KEROSINE, OTHER]
-        energy-label:
-          type: string
-          enum: [A,B,C,D,E]
-        co2-per-km:
-          type: number
-        brand:
-          type: string
-        model:
-          type: string
-        building-year:
-          type: number
  
     leg-progress:
       type: object
@@ -1643,8 +1642,7 @@ components:
           type: string
           description: this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040
         country:
-          type: string
-          description: country where the stop is located
+          $ref: '#/components/schemas/country' 
          
     support-status:
       description: the current status of support
@@ -1945,7 +1943,11 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/key-value'
- 
+                
+    asset-class:
+      type: string
+      enum: [WALK, BIKE, MOPED, SCOOTER, STEP, CAR, TAXI, BUS, TRAM, LIGHTRAIL, METRO, TRAIN, FERRY, BOAT, AIRLINE, CABLEWAY, OTHER]
+      
     type-of-asset:
       required:
         - type-id
@@ -1957,19 +1959,32 @@ components:
         name:
           type: string
           description: name of asset type
+        asset-class:
+          $ref: '#/components/schemas/asset-class'
+        asset-sub-class:
+          type: string
+          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway', 'funicular'. This is mandatory when using 'OTHER' as class.
+        fuel:
+          type: string
+          enum: [NONE, GASOLINE, DIESEL, ELECTRIC, HYBRID-GASOLINE, HYBRID-DIESEL, HYBRID-GAS, HYBRID-GAS, HYDROGEN, GAS, BIO-MASS, KEROSINE, OTHER]
+        energy-label:
+          type: string
+          enum: [A,B,C,D,E]
+        co2-per-km:
+          type: number
+        brand:
+          type: string
+          description: brand of the asset
+        model:
+          type: string
+        building-year:
+          type: number
         travel-abroad:
           type: boolean
           description: true indicates asset is allowed to travel abroad
         air-conditioning:
           type: boolean
           description: true indicates airconditioning required
-        asset-class:
-          type: string
-          description: classification of the asset
-          enum: [AIR, BUS, COACH, FERRY, METRO, RAIL, TROLLEYBUS, TRAM, WATER, CABLEWAY, FUNICULAR, LIFT, OTHER]
-        brand:
-          type: string
-          description: brand of the asset
         cabrio:
           type: boolean
           description: true indicates cabrio required
@@ -2031,6 +2046,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/key-value'
+
+    country:
+      type: string
+      description: country codes according ISO 3166-2
+      maxLength: 2
+      minLength: 2
 
     booking-operation:
       type: object
