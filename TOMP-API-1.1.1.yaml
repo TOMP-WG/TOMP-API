@@ -1106,9 +1106,11 @@ components:
         - $ref: '#/components/schemas/postponed-commit-condition'
         - $ref: '#/components/schemas/return-area-condition'
         - $ref: '#/components/schemas/deposit-condition'
-        - $ref: '#/components/schemas/discount-condition'
       discriminator:
         propertyName: conditionType
+      properties:
+        name:
+          type: string
               
     postponed-commit-condition:
       type: object
@@ -1132,17 +1134,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/amount-of-money'
 
-    discount-condition:
-      type: object
-      required:
-        - conditionType
-      properties:
-        conditionType:
-          type: string
-          example: 'DISCOUNT'    
-      allOf:
-        - $ref: '#/components/schemas/fare'
-          
     return-area-condition:
       type: object
       required:
@@ -1151,9 +1142,6 @@ components:
         conditionType:
           type: string
           example: 'RETURN-AREA'      
-        name:
-          description: name of the area
-          type: string
         station-id:
           description: optional station id (see static information)
           type: string
@@ -1246,6 +1234,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/license'
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/card'
         requirements:
           description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
           type: array
@@ -1255,6 +1247,16 @@ components:
     license:
       type: object
       properties:
+        country:
+          $ref: '#/components/schemas/country' 
+        asset-type:
+          $ref: '#/components/schemas/asset-class' 
+
+    card:
+      type: object
+      properties:
+        card-type:
+          type: string 
         country:
           $ref: '#/components/schemas/country' 
         asset-type:
@@ -1946,7 +1948,7 @@ components:
                 
     asset-class:
       type: string
-      enum: [WALK, BIKE, MOPED, SCOOTER, STEP, CAR, TAXI, BUS, TRAM, LIGHTRAIL, METRO, TRAIN, FERRY, BOAT, AIRLINE, CABLEWAY, OTHER]
+      enum: [AIR, BUS, TROLLEYBUS, TRAM, COACH, RAIL, INTERCITYRAIL, URBANRAIL, METRO, WATER, CABLEWAY, FUNICULAR, TAXI, SELFDRIVE, FOOT, BICYCLE, MOTORCYCLE, CAR, SHUTTLE, OTHER]
       
     type-of-asset:
       required:
