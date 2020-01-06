@@ -667,14 +667,13 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/journal-state'
         - name: category
           in: path
           description: type of booking line (e.g. fare, addition costs, fines, ...)
           required: true
           schema:
-            type: string
-            enum: [ALL, DAMAGE, LOSS, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, OTHER]
+            $ref: '#/components/schemas/journal-category' 
 
       responses:
         '200':
@@ -695,7 +694,7 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '401':
           $ref: '#/components/responses/401Unauthorized'
- 
+
   /payment/{id}/claim-extra-costs:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
@@ -754,7 +753,7 @@ paths:
           description: type of support needed
           required: true
           schema:
-            enum: [ BROKEN-DOWN, NOT-AT-LOCATION, NOT-CLEAN, NOT-AVAILABLE, UNABLE-TO-OPEN, UNABLE-TO-CLOSE, OTHER ]
+            enum: [ BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, OTHER ]
       responses:
         '200':
           description: support request acknowledged
@@ -1299,7 +1298,7 @@ components:
     booking-state:
       description: The life-cycle state of the booking (from NEW to FINISHED)
       type: string
-      enum: [NEW, PENDING, RELEASED, EXPIRED, CONDITIONAL-CONFIRMED, CONFIRMED, CANCELLED, STARTED, FINISHED]
+      enum: [NEW, PENDING, RELEASED, EXPIRED, CONDITIONAL_CONFIRMED, CONFIRMED, CANCELLED, STARTED, FINISHED]
       example: CONFIRMED
      
     coordinate:
@@ -1368,16 +1367,20 @@ components:
     journal-entry:
       type: object
       properties:
-        id:
-          description: id of the leg
+        journal-id:
+          description: id of the entry, leg id can be reused
           type: string
+        journal-sequence-id:
+          description: sequence id of the entry, in combination with journal-id unique from TO perspective.
+          type: string
+        invoice-date:
+          $ref: '#/components/schemas/timestamp'
         external-url:
           description: an optional external invoice.
           type: string
           format: url
         state:
-          type: string
-          enum: [OPEN, PAYED, DISCUSS]
+          $ref: '#/components/schemas/journal-state'
         expiration-date:
           $ref: '#/components/schemas/timestamp'
         comment:
@@ -1387,10 +1390,18 @@ components:
           oneOf:
             - $ref: '#/components/schemas/fare'
             - $ref: '#/components/schemas/extra-costs'
-         
+            
+    journal-state:
+      type: string
+      enum: [TO_INVOICE, INVOICED, PARTLY_PAYED, PAYED, TO_DISCUSS, REJECTED]
+      
+    journal-category:
+      type: string
+      enum: [ALL, DAMAGE, LOSS, STOLEN, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, CREDIT, VOUCHER, DEPOSIT, OTHER]
+
     extra-costs:
       type: object
-      description: Costs that the TO is charging the MSP
+      description: Costs that the TO is charging the MSP; credits are negative
       required:
         - reason
         - description
@@ -1400,19 +1411,19 @@ components:
       properties:
         reason:
           description: the reason the TO is charging
-          type: string
-          enum: [DAMAGE, LOSS, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, OTHER]
         description:
           description: free text to describe the extra costs. Mandatory in case of 'OTHER'
           type: string
+        category:
+          $ref: '#/components/schemas/journal-category'
         meta:
-          description: Arbitrary metadata that a TO can add, like categories
+          description: Arbitrary metadata that a TO can add, like voucher codes
           type: array
           items:
             $ref: '#/components/schemas/key-value'
 
     fare:
-      description: the total fare is the sum of all parts.
+      description: the total fare is the sum of all parts, except for the 'MAX' fare-part. This one descripes the maximum price for the complete leg.
       properties:
         parts:
           type: array
@@ -1421,7 +1432,7 @@ components:
 
     fare-part:
       type: object
-      description: this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are negative. 
+      description: this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts.
       example: { "amount": 9.96, "currency-code": "EUR", "tax-rate": 21.0, "type": "FLEX", "unit-type": "HOUR", "units": 1 }
       allOf:
         - $ref: '#/components/schemas/amount-of-money'
@@ -1429,11 +1440,11 @@ components:
         type: 
           description: type of fare part
           type: string
-          enum: [FIXED, FLEX]
+          enum: [FIXED, FLEX, MAX]
         unit-type:
           type: string
           description: in case of 'FLEX' mandatory. E.g. 0.5 EUR per HOUR
-          enum: [KM, MINUTE, HOUR, MILE]
+          enum: [KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE]
         units:
           type: number
 
@@ -1948,12 +1959,16 @@ components:
                 
     asset-class:
       type: string
-      enum: [AIR, BUS, TROLLEYBUS, TRAM, COACH, RAIL, INTERCITYRAIL, URBANRAIL, METRO, WATER, CABLEWAY, FUNICULAR, TAXI, SELFDRIVE, FOOT, BICYCLE, MOTORCYCLE, CAR, SHUTTLE, OTHER]
+      description: the class of asset. It's possible to specify it more in the asset-sub-type in type-of-asset. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added. 
+      enum: [AIR, BUS, TROLLEYBUS, TRAM, COACH, RAIL, INTERCITYRAIL, URBANRAIL, METRO, WATER, CABLEWAY, FUNICULAR, TAXI, SELFDRIVE, FOOT, BICYCLE, MOTORCYCLE, CAR, SHUTTLE, OTHER, PARKING]
       
     type-of-asset:
+      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
       required:
         - type-id
         - name
+        - asset-class
+        - energy-label
       properties:
         type-id:
           type: string
@@ -1965,7 +1980,7 @@ components:
           $ref: '#/components/schemas/asset-class'
         asset-sub-class:
           type: string
-          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway', 'funicular'. This is mandatory when using 'OTHER' as class.
+          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         fuel:
           type: string
           enum: [NONE, GASOLINE, DIESEL, ELECTRIC, HYBRID-GASOLINE, HYBRID-DIESEL, HYBRID-GAS, HYBRID-GAS, HYDROGEN, GAS, BIO-MASS, KEROSINE, OTHER]
