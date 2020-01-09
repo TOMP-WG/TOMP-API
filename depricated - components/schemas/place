@@ -2,8 +2,7 @@
       type: object
       description: a origin or destination of a leg, non 3D. lon/lat in WGS84.
       required:
-        - lon
-        - lat
+        - location
       properties:
         name:
           description: Human readable name of the place

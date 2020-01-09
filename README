@@ -1,23 +1,40 @@
-Transport Operator MaaS Provider (TOMP) API development for Transport Operators in the Netherlands
-For more information, contact edoardo.felici@minienw.nl
+Transport Operator Mobility Provider (TOMP) API development Github
 
-Active participation from (pending permission to disclose further names):
+Working group meeting in the Netherlands every two weeks with the goal to develop 
+and specify a generic TOMP-API for use by Transport Operators and Mobility Providers by Jan 1st 2020.
+
+OpenAPI 3.0 documentation is also available at https://app.swaggerhub.com/apis-docs/efel85/TOMP/1.1#/ 
+
+To document the latest developments, a Blueprint for an Transport Operator to Mobility Provider API is provided
+The latest version of this Blueprint is available at:
+https://github.com/maas-nl/TOMP-API/tree/master/documents or through dutchmobilityinnovations.com.
+
+Also, a WIKI-page has been set up as a quick start guide for developers interested in using the TOMP-API: 
+https://github.com/maas-nl/TOMP-API/wiki 
+
+For more information, contact bon.bakermans@minienw.nl
+
+The workgroup has active participation from (pending permission to disclose further names):
 
 Radiuz - Jef Heyse and Himanshu Gautam
-Nazza - Rob Verkerk and Gerke H.
+Nazza - Rob Verkerk and Gerke Henkes
 Trevvel/Paxx - Robert Baart
 Intraffic - Pim van der Toolen
-Cargoroo - Ross Curzon Butler
-University of Twente - Steven Haveman and Roberto G.
+Cargoroo - Ross Curzon-Butler
+University of Twente - Steven Haveman and J. Roberto Reyes García
 Stapp.in - Reinald Bronkhorst
-Mobiliteitsfabriek
+Stichting OpenGeo - Stefan de Konink
+Mobiliteitsfabriek - Martijn van der Linden
+Taxistop - Tjalle Groen
+PON (Next Urban Mobility, Shuttel, Dockr, Check) - Marijn Roverts
+Innovactory - Stefan Bollars
 DAT Mobility
 Urbee
 Mobike
 RET
 HTM
 NS
-Stichting OpenGeo
-Accept Institute 
+Cityway
+European Travellers Club
 
-Testing environment available through Accept Institute at: http://maas-nl-hub.westeurope.cloudapp.azure.com/GTOAS/swagger/
+Testing environment available through http://maas-nl-hub.westeurope.cloudapp.azure.com/GTOAS/swagger/
