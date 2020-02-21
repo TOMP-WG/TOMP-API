@@ -98,10 +98,6 @@ paths:
               schema:
                 type: string
               required: true
-            maas-id:
-              description: the maas-id of the sending party
-              schema:
-                type: string
             Expires:
               description: the result is valid until this timestamp. After this timestamp the planning-option will be discarded, if cannot become a booking-option.
               schema:
@@ -474,17 +470,11 @@ paths:
         '401':
           $ref: '#/components/responses/401Unauthorized'
  
-  /operators/available-assets:
+  /operator/available-assets:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
     - $ref: '#/components/parameters/api'
     - $ref: '#/components/parameters/apiVersion'
-    - name: id
-      in: path
-      description: Booking identifier
-      required: true
-      schema:
-        type: string
     get:
       description: Returns a list of available assets.
       tags:
@@ -492,7 +482,7 @@ paths:
       - TO
       responses:
         '200':
-          description: Available assets. If no suitable assets are found an empty array is to be returned.
+          description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -504,7 +494,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/asset'
+                  type: object
+                  anyOf:
+                    - $ref: '#/components/schemas/asset'
+                    - $ref: '#/components/schemas/type-of-asset'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -747,7 +740,7 @@ paths:
       tags:
         - payment
         - MP
-      description: extra costs that the TO has to charge to the MP or vice versa
+      description: extra costs that the TO has to charge to the MP or vice versa. 
       parameters:
         - name: id
           in: path 
@@ -773,9 +766,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/journal-entry'
+                $ref: '#/components/schemas/journal-entry'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -1122,6 +1113,8 @@ components:
         - type-of-asset
         - pricing
       properties:
+        valid-until:
+          $ref: '#/components/schemas/timestamp'
         conditions:
           type: array
           items:
@@ -1323,6 +1316,9 @@ components:
         travellers:
           description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
           type: number
+        use-asset:
+          description: when you use the /operator/available-assets and you want to book a displayed asset, you must be able to request o a planning-option for the specific asset (with provide-ids=true), post a booking with the provided id and send directly a commit. This field should contain the asset to book.
+          type: string
         provide-ids:
           description: default false (during planning phase). Whenever entering the booking phase to present the options to the user, set it to true to refert to this option. The returned ID can be used througout the complete process. [https://github.com/efel85/TOMP-API/issues/57]
           type: boolean
@@ -1334,6 +1330,9 @@ components:
     user:
       type: object
       properties:
+        validated:
+          description: for anonymous usage this property should be false. 
+          type: boolean
         age:
           type: number
         licenses:
@@ -1362,7 +1361,14 @@ components:
       type: object
       properties:
         card-type:
-          type: string 
+          type: string
+        card-acceptors:
+          description: references to maas-ids of accepting parties
+          type: array
+          items:
+            type: string
+        card-number:
+          type: string
         country:
           $ref: '#/components/schemas/country' 
         asset-type:
@@ -1473,6 +1479,8 @@ components:
 
     journal-entry:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/amount-of-money'
       properties:
         journal-id:
           description: id of the entry, leg id can be reused
@@ -1494,8 +1502,6 @@ components:
           $ref: '#/components/schemas/timestamp'
         comment:
           type: string
-        amount:
-          $ref: '#/components/schemas/amount-of-money'
         distance:
           description: the travelled distance. Only if applicable.
           type: number
@@ -1514,7 +1520,7 @@ components:
             
     journal-state:
       type: string
-      enum: [TO_INVOICE, INVOICED, PARTLY_PAYED, PAYED, TO_DISCUSS, REJECTED]
+      enum: [TO_INVOICE, INVOICED]
       
     journal-category:
       type: string
@@ -1561,6 +1567,15 @@ components:
     fare:
       description: the total fare is the sum of all parts, except for the 'MAX' fare-part. This one descripes the maximum price for the complete leg.
       properties:
+        estimated:
+          description: is this fare an estimation?
+          type: boolean
+        description:
+          description: user friendly description of the fare (e.g. 'full fare')
+          type: string
+        class:
+          description: in the future we'll set up an enumeration of possible "fare classes". For now it's free format.
+          type: string
         parts:
           type: array
           items: 
@@ -1591,6 +1606,14 @@ components:
         scale-type:
           type: string
           enum: [KM, MILE, HOUR, MINUTE]
+        name:
+          type: string
+        class:
+          type: string
+        meta:
+          type: array
+          items:
+            $ref: '#/components/schemas/key-value'
 
     amount-of-money:
       type: object
@@ -1719,7 +1742,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/stop-reference'
-        station-d:
+        station-id:
           description: reference to /operator/stations
           type: string
         coordinate:
@@ -2098,7 +2121,7 @@ components:
     asset-class:
       type: string
       description: the class of asset. It's possible to specify it more in the asset-sub-type in type-of-asset. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added. 
-      enum: [AIR, BUS, TROLLEYBUS, TRAM, COACH, RAIL, INTERCITYRAIL, URBANRAIL, METRO, WATER, CABLEWAY, FUNICULAR, TAXI, SELFDRIVE, FOOT, BICYCLE, MOTORCYCLE, CAR, SHUTTLE, OTHER, PARKING]
+      enum: [AIR, BUS, TROLLEYBUS, TRAM, COACH, RAIL, INTERCITYRAIL, URBANRAIL, METRO, WATER, CABLEWAY, FUNICULAR, TAXI, SELFDRIVE, FOOT, BICYCLE, MOTORCYCLE, CAR, SHUTTLE, OTHER, PARKING, MOPED, STEP]
       
     type-of-asset:
       description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
@@ -2119,6 +2142,8 @@ components:
         asset-sub-class:
           type: string
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
+        amount-available:
+          type: number
         fuel:
           type: string
           enum: [NONE, GASOLINE, DIESEL, ELECTRIC, HYBRID_GASOLINE, HYBRID_DIESEL, HYBRID_GAS, HYDROGEN, GAS, BIO_MASS, KEROSINE, OTHER]
@@ -2242,6 +2267,14 @@ components:
       schema:
         type: string
       description: Version of the API.
+      example: 1.1
+    maasId:
+      in: header
+      name: maas-id
+      required: true
+      schema:
+        type: string
+      description: The ID of the sending maas operator
       example: 1.1
  
   securitySchemes:
