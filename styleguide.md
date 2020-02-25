@@ -41,9 +41,11 @@ E.g.
 Every name consists of one or more words, seperated by dashes. E.g. support-status. NO CAMEL CASING, NO UNDERSCORES!
 
 ## Properties ##
-The properties should always have a type and - if it's a flat type - a clear description. If it's an object, use ALWAYS a $ref, referencing to another object, DON'T nest objects.
+The properties should always have a type and - if it's a flat type - a clear description. If it's an object, use ALWAYS a $ref, referencing to another object, **DON'T nest objects**.
 
 Other keywords for properties (example, format, etc) are not mandatory. But when it makes sence, please add them. For references to websites/uri's, DO use format: URL. 
+
+Property names are with lowercase, optionally use dashes.
 
 E.g. 
 
@@ -71,10 +73,10 @@ E.g.
           type-of-system:
             description: Describes the type of system
             type: string
-            enum: [FREE-FLOATING, STATION-BASED, VIRTUAL-STATION-BASED]
-            example: FREE-FLOATING
+            enum: [FREE_FLOATING, STATION_BASED, VIRTUAL_STATION_BASED]
+            example: FREE_FLOATING
 
-The enumeration values are ALWAYS in capitals. The meaning of the values should be in the description of the property.
+The enumeration values are ALWAYS in capitals. The meaning of the values should be in the description of the property. Use underscores instead of dash.
 
 ## Arrays ##
-The arrays should be handled the same way as properties, but in the 'items' there should be flat types OR $ref's. No embedded objects.
+The arrays should be handled the same way as properties, but in the 'items' there should be flat types OR $ref's. **No embedded objects**.
