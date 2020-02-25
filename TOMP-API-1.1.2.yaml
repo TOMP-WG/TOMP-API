@@ -215,7 +215,7 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. Cancelling a pending booking should be refused with 403.<br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give garantees directly to fullfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will be come expired. Otherwise it can be commmitted when the leg is confirmed or denied (using this event). 
+      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. <br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give garantees directly to fullfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will be come expired. Otherwise it can be commmitted when the leg is confirmed or denied (using this event). 
       tags:
         - booking
         - MP
@@ -687,7 +687,7 @@ paths:
       description: Returns all the journal entries that should be payed per leg
       parameters:
         - name: from
-          in: path 
+          in: path
           description: start of the selection
           required: true
           schema:
@@ -1122,13 +1122,18 @@ components:
         results:
           type: array
           items:
-            type: object
-            oneOf: 
-              - $ref: '#/components/schemas/simple-leg'
-              - $ref: '#/components/schemas/composit-leg'
+            $ref: '#/components/schemas/planning-result'
+    
+    planning-result:
+      type: object
+      oneOf: 
+        - $ref: '#/components/schemas/simple-leg'
+        - $ref: '#/components/schemas/composit-leg'
                   
     simple-leg:
       type: object
+      allOf: 
+      - $ref: '#/components/schemas/planning-result'
       properties:
         id:
           description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
@@ -1150,14 +1155,24 @@ components:
     composit-leg:
       description: this leg type should be used when returning multiple legs to fullfil a single request from A to B. For instance handling overlegs or when acting as broker for multiple sub contractors.
       type: object
+      allOf: 
+      - $ref: '#/components/schemas/planning-result'
       properties:
+        id:
+          description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
+          type: string
         pricing:
           $ref: '#/components/schemas/fare'
         legs:
           type: array
           items:
             $ref: '#/components/schemas/operator-leg'
- 
+        conditions:
+          description: references to the 'conditions' array (start of this object).
+          type: array
+          items:
+            type: string
+
     operator-leg:
       type: object
       allOf: 
@@ -1183,64 +1198,60 @@ components:
         - $ref: '#/components/schemas/deposit-condition'
         - $ref: '#/components/schemas/upfront-payment-condition'
         - $ref: '#/components/schemas/pay-when-finished-condition'
+        - $ref: '#/components/schemas/require-booking-data-condition'
       discriminator:
         propertyName: conditionType
       properties:
         name:
           type: string
-              
-    postponed-commit-condition:
-      type: object
-      required:
-        - conditionType
-      properties:
         conditionType:
           type: string
-          example: 'POSTPONED-COMMIT'          
+          enum: [POSTPONED-COMMIT, DEPOSIT, UPFRONT-PAYMENT, PAY-WHEN-FINISHED, RETURN-AREA, REQUIRE-BOOKING-DATA]
+    
+    require-booking-data-condition:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/condition'
+      properties:
+        required-fields:
+          type: array
+          items:
+            type: string
+            enum: [FROM-ADDRESS, TO-ADDRESS, BIRTHDATE, EMAIL, PERSONAL-ADDRESS]
+    
+    postponed-commit-condition:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/condition'
+      properties:
         ultimate-response-time: 
           $ref: '#/components/schemas/timestamp'
 
     deposit-condition:
       type: object
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
-      required:
-        - conditionType
-      properties:
-        conditionType:
-          type: string
-          example: 'DEPOSIT'    
       allOf:
+        - $ref: '#/components/schemas/condition'
         - $ref: '#/components/schemas/amount-of-money'
 
     upfront-payment-condition:
       type: object
       description: in case the TO demands a upfront payment before usage. The payment should be made in the booking phase.
-      required:
-        - conditionType
-      properties:
-        conditionType:
-          type: string
-          example: 'UPFRONT-PAYMENT'    
+      allOf:
+        - $ref: '#/components/schemas/condition'
 
     pay-when-finished-condition:
       type: object
       description: in case the TO demands a direct payment after usage.
-      required:
-        - conditionType
-      properties:
-        conditionType:
-          type: string
-          example: 'PAY-WHEN-FINISHED'    
-          
+      allOf:
+        - $ref: '#/components/schemas/condition'
+
     return-area-condition:
       type: object
       description: a return area. In the condition list there can be multiple return area's. In case the return area is a building, it's allowed to put a single point in the geometry.
-      required:
-        - conditionType
+      allOf:
+        - $ref: '#/components/schemas/condition'
       properties:
-        conditionType:
-          type: string
-          example: 'RETURN-AREA'      
         station-id:
           description: optional station id (see static information)
           type: string
@@ -1264,7 +1275,7 @@ components:
 
     booking-option:
       type: object
-      description: A new booking, created by MaaS POST request in 'PENDING' state. The ID is generated by the TO in the 'availability-check'.
+      description: A new booking, created by MaaS POST request in 'PENDING' state. The ID is generated by the TO in the 'availability-check'. The from-address, to-address and the personal data should only be provided if there is an actual request for it (see conditions)
       required:
         - id
         - customer
@@ -1274,6 +1285,26 @@ components:
           type: string
         customer:
           $ref: '#/components/schemas/customer'
+        from-address:
+          $ref: '#/components/schemas/address'
+        to-address:
+          $ref: '#/components/schemas/address'
+    
+    address:
+      type: object
+      properties:
+        street-address: 
+          description: street address, including number OR PO box number, eventually extended with internal referencce like room number
+          type: string
+          example: example street 18, 2nd floor, 18B-33
+        area-reference:
+          description: city or town, principal subdivision such as province, state or county
+          type: string
+          example: Smallcity, Pinetree county
+        postal-code:
+          type: string
+        country: 
+          $ref: '#/components/schemas/country'
          
     leg-event:
       type: object
@@ -1427,6 +1458,7 @@ components:
        
     customer:
       type: object
+      description: this object should be as small as possible. Only provide address, email and birth-date in case of a direct request in the planning-option (condition).
       required:
         - id
       properties:
@@ -1445,6 +1477,13 @@ components:
         phone:
           description: Phone number that the customer may be reached from
           type: string
+        email:
+          description: the email address of the customer
+          type: string
+        birth-date:
+          $ref: '#/components/schemas/date'
+        address:
+          $ref: '#/components/schemas/address'
    
     day:
       type: string
@@ -1488,14 +1527,10 @@ components:
         journal-sequence-id:
           description: sequence id of the entry, in combination with journal-id unique from TO perspective.
           type: string
-        bank-account:
-          $ref: '#/components/schemas/bank-account'
+        invoice-id:
+          description: the number of the invoice. Should be filled in when invoiced.
         invoice-date:
           $ref: '#/components/schemas/timestamp'
-        external-url:
-          description: an optional external invoice.
-          type: string
-          format: url
         state:
           $ref: '#/components/schemas/journal-state'
         expiration-date:
@@ -1511,6 +1546,8 @@ components:
         used-time:
           description: the time in seconds that the assed is used. Only if applicable.
           type: number
+        bank-account:
+          $ref: '#/components/schemas/bank-account'
         details:
           type: object
           description: the specification of the amount; how is it composed.
@@ -1556,6 +1593,12 @@ components:
         description:
           description: free text to describe the extra costs. Mandatory in case of 'OTHER'
           type: string
+        number:
+          type: number
+          description: e.g. number of litres, number of kilowatthour, etc
+        number-type:
+          type: string
+          enum: [LITER, KILOWATTHOUR, CO2-COMPENSATION, OTHER]
         account:
           $ref: '#/components/schemas/bank-account'
         meta:
@@ -1619,18 +1662,23 @@ components:
       type: object
       properties:
         amount:
-          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95   
+          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT   
           type: number
           example: 9.95
+        amount-ex-vat:
+          type: number
+          example: 8.95
         currency-code:
           description: ISO 4217 currency code
           type: string
           minLength: 3
           maxLength: 3 
-        tax-rate:
+        vat-rate:
           type: number
-          description: tax rate (percentage of amount)
+          description: value added tax rate (percentage of amount)
           example: 21.0
+        vat-country-code:
+          $ref : '#/components/schemas/country'
 
     key-value:
       type: object
@@ -1684,7 +1732,10 @@ components:
         leg-geometry:
           type: string
           description: format as in geojson linestring eg. [[6.169639, 52.253279], .. ] WGS84, [lng,lat]
- 
+        asset-access-data:
+          $ref: '#/components/schemas/token'
+          description: data to open a specific asset (e.g. QR code, image base64). This can be provided when using assign_asset, when it's not provided in the booking.
+          
     leg-progress:
       type: object
       description: provides current asset location & duration and distance of the current leg
@@ -1751,6 +1802,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/key-value'
+        physical-address:
+          $ref: '#/components/schemas/address'
  
     station-information:
       properties:
@@ -1773,10 +1826,8 @@ components:
                 example: Island Central
               coordinate:
                 $ref: '#/components/schemas/coordinate'
-              address:
-                type: string
-                description: Valid street number and name where station is located. This field is intended to be an actual address, not a free form text description (see "cross-street")
-                example: Main Road 1
+              physical-address:
+                $ref: '#/components/schemas/address'
               cross-street:
                 type: string
                 description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc.
@@ -1784,16 +1835,12 @@ components:
               region-id:
                 type: string
                 description: ID of the region where the station is located (see "system-regions")
-              postal-code:
-                type: string
-                description: Postal code where station is located
-                example: X123456
               rental-methods:
                 type: array
                 description: Array of enumerables containing the payment methods accepted at this station.
                 items:
                   type: string
-                  enum: [KEY, CREDITCARD, PAYPASS, APPLEPAY, ANDROIDPAY, TRANSITCARD, ACCOUNTNUMBER, PHONE]
+                  enum: [KEY, CREDITCARD, PAYPASS, APPLEPAY, ANDROIDPAY, TRANSITCARD, ACCOUNTNUMBER, PHONE, OTHER]
                 example: [CREDITCARD,PAYPASS,APPLEPAY]
               rental-url:
                 type: string
@@ -1810,7 +1857,7 @@ components:
       properties:
         type:
           type: string
-          description: type of external reference (GTFS, CHB). This should be extended
+          description: type of external reference (GTFS, CHB).
           enum: [GTFS_STOP_ID, GTFS_STOP_CODE, GTFS_AREA_ID, CHB_STOP_PLACE_CODE, CHB_QUAY_CODE, NS_CODE]
         id:
           type: string
@@ -2000,10 +2047,7 @@ components:
                   type: string
                   example: https://www.rentmyfreebike.com/purchase
                 start-date:
-                  description: String in the form YYYY-MM-DD representing the date that the system began operations
-                  type: string
-                  format: date
-                  example: 2019-01-01
+                  $ref: '#/components/schemas/date'
                 phone-number:
                   description: A single voice telephone number for the specified system. This field is a string value that presents the telephone number as typical for the system's service area. It can and should contain punctuation marks to group the digits of the number.
                   type: string
@@ -2232,6 +2276,12 @@ components:
       description: country codes according ISO 3166-2
       maxLength: 2
       minLength: 2
+      example: NL
+
+    date:
+      type: string
+      description: String in the form YYYY-MM-DD representing a date 
+      format: date
 
     booking-operation:
       type: object
