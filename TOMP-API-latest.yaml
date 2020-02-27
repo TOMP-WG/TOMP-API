@@ -2144,22 +2144,14 @@ components:
  
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to validate the leg when starting the leg.
+      allOf:
+        - $ref: '#/components/schemas/period'
       properties:
-        validity-duration:
-          description: The rules that MaaS will interpret to schedule, -validate or cancel the booking.
-          type: object
-          properties:
-            from:
-              description: The starting time from which the ticket is valid
-              $ref: '#/components/schemas/timestamp'
-            to:
-              description: The finishing time the ticket is valid for
-              $ref: '#/components/schemas/timestamp'
-            meta:
-              description: Arbitrary metadata the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary)
-              type: array
-              items:
-                $ref: '#/components/schemas/key-value'
+        meta:
+          description: Arbitrary metadata the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary)
+          type: array
+          items:
+            $ref: '#/components/schemas/key-value'
                 
     asset-class:
       type: string
