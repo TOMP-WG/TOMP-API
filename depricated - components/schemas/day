@@ -1,3 +1,0 @@
-    day:
-      type: string
-      enum: [MON, TUE, WED, THU, FRI, SAT, SUN]

@@ -1,6 +1,0 @@
-    booking-state:
-      description: The life-cycle state of the booking (from NEW to FINISHED)
-      type: string
-      enum: [NEW, PENDING, RELEASED, EXPIRED, CONFIRMED, CANCELLED, STARTED, FINISHED]
-      example: CONFIRMED
-      

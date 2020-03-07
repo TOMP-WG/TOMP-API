@@ -1,8 +1,0 @@
-    key-value:
-      type: object
-      properties:
-        key:
-          type: string
-      example:
-        "key": "value"
-

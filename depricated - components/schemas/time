@@ -1,8 +1,0 @@
-    time:
-      description: A time description in hh:mm, 24-hour notation.
-      type: object
-      properties: 
-        time: 
-          type: string
-        timezone: 
-          type: string
