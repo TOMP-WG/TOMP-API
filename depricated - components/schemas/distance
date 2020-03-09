@@ -1,5 +1,0 @@
-    distance:
-      description: The estimated distance travelled in the leg (in meters)
-      type: integer
-      minimum: 0
-      example: 7250

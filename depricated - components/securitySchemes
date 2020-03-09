@@ -1,8 +1,0 @@
-securitySchemes:
-    key:
-      description: MaaS can authenticate using an access token as part of the HTTP(S)
-        headers. The keys are sent as part of every request that MaaS makes to
-        the TSP API with a `x-api-key` custom header option. [from MaaS-API]
-      type: apiKey
-      name: X-Api-Key
-      in: header
