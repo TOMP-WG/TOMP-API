@@ -3,7 +3,7 @@ info:
   title: Transport Operator MaaS Provider API
   description: An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.2"
+  version: "1.2.1"
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -870,7 +870,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/asset'
+                  $ref: '#/components/schemas/type-of-asset'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -2175,6 +2175,10 @@ components:
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         amount-available:
           type: number
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/asset'
         fuel:
           type: string
           enum: [NONE, GASOLINE, DIESEL, ELECTRIC, HYBRID_GASOLINE, HYBRID_DIESEL, HYBRID_GAS, HYDROGEN, GAS, BIO_MASS, KEROSINE, OTHER]
