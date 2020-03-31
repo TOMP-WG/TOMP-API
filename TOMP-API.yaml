@@ -1122,7 +1122,7 @@ components:
       type: object
       oneOf: 
         - $ref: '#/components/schemas/simple-leg'
-        - $ref: '#/components/schemas/composit-leg'
+        - $ref: '#/components/schemas/composite-leg'
                   
     simple-leg:
       type: object
@@ -1146,7 +1146,7 @@ components:
           items:
             type: string
             
-    composit-leg:
+    composite-leg:
       description: this leg type should be used when returning multiple legs to fullfil a single request from A to B. For instance handling overlegs or when acting as broker for multiple sub contractors.
       type: object
       allOf: 
