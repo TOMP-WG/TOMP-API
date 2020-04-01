@@ -1120,6 +1120,8 @@ components:
     
     planning-result:
       type: object
+      discriminator:
+        propertyName: result-type
       oneOf: 
         - $ref: '#/components/schemas/simple-leg'
         - $ref: '#/components/schemas/composit-leg'
@@ -1198,9 +1200,6 @@ components:
       properties:
         name:
           type: string
-        conditionType:
-          type: string
-          enum: [POSTPONED-COMMIT, DEPOSIT, UPFRONT-PAYMENT, PAY-WHEN-FINISHED, RETURN-AREA, REQUIRE-BOOKING-DATA]
     
     require-booking-data-condition:
       type: object
@@ -1830,6 +1829,8 @@ components:
               region-id:
                 type: string
                 description: ID of the region where the station is located (see "system-regions")
+              service-area:
+                $ref: '#/components/schemas/polygon'
               rental-methods:
                 type: array
                 description: Array of enumerables containing the payment methods accepted at this station.
@@ -2068,6 +2069,11 @@ components:
                 conditions:
                   description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
                   type: string
+                service-areas:
+                  description: the area's where the operator is allowed to operate by the (local) authorities
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/polygon'
  
     system-pricing-plan:
       properties:
@@ -2122,8 +2128,10 @@ components:
               name:
                 type: string
                 description: Public name for this region
-                example: BikeTown   
-              
+                example: BikeTown
+              area:
+                $ref: '#/components/schemas/polygon'
+                
     time:
       description: A time description in hh:mm, 24-hour notation.
       type: object
@@ -2137,6 +2145,8 @@ components:
       description: A UTC timestamp (number of milliseconds in a Date object since January
         1, 1970, 00:00:00)
       example: 1546336800
+      type:
+        number
  
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to validate the leg when starting the leg.
