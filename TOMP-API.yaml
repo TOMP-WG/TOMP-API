@@ -47,7 +47,7 @@ tags:
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
 #                           OAuth2 and OpenId are also available
-# The exact ways to authenticate will be described in version 1.2
+
 security:
   - BasicAuth: []
   - BearerAuth: []
@@ -1842,7 +1842,27 @@ components:
                 type: string
                 format: URL
                 example: https://www.rentmyfreebike.com
-   
+              num-bikes-available:
+                type: integer
+                minimum: 0
+              num-bikes-disabled:
+                type: integer
+                minimum: 0
+              num-docks-available:
+                type: integer
+                minimum: 0
+              num-docks-disabled: 
+                type: integer
+                minimum: 0
+              is-installed:
+                type: boolean
+              is-renting:
+                type: boolean
+              is-returning:
+                type: boolean
+              last-reported:
+                $ref: '#/components/schemas/timestamp'
+              
     stop-reference:
       type: object
       description: reference to a stop (can be nation specific). This can help to specific pinpoint a (bus) stop. Extra information about the stop is not supplied; you should find it elsewhere.
