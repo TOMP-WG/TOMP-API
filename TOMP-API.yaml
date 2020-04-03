@@ -47,7 +47,7 @@ tags:
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
 #                           OAuth2 and OpenId are also available
-
+# The exact ways to authenticate will be described in version 1.2
 security:
   - BasicAuth: []
   - BearerAuth: []
@@ -1210,7 +1210,7 @@ components:
           type: array
           items:
             type: string
-            enum: [FROM-ADDRESS, TO-ADDRESS, BIRTHDATE, EMAIL, PERSONAL-ADDRESS]
+            enum: [FROM-ADDRESS, TO-ADDRESS, BIRTHDATE, EMAIL, PERSONAL-ADDRESS, GENDER, PHONE-NUMBERS, LICENSES, BANK-CARDS, DISCOUNT-CARDS, TRAVEL-CARDS, ID-CARDS, CREDIT-CARDS]
     
     postponed-commit-condition:
       type: object
@@ -1369,31 +1369,56 @@ components:
           items:
             $ref: '#/components/schemas/card'
         requirements:
-          description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
-          type: array
-          items:
-            $ref: '#/components/schemas/key-value'
+          $ref: '#/components/schemas/requirements'
  
     license:
       type: object
+      description: driver or usage license for a specific user. Contains the number and the asset-type you're allowed to operate (e.g. driver license for CAR)
       properties:
-        country:
-          $ref: '#/components/schemas/country' 
+        number:
+          type: string
+          example: 1287948792
         asset-type:
           $ref: '#/components/schemas/asset-class' 
+        license-code:
+          description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the asset-type too generic.
+          example: D4
+          type: string
+        country:
+          $ref: '#/components/schemas/country' 
+        valid-until:
+          $ref: '#/components/schemas/date' 
 
     card:
       type: object
+      description: card object. Only provide the cards that are requested. The asset type property is only allowed for the DISCOUNT card in combination with certain card-acceptors.
+      required:
+        - card-type
+        - card-number
+        - valid-until
       properties:
         card-type:
           type: string
+          enum: [ID, DISCOUNT, TRAVEL, BANK, CREDIT, PASSPORT, OTHER]
+        card-sub-type:
+          description: mandatory in case of OTHER. Can be used in bilateral agreements. 
+          type: string
+        card-description:
+          description: description of the card
+          type: string
         card-acceptors:
-          description: references to maas-ids of accepting parties
+          description: references to maas-ids of accepting parties. Only if applicable (DISCOUNT).
           type: array
           items:
             type: string
         card-number:
+          description: number of the card, like ID number, credit card or bank account number
           type: string
+        card-additional-number:
+          description: additional number, like CVC code or IBAN code
+          type: string
+        valid-until:
+          $ref: '#/components/schemas/date' 
         country:
           $ref: '#/components/schemas/country' 
         asset-type:
@@ -1452,7 +1477,9 @@ components:
        
     customer:
       type: object
-      description: this object should be as small as possible. Only provide address, email and birth-date in case of a direct request in the planning-option (condition).
+      allOf:
+        - $ref: '#/components/schemas/user'
+      description: a person that wants to travel. Only use the properties that are needed.
       required:
         - id
       properties:
@@ -1460,6 +1487,8 @@ components:
           description: The identifier MaaS uses to identify the customer
           type: string
           example: "A0-123456"
+        initials:
+          type: string
         first-name:
           description: First name of the customer
           type: string
@@ -1468,9 +1497,25 @@ components:
           description: Last name of the customer
           type: string
           example: Doe
-        phone:
-          description: Phone number that the customer may be reached from
+        middle-name:
+          description: Middle name of the customer 
           type: string
+          example: von
+        prefix:
+          description: prefix of the customer, like titles
+          type: string
+        postfix:
+          description: postfix of the customer, like titles
+          type: string
+        phones:
+          type: array
+          items:
+            $ref: '#/components/schemas/phone'
+        personal-requirements:
+          $ref: '#/components/schemas/requirements'
+        gender:
+          type: string
+          enum: [M,F,U]
         email:
           description: the email address of the customer
           type: string
@@ -1478,6 +1523,34 @@ components:
           $ref: '#/components/schemas/date'
         address:
           $ref: '#/components/schemas/address'
+        photo:
+          description: base64 encoded
+          type: string
+          format: byte
+          
+    requirements:
+      description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
+      type: array
+      items:
+        $ref: '#/components/schemas/key-value'
+          
+    phone:
+      type: object
+      properties:
+        preferred:
+          description: only one phone in this array can have a true in this property
+          type: boolean
+        number: 
+          description: phone number. In case of international usage, always provide the country code.
+          type: string
+          pattern: '^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$'
+          example: +31-48934758 or +(0075)-834923384 or 020 1234 1234
+        kind:
+          type: string
+          enum: [landline, mobile]
+        type:
+          type: string
+          enum: [private, business, other]
    
     day:
       type: string
