@@ -601,12 +601,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/system-information'
-              example:
-                system-id: XXTO0001
-                language: eng
-                name: FreeBike
-                timezone: IST
-                type-of-system: free-floating
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -1751,6 +1745,8 @@ components:
       type: object
       properties:
         key:
+          type: string
+        value:
           type: string
       example:
         "key": "value"
