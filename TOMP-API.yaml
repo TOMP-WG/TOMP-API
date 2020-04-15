@@ -1818,7 +1818,7 @@ components:
       properties:
         type:       
           type: string
-          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, OTHER]
+          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, OTHER]
           example: VEHICLE_NOT_AVAILABLE
         comment:
           type: string
