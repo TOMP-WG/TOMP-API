@@ -1746,8 +1746,6 @@ components:
       properties:
         key:
           type: string
-        value:
-          type: string
       example:
         "key": "value"
  
