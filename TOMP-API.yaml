@@ -3,7 +3,7 @@ info:
   title: Transport Operator MaaS Provider API
   description: An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.0.0"
+  version: "0.5.0"
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -452,7 +452,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/stationInformation'
+                type: array
+                items:
+                  $ref: '#/components/schemas/stationInformation'
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -488,10 +490,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  anyOf:
-                    - $ref: '#/components/schemas/asset'
-                    - $ref: '#/components/schemas/typeOfAsset'
+                  $ref: '#/components/schemas/typeOfAsset'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
@@ -515,7 +514,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/systemAlert'
+                type: array
+                items:
+                  $ref: '#/components/schemas/systemAlert'
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -542,7 +543,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/systemCalendar'
+                type: array
+                items:
+                  $ref: '#/components/schemas/systemCalendar'
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -570,7 +573,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/systemHours'
+                type: array
+                items:
+                  $ref: '#/components/schemas/systemHours'
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -629,7 +634,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/systemPricingPlan'
+                type: array
+                items:
+                  $ref: '#/components/schemas/systemPricingPlan'
           headers:
             'Content-Language':
               description: ISO 639-1 two letter language code
@@ -656,7 +663,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/systemRegion'
+                type: array
+                items:
+                  $ref: '#/components/schemas/systemRegion'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -1063,6 +1072,8 @@ components:
     asset:
       required:
         - assetId
+      allOf:
+        - $ref: '#/components/schemas/typeOfAsset'
       properties:
         assetId:
           type: string
@@ -1132,8 +1143,6 @@ components:
           $ref: '#/components/schemas/typeOfAsset'
         pricing:
           $ref: '#/components/schemas/fare'
-        asset:
-          $ref: '#/components/schemas/asset'
         conditions:
           description: references to the 'conditions' array (start of this object).
           type: array
@@ -1244,7 +1253,7 @@ components:
           description: the opening times of the facility
           type: array
           items:
-            $ref: '#/components/schemas/period'
+            $ref: '#/components/schemas/systemHours'
 
     polygon:
       type: object
@@ -1875,68 +1884,64 @@ components:
           $ref: '#/components/schemas/address'
 
     stationInformation:
+      type: object
+      required:
+        - stationId
+        - name
+        - coordinate
       properties:
-        stations:
+        stationId:
+          type: string
+          description: unique identifier of a station
+          example: XX:Y:12345678
+        name:
+          type: string
+          description: public name of the station
+          example: Island Central
+        coordinate:
+          $ref: '#/components/schemas/coordinate'
+        physicalAddress:
+          $ref: '#/components/schemas/address'
+        crossStreet:
+          type: string
+          description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc.
+          example: on the corner with Secondary Road
+        regionId:
+          type: string
+          description: ID of the region where the station is located (see "systemRegions")
+        serviceArea:
+          $ref: '#/components/schemas/polygon'
+        rentalMethods:
           type: array
+          description: Array of enumerables containing the payment methods accepted at this station.
           items:
-            type: object
-            required:
-              - stationId
-              - name
-              - coordinate
-            properties:
-              stationId:
-                type: string
-                description: unique identifier of a station
-                example: XX:Y:12345678
-              name:
-                type: string
-                description: public name of the station
-                example: Island Central
-              coordinate:
-                $ref: '#/components/schemas/coordinate'
-              physicalAddress:
-                $ref: '#/components/schemas/address'
-              crossStreet:
-                type: string
-                description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc.
-                example: on the corner with Secondary Road
-              regionId:
-                type: string
-                description: ID of the region where the station is located (see "systemRegions")
-              serviceArea:
-                $ref: '#/components/schemas/polygon'
-              rentalMethods:
-                type: array
-                description: Array of enumerables containing the payment methods accepted at this station.
-                items:
-                  type: string
-                  enum: [KEY, CREDITCARD, PAYPASS, APPLEPAY, ANDROIDPAY, TRANSITCARD, ACCOUNTNUMBER, PHONE, OTHER]
-                example: [CREDITCARD,PAYPASS,APPLEPAY]
-              rentalUrl:
-                type: string
-                format: URL
-                example: https://www.rentmyfreebike.com
-              numBikesAvailable:
-                type: integer
-                minimum: 0
-              numBikesDisabled:
-                type: integer
-                minimum: 0
-              numDocksAvailable:
-                type: integer
-                minimum: 0
-              numDocksDisabled:
-                type: integer
-                minimum: 0
-              isInstalled:
-                type: boolean
-              isRenting:
-                type: boolean
-              isReturning:
-                type: boolean
-              lastReported:
-                $ref: '#/components/schemas/timestamp'
+            type: string
+            enum: [KEY, CREDITCARD, PAYPASS, APPLEPAY, ANDROIDPAY, TRANSITCARD, ACCOUNTNUMBER, PHONE, OTHER]
+          example: [CREDITCARD,PAYPASS,APPLEPAY]
+        rentalUrl:
+          type: string
+          format: URL
+          example: https://www.rentmyfreebike.com
+        numBikesAvailable:
+          type: integer
+          minimum: 0
+        numBikesDisabled:
+          type: integer
+          minimum: 0
+        numDocksAvailable:
+          type: integer
+          minimum: 0
+        numDocksDisabled:
+          type: integer
+          minimum: 0
+        isInstalled:
+          type: boolean
+        isRenting:
+          type: boolean
+        isReturning:
+          type: boolean
+        lastReported:
+          $ref: '#/components/schemas/timestamp'
 
     stopReference:
       type: object
@@ -1971,261 +1976,232 @@ components:
 
     systemAlert:
       type: object
+      required:
+        - alertId
+        - alertType
+        - start
+        - summary
       properties:
-        alerts:
+        alertId:
+          type: string
+          description: a unique identifier for this alert
+        alertType:
+          type: string
+          enum: [SYSTEM_CLOSURE, STATION_CLOSURE, STATION_MOVE, OTHER]
+        startAndEndTimes:
+          description: Array of hashes with the keys "start" and "end" indicating when the alert is in effect (e.g. when the system or station is actually closed, or when it is scheduled to be moved). If this array is omitted then the alert should be displayed as long as it is in the feed.
           type: array
           items:
-            type: object
-            required:
-              - alertId
-              - alertType
-              - start
-              - summary
-            properties:
-              alertId:
-                type: string
-                description: a unique identifier for this alert
-              alertType:
-                type: string
-                enum: [SYSTEM_CLOSURE, STATION_CLOSURE, STATION_MOVE, OTHER]
-              startAndEndTimes:
-                description: Array of hashes with the keys "start" and "end" indicating when the alert is in effect (e.g. when the system or station is actually closed, or when it is scheduled to be moved). If this array is omitted then the alert should be displayed as long as it is in the feed.
-                type: array
-                items:
-                  $ref: '#/components/schemas/period'
-              stationIds:
-                type: array
-                items:
-                  type: string
-                description: Array of strings - If this is an alert that affects one or more stations, include their ids, otherwise omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
-                example: stationID0001
-              regionId:
-                type: array
-                items:
-                  type: string
-                description: Array of strings - If this system has regions, and if this alert only affects certain regions, include their ids, otherwise, omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
-                example: regionID0001
-              url:
-                type: string
-                format: hostname
-                description: URL where the customer can learn more information about this alert, if there is one
-                example: http://www.rentmyfreebike.com/alerts
-              summary:
-                type: string
-                description: A short summary of this alert to be displayed to the customer
-                example: station closed
-              description:
-                type: string
-                description: Detailed text description of the alert
-                example: station closed indefinitely due to vandalism
-              last-updated:
-                $ref: '#/components/schemas/timestamp'
+            $ref: '#/components/schemas/period'
+        stationIds:
+          type: array
+          items:
+            type: string
+          description: Array of strings - If this is an alert that affects one or more stations, include their ids, otherwise omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
+          example: stationID0001
+        regionId:
+          type: array
+          items:
+            type: string
+          description: Array of strings - If this system has regions, and if this alert only affects certain regions, include their ids, otherwise, omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
+          example: regionID0001
+        url:
+          type: string
+          format: hostname
+          description: URL where the customer can learn more information about this alert, if there is one
+          example: http://www.rentmyfreebike.com/alerts
+        summary:
+          type: string
+          description: A short summary of this alert to be displayed to the customer
+          example: station closed
+        description:
+          type: string
+          description: Detailed text description of the alert
+          example: station closed indefinitely due to vandalism
+        last-updated:
+          $ref: '#/components/schemas/timestamp'
 
     systemCalendar:
       type: object
+      required:
+        - startMonth
+        - startDay
+        - endMonth
+        - endDay
       properties:
-        periods:
-          type: array
-          items:
-            type: object
-            required:
-              - startMonth
-              - startDay
-              - endMonth
-              - endDay
-            properties:
-              startMonth:
-                type: integer
-                minimum: 1
-                maximum: 12
-                description: Starting month for the system operations (1-12)
-                example: 1
-              startDay:
-                type: integer
-                minimum: 1
-                maximum: 31
-                description: Starting day for the system operations (1-31)
-                example: 1
-              startYear:
-                type: integer
-                description: Starting year for the system operations
-                example: 2019
-              endMonth:
-                type: integer
-                minimum: 1
-                maximum: 12
-                description: Ending month for the system operations (1-12)
-                example: 12
-              endDay:
-                type: integer
-                minimum: 1
-                maximum: 31
-                description: Ending day for the system operations (1-31)
-                example: 31
-              endYear:
-                type: integer
-                description: Ending year for the system operations
-                example: 2099
+        startMonth:
+          type: integer
+          minimum: 1
+          maximum: 12
+          description: Starting month for the system operations (1-12)
+          example: 1
+        startDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: Starting day for the system operations (1-31)
+          example: 1
+        startYear:
+          type: integer
+          description: Starting year for the system operations
+          example: 2019
+        endMonth:
+          type: integer
+          minimum: 1
+          maximum: 12
+          description: Ending month for the system operations (1-12)
+          example: 12
+        endDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: Ending day for the system operations (1-31)
+          example: 31
+        endYear:
+          type: integer
+          description: Ending year for the system operations
+          example: 2099
 
     systemHours:
+      type: object
+      required:
+        - days
+        - startTime
+        - endTime
       properties:
-        hours:
+        userType:
+          type: string
+          description: This indicates that this set of rental hours applies to either members or non-members only.
+          enum: [MEMBER, NON_MEMBERS]
+          example: MEMBER
+        startTime:
+          $ref: '#/components/schemas/time'
+        endTime:
+          $ref: '#/components/schemas/time'
+        days:
           type: array
+          description: An array of abbreviations (first 3 letters) of English names of the days of the week that this hour object applies to (i.e. ["mon", "tue"]). Each day can only appear once within all of the hours objects in this feed.
           items:
-            type: object
-            required:
-              - userType
-              - days
-              - startTime
-              - endTime
-            properties:
-              userType:
-                type: string
-                description: This indicates that this set of rental hours applies to either members or non-members only.
-                enum: [MEMBER, NON_MEMBERS]
-                example: MEMBER
-              startTime:
-                $ref: '#/components/schemas/time'
-              endTime:
-                $ref: '#/components/schemas/time'
-              days:
-                type: array
-                description: An array of abbreviations (first 3 letters) of English names of the days of the week that this hour object applies to (i.e. ["mon", "tue"]). Each day can only appear once within all of the hours objects in this feed.
-                items:
-                  $ref: '#/components/schemas/day'
+            $ref: '#/components/schemas/day'
 
     systemInformation:
+      required:
+        - systemId
+        - language
+        - name
+        - timezone
+        - typeOfSystem
       properties:
-        information:
-          type: array
-          items:
-            type: object
-            description: operation successful
-            required:
-              - systemId
-              - language
-              - name
-              - timezone
-              - typeOfSystem
-            properties:
-                systemId:
-                  description: identifier for this transport system. This should be globally unique (even between different systems)
-                  type: string
-                  example: XXTO0001
-                language:
-                  description: An IETF language tag indicating the language that will be used throughout the rest of the files. This is a string that defines a single language tag only.
-                  type: string
-                  format: ietf
-                  example: eng
-                name:
-                  description: Full name of the system to be displayed to customers
-                  type: string
-                  example: FreeBike
-                shortName:
-                  description: Optional abbreviation for a system
-                  type: string
-                  example: FB
-                operator:
-                  description: Name of the operator of the system
-                  type: string
-                  example: FreeBike
-                url:
-                  description: The URL of the transport operator. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped.
-                  type: string
-                  example: https://www.rentmyfreebike.com
-                purchaseUrl:
-                  description: A fully qualified URL where a customer can purchase a membership or learn more about purchasing memberships
-                  type: string
-                  example: https://www.rentmyfreebike.com/purchase
-                startDate:
-                  $ref: '#/components/schemas/date'
-                phoneNumber:
-                  description: A single voice telephone number for the specified system. This field is a string value that presents the telephone number as typical for the system's service area. It can and should contain punctuation marks to group the digits of the number.
-                  type: string
-                  example: 555-12345
-                email:
-                  description: A single contact email address for customers to address questions about the system
-                  type: string
-                  format: email
-                  example: rent@freebike.com
-                timezone:
-                  description: The time zone where the system is located. Time zone names never contain the space character but may contain an underscore. Please refer to the "TZ" value in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of valid values
-                  type: string
-                  example: IST
-                licenseUrl:
-                  description: A fully qualified URL of a page that defines the license terms for the GBFS data for this system, as well as any other license terms the system would like to define (including the use of corporate trademarks, etc)
-                  type: string
-                  example: https://www.rentmyfreebike.com/license
-                typeOfSystem:
-                  description: Describes the type of system
-                  type: string
-                  enum: [FREE_FLOATING, STATION_BASED, VIRTUAL_STATION_BASED]
-                  example: FREE_FLOATING
-                conditions:
-                  description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
-                  type: string
-                serviceAreas:
-                  description: the area's where the operator is allowed to operate by the (local) authorities
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/polygon'
+          systemId:
+            description: identifier for this transport system. This should be globally unique (even between different systems)
+            type: string
+            example: XXTO0001
+          language:
+            description: An IETF language tag indicating the language that will be used throughout the rest of the files. This is a string that defines a single language tag only.
+            type: string
+            format: ietf
+            example: eng
+          name:
+            description: Full name of the system to be displayed to customers
+            type: string
+            example: FreeBike
+          shortName:
+            description: Optional abbreviation for a system
+            type: string
+            example: FB
+          operator:
+            description: Name of the operator of the system
+            type: string
+            example: FreeBike
+          url:
+            description: The URL of the transport operator. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped.
+            type: string
+            example: https://www.rentmyfreebike.com
+          purchaseUrl:
+            description: A fully qualified URL where a customer can purchase a membership or learn more about purchasing memberships
+            type: string
+            example: https://www.rentmyfreebike.com/purchase
+          startDate:
+            $ref: '#/components/schemas/date'
+          phoneNumber:
+            description: A single voice telephone number for the specified system. This field is a string value that presents the telephone number as typical for the system's service area. It can and should contain punctuation marks to group the digits of the number.
+            type: string
+            example: 555-12345
+          email:
+            description: A single contact email address for customers to address questions about the system
+            type: string
+            format: email
+            example: rent@freebike.com
+          timezone:
+            description: The time zone where the system is located. Time zone names never contain the space character but may contain an underscore. Please refer to the "TZ" value in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of valid values
+            type: string
+            example: IST
+          licenseUrl:
+            description: A fully qualified URL of a page that defines the license terms for the GBFS data for this system, as well as any other license terms the system would like to define (including the use of corporate trademarks, etc)
+            type: string
+            example: https://www.rentmyfreebike.com/license
+          typeOfSystem:
+            description: Describes the type of system
+            type: string
+            enum: [FREE_FLOATING, STATION_BASED, VIRTUAL_STATION_BASED]
+            example: FREE_FLOATING
+          conditions:
+            description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
+            type: string
+          serviceAreas:
+            description: the area's where the operator is allowed to operate by the (local) authorities
+            type: array
+            items:
+              $ref: '#/components/schemas/polygon'
 
     systemPricingPlan:
+      type: object
+      required:
+       - planId
+       - name
+       - currency
+       - price
+       - isTaxable
+       - description
       properties:
-        pricingPlan:
-          type: array
-          items:
-            type: object
-            required:
-             - planId
-             - name
-             - currency
-             - price
-             - isTaxable
-             - description
-            properties:
-              planId:
-                type: string
-                description: a unique identifier for this plan in the system
-                example: freeplan1
-              url:
-                type: string
-                description: a fully qualified URL where the customer can learn more about this particular scheme
-                example: https://www.rentmyfreebike.com/freeplan
-              name:
-                type: string
-                description: name of this pricing scheme
-                example: Free Plan
-              fare:
-                $ref: '#/components/schemas/fare'
-              isTaxable:
-                type: boolean
-                description: false indicates that no additional tax will be added (either because tax is not charged, or because it is included) true indicates that tax will be added to the base price
-              description:
-                type: string
-                description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations
-                example: Unlimited plan for free bikes, as long as you don't break them!
+        planId:
+          type: string
+          description: a unique identifier for this plan in the system
+          example: freeplan1
+        url:
+          type: string
+          description: a fully qualified URL where the customer can learn more about this particular scheme
+          example: https://www.rentmyfreebike.com/freeplan
+        name:
+          type: string
+          description: name of this pricing scheme
+          example: Free Plan
+        fare:
+          $ref: '#/components/schemas/fare'
+        isTaxable:
+          type: boolean
+          description: false indicates that no additional tax will be added (either because tax is not charged, or because it is included) true indicates that tax will be added to the base price
+        description:
+          type: string
+          description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations
+          example: Unlimited plan for free bikes, as long as you don't break them!
 
     systemRegion:
+      type: object
+      required:
+       - regionId
+       - name
       properties:
-        regions:
-          type: array
-          items:
-            type: object
-            required:
-             - regionId
-             - name
-            properties:
-              region-id:
-                type: string
-                description: Unique identifier for this region
-                example: BikeRegion
-              name:
-                type: string
-                description: Public name for this region
-                example: BikeTown
-              area:
-                $ref: '#/components/schemas/polygon'
+        region-id:
+          type: string
+          description: Unique identifier for this region
+          example: BikeRegion
+        name:
+          type: string
+          description: Public name for this region
+          example: BikeTown
+        area:
+          $ref: '#/components/schemas/polygon'
 
     time:
       description: A time description in hh:mm, 24-hour notation.
@@ -2398,7 +2374,7 @@ components:
       schema:
         type: string
       description: ISO 639-1 two letter language code
-      example: nl
+      example: NL
     api:
       in: header
       name: Api
@@ -2414,7 +2390,7 @@ components:
       schema:
         type: string
       description: Version of the API.
-      example: 1.1
+      example: 0.5.0
     maasId:
       in: header
       name: maas-id
@@ -2422,7 +2398,7 @@ components:
       schema:
         type: string
       description: The ID of the sending maas operator
-      example: 1.1
+      example: 1324A-DFB3482-32ACD
 
   securitySchemes:
     BasicAuth:
@@ -2481,4 +2457,4 @@ components:
       description: The request will not be fulfilled. The request itself is legal, but the content conflicts with the server and might be stale. The user might try again after looking up the current state of the resource.
     410Gone:
       description: The requested resource is no longer available. This is permanent.
-
+      
