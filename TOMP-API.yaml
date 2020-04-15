@@ -1760,11 +1760,10 @@ components:
 
     keyValue:
       type: object
-      properties:
-        key:
-          type: string
+      minProperties: 1
+      maxProperties: 2
       example:
-        { "key": "value" }
+        { "wheelchair": true }
 
     leg:
       type: object
