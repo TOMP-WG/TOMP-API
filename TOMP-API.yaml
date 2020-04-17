@@ -1507,7 +1507,8 @@ components:
           $ref: '#/components/schemas/requirements'
         gender:
           type: string
-          enum: [M,F,U]
+          description: Male, Female, Unknown or Other
+          enum: [M,F,U,O]
         email:
           description: the email address of the customer
           type: string
