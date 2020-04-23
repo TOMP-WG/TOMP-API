@@ -1906,10 +1906,10 @@ components:
                 type: string
                 format: URL
                 example: https://www.rentmyfreebike.com
-              num-bikes-available:
+              num-assets-available:
                 type: integer
                 minimum: 0
-              num-bikes-disabled:
+              num-assets-disabled:
                 type: integer
                 minimum: 0
               num-docks-available:
