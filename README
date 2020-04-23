@@ -3,7 +3,7 @@ Transport Operator Mobility Provider (TOMP) API development Github
 Working group meeting in the Netherlands every two weeks with the goal to develop 
 and specify a generic TOMP-API for use by Transport Operators and Mobility Providers by Jan 1st 2020.
 
-OpenAPI 3.0 documentation is also available at https://app.swaggerhub.com/apis-docs/efel85/TOMP/1.1#/ 
+OpenAPI 3.0 documentation is also available at https://app.swaggerhub.com/apis/TOMP-API-WG/transport-operator_maas_provider_api/1.2 
 
 To document the latest developments, a Blueprint for an Transport Operator to Mobility Provider API is provided
 The latest version of this Blueprint is available at:
@@ -38,4 +38,4 @@ NS
 Cityway
 European Travellers Club
 
-Testing environment available through http://maas-nl-hub.westeurope.cloudapp.azure.com/GTOAS/swagger/
+
