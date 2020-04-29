@@ -1606,6 +1606,7 @@ components:
 
     keyValue:
       type: object
+      additionalProperties: true
       minProperties: 1
       maxProperties: 2
       example:
