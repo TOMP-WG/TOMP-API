@@ -17,6 +17,7 @@ tags:
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
+    description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
 
   - name: trip execution
     description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating a leg (not the state!).
@@ -1251,7 +1252,7 @@ components:
           description: description of the card
           type: string
         cardAcceptors:
-          description: references to maas-ids of accepting parties. Only if applicable (DISCOUNT).
+          description: references to maasIds of accepting parties. Only if applicable (DISCOUNT).
           type: array
           items:
             type: string
@@ -1681,7 +1682,7 @@ components:
       type: object
       description: provides current asset location & duration and distance of the current leg
       required:
-        - coordinate
+        - coordinates
       properties:
         coordinates:
           $ref: '#/components/schemas/coordinates'
@@ -1697,7 +1698,7 @@ components:
 
     license:
       type: object
-      description: driver or usage license for a specific user. Contains the number and the asset-type you're allowed to operate (e.g. driver license for CAR)
+      description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
       properties:
         number:
           type: string
@@ -1705,7 +1706,7 @@ components:
         assetClass:
           $ref: '#/components/schemas/assetClass'
         licenseCode:
-          description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the asset-type too generic.
+          description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
           example: D4
           type: string
         country:
@@ -1824,7 +1825,7 @@ components:
               description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
               type: number
             useAssets:
-              description: when you use the /operator/available-assets and you want to book a displayed asset, you must be able to request o a planning-option for the specific asset (with provide-ids=true), post a booking with the provided id and send directly a commit. This field should contain the asset to book.
+              description: when you use the /operator/available-assets and you want to book a displayed asset, you must be able to request o a planning-option for the specific asset (with provideIds=true), post a booking with the provided id and send directly a commit. This field should contain the asset to book.
               type: array
               items:
                 type: string
@@ -1903,7 +1904,7 @@ components:
       required:
         - stationId
         - name
-        - coordinate
+        - coordinates
       properties:
         stationId:
           type: string
