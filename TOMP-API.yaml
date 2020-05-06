@@ -3,7 +3,7 @@ info:
   title: Transport Operator MaaS Provider API
   description: An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.5.0"
+  version: "0.5.1"
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -16,7 +16,6 @@ tags:
     description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or typeOfAsset), including the non-happy paths (cancel, expire etc).
 
   - name: booking [optional]
-    description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
 
   - name: trip execution
@@ -908,27 +907,27 @@ paths:
         - payment
         - MP
         - TO
-      description: Returns all the journal entries that should be payed per leg
+      description: Returns all the journal entries that should be paid per leg
       parameters:
         - name: from
-          in: path
+          in: query
           description: start of the selection
           required: true
           schema:
             $ref: '#/components/schemas/timestamp'
         - name: to
-          in: path
+          in: query
           description: end of the selection
           required: true
           schema:
             $ref: '#/components/schemas/timestamp'
         - name: state
-          in: path
+          in: query
           required: true
           schema:
             $ref: '#/components/schemas/journalState'
         - name: category
-          in: path
+          in: query
           description: type of booking line (e.g. fare, addition costs, fines, ...)
           required: true
           schema:
@@ -2373,7 +2372,7 @@ components:
       schema:
         type: string
       description: Version of the API.
-      example: 0.5.0
+      example: 0.5.1
     maasId:
       in: header
       name: maas-id
