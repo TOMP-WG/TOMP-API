@@ -1,18 +1,17 @@
 ---
-name: Bug report
-about: Use this template to report a bug in the current API. Do not use this template for
-  new feature requests or anything else. 
-title: "[BUG] "
+name: Bug report / change request
+about: Use this template to report a bug in the current API or is your want to see a small change. Do not use this template for new features or anything else. 
+title: "[BUG] or [CHANGE REQUEST] "
 labels: ''
 assignees: ''
 
 ---
 
 ## API Version
-<!--- In what version of the API did you find the bug? -->
+<!--- In what version of the API did you find the bug or do you base your change on? -->
 
 ## Summary
-<!--- Provide a general summary of the issue. -->
+<!--- Provide a general summary of the issue of the change request. -->
 
 ## Expected Behavior
 <!--- Tell us what should happen. -->
@@ -26,6 +25,7 @@ assignees: ''
 ## Steps to Reproduce
 <!--- Provide a link to a live example, or an unambiguous set of steps to -->
 <!--- reproduce this bug. Include a flow of API calls to reproduce, if relevant. -->
+<!--- If this is a change request, provide a flow of where the current functionality is located that you want to change. --->
 1.
 2.
 3.
