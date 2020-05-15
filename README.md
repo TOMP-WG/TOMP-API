@@ -1,8 +1,8 @@
-Transport Operator Mobility Provider (TOMP) API development Github
+Transport Operator Mobility-as-a-service Provider (TOMP) API development Github
 ====
 
 Working group meeting in the Netherlands every two weeks with the goal to develop 
-and specify a generic TOMP-API for use by Transport Operators and Mobility Providers by Jan 1st 2020.
+and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers by Jan 1st 2020.
 
 I need help, where can I find it? / How do I start implementing TOMP?
 ---
@@ -14,7 +14,7 @@ Where can I find the API-documentation?
 ---
 OpenAPI 3.0 documentation is also available at https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/
 
-To document the latest developments, a Blueprint for an Transport Operator to Mobility Provider API is provided
+To document the latest developments, a Blueprint for an Transport Operator to Mobility-as-a-service Provider API is provided
 The latest version of this Blueprint is available at:
 
 https://github.com/TOMP-WG/TOMP-API/tree/master/documents or through dutchmobilityinnovations.com.
