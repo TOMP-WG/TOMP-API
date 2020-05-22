@@ -1006,7 +1006,7 @@ paths:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/api'
       - $ref: '#/components/parameters/apiVersion'
-    put:
+    post:
       description: creates a request for support from end user via MP
       tags:
         - support
