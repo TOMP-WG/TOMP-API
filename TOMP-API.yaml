@@ -3,7 +3,7 @@ info:
   title: Transport Operator MaaS Provider API
   description: An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.5.0"
+  version: "0.5.2"
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -608,6 +608,12 @@ paths:
             schema:
               $ref: "#/components/schemas/legEvent"
       responses:
+        '200':
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/leg'
         '204':
           $ref: '#/components/responses/204NoContent'
         '400':
@@ -935,27 +941,27 @@ paths:
         - payment
         - MP
         - TO
-      description: Returns all the journal entries that should be payed per leg
+      description: Returns all the journal entries that should be paid per leg
       parameters:
         - name: from
-          in: path
+          in: query
           description: start of the selection
           required: true
           schema:
             $ref: '#/components/schemas/timestamp'
         - name: to
-          in: path
+          in: query
           description: end of the selection
           required: true
           schema:
             $ref: '#/components/schemas/timestamp'
         - name: state
-          in: path
+          in: query
           required: true
           schema:
             $ref: '#/components/schemas/journalState'
         - name: category
-          in: path
+          in: query
           description: type of booking line (e.g. fare, addition costs, fines, ...)
           required: true
           schema:
@@ -2412,7 +2418,7 @@ components:
       schema:
         type: string
       description: Version of the API.
-      example: 0.5.0
+      example: 0.5.2
     maasId:
       in: header
       name: maas-id
