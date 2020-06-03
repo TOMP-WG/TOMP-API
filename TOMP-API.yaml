@@ -1017,38 +1017,21 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /support/{id}/request/{support-type}:
+  /support/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
-    put:
-      description: identifies a request for support from user via MP
+    post:
+      description: creates a request for support from end user via MP
       tags:
         - support
         - TO
-      parameters:
-        - name: id
-          in: path
-          description: Booking identifier
-          required: true
-          schema:
-            type: string
-        - name: support-type
-          in: path
-          description: type of support needed
-          required: true
-          schema:
-            enum:
-              [
-                BROKEN_DOWN,
-                NOT_AT_LOCATION,
-                NOT_CLEAN,
-                NOT_AVAILABLE,
-                UNABLE_TO_OPEN,
-                UNABLE_TO_CLOSE,
-                OTHER,
-              ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/supportRequest"
       responses:
         "200":
           description: support request acknowledged
@@ -1058,6 +1041,10 @@ paths:
               example: nl
               schema:
                 type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supportStatus"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1071,7 +1058,7 @@ paths:
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
     get:
-      description: Identifies the current status of the support request
+      description: Gets the status report of the support request. Last status (highest order number) is the current status
       tags:
         - support
         - TO
@@ -1088,7 +1075,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/supportStatus"
+                type: array
+                items:
+                  $ref: "#/components/schemas/supportStatus"
           headers:
             "Content-Language":
               description: ISO 639-1 two letter language code
@@ -2084,10 +2073,39 @@ components:
           description: this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040
         country:
           $ref: "#/components/schemas/country"
+          
+    supportRequest:
+      description: request for support
+      type: object
+      properties:
+        id:
+          type: string
+          description: the booking id
+        supportType:
+          type: string
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+        location:
+          $ref: '#/components/schemas/place'
+        timestamp:
+          $ref: '#/components/schemas/timestamp'  
+        priority:
+          description: the priority of the support request. 
+          type: string
+          enum: [ERROR_CANNOT_CONTINUE, ERROR_CAN_CONTINUE, DISTURBING_ISSUE, QUESTION, OTHER]
+        contactInformationEndUser:
+          description: contact information of the end user in case of direct response requests, like phone number
+          type: string
+        comment:
+          type: string
+        requestedResponseTime:
+          type: number
+          description: time to respond in minutes.
 
     supportStatus:
       description: the current status of support
       type: object
+      allOf:
+        - $ref: '#/components/schemas/supportRequest'
       properties:
         status:
           type: string
@@ -2097,6 +2115,12 @@ components:
           type: integer
           description: time in minutes to expected resolution of support request
           example: 9
+        order:
+          type: integer
+          description: the sequence number of status of the support issue
+        comment:
+          type: string
+          description: free text to send to the end user.
 
     systemAlert:
       type: object
