@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.5.3"
+  version: "0.6.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -2331,11 +2331,10 @@ components:
           type: string
 
     timestamp:
-      description:
-        A UTC timestamp (number of milliseconds in a Date object since January
-        1, 1970, 00:00:00)
-      example: 1546336800
-      type: number
+      description: timestamp according to ISO 8601 (RFC3339)
+      type: string
+      format: date-time
+      example: '2020-06-28T14:55:00+02:00'
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to validate the leg when starting the leg.
@@ -2522,7 +2521,7 @@ components:
       schema:
         type: string
       description: Version of the API.
-      example: 0.5.2
+      example: 0.6.0
     maasId:
       in: header
       name: maas-id
