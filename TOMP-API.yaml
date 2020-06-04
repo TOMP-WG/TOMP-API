@@ -1970,7 +1970,7 @@ components:
               type: number
             to:
               $ref: "#/components/schemas/place"
-            travellers:
+            travelers:
               description: The number of people that want to travel
               type: number
             useAssets:
