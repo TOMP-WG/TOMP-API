@@ -69,6 +69,13 @@ paths:
       tags:
         - planning
         - TO
+      parameters:
+        - name: bookable
+          in: query
+          description: Specifies whether bookable IDs should be returned with the results
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           application/json:
@@ -1971,9 +1978,6 @@ components:
               type: array
               items:
                 type: string
-            provideIds:
-              description: default false (during planning phase). Whenever entering the booking phase to present the options to the user, set it to true to refert to this option. The returned ID can be used througout the complete process. [https://github.com/efel85/TOMP-API/issues/57]
-              type: boolean
             users:
               type: array
               items:
