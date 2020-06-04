@@ -102,7 +102,7 @@ paths:
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
             Expires:
-              description: the result is valid until this timestamp. After this timestamp the planningOption will be discarded, if cannot become a bookingOption.
+              description: the result is valid until this timestamp. After this timestamp the planningOption may no longer be available or change
               schema:
                 $ref: "#/components/schemas/timestamp"
               required: true
@@ -112,6 +112,49 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+
+  /planning-options/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - name: id
+        in: path
+        description: Planning option identifier
+        required: true
+        schema:
+          type: string
+    get:
+      description: Returns the planning option.
+      tags:
+        - planning
+        - TO
+      responses:
+        "200":
+          description: The booking was found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planningOption"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+            Expires:
+              description: the result is valid until this timestamp. After this timestamp the planningOption may no longer be available or change
+              schema:
+                $ref: "#/components/schemas/timestamp"
+              required: true
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "410":
+          $ref: "#/components/responses/410Gone"
 
   /bookings/:
     parameters:
