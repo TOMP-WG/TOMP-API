@@ -63,8 +63,8 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
     post:
       description:
-        Returns available transport options for given coordinates and radius. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `provideIds`, requesting the TO to provide unique IDs to reference to during communication with the MP.
+        Returns planning options for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `bookable`, requesting the TO to provide booking IDs to reference to during communication with the MP.
         <p>see (2.1) in the process flow - planning
       tags:
         - planning
@@ -80,17 +80,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/planningCheck"
+              $ref: "#/components/schemas/travelPlan"
       responses:
         "201":
           description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/planningOptions"
+                $ref: "#/components/schemas/planningOption"
           headers:
             Location:
-              description: The URI where the created options can be found, in case of 'provideIds' = true
+              description: The URI where the most up to date version of the created option can be found. Not required.
               schema:
                 type: string
                 example: "/planning-options/1234"
@@ -120,7 +120,7 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
     post:
       description:
-        Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planningOptions).
+        Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planningOption).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
         <p>The optional webhook can be used to post updates from TO to MP. If it isn't used, the subscription possibility in this API can be used or the events can be posted directly.
@@ -1955,8 +1955,8 @@ components:
         physicalAddress:
           $ref: "#/components/schemas/address"
 
-    planningCheck:
-      description: the request for available assets. User's location in comma separated form e.g. 60.123,27.456 (lat/long, WGS84)
+    travelPlan:
+      description: The data for requesting available planning options
       allOf:
         - $ref: "#/components/schemas/period"
         - type: object
@@ -1966,30 +1966,32 @@ components:
             from:
               $ref: "#/components/schemas/place"
             radius:
-              description: Maximum distance a user wants to travel to reach asset in metres, e.g. 500 metres
+              description: Maximum distance in meters a user wants to travel to reach the travel option
               type: number
             to:
               $ref: "#/components/schemas/place"
             travellers:
-              description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
+              description: The number of people that want to travel
               type: number
             useAssets:
-              description: when you use the /operator/available-assets and you want to book a displayed asset, you must be able to request o a planning-option for the specific asset (with provideIds=true), post a booking with the provided id and send directly a commit. This field should contain the asset to book.
+              description: The specific asset(s), the user wishes to receive planning options for
               type: array
               items:
                 type: string
+                format: an asset id for this operator
             users:
               type: array
               items:
                 $ref: "#/components/schemas/user"
 
-    planningOptions:
+    planningOption:
       type: object
-      description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included.
+      description: Available option matching the query.
       properties:
         validUntil:
           $ref: "#/components/schemas/timestamp"
         conditions:
+          description: An array of the conditions that apply to at least one of the results
           type: array
           items:
             $ref: "#/components/schemas/condition"
