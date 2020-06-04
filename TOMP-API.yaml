@@ -1964,12 +1964,12 @@ components:
             - from
           properties:
             from:
-              $ref: "#/components/schemas/coordinates"
+              $ref: "#/components/schemas/place"
             radius:
               description: Maximum distance a user wants to travel to reach asset in metres, e.g. 500 metres
               type: number
             to:
-              $ref: "#/components/schemas/coordinates"
+              $ref: "#/components/schemas/place"
             travellers:
               description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
               type: number
