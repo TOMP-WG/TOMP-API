@@ -126,7 +126,7 @@ paths:
         - TO
       responses:
         "200":
-          description: The booking was found
+          description: The planning option was found
           content:
             application/json:
               schema:
@@ -1401,26 +1401,24 @@ components:
         assetClass:
           $ref: "#/components/schemas/assetClass"
 
-    compositeLeg:
+    compositeOption:
       description: this leg type should be used when returning multiple legs to fullfil a single request from A to B. For instance handling overlegs or when acting as broker for multiple sub contractors.
-      allOf:
-        - $ref: "#/components/schemas/planningResult"
-        - type: object
-          properties:
-            id:
-              description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
-              type: string
-            pricing:
-              $ref: "#/components/schemas/fare"
-            legs:
-              type: array
-              items:
-                $ref: "#/components/schemas/operatorLeg"
-            conditions:
-              description: references to the 'conditions' array (start of this object).
-              type: array
-              items:
-                type: string
+      type: object
+      required:
+        - optionType
+        - parts
+      properties:
+        optionType:
+          type: string
+        id:
+          description: A unique id which can be referred to when creating a booking
+          type: string
+        pricing:
+          $ref: "#/components/schemas/fare"
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/simpleOption"
 
     condition:
       oneOf:
@@ -1909,34 +1907,6 @@ components:
           type: string
           description: free text, should match Content-Language
 
-    operatorLeg:
-      allOf:
-        - $ref: "#/components/schemas/simpleLeg"
-        - type: object
-          properties:
-            operatorName:
-              type: string
-              description: Name of the operator, could match Content-Language
-            operatorMaasId:
-              type: string
-              description: the maasId from the operator
-            operatorDescription:
-              type: string
-              description: short description of the operator, should match Content-Language
-            operatorContact:
-              type: string
-              description: contact information, should match Content-Language
-
-    optionsLeg:
-      allOf:
-        - $ref: "#/components/schemas/period"
-        - type: object
-          properties:
-            from:
-              $ref: "#/components/schemas/coordinates"
-            to:
-              $ref: "#/components/schemas/coordinates"
-
     period:
       type: object
       properties:
@@ -2024,21 +1994,18 @@ components:
         validUntil:
           $ref: "#/components/schemas/timestamp"
         conditions:
-          description: An array of the conditions that apply to at least one of the results
+          description: An array of the conditions that apply to at least one of the options
           type: array
           items:
             $ref: "#/components/schemas/condition"
-        results:
+        options:
           type: array
           items:
-            $ref: "#/components/schemas/planningResult"
-
-    planningResult:
-      oneOf:
-        - $ref: "#/components/schemas/simpleLeg"
-        - $ref: "#/components/schemas/compositeLeg"
-      discriminator:
-        propertyName: resultType
+            oneOf:
+              - $ref: "#/components/schemas/singleOption"
+              - $ref: "#/components/schemas/compositeOption"
+            discriminator:
+              propertyName: optionType
 
     polygon:
       type: object
@@ -2055,25 +2022,55 @@ components:
       items:
         $ref: "#/components/schemas/keyValue"
 
-    simpleLeg:
+    simpleOption:
+      type: object
+      required:
+        - from
+        - typeOfAsset
+        - conditions
+      properties:
+        from:
+          $ref: "#/components/schemas/coordinates"
+        to:
+          $ref: "#/components/schemas/coordinates"
+        startTime:
+          $ref: "#/components/schemas/timestamp"
+        endTime:
+          $ref: "#/components/schemas/timestamp"
+        asset:
+          $ref: "#/components/schemas/typeOfAsset"
+        pricing:
+          $ref: "#/components/schemas/fare"
+        conditions:
+          description: Indices of the conditions in the parent planningOption that apply to this option
+          type: array
+          items:
+            type: number
+        operatorName:
+          type: string
+          description: Name of the operator, these should not be included if they are the TO itself, could match Content-Language
+        operatorMaasId:
+          type: string
+          description: the maasId from the operator
+        operatorDescription:
+          type: string
+          description: short description of the operator, should match Content-Language
+        operatorContact:
+          type: string
+          description: contact information, should match Content-Language
+
+    singleOption:
       allOf:
-        - $ref: "#/components/schemas/planningResult"
+        - $ref: "#/components/schemas/simpleOption"
         - type: object
+          required:
+            - optionType
           properties:
-            id:
-              description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
+            optionType:
               type: string
-            leg:
-              $ref: "#/components/schemas/optionsLeg"
-            typeOfAsset:
-              $ref: "#/components/schemas/typeOfAsset"
-            pricing:
-              $ref: "#/components/schemas/fare"
-            conditions:
-              description: references to the 'conditions' array (start of this object).
-              type: array
-              items:
-                type: string
+            id:
+              description: A unique id which can be referred to when creating a booking
+              type: string
 
     stationInformation:
       type: object
