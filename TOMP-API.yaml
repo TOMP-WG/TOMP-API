@@ -101,11 +101,6 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
-            Expires:
-              description: the result is valid until this timestamp. After this timestamp the planningOption may no longer be available or change
-              schema:
-                $ref: "#/components/schemas/timestamp"
-              required: true
         "202":
           $ref: "#/components/responses/202Accepted"
         "400":
@@ -143,11 +138,6 @@ paths:
               schema:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-            Expires:
-              description: the result is valid until this timestamp. After this timestamp the planningOption may no longer be available or change
-              schema:
-                $ref: "#/components/schemas/timestamp"
               required: true
         "401":
           $ref: "#/components/responses/401Unauthorized"
