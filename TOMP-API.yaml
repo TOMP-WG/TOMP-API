@@ -1436,9 +1436,10 @@ components:
         conditionType:
           description: The specific subclass of condition, should match the schema name exactly
           type: string
-        name:
-          description: TODO
+        id:
+          description: An identifier for this condition that can be used to refer to this condition
           type: string
+          example: deposit50eu
 
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
@@ -2042,10 +2043,10 @@ components:
         pricing:
           $ref: "#/components/schemas/fare"
         conditions:
-          description: Indices of the conditions in the parent planningOption that apply to this option
+          description: Ids of the conditions in the parent planningOption that apply to this option
           type: array
           items:
-            type: number
+            type: string
         operatorName:
           type: string
           description: Name of the operator, these should not be included if they are the TO itself, could match Content-Language
