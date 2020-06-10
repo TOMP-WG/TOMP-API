@@ -64,15 +64,15 @@ paths:
     post:
       description:
         Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `bookable`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
         <p>see (2.1) in the process flow - planning
       tags:
         - planning
         - TO
       parameters:
-        - name: bookable
+        - name: booking-intent
           in: query
-          description: Specifies whether bookable IDs should be returned with the results
+          description: Specifies whether IDs should be returned for the leg options that can be referred to when booking
           schema:
             type: boolean
             default: false
