@@ -41,6 +41,7 @@ The workgroup has active participation from (pending permission to disclose furt
 - XXImo Mobility - Christiaan Rakowski
 - Innovactory - Stefan Bollars
 - DAT.Mobility - Edwin van den Belt
+- SBB/MOVI+ (Project Arc Mobilité) - Stephan Röösli
 - Urbee
 - Mobike
 - RET
