@@ -20,7 +20,7 @@ tags:
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
 
   - name: trip execution
-    description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating a leg (not the state!).
+    description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /executions/{id}/events) or updating an execution (not the state!).
 
   - name: trip execution [optional]
     description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
@@ -32,10 +32,10 @@ tags:
     description: gives information about systems, stations, operating hours [from GBFS]
 
   - name: payment
-    description: arranges financial settlement for legs
+    description: arranges financial settlement for executions
 
   - name: support
-    description: support for the user while the leg is being executed
+    description: support for the user while the leg execution is ongoing
 
   - name: TO
     description: the Transport Operator's endpoints
@@ -56,48 +56,50 @@ security:
   - OpenId: []
 
 paths:
-  /planning-options/:
+  /plannings/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
     post:
       description:
-        Returns available transport options for given coordinates and radius. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `provideIds`, requesting the TO to provide unique IDs to reference to during communication with the MP.
+        Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
         <p>see (2.1) in the process flow - planning
       tags:
         - planning
         - TO
+      parameters:
+        - name: booking-intent
+          in: query
+          description: Specifies whether IDs should be returned for the leg options that can be referred to when booking
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/planningCheck"
+              $ref: "#/components/schemas/planningRequest"
       responses:
         "201":
           description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/planningOptions"
+                $ref: "#/components/schemas/planning"
           headers:
             Location:
-              description: The URI where the created options can be found, in case of 'provideIds' = true
+              description: The URI where the most up to date version of the created planning result can be found. Not required.
               schema:
                 type: string
-                example: "/planning-options/1234"
+                example: "/plannings/1234"
             Content-Language:
               description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-            Expires:
-              description: the result is valid until this timestamp. After this timestamp the planningOption will be discarded, if cannot become a bookingOption.
-              schema:
-                $ref: "#/components/schemas/timestamp"
               required: true
         "202":
           $ref: "#/components/responses/202Accepted"
@@ -106,6 +108,44 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
+  /plannings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - name: id
+        in: path
+        description: Planning identifier
+        required: true
+        schema:
+          type: string
+    get:
+      description: Returns the planning result.
+      tags:
+        - planning
+        - TO
+      responses:
+        "200":
+          description: The planning was found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planning"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "410":
+          $ref: "#/components/responses/410Gone"
+
   /bookings/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -113,7 +153,7 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
     post:
       description:
-        Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planningOptions).
+        Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planning).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
         <p>The optional webhook can be used to post updates from TO to MP. If it isn't used, the subscription possibility in this API can be used or the events can be posted directly.
@@ -122,7 +162,7 @@ paths:
         - booking
         - TO
       requestBody:
-        description: One of available options, returned by /planning-options, with an ID.
+        description: One of available legs, returned by /plannings, with an ID.
         required: true
         content:
           application/json:
@@ -462,7 +502,7 @@ paths:
         "410":
           $ref: "#/components/responses/410Gone"
 
-  /legs/{id}/available-assets:
+  /executions/{id}/available-assets:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
@@ -474,7 +514,7 @@ paths:
         schema:
           type: string
     get:
-      description: Returns a list of available assets for the given booking. These assets can be used to POST to /legs/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.7) in the process flow. - trip execution
+      description: Returns a list of available assets for the given booking. These assets can be used to POST to /executions/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.7) in the process flow. - trip execution
       tags:
         - trip execution
         - TO
@@ -502,7 +542,7 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
-  /legs/{id}:
+  /executions/{id}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
@@ -525,7 +565,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/leg"
+                $ref: "#/components/schemas/execution"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
@@ -539,7 +579,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/leg"
+              $ref: "#/components/schemas/execution"
         description: changed leg (e.g. with different duration or destination)
         required: true
       responses:
@@ -552,7 +592,7 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
-  /legs/{id}/asset:
+  /executions/{id}/asset:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
@@ -580,7 +620,7 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
-  /legs/{id}/events:
+  /executions/{id}/events:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
@@ -608,14 +648,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/legEvent"
+              $ref: "#/components/schemas/executionEvent"
       responses:
         "200":
           description: operation successful
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/leg"
+                $ref: "#/components/schemas/execution"
         "204":
           $ref: "#/components/responses/204NoContent"
         "400":
@@ -625,19 +665,19 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
-  /legs/{id}/progress:
+  /executions/{id}/progress:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
       - name: id
         in: path
-        description: Leg identifier
+        description: Leg execution identifier
         required: true
         schema:
           type: string
     get:
-      description: Monitors the current location of the asset and duration & distance of the leg (see (4.7) in process flow)
+      description: Monitors the current location of the asset and duration & distance of the leg execution (see (4.7) in process flow)
       tags:
         - trip execution
         - TO
@@ -654,13 +694,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/legProgress"
+                $ref: "#/components/schemas/executionProgress"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
     post:
-      description: Monitors the current location of the asset and duration & distance of the leg
+      description: Monitors the current location of the asset and duration & distance of the leg execution
       tags:
         - trip execution
         - MP
@@ -668,7 +708,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/legProgress"
+              $ref: "#/components/schemas/executionProgress"
       responses:
         "204":
           $ref: "#/components/responses/204NoContent"
@@ -1280,7 +1320,6 @@ components:
           required:
             - id
             - state
-            - leg
             - customer
             - token
           properties:
@@ -1324,7 +1363,7 @@ components:
         - customer
       properties:
         id:
-          description: unique ID (TO's perspective) for identifying this specific available (type of) asset
+          description: unique ID (TO's perspective) for identifying this specific available leg
           type: string
         customer:
           $ref: "#/components/schemas/customer"
@@ -1386,27 +1425,6 @@ components:
         assetClass:
           $ref: "#/components/schemas/assetClass"
 
-    compositeLeg:
-      description: this leg type should be used when returning multiple legs to fullfil a single request from A to B. For instance handling overlegs or when acting as broker for multiple sub contractors.
-      allOf:
-        - $ref: "#/components/schemas/planningResult"
-        - type: object
-          properties:
-            id:
-              description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
-              type: string
-            pricing:
-              $ref: "#/components/schemas/fare"
-            legs:
-              type: array
-              items:
-                $ref: "#/components/schemas/operatorLeg"
-            conditions:
-              description: references to the 'conditions' array (start of this object).
-              type: array
-              items:
-                type: string
-
     condition:
       oneOf:
         - $ref: "#/components/schemas/conditionDeposit"
@@ -1423,9 +1441,10 @@ components:
         conditionType:
           description: The specific subclass of condition, should match the schema name exactly
           type: string
-        name:
-          description: TODO
+        id:
+          description: An identifier for this condition that can be used to refer to this condition
           type: string
+          example: deposit50eu
 
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
@@ -1835,9 +1854,9 @@ components:
       maxProperties: 2
       example: { "wheelchair": true }
 
-    leg:
+    execution:
       type: object
-      description: A OpenlegPlanner compatible definition of a leg (see OpenlegPlanner docs for reference)
+      description: The execution of a booked leg
       required:
         - from
         - to
@@ -1846,10 +1865,10 @@ components:
         - endTime
       properties:
         from:
-          description: The coordinate the TO should use to resolve leg start location
+          description: The place the TO should use to resolve leg start location
           $ref: "#/components/schemas/place"
         to:
-          description: The coordinate the TO should use to resolve leg finish location
+          description: The place the TO should use to resolve leg finish location
           $ref: "#/components/schemas/place"
         startTime:
           $ref: "#/components/schemas/timestamp"
@@ -1858,7 +1877,7 @@ components:
         mode:
           $ref: "#/components/schemas/typeOfAsset"
         state:
-          $ref: "#/components/schemas/legState"
+          $ref: "#/components/schemas/executionState"
         departureDelay:
           $ref: "#/components/schemas/duration"
         arrivalDelay:
@@ -1882,9 +1901,9 @@ components:
           $ref: "#/components/schemas/token"
           description: data to open a specific asset (e.g. QR code, image base64). This can be provided when using assign_asset, when it's not provided in the booking.
 
-    legEvent:
+    executionEvent:
       type: object
-      description: event for the leg
+      description: event for the execution
       required:
         - time
         - event
@@ -1909,9 +1928,9 @@ components:
         asset:
           $ref: "#/components/schemas/asset"
 
-    legProgress:
+    executionProgress:
       type: object
-      description: provides current asset location & duration and distance of the current leg
+      description: provides current asset location & duration and distance of the current leg execution
       required:
         - coordinates
       properties:
@@ -1922,9 +1941,9 @@ components:
         distance:
           $ref: "#/components/schemas/distance"
 
-    legState:
+    executionState:
       type: string
-      description: status of a leg
+      description: status of a leg execution
       enum:
         [
           NOT_STARTED,
@@ -1966,34 +1985,6 @@ components:
         comment:
           type: string
           description: free text, should match Content-Language
-
-    operatorLeg:
-      allOf:
-        - $ref: "#/components/schemas/simpleLeg"
-        - type: object
-          properties:
-            operatorName:
-              type: string
-              description: Name of the operator, could match Content-Language
-            operatorMaasId:
-              type: string
-              description: the maasId from the operator
-            operatorDescription:
-              type: string
-              description: short description of the operator, should match Content-Language
-            operatorContact:
-              type: string
-              description: contact information, should match Content-Language
-
-    optionsLeg:
-      allOf:
-        - $ref: "#/components/schemas/period"
-        - type: object
-          properties:
-            from:
-              $ref: "#/components/schemas/coordinates"
-            to:
-              $ref: "#/components/schemas/coordinates"
 
     period:
       type: object
@@ -2046,8 +2037,8 @@ components:
         physicalAddress:
           $ref: "#/components/schemas/address"
 
-    planningCheck:
-      description: the request for available assets. User's location in comma separated form e.g. 60.123,27.456 (lat/long, WGS84)
+    planningRequest:
+      description: The data for requesting available leg options
       allOf:
         - $ref: "#/components/schemas/period"
         - type: object
@@ -2055,49 +2046,46 @@ components:
             - from
           properties:
             from:
-              $ref: "#/components/schemas/coordinates"
+              $ref: "#/components/schemas/place"
             radius:
-              description: Maximum distance a user wants to travel to reach asset in metres, e.g. 500 metres
+              description: Maximum distance in meters a user wants to travel to reach the travel option
               type: number
             to:
-              $ref: "#/components/schemas/coordinates"
-            travellers:
-              description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
+              $ref: "#/components/schemas/place"
+            travelers:
+              description: The number of people that want to travel
               type: number
             useAssets:
-              description: when you use the /operator/available-assets and you want to book a displayed asset, you must be able to request o a planning-option for the specific asset (with provideIds=true), post a booking with the provided id and send directly a commit. This field should contain the asset to book.
+              description: The specific asset(s), the user wishes to receive leg options for
               type: array
               items:
                 type: string
-            provideIds:
-              description: default false (during planning phase). Whenever entering the booking phase to present the options to the user, set it to true to refert to this option. The returned ID can be used througout the complete process. [https://github.com/efel85/TOMP-API/issues/57]
-              type: boolean
+                format: an asset id for this operator
             users:
               type: array
               items:
                 $ref: "#/components/schemas/user"
 
-    planningOptions:
+    planning:
       type: object
-      description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included.
+      description: Available option matching the query.
+      required:
+        - validUntil
+        - conditions
+        - legOptions
       properties:
         validUntil:
           $ref: "#/components/schemas/timestamp"
         conditions:
+          description: An array of the conditions that apply to at least one of the leg options
           type: array
           items:
             $ref: "#/components/schemas/condition"
-        results:
+        legOptions:
+          description: Legs the TO has found that match the planning request
           type: array
           items:
-            $ref: "#/components/schemas/planningResult"
-
-    planningResult:
-      oneOf:
-        - $ref: "#/components/schemas/simpleLeg"
-        - $ref: "#/components/schemas/compositeLeg"
-      discriminator:
-        propertyName: resultType
+            $ref: "#/components/schemas/leg"
 
     polygon:
       type: object
@@ -2125,25 +2113,40 @@ components:
         UPFRONT_PAYMENT
       ]
 
-    simpleLeg:
-      allOf:
-        - $ref: "#/components/schemas/planningResult"
-        - type: object
-          properties:
-            id:
-              description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
-              type: string
-            leg:
-              $ref: "#/components/schemas/optionsLeg"
-            typeOfAsset:
-              $ref: "#/components/schemas/typeOfAsset"
-            pricing:
-              $ref: "#/components/schemas/fare"
-            conditions:
-              description: references to the 'conditions' array (start of this object).
-              type: array
-              items:
-                type: string
+    leg:
+      description: A concrete option for a leg that matches the planning
+      type: object
+      required:
+        - from
+        - conditions
+      properties:
+        id:
+          description: A unique id which can be referred to when creating a booking, should not be used for sublegs
+          type: string
+        from:
+          $ref: "#/components/schemas/coordinates"
+        to:
+          $ref: "#/components/schemas/coordinates"
+        startTime:
+          $ref: "#/components/schemas/timestamp"
+        endTime:
+          $ref: "#/components/schemas/timestamp"
+        asset:
+          $ref: "#/components/schemas/typeOfAsset"
+        pricing:
+          $ref: "#/components/schemas/fare"
+        suboperator:
+          $ref: "#/components/schemas/suboperator"
+        parts:
+          description: The component legs if this leg is composed of multiple legs using different assets
+          type: array
+          items:
+            $ref: "#/components/schemas/leg"
+        conditions:
+          description: Ids of the conditions in the parent planning that apply to this leg
+          type: array
+          items:
+            type: string
 
     stationInformation:
       type: object
@@ -2219,7 +2222,26 @@ components:
           description: this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040
         country:
           $ref: "#/components/schemas/country"
-          
+
+    suboperator:
+      type: object
+      description: The operator of a leg or asset, in case this is not the TO itself but should be shown to the user
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the operator, could match Content-Language
+        maasId:
+          type: string
+          description: the maasId from the operator
+        description:
+          type: string
+          description: short description of the operator, should match Content-Language
+        contact:
+          type: string
+          description: contact information, should match Content-Language
+
     supportRequest:
       description: request for support
       type: object
