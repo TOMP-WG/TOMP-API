@@ -2725,6 +2725,15 @@ components:
         type: string
       description: The ID of the sending maas operator
       example: 1324A-DFB3482-32ACD
+    addressedTo:
+      in: header
+      name: addressed-to
+      required: false
+      schema:
+        type: string
+      description: The ID of the maas operator that has to receive this message
+      example: 1324A-DFB3482-32ACD
+
 
   securitySchemes:
     BasicAuth:
