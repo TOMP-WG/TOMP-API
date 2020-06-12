@@ -1449,6 +1449,8 @@ components:
                     TRAVEL_CARDS,
                     ID_CARDS,
                     CREDIT_CARDS,
+                    NAME,
+                    AGE,
                   ]
 
     conditionReturnArea:
