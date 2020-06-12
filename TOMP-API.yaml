@@ -679,6 +679,31 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /operator/meta:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+    get:
+      summary: describes the running implementations
+      description: all versions that are implemented on this url, are described in the result of this endpoint. In contains all versions and per version the endpoints, their status
+        and the supported scenarios.
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/endpointImplementation"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+
   /operator/stations:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -1562,6 +1587,77 @@ components:
       minimum: 0
       example: 11112
 
+    endpoint:
+      type: object
+      description: a formal description of an endpoint.
+      required:
+        - method
+        - path
+        - status
+      properties:
+        method: 
+          type: string
+          enum: [
+            POST, 
+            PUT, 
+            GET, 
+            DELETE, 
+            PATCH
+          ]
+        path:
+          description: the exact path of the endpoint, starting after the base URL
+          type: string
+          example: /planning-options/
+        eventType:
+          description: in case the path is ending in /events, the event type/operator enum should be added here.
+          type: string
+          enum: [
+            PREPARE, 
+            ASSIGN_ASSET, 
+            SET_IN_USE, 
+            PAUSE, 
+            START_FINISHING, 
+            FINISH, 
+            ISSUE, 
+            CANCEL, 
+            EXPIRE, 
+            DENY, 
+            COMMIT
+          ]
+        status:
+          type: string
+          enum: [
+            NOT_IMPLEMENTED, 
+            DIALECT, 
+            IMPLEMENTED
+          ]
+      example:
+        { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
+
+    endpointImplementation:
+      type: object
+      description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios.
+      required:
+        - version
+        - baseUrl
+        - endpoints
+        - scenarios
+      properties:
+        version:
+          type: string
+        baseUrl:
+          type: string
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/endpoint'
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/scenario'
+      example:
+        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"] }
+      
     error:
       type: object
       description:
@@ -2017,6 +2113,17 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/keyValue"
+
+    scenario:
+      type: string
+      enum: [
+        POSTPONED_COMMIT, 
+        DEPOSIT, 
+        PAY_WHEN_FINISHED, 
+        REQUIRE_BOOKING_DATA, 
+        RETURN_AREA, 
+        UPFRONT_PAYMENT
+      ]
 
     simpleLeg:
       allOf:
