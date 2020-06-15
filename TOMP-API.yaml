@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.5.3"
+  version: "0.6.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -88,10 +88,11 @@ paths:
                 type: string
                 example: "/planning-options/1234"
             Content-Language:
-              description: ISO 639-1 two letter language code
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
               required: true
             Expires:
               description: the result is valid until this timestamp. After this timestamp the planningOption will be discarded, if cannot become a bookingOption.
@@ -137,10 +138,11 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: ISO 639-1 two letter language code
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
               required: true
             Expires:
               description: The result is valid until this timestamp. The pending booking is expired after this timestamp. This option can be used, but there is also a facility to use the webhook, mentioned in '#/component/schemas/booking'.
@@ -189,11 +191,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -229,11 +233,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "204":
           $ref: "#/components/responses/204NoContent"
         "400":
@@ -271,11 +277,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
@@ -303,11 +311,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -407,11 +417,13 @@ paths:
         "200":
           description: The bookings matching the query
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -470,11 +482,13 @@ paths:
         "200":
           description: Available assets for the booking. If no suitable assets are found an empty array is to be returned.
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -686,11 +700,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/stationInformation"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -710,11 +726,13 @@ paths:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -749,11 +767,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemAlert"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -779,11 +799,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemCalendar"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -810,11 +832,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemHours"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -839,11 +863,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/systemInformation"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -871,11 +897,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemPricingPlan"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -960,11 +988,13 @@ paths:
         "200":
           description: journal entries
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -1003,11 +1033,13 @@ paths:
         "200":
           description: journal entry received, will be processed (state = INVOICED)
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -1017,47 +1049,36 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /support/{id}/request/{support-type}:
+  /support/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
-    put:
-      description: identifies a request for support from user via MP
+    post:
+      description: creates a request for support from end user via MP
       tags:
         - support
         - TO
-      parameters:
-        - name: id
-          in: path
-          description: Booking identifier
-          required: true
-          schema:
-            type: string
-        - name: support-type
-          in: path
-          description: type of support needed
-          required: true
-          schema:
-            enum:
-              [
-                BROKEN_DOWN,
-                NOT_AT_LOCATION,
-                NOT_CLEAN,
-                NOT_AVAILABLE,
-                UNABLE_TO_OPEN,
-                UNABLE_TO_CLOSE,
-                OTHER,
-              ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/supportRequest"
       responses:
         "200":
           description: support request acknowledged
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supportStatus"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1071,7 +1092,7 @@ paths:
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
     get:
-      description: Identifies the current status of the support request
+      description: Gets the status report of the support request. Last status (highest order number) is the current status
       tags:
         - support
         - TO
@@ -1088,13 +1109,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/supportStatus"
+                type: array
+                items:
+                  $ref: "#/components/schemas/supportStatus"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1108,11 +1133,11 @@ components:
       type: object
       properties:
         streetAddress:
-          description: street address, including number OR PO box number, eventually extended with internal referencce like room number
+          description: street address, including number OR PO box number, eventually extended with internal referencce like room number, could match Content-Language
           type: string
           example: example street 18, 2nd floor, 18-B33
         areaReference:
-          description: city or town, principal subdivision such as province, state or county
+          description: city or town, principal subdivision such as province, state or county, could match Content-Language
           type: string
           example: Smallcity, Pinetree county
         postalCode:
@@ -1549,10 +1574,13 @@ components:
           description: The category of this type of error.
         title:
           type: string
-          description: A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization.
+          description: A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except to match Content-Language
+        status:
+          type: number
+          description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
         detail:
           type: string
-          description: A human-readable explanation specific to this occurrence of the problem.
+          description: A human-readable explanation specific to this occurrence of the problem, could match Content-Language
         instance:
           type: string
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
@@ -1570,7 +1598,7 @@ components:
             category:
               $ref: "#/components/schemas/journalCategory"
             description:
-              description: free text to describe the extra costs. Mandatory in case of 'OTHER'
+              description: free text to describe the extra costs. Mandatory in case of 'OTHER', should match Content-Language
               type: string
             number:
               type: number
@@ -1593,7 +1621,7 @@ components:
           description: is this fare an estimation?
           type: boolean
         description:
-          description: user friendly description of the fare (e.g. 'full fare')
+          description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
           type: string
         class:
           description: in the future we'll set up an enumeration of possible "fare classes". For now it's free format.
@@ -1782,7 +1810,7 @@ components:
             ]
         comment:
           type: string
-          description: free text
+          description: free text, should match Content-Language
         asset:
           $ref: "#/components/schemas/asset"
 
@@ -1842,7 +1870,7 @@ components:
           example: VEHICLE_NOT_AVAILABLE
         comment:
           type: string
-          description: free text
+          description: free text, should match Content-Language
 
     operatorLeg:
       allOf:
@@ -1851,15 +1879,16 @@ components:
           properties:
             operatorName:
               type: string
+              description: Name of the operator, could match Content-Language
             operatorMaasId:
               type: string
               description: the maasId from the operator
             operatorDescription:
               type: string
-              description: short description of the operator
+              description: short description of the operator, should match Content-Language
             operatorContact:
               type: string
-              description: contact information
+              description: contact information, should match Content-Language
 
     optionsLeg:
       allOf:
@@ -1904,7 +1933,7 @@ components:
         - coordinates
       properties:
         name:
-          description: Human readable name of the place
+          description: Human readable name of the place, could match Content-Language
           type: string
         stopReference:
           type: array
@@ -2023,7 +2052,7 @@ components:
           example: XX:Y:12345678
         name:
           type: string
-          description: public name of the station
+          description: public name of the station, could match Content-Language
           example: Island Central
         coordinates:
           $ref: "#/components/schemas/coordinates"
@@ -2031,7 +2060,7 @@ components:
           $ref: "#/components/schemas/address"
         crossStreet:
           type: string
-          description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc.
+          description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc, should match Content-Language
           example: on the corner with Secondary Road
         regionId:
           type: string
@@ -2084,10 +2113,39 @@ components:
           description: this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040
         country:
           $ref: "#/components/schemas/country"
+          
+    supportRequest:
+      description: request for support
+      type: object
+      properties:
+        id:
+          type: string
+          description: the booking id
+        supportType:
+          type: string
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+        location:
+          $ref: '#/components/schemas/place'
+        timestamp:
+          $ref: '#/components/schemas/timestamp'  
+        priority:
+          description: the priority of the support request. 
+          type: string
+          enum: [ERROR_CANNOT_CONTINUE, ERROR_CAN_CONTINUE, DISTURBING_ISSUE, QUESTION, OTHER]
+        contactInformationEndUser:
+          description: contact information of the end user in case of direct response requests, like phone number
+          type: string
+        comment:
+          type: string
+        requestedResponseTime:
+          type: number
+          description: time to respond in minutes.
 
     supportStatus:
       description: the current status of support
       type: object
+      allOf:
+        - $ref: '#/components/schemas/supportRequest'
       properties:
         status:
           type: string
@@ -2097,6 +2155,12 @@ components:
           type: integer
           description: time in minutes to expected resolution of support request
           example: 9
+        order:
+          type: integer
+          description: the sequence number of status of the support issue
+        comment:
+          type: string
+          description: free text to send to the end user.
 
     systemAlert:
       type: object
@@ -2135,11 +2199,11 @@ components:
           example: http://www.rentmyfreebike.com/alerts
         summary:
           type: string
-          description: A short summary of this alert to be displayed to the customer
+          description: A short summary of this alert to be displayed to the customer, should match Content-Language
           example: station closed
         description:
           type: string
-          description: Detailed text description of the alert
+          description: Detailed text description of the alert, should match Content-Language
           example: station closed indefinitely due to vandalism
         lastUpdated:
           $ref: "#/components/schemas/timestamp"
@@ -2220,12 +2284,14 @@ components:
           type: string
           example: XXTO0001
         language:
-          description: An IETF language tag indicating the language that will be used throughout the rest of the files. This is a string that defines a single language tag only.
-          type: string
-          format: ietf
-          example: eng
+          description: The languages supported by this operator for user-facing text. These can be requested using the Accept-Language header and should then be returned in Content-Language
+          type: array
+          items:
+            type: string
+            format: One IETF BCP 47 (RFC 5646) language tag
+            example: fr-FR
         name:
-          description: Full name of the system to be displayed to customers
+          description: Full name of the system to be displayed to customers, could match Content-Language
           type: string
           example: FreeBike
         shortName:
@@ -2233,7 +2299,7 @@ components:
           type: string
           example: FB
         operator:
-          description: Name of the operator of the system
+          description:  Name of the operator of the system, could match Content-Language
           type: string
           example: FreeBike
         url:
@@ -2291,7 +2357,7 @@ components:
           example: https://www.rentmyfreebike.com/freeplan
         name:
           type: string
-          description: name of this pricing scheme
+          description: name of this pricing scheme, could match Content-Language
           example: Free Plan
         fare:
           $ref: "#/components/schemas/fare"
@@ -2300,7 +2366,7 @@ components:
           description: false indicates that no additional tax will be added (either because tax is not charged, or because it is included) true indicates that tax will be added to the base price
         description:
           type: string
-          description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations
+          description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations, should match Content-Language
           example: Unlimited plan for free bikes, as long as you don't break them!
 
     systemRegion:
@@ -2315,7 +2381,7 @@ components:
           example: BikeRegion
         name:
           type: string
-          description: Public name for this region
+          description: Public name for this region, could match Content-Language
           example: BikeTown
         serviceArea:
           description: The area served by the region (i.e. where one may travel using the service's assets)
@@ -2331,11 +2397,10 @@ components:
           type: string
 
     timestamp:
-      description:
-        A UTC timestamp (number of milliseconds in a Date object since January
-        1, 1970, 00:00:00)
-      example: 1546336800
-      type: number
+      description: timestamp according to ISO 8601 (RFC3339)
+      type: string
+      format: date-time
+      example: '2020-06-28T14:55:00+02:00'
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to validate the leg when starting the leg.
@@ -2414,10 +2479,10 @@ components:
           description: true indicates cabrio required
         colour:
           type: string
-          description: colour of the asset
+          description: colour of the asset, should match Content-Language
         cargo:
           type: string
-          description: describes options to carry cargo
+          description: describes options to carry cargo, should match Content-Language
         easyAccessibility:
           type: string
           description: describes if asset is or needs to be easily accessible
@@ -2472,7 +2537,7 @@ components:
           description: true indicates winter tires required
         other:
           type: string
-          description: free text to describe asset
+          description: free text to describe asset, should match Content-Language
         meta:
           description: this array can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning-options.
           type: array
@@ -2505,8 +2570,9 @@ components:
       required: true
       schema:
         type: string
-      description: ISO 639-1 two letter language code
-      example: NL
+        format: A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5
+      description: A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible, ideally just one language tag from the list in operator/information
+      example: nl, de;q=0.7
     api:
       in: header
       name: Api
@@ -2522,7 +2588,7 @@ components:
       schema:
         type: string
       description: Version of the API.
-      example: 0.5.2
+      example: 0.6.0
     maasId:
       in: header
       name: maas-id
