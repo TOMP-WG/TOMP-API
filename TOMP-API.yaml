@@ -1564,11 +1564,14 @@ components:
       type: object
       description:
         An error that the service may send, e.g. in case of invalid input,
-        missing authorization or internal service error. see https://tools.ietf.org/html/rfc7807
+        missing authorization or internal service error. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       properties:
+        errorcode:
+          type: number
+          description: The TOMP specific error code. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for more details of this error.
         type:
           type: string
-          description: A URI reference [RFC3986] that identifies the problem type.  This specification encourages that, when  dereferenced, it provide human-readable documentation for the problem type (e.g., using HTML [W3C.REC-html5-20141028]).  When this member is not present, its value is assumed to be "about:blank".
+          description: The category of this type of error.
         title:
           type: string
           description: A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except to match Content-Language
@@ -2629,19 +2632,19 @@ components:
     204NoContent:
       description: Request was successful, no content to return.
     400BadRequest:
-      description: Bad request (invalid query or body parameters).
+      description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
     401Unauthorized:
-      description: Authorization error (invalid API key) or insufficient access rights given current authorization.
+      description: Authorization error (invalid API key) or insufficient access rights given current authorization. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
     403Forbidden:
-      description: The request will not be fulfilled, because the request is not legal in the current state. Authorization will not help.
+      description: The request will not be fulfilled, because the request is not legal in the current state. Authorization will not help. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       content:
         application/json:
           schema:
