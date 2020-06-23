@@ -11,10 +11,10 @@ info:
 
 tags:
   - name: planning
-    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS].<p> The endpoints in this part can give information about the availability of assets (or typeOfAssets) and can provide information to take the next step - the booking part.
+    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS].<p> The endpoints in this part can give information about the availability of assets (or assetGroups) and can provide information to take the next step - the booking part.
 
   - name: booking
-    description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or typeOfAsset), including the non-happy paths (cancel, expire etc).
+    description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or assetGroup), including the non-happy paths (cancel, expire etc).
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
@@ -534,7 +534,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/typeOfAsset"
+                  $ref: "#/components/schemas/assetGroup"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -803,7 +803,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/typeOfAsset"
+                  $ref: "#/components/schemas/assetGroup"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -1234,7 +1234,7 @@ components:
 
     asset:
       allOf:
-        - $ref: "#/components/schemas/typeOfAsset"
+        - $ref: "#/components/schemas/assetGroupProperties"
         - type: object
           required:
             - assetId
@@ -1269,7 +1269,7 @@ components:
 
     assetClass:
       type: string
-      description: the class of asset. It's possible to specify it more in the assetSubType in typeOfAsset. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
+      description: the class of asset. It's possible to specify it more in the assetSubType in assetGroup. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
       enum:
         [
           AIR,
@@ -1296,6 +1296,16 @@ components:
           MOPED,
           STEP,
         ]
+
+    assetGroup:
+      allOf:
+        - $ref: "#/components/schemas/assetGroupProperties"
+        - type: object
+          properties:
+            assets:
+              type: array
+              items:
+                $ref: "#/components/schemas/asset"
 
     bankAccount:
       type: object
@@ -1875,7 +1885,7 @@ components:
         endTime:
           $ref: "#/components/schemas/timestamp"
         mode:
-          $ref: "#/components/schemas/typeOfAsset"
+          $ref: "#/components/schemas/assetGroup"
         state:
           $ref: "#/components/schemas/executionState"
         departureDelay:
@@ -2132,7 +2142,7 @@ components:
         endTime:
           $ref: "#/components/schemas/timestamp"
         asset:
-          $ref: "#/components/schemas/typeOfAsset"
+          $ref: "#/components/schemas/assetGroup"
         pricing:
           $ref: "#/components/schemas/fare"
         suboperator:
@@ -2542,7 +2552,7 @@ components:
               items:
                 $ref: "#/components/schemas/keyValue"
 
-    typeOfAsset:
+    assetGroupProperties:
       description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
       required:
         - typeId
@@ -2563,10 +2573,6 @@ components:
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         amountAvailable:
           type: number
-        assets:
-          type: array
-          items:
-            $ref: "#/components/schemas/asset"
         fuel:
           type: string
           enum:
