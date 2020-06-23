@@ -1307,6 +1307,132 @@ components:
               items:
                 $ref: "#/components/schemas/asset"
 
+    assetGroupProperties:
+      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      required:
+        - typeId
+        - name
+        - assetClass
+        - energyLabel
+      properties:
+        typeId:
+          type: string
+          description: unique identifier of a type, scope TO
+        name:
+          type: string
+          description: name of asset type
+        assetClass:
+          $ref: "#/components/schemas/assetClass"
+        assetSubClass:
+          type: string
+          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
+        amountAvailable:
+          type: number
+        fuel:
+          type: string
+          enum:
+            [
+              NONE,
+              GASOLINE,
+              DIESEL,
+              ELECTRIC,
+              HYBRID_GASOLINE,
+              HYBRID_DIESEL,
+              HYBRID_GAS,
+              HYDROGEN,
+              GAS,
+              BIO_MASS,
+              KEROSINE,
+              OTHER,
+            ]
+        energyLabel:
+          type: string
+          enum: [A, B, C, D, E]
+        co2PerKm:
+          type: number
+        brand:
+          type: string
+          description: brand of the asset
+        model:
+          type: string
+        buildingYear:
+          type: number
+        travelAbroad:
+          type: boolean
+          description: true indicates asset is allowed to travel abroad
+        airConditioning:
+          type: boolean
+          description: true indicates airconditioning required
+        cabrio:
+          type: boolean
+          description: true indicates cabrio required
+        colour:
+          type: string
+          description: colour of the asset, should match Content-Language
+        cargo:
+          type: string
+          description: describes options to carry cargo, should match Content-Language
+        easyAccessibility:
+          type: string
+          description: describes if asset is or needs to be easily accessible
+          enum:
+            [
+              LIFT,
+              ESCALATOR,
+              GROUND_LEVEL,
+              SIGHTIMPAIRMENT,
+              HEARINGIMPAIRMENT,
+              WHEELCHAIR,
+            ]
+        gears:
+          type: integer
+          description: number of gears of the asset
+        gearbox:
+          type: string
+          description: type of gearbox
+          enum: [MANUAL, AUTOMATIC, SEMIAUTOMATIC]
+        image:
+          type: string
+          format: url
+        infantSeat:
+          type: boolean
+          description: true indicates infant seat required
+        persons:
+          type: integer
+          description: number of persons able to use the asset
+        pets:
+          type: boolean
+          description: true indicates pets are allowed on asset
+        propulsion:
+          type: string
+          description: way in which the asset is powered
+          enum: [MUSCLE, ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN]
+        smoking:
+          type: boolean
+          description: true indicates smoking is allowed on asset
+        stateOfCharge:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: percentage of charge available
+        towingHook:
+          type: boolean
+          description: true indicates towing hook required
+        undergroundParking:
+          type: boolean
+          description: true indicates underground parking is allowed with asset
+        winterTires:
+          type: boolean
+          description: true indicates winter tires required
+        other:
+          type: string
+          description: free text to describe asset, should match Content-Language
+        meta:
+          description: this array can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning-options.
+          type: array
+          items:
+            $ref: "#/components/schemas/keyValue"
+
     bankAccount:
       type: object
       properties:
@@ -2551,132 +2677,6 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/keyValue"
-
-    assetGroupProperties:
-      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
-      required:
-        - typeId
-        - name
-        - assetClass
-        - energyLabel
-      properties:
-        typeId:
-          type: string
-          description: unique identifier of a type, scope TO
-        name:
-          type: string
-          description: name of asset type
-        assetClass:
-          $ref: "#/components/schemas/assetClass"
-        assetSubClass:
-          type: string
-          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
-        amountAvailable:
-          type: number
-        fuel:
-          type: string
-          enum:
-            [
-              NONE,
-              GASOLINE,
-              DIESEL,
-              ELECTRIC,
-              HYBRID_GASOLINE,
-              HYBRID_DIESEL,
-              HYBRID_GAS,
-              HYDROGEN,
-              GAS,
-              BIO_MASS,
-              KEROSINE,
-              OTHER,
-            ]
-        energyLabel:
-          type: string
-          enum: [A, B, C, D, E]
-        co2PerKm:
-          type: number
-        brand:
-          type: string
-          description: brand of the asset
-        model:
-          type: string
-        buildingYear:
-          type: number
-        travelAbroad:
-          type: boolean
-          description: true indicates asset is allowed to travel abroad
-        airConditioning:
-          type: boolean
-          description: true indicates airconditioning required
-        cabrio:
-          type: boolean
-          description: true indicates cabrio required
-        colour:
-          type: string
-          description: colour of the asset, should match Content-Language
-        cargo:
-          type: string
-          description: describes options to carry cargo, should match Content-Language
-        easyAccessibility:
-          type: string
-          description: describes if asset is or needs to be easily accessible
-          enum:
-            [
-              LIFT,
-              ESCALATOR,
-              GROUND_LEVEL,
-              SIGHTIMPAIRMENT,
-              HEARINGIMPAIRMENT,
-              WHEELCHAIR,
-            ]
-        gears:
-          type: integer
-          description: number of gears of the asset
-        gearbox:
-          type: string
-          description: type of gearbox
-          enum: [MANUAL, AUTOMATIC, SEMIAUTOMATIC]
-        image:
-          type: string
-          format: url
-        infantSeat:
-          type: boolean
-          description: true indicates infant seat required
-        persons:
-          type: integer
-          description: number of persons able to use the asset
-        pets:
-          type: boolean
-          description: true indicates pets are allowed on asset
-        propulsion:
-          type: string
-          description: way in which the asset is powered
-          enum: [MUSCLE, ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN]
-        smoking:
-          type: boolean
-          description: true indicates smoking is allowed on asset
-        stateOfCharge:
-          type: integer
-          minimum: 0
-          maximum: 100
-          description: percentage of charge available
-        towingHook:
-          type: boolean
-          description: true indicates towing hook required
-        undergroundParking:
-          type: boolean
-          description: true indicates underground parking is allowed with asset
-        winterTires:
-          type: boolean
-          description: true indicates winter tires required
-        other:
-          type: string
-          description: free text to describe asset, should match Content-Language
-        meta:
-          description: this array can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning-options.
-          type: array
-          items:
-            $ref: "#/components/schemas/keyValue"
 
     user:
       type: object
