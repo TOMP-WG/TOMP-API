@@ -11,10 +11,10 @@ info:
 
 tags:
   - name: planning
-    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS].<p> The endpoints in this part can give information about the availability of assets (or assetGroups) and can provide information to take the next step - the booking part.
+    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS].<p> The endpoints in this part can give information about the availability of assets (or assetTypes) and can provide information to take the next step - the booking part.
 
   - name: booking
-    description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or assetGroup), including the non-happy paths (cancel, expire etc).
+    description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or assetType), including the non-happy paths (cancel, expire etc).
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
@@ -509,7 +509,7 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
       - name: id
         in: path
-        description: Booking identifier
+        description: Leg execution identifier
         required: true
         schema:
           type: string
@@ -534,7 +534,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/assetGroup"
+                  $ref: "#/components/schemas/assetType"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -549,12 +549,12 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
       - name: id
         in: path
-        description: Leg identifier
+        description: Leg execution identifier
         required: true
         schema:
           type: string
     get:
-      description: Retrieves the latest summary of the leg, being the execution of a portion of a journey travelled using one asset (vehicle). Every leg belongs to one booking, every booking has at most one current leg. Where the booking describes the agreement between user/MP and TO, the leg describes the journey as it occured. See (4.3) in the flow chart - trip execution
+      description: Retrieves the latest summary of the execution, being the execution of a portion of a journey travelled using one asset (vehicle). Every execution belongs to one booking, every booking has at most one current leg. Where the booking describes the agreement between user/MP and TO, the leg describes the journey as it occured. See (4.3) in the flow chart - trip execution
       tags:
         - trip execution
         - TO
@@ -571,7 +571,7 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
     put:
-      description: Updates the leg with new information. Only used for updates about execution to the MP. To request changes as the MP, the booking should be updated and the TO can accept the change and update the leg in turn.
+      description: Updates the execution with new information. Only used for updates about execution to the MP. To request changes as the MP, the booking should be updated and the TO can accept the change and update the leg in turn.
       tags:
         - trip execution
         - MP
@@ -580,7 +580,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/execution"
-        description: changed leg (e.g. with different duration or destination)
+        description: changed execution (e.g. with different duration or destination)
         required: true
       responses:
         "204":
@@ -599,12 +599,12 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
       - name: id
         in: path
-        description: Leg identifier
+        description: Leg execution identifier
         required: true
         schema:
           type: string
     get:
-      description: Optional - The specific asset used for this leg. If no asset is assigned, this will result in an asset object with only the asset type completed.
+      description: Optional - The specific asset used for this execution. If no asset is assigned, 404 should be returned
       tags:
         - trip execution [optional]
         - TO
@@ -619,6 +619,32 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
+    post:
+      description: Optional - Choose one of the available assets and set it to be the one used in this execution
+      tags:
+        - trip execution
+        - TO
+        - MP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/asset"
+      responses:
+        "200":
+          description: operation successful, and there is more information about the asset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/asset"
+        "204":
+          $ref: "#/components/responses/204NoContent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
 
   /executions/{id}/events:
     parameters:
@@ -627,7 +653,7 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
       - name: id
         in: path
-        description: Leg identifier
+        description: Leg execution identifier
         required: true
         schema:
           type: string
@@ -803,7 +829,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/assetGroup"
+                  $ref: "#/components/schemas/assetType"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -1234,7 +1260,7 @@ components:
 
     asset:
       allOf:
-        - $ref: "#/components/schemas/assetGroupProperties"
+        - $ref: "#/components/schemas/assetTypeProperties"
         - type: object
           required:
             - assetId
@@ -1269,7 +1295,7 @@ components:
 
     assetClass:
       type: string
-      description: the class of asset. It's possible to specify it more in the assetSubType in assetGroup. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
+      description: the class of asset. It's possible to specify it more in the assetSubType in assetType. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
       enum:
         [
           AIR,
@@ -1297,9 +1323,9 @@ components:
           STEP,
         ]
 
-    assetGroup:
+    assetType:
       allOf:
-        - $ref: "#/components/schemas/assetGroupProperties"
+        - $ref: "#/components/schemas/assetTypeProperties"
         - type: object
           properties:
             assets:
@@ -1307,7 +1333,7 @@ components:
               items:
                 $ref: "#/components/schemas/asset"
 
-    assetGroupProperties:
+    assetTypeProperties:
       description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
       required:
         - typeId
@@ -1468,6 +1494,14 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/condition"
+            executions:
+              description: The execution IDs, generally just one for simple legs, of this booking, highest index is latest
+              type: array
+              items:
+                type: string
+                format: execution IDs that can be used in the /executions/{id} paths
+            leg:
+              $ref: "#/components/schemas/leg"
             token:
               $ref: "#/components/schemas/token"
             webhook:
@@ -1571,6 +1605,8 @@ components:
         - $ref: "#/components/schemas/conditionUpfrontPayment"
       discriminator:
         propertyName: conditionType
+
+    conditionProperties:
       required:
         - conditionType
       properties:
@@ -1585,17 +1621,17 @@ components:
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/conditionProperties"
         - $ref: "#/components/schemas/amountOfMoney"
 
     conditionPayWhenFinished:
       description: in case the TO demands a direct payment after usage.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/conditionProperties"
 
     conditionPostponedCommit:
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/conditionProperties"
         - type: object
           required:
             - ultimateResponseTime
@@ -1606,7 +1642,7 @@ components:
     conditionRequireBookingData:
       type: object
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/conditionProperties"
         - type: object
           required:
             - requiredFields
@@ -1636,7 +1672,7 @@ components:
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/conditionProperties"
         - type: object
           properties:
             stationId:
@@ -1656,7 +1692,7 @@ components:
     conditionUpfrontPayment:
       description: in case the TO demands a upfront payment before usage. The payment should be made in the booking phase.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/conditionProperties"
 
     coordinates:
       type: object
@@ -1993,13 +2029,37 @@ components:
     execution:
       type: object
       description: The execution of a booked leg
+      properties:
+        id:
+          description: The id of the execution
+          type: string
+        state:
+          $ref: "#/components/schemas/executionState"
+        leg:
+          $ref: "#/components/schemas/leg"
+        departureDelay:
+          $ref: "#/components/schemas/duration"
+        arrivalDelay:
+          $ref: "#/components/schemas/duration"
+        distance:
+          $ref: "#/components/schemas/distance"
+        progressGeometry:
+          type: string
+          description: format as in geojson linestring eg. [[6.169639, 52.253279], .. ] WGS84, [lng,lat]
+        assetAccessData:
+          $ref: "#/components/schemas/token"
+          description: data to open a specific asset (e.g. QR code, image base64). This can be provided when using assign_asset, when it's not provided in the booking.
+
+    leg:
+      description: A concrete option for a leg that matches the planning
+      type: object
       required:
         - from
-        - to
-        - mode
-        - startTime
-        - endTime
+        - conditions
       properties:
+        id:
+          description: A unique id which can be referred to when creating a booking, should not be used for sublegs
+          type: string
         from:
           description: The place the TO should use to resolve leg start location
           $ref: "#/components/schemas/place"
@@ -2010,32 +2070,22 @@ components:
           $ref: "#/components/schemas/timestamp"
         endTime:
           $ref: "#/components/schemas/timestamp"
-        mode:
-          $ref: "#/components/schemas/assetGroup"
-        state:
-          $ref: "#/components/schemas/executionState"
-        departureDelay:
-          $ref: "#/components/schemas/duration"
-        arrivalDelay:
-          $ref: "#/components/schemas/duration"
-        distance:
-          $ref: "#/components/schemas/distance"
-        fare:
+        assetType:
+          $ref: "#/components/schemas/assetType"
+        pricing:
           $ref: "#/components/schemas/fare"
-        route:
-          type: string
-        routeShortName:
-          type: string
-        routeLongName:
-          type: string
-        agencyId:
-          type: string
-        legGeometry:
-          type: string
-          description: format as in geojson linestring eg. [[6.169639, 52.253279], .. ] WGS84, [lng,lat]
-        assetAccessData:
-          $ref: "#/components/schemas/token"
-          description: data to open a specific asset (e.g. QR code, image base64). This can be provided when using assign_asset, when it's not provided in the booking.
+        suboperator:
+          $ref: "#/components/schemas/suboperator"
+        parts:
+          description: The component legs if this leg is composed of multiple legs using different assets
+          type: array
+          items:
+            $ref: "#/components/schemas/leg"
+        conditions:
+          description: Ids of the conditions in the parent planning that apply to this leg
+          type: array
+          items:
+            type: string
 
     executionEvent:
       type: object
@@ -2248,41 +2298,6 @@ components:
         RETURN_AREA, 
         UPFRONT_PAYMENT
       ]
-
-    leg:
-      description: A concrete option for a leg that matches the planning
-      type: object
-      required:
-        - from
-        - conditions
-      properties:
-        id:
-          description: A unique id which can be referred to when creating a booking, should not be used for sublegs
-          type: string
-        from:
-          $ref: "#/components/schemas/coordinates"
-        to:
-          $ref: "#/components/schemas/coordinates"
-        startTime:
-          $ref: "#/components/schemas/timestamp"
-        endTime:
-          $ref: "#/components/schemas/timestamp"
-        asset:
-          $ref: "#/components/schemas/assetGroup"
-        pricing:
-          $ref: "#/components/schemas/fare"
-        suboperator:
-          $ref: "#/components/schemas/suboperator"
-        parts:
-          description: The component legs if this leg is composed of multiple legs using different assets
-          type: array
-          items:
-            $ref: "#/components/schemas/leg"
-        conditions:
-          description: Ids of the conditions in the parent planning that apply to this leg
-          type: array
-          items:
-            type: string
 
     stationInformation:
       type: object
