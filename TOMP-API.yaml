@@ -1733,6 +1733,9 @@ components:
 
     fare:
       description: the total fare is the sum of all parts, except for the 'MAX' farePart. This one descripes the maximum price for the complete leg.
+      required:
+        - estimated
+        - parts
       properties:
         estimated:
           description: is this fare an estimation?
@@ -1762,6 +1765,10 @@ components:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
+          required:
+            - vatRate
+            - unitType
+            - amount
           properties:
             type:
               description: type of fare part
@@ -2477,6 +2484,7 @@ components:
         - name
         - isTaxable
         - description
+        - fare
       properties:
         planId:
           type: string
