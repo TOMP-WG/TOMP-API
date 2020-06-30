@@ -1677,6 +1677,9 @@ components:
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
+      required:
+        - lat
+        - lng
       properties:
         lng:
           type: number
