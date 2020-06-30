@@ -2684,9 +2684,8 @@ components:
           example: QR-code
         tokenData:
           description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
-          type: array
-          items:
-            $ref: "#/components/schemas/keyValue"
+          type: object
+          additionalProperties: true
 
     traveler:
       description: A generic description of a traveler, not including any identifying information
