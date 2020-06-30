@@ -1451,7 +1451,6 @@ components:
         - $ref: "#/components/schemas/bookingRequest"
         - type: object
           required:
-            - conditions
             - legs
           properties:
             state:
@@ -2033,6 +2032,9 @@ components:
         - from
         - assetType
       properties:
+        id:
+          description: The unique identifier (TO) of this leg
+          type: string
         from:
           description: The departure location of this leg, using this asset type
           $ref: "#/components/schemas/place"
@@ -2250,6 +2252,9 @@ components:
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
+      required:
+        - validUntil
+        - options
       allOf:
         - $ref: "#/components/schemas/planningRequest"
         - type: object
