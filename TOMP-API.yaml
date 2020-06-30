@@ -187,6 +187,7 @@ paths:
             Expires:
               description: The result is valid until this timestamp. The pending booking is expired after this timestamp. This option can be used, but there is also a facility to use the webhook, mentioned in '#/component/schemas/booking'.
               schema:
+                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
                 type: string
                 format: http-date
               required: true
