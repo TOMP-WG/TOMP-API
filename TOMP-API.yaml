@@ -699,6 +699,7 @@ paths:
       tags:
         - operator information
         - TO
+        - MP
       summary: describes the running implementations
       description: all versions that are implemented on this url, are described in the result of this endpoint. In contains all versions and per version the endpoints, their status
         and the supported scenarios.
@@ -1813,12 +1814,13 @@ components:
 
     endpointImplementation:
       type: object
-      description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios.
+      description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
       required:
         - version
         - baseUrl
         - endpoints
         - scenarios
+        - processIdentifiers
       properties:
         version:
           type: string
@@ -1827,13 +1829,15 @@ components:
         endpoints:
           type: array
           items:
-            $ref: '#/components/schemas/endpoint'
+            $ref: "#/components/schemas/endpoint"
         scenarios:
           type: array
           items:
-            $ref: '#/components/schemas/scenario'
+            $ref: "#/components/schemas/scenario"
+        processIdentifiers:
+          $ref: "#/components/schemas/processIdentifiers"
       example:
-        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"] }
+        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"], "processIdentifiers": { "planning": ["LOCATION_BASED"] }, "booking": ["ACCESS_CODE_QR", "ACCESS_CODE_IN_COMMIT_EVENT"] }
       
     error:
       type: object
@@ -2267,6 +2271,46 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/booking"
+
+    processIdentifiers:
+      type: object
+      required:
+        - operatorInformation
+        - planning
+        - booking
+        - tripExecution
+        - support
+        - payment
+        - general
+      properties:
+        operatorInformation:
+          type: array
+          items:
+            type: string
+        planning: 
+          type: array
+          items:
+            type: string
+        booking:
+          type: array
+          items:
+            type: string
+        tripExecution:
+          type: array
+          items: 
+            type: string
+        support:
+          type: array
+          items: 
+            type: string
+        payment:
+          type: array
+          items: 
+            type: string
+        general:
+          type: array
+          items: 
+            type: string
 
     requirements:
       description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
