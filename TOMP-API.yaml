@@ -535,7 +535,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/assetType"
+                  $ref: "#/components/schemas/asset"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -584,60 +584,6 @@ paths:
         description: changed leg (e.g. with different duration or destination)
         required: true
       responses:
-        "204":
-          $ref: "#/components/responses/204NoContent"
-        "400":
-          $ref: "#/components/responses/400BadRequest"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-
-  /legs/{id}/asset:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - name: id
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          type: string
-    get:
-      description: Optional - The specific asset used for this leg. If no asset is assigned, 404 should be returned
-      tags:
-        - trip execution [optional]
-        - TO
-      responses:
-        "200":
-          description: operation successful
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/asset"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-    post:
-      description: Optional - Choose one of the available assets and set it to be the one used in this leg
-      tags:
-        - trip execution
-        - TO
-        - MP
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/asset"
-      responses:
-        "200":
-          description: operation successful, and there is more information about the asset
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/asset"
         "204":
           $ref: "#/components/responses/204NoContent"
         "400":
@@ -1288,9 +1234,7 @@ components:
           type: boolean
           description: true indicates the asset is currently disabled (broken)
         properties:
-          type: array
-          items:
-            $ref: "#/components/schemas/assetProperties"
+          $ref: "#/components/schemas/assetProperties"
 
     assetClass:
       type: string
@@ -1328,6 +1272,7 @@ components:
         - id
         - amountAvailable
         - assets
+        - assetClass
         - sharedProperties
       properties:
         id:
@@ -1339,26 +1284,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/asset"
-        sharedProperties:
-          type: array
-          items:
-            $ref: "#/components/schemas/assetProperties"
-              
-    assetProperties:
-      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
-      required:
-        - name
-        - assetClass
-        - energyLabel
-      properties:
-        name:
-          type: string
-          description: name of asset type
         assetClass:
           $ref: "#/components/schemas/assetClass"
         assetSubClass:
           type: string
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
+        sharedProperties:
+          $ref: "#/components/schemas/assetProperties"
+              
+    assetProperties:
+      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      properties:
+        name:
+          description: name of asset (type), required in either assetType or asset, should match Content-Language
+          type: string
         location:
           $ref: "#/components/schemas/place"
         fuel:
@@ -1379,6 +1318,7 @@ components:
               OTHER,
             ]
         energyLabel:
+          description: Energy efficiency
           type: string
           enum: [A, B, C, D, E]
         co2PerKm:
@@ -1423,7 +1363,12 @@ components:
         gearbox:
           type: string
           description: type of gearbox
-          enum: [MANUAL, AUTOMATIC, SEMIAUTOMATIC]
+          enum: 
+            [
+              MANUAL, 
+              AUTOMATIC, 
+              SEMIAUTOMATIC
+            ]
         image:
           description: Link to an image of the asset
           type: string
@@ -1447,7 +1392,16 @@ components:
         propulsion:
           type: string
           description: way in which the asset is powered
-          enum: [MUSCLE, ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN]
+          enum: 
+            [
+              MUSCLE, 
+              ELECTRIC, 
+              GASOLINE, 
+              DIESEL, 
+              HYBRID, 
+              LPG, 
+              HYDROGEN
+            ]
         smoking:
           type: boolean
           description: true indicates smoking is allowed on asset
@@ -1469,10 +1423,9 @@ components:
           type: string
           description: free text to describe asset, should match Content-Language
         meta:
-          description: this array can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning-options.
-          type: array
-          items:
-            $ref: "#/components/schemas/keyValue"
+          description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
+          type: object
+          additionalProperties: true
 
     bankAccount:
       type: object
@@ -1516,9 +1469,8 @@ components:
               $ref: "#/components/schemas/fare"
             extraData:
               description: Arbitrary information that a TO can add
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
+              type: object
+              additionalProperties: true
 
     bookingOperation:
       type: object
@@ -1596,7 +1548,16 @@ components:
         type:
           description: The broad category of card
           type: string
-          enum: [ID, DISCOUNT, TRAVEL, BANK, CREDIT, PASSPORT, OTHER]
+          enum: 
+            [
+              ID, 
+              DISCOUNT, 
+              TRAVEL, 
+              BANK, 
+              CREDIT, 
+              PASSPORT, 
+              OTHER
+            ]
         subType:
           description: For use in case of OTHER. Can be used in bilateral agreements.
           type: string
@@ -1924,9 +1885,8 @@ components:
               $ref: "#/components/schemas/bankAccount"
             meta:
               description: Arbitrary metadata that a TO can add, like voucher codes
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
+              type: object
+              additionalProperties: true
 
     fare:
       description: the total fare is the sum of all parts, except for the 'MAX' farePart. This one descripes the maximum price for the complete leg.
@@ -1990,9 +1950,8 @@ components:
             class:
               type: string
             meta:
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
+              type: object
+              additionalProperties: true
 
     geojsonLine:
       description: An array  of WGS84 coordinate pairs [lon, lat]
@@ -2001,8 +1960,8 @@ components:
         type: array
         items: 
           type: number
-        minimum: 2
-        maximum: 2
+        minItems: 2
+        maxItems: 2
       example: [[6.169639, 52.253279], [6.05623, 52.63473]]
 
     journalEntry:
@@ -2067,13 +2026,6 @@ components:
           OTHER,
         ]
 
-    keyValue:
-      type: object
-      additionalProperties: true
-      minProperties: 1
-      maxProperties: 2
-      example: { "wheelchair": true }
-
     leg:
       description: A planned (segment of) a booked trip using one asset type
       type: object
@@ -2096,8 +2048,11 @@ components:
           type: string
           format: date-time
         assetType:
-          description: The asset type used in this leg
+          description: The asset type used in this leg as determined during booking
           $ref: "#/components/schemas/assetType"
+        asset:
+          description: The concrete asset used for the execution of the leg
+          $ref: "#/components/schemas/asset"
         pricing:
           description: The leg-specific pricing information, all fares are additive, if the booking does not have pricing set all legs should
           $ref: "#/components/schemas/fare"
@@ -2257,12 +2212,11 @@ components:
           type: string
         coordinates:
           $ref: "#/components/schemas/coordinates"
-        extraInfo:
-          type: array
-          items:
-            $ref: "#/components/schemas/keyValue"
         physicalAddress:
           $ref: "#/components/schemas/address"
+        extraInfo:
+          type: object
+          additionalProperties: true
 
     planningRequest:
       description: A travel planning for which bookable options are requested
@@ -2316,9 +2270,8 @@ components:
 
     requirements:
       description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
-      type: array
-      items:
-        $ref: "#/components/schemas/keyValue"
+      type: object
+      additionalProperties: true
 
     scenario:
       type: string
@@ -2491,14 +2444,12 @@ components:
           description: Array of hashes with the keys "start" and "end" indicating when the alert is in effect (e.g. when the system or station is actually closed, or when it is scheduled to be moved). If this array is omitted then the alert should be displayed as long as it is in the feed.
           type: array
           items:
-            type: object
-            properties:
-              startTime:
-                type: string
-                format: date-time
-              endTime:
-                type: string
-                format: date-time
+            type: array
+            items:
+              type: string
+              format: date-time
+              minItems: 2
+              maxItems: 2
         stationIds:
           type: array
           items:
