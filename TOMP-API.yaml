@@ -1456,11 +1456,6 @@ components:
           properties:
             state:
               $ref: "#/components/schemas/bookingState"
-            conditions:
-              description: The conditions that apply to this booking, there may be more conditions in a parent planning object (if this is returned as part of that) or in one of the legs (specific to that leg)
-              type: array
-              items:
-                $ref: "#/components/schemas/condition"
             legs:
               description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled
               type: array
@@ -2263,11 +2258,6 @@ components:
               description: The time until which the presented options are (likely) available
               type: string
               format: date-time
-            conditions:
-              description: The conditions that apply to all presented options
-              type: array
-              items:
-                $ref: "#/components/schemas/condition"
             options:
               type: array
               items:
