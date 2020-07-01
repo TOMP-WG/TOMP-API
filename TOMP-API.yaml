@@ -1576,8 +1576,6 @@ components:
         - $ref: "#/components/schemas/conditionUpfrontPayment"
       discriminator:
         propertyName: conditionType
-
-    conditionProperties:
       required:
         - conditionType
       properties:
@@ -1592,17 +1590,17 @@ components:
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
       allOf:
-        - $ref: "#/components/schemas/conditionProperties"
+        - $ref: "#/components/schemas/condition"
         - $ref: "#/components/schemas/amountOfMoney"
 
     conditionPayWhenFinished:
       description: in case the TO demands a direct payment after usage.
       allOf:
-        - $ref: "#/components/schemas/conditionProperties"
+        - $ref: "#/components/schemas/condition"
 
     conditionPostponedCommit:
       allOf:
-        - $ref: "#/components/schemas/conditionProperties"
+        - $ref: "#/components/schemas/condition"
         - type: object
           required:
             - ultimateResponseTime
@@ -1614,7 +1612,7 @@ components:
     conditionRequireBookingData:
       type: object
       allOf:
-        - $ref: "#/components/schemas/conditionProperties"
+        - $ref: "#/components/schemas/condition"
         - type: object
           required:
             - requiredFields
@@ -1644,7 +1642,7 @@ components:
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
       allOf:
-        - $ref: "#/components/schemas/conditionProperties"
+        - $ref: "#/components/schemas/condition"
         - type: object
           properties:
             stationId:
@@ -1664,7 +1662,7 @@ components:
     conditionUpfrontPayment:
       description: in case the TO demands a upfront payment before usage. The payment should be made in the booking phase.
       allOf:
-        - $ref: "#/components/schemas/conditionProperties"
+        - $ref: "#/components/schemas/condition"
 
     coordinates:
       type: object
