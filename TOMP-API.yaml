@@ -1652,9 +1652,7 @@ components:
               type: string
             returnArea:
               description: area in which the asset should be returned as GeoJSON Polygon coordinates
-              type: array
-              items:
-                $ref: "#/components/schemas/geojsonLine"
+              $ref: "#/components/schemas/geojsonPolygon"
             coordinates:
               $ref: "#/components/schemas/coordinates"
             returnHours:
@@ -1956,15 +1954,27 @@ components:
               additionalProperties: true
 
     geojsonLine:
-      description: An array  of WGS84 coordinate pairs [lon, lat]
+      description: An array  of WGS84 coordinate pairs 
+      type: array
+      example: [[6.169639, 52.253279], [6.05623, 52.63473]]
+      items:
+        $ref: "#/components/schemas/geojsonPoint"
+
+    geojsonPoint:
+      description: Geojson Coordinate 
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: number
+      example: [lon, lat]
+
+    geojsonPolygon:
+      description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4
       type: array
       items:
-        type: array
-        items: 
-          type: number
-        minItems: 2
-        maxItems: 2
-      example: [[6.169639, 52.253279], [6.05623, 52.63473]]
+        $ref: "#/components/schemas/geojsonLine"
+      example: [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]]
 
     journalEntry:
       allOf:
@@ -2711,9 +2721,7 @@ components:
           example: BikeTown
         serviceArea:
           description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
-          type: array
-          items:
-            $ref: "#/components/schemas/geojsonLine"
+          $ref: "#/components/schemas/geojsonPolygon"
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
