@@ -2229,6 +2229,9 @@ components:
       properties:
         from:
           $ref: "#/components/schemas/place"
+        radius:
+          description: Maximum distance in meters a user wants to travel to reach the travel option
+          type: number
         to:
           $ref: "#/components/schemas/place"
         departureTime:
@@ -2248,6 +2251,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/traveler"
+        useAssets:
+          description: The specific asset(s), the user wishes to receive leg options for
+          type: array
+          items:
+            type: string
+            format: an asset id for this operator
 
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
