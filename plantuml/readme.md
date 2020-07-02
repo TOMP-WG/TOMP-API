@@ -3,6 +3,8 @@ The flows are grouped per modality, so have a look at them before implementing t
 
 You can click on the scenario names to open a plantuml sequence diagram. You can use https://planttext.com or http://plantuml.com to view it. Visual Studio Code also provides plantuml preview extensions.
 
+Tip: if you use Chrome, you can add the extension https://chrome.google.com/webstore/detail/plantuml-viewer/legbfeljfbjgfifnkmpoajgpgejojooj. You can click on the plantuml file and view it in 'raw' modus.
+
 # Building blocks
 In the first part, we describe all the 'building blocks', per module. After this we zoom in on specific operator types and describe there flows per operator type.
 The names in _italics_ are [processIdentifiers](https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers). They describe the way the TO wants to be threated ('care labels').
