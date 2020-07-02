@@ -12,46 +12,46 @@ The operator information actually contains no flow. All endpoints here can be ca
 
 This information can also be used by 'lookups'; central locations where MPs can look up information about the TOs.
 
-The sequence diagram can be found here: [operator information](/Planning/default.plantuml).
+The sequence diagram can be found here: [operator information](Planning/default.plantuml).
 
 ## Planning
 We have a few types of planning:
-* [planned-trip](/Planning/planned-trip.plantuml): person(s) who want to travel from A to B on a certain time (departure or arrival): _PLANNING_BASED_. 
-* [book-and-go](/Planning/book-and-go.plantuml): person(s) who want to book an asset really nearby and go instantly: _ASSET_BASED_ OR _SPECIFIC_LOCATION_BASED_.
-* [book-from-map](/Planning/book-from-map.plantuml): person(s) who want to book an asset in the near future, go there and use it: _ASSET_BASED_ OR _SPECIFIC_LOCATION_BASED_.
+* [planned-trip](Planning/planned-trip.plantuml): person(s) who want to travel from A to B on a certain time (departure or arrival): _PLANNING_BASED_. 
+* [book-and-go](Planning/book-and-go.plantuml): person(s) who want to book an asset really nearby and go instantly: _ASSET_BASED_ OR _SPECIFIC_LOCATION_BASED_.
+* [book-from-map](Planning/book-from-map.plantuml): person(s) who want to book an asset in the near future, go there and use it: _ASSET_BASED_ OR _SPECIFIC_LOCATION_BASED_.
 
 ## Booking
 The booking has only two scenarios:
-* [default](/Booking/default.plantuml): the booking is done by the MP, the TO can directly guarantee that the leg can be made: _NORMAL_.
-* [postponed-commit](/Booking/postponed-commit.plantuml): the TO **cannot** guarantee directly the leg. There have to be taken some (manual) actions or acknowledgments from third parties (e.g. drivers): _POSTPONED_COMMIT_.
+* [default](Booking/default.plantuml): the booking is done by the MP, the TO can directly guarantee that the leg can be made: _NORMAL_.
+* [postponed-commit](Booking/postponed-commit.plantuml): the TO **cannot** guarantee directly the leg. There have to be taken some (manual) actions or acknowledgments from third parties (e.g. drivers): _POSTPONED_COMMIT_.
 
 ## Trip execution
 In the trip execution there are quite a few endpoints. We've described here the flow for a few types of usage (the opening, closing and pausing assets by TO (internet controlled) or by app (bluetooth, etc)).
 
 ### Micro mobility - by app
 These flows are marked by _LOCK_UNLOCK_APP_, accompanied by any of the other _LOCK_UNLOCK_ process identifiers:
-* [opening](/TripExecution/open-asset-by-app.plantuml)
-* [closing](/TripExecution/finish-asset-by-app.plantuml)
-* [pausing](/TripExecution/pause-asset-by-app.plantuml)
+* [opening](TripExecution/open-asset-by-app.plantuml)
+* [closing](TripExecution/finish-asset-by-app.plantuml)
+* [pausing](TripExecution/pause-asset-by-app.plantuml)
 
 In these scenarios there might be some extra information needed to open / close the lock. This information can be posted to the MP in the booking (_ACCESS_CODE_IN_BOOKING_), in the commit event (_ACCESS_CODE_IN_COMMIT_EVENT_) or in the prepare event (_ACCESS_CODE_IN_PREPARE_EVENT_).
 
 ### Micro mobility - internet controlled
 These flows are marked by _LOCK_UNLOCK_REMOTELY_:
-* [opening](/TripExecution/open-asset-by-TO.plantuml)
-* [closing](/TripExecution/finish-asset-by-TO.plantuml)
-* [pausing](/TripExecution/pause-asset-by-TO.plantuml)
+* [opening](TripExecution/open-asset-by-TO.plantuml)
+* [closing](TripExecution/finish-asset-by-TO.plantuml)
+* [pausing](TripExecution/pause-asset-by-TO.plantuml)
 
-There are also a few endpoint regarding the progess (reporting) and changing a leg: [progress](/TripExecution/progress.plantuml) and [changes](/TripExecution/change-leg.plantuml).
+There are also a few endpoint regarding the progess (reporting) and changing a leg: [progress](TripExecution/progress.plantuml) and [changes](TripExecution/change-leg.plantuml).
 
 ### TO controlled trip execution (e.g. taxi)
-The flow for taxis is a bit different: [TO controlled](/TripExecution/to-controlled.plantuml).
+The flow for taxis is a bit different: [TO controlled](TripExecution/to-controlled.plantuml).
 
 ## Support
-The support part is pretty straight forward: issues can be reported by the MP and monitored by the MP: [support](/Support/default.plantuml).
+The support part is pretty straight forward: issues can be reported by the MP and monitored by the MP: [support](Support/default.plantuml).
 
 ## Payment
-The payment module facilitates in enlisting the costs of all the executed legs. This can be called by the MP. On the other hand, there are facilities to report extra costs on both sides: [payment](/Payment/default.plantuml).
+The payment module facilitates in enlisting the costs of all the executed legs. This can be called by the MP. On the other hand, there are facilities to report extra costs on both sides: [payment](Payment/default.plantuml).
 
 # Operator type flow files
 The flow files per operator type can be constructed the scenario flow files as described above.
