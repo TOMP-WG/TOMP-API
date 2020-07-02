@@ -1,0 +1,22 @@
+@startuml finish-asset-by-app
+title Trip execution Scenario Part 'close asset by app' - V1.0.0
+
+participant App
+participant MP
+participant TO
+participant Asset
+
+App -> MP : stop 
+MP -> TO : /executions/{id}/events { "operation" : "START_FINISHING" }
+return execution, in case of 'LOCK_CODE_IN_FINISHING_EVENT'\nit must contain lock information
+
+MP -> App : lock instructions
+App -> Asset : close
+return ok
+
+App -> MP : bike closed
+MP -> TO : /executions/{id}/events { "operation" : "FINISH" }
+return ok
+
+
+@enduml
