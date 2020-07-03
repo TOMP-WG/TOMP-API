@@ -1484,8 +1484,6 @@ components:
       allOf:
         - $ref: "#/components/schemas/planningRequest"
         - type: object
-          required:
-            - customer
           properties:
             id:
               description: A unique identifier for the TO to know this booking by, required from the point on where booking-intent is true
@@ -2275,18 +2273,15 @@ components:
       required:
         - validUntil
         - options
-      allOf:
-        - $ref: "#/components/schemas/planningRequest"
-        - type: object
-          properties:
-            validUntil:
-              description: The time until which the presented options are (likely) available
-              type: string
-              format: date-time
-            options:
-              type: array
-              items:
-                $ref: "#/components/schemas/booking"
+      properties:
+        validUntil:
+          description: The time until which the presented options are (likely) available
+          type: string
+          format: date-time
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/booking"
 
     processIdentifiers:
       type: object
