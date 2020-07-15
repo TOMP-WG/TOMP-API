@@ -4,23 +4,23 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.5.3"
+  version: "0.9.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
   - name: planning
-    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS].<p> The endpoints in this part can give information about the availability of assets (or typeOfAssets) and can provide information to take the next step - the booking part.
+    description: gives information about transport asset availability and pricing [free_bike_status and system_pricing_plans in GBFS].<p> The endpoints in this part can give information about the availability of assets (or assetTypes) and can provide information to take the next step - the booking part.
 
   - name: booking
-    description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or typeOfAsset), including the non-happy paths (cancel, expire etc).
+    description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or assetType), including the non-happy paths (cancel, expire etc).
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
 
   - name: trip execution
-    description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating a leg (not the state!).
+    description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating an execution (not the state!).
 
   - name: trip execution [optional]
     description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
@@ -35,7 +35,7 @@ tags:
     description: arranges financial settlement for legs
 
   - name: support
-    description: support for the user while the leg is being executed
+    description: support for the user while the leg is ongoing
 
   - name: TO
     description: the Transport Operator's endpoints
@@ -56,47 +56,50 @@ security:
   - OpenId: []
 
 paths:
-  /planning-options/:
+  /plannings/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
     post:
       description:
-        Returns available transport options for given coordinates and radius. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `provideIds`, requesting the TO to provide unique IDs to reference to during communication with the MP.
+        Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
         <p>see (2.1) in the process flow - planning
       tags:
         - planning
         - TO
+      parameters:
+        - name: booking-intent
+          in: query
+          description: Specifies whether IDs should be returned for the leg options that can be referred to when booking
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/planningCheck"
+              $ref: "#/components/schemas/planningRequest"
       responses:
         "201":
           description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/planningOptions"
+                $ref: "#/components/schemas/planning"
           headers:
             Location:
-              description: The URI where the created options can be found, in case of 'provideIds' = true
+              description: The URI where the most up to date version of the created planning result can be found. Not required.
               schema:
                 type: string
-                example: "/planning-options/1234"
+                example: "/plannings/1234"
             Content-Language:
-              description: ISO 639-1 two letter language code
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
-              required: true
-            Expires:
-              description: the result is valid until this timestamp. After this timestamp the planningOption will be discarded, if cannot become a bookingOption.
-              schema:
-                $ref: "#/components/schemas/timestamp"
+                format: One IETF BCP 47 (RFC 5646) language tag
               required: true
         "202":
           $ref: "#/components/responses/202Accepted"
@@ -105,6 +108,44 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
+  /plannings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - name: id
+        in: path
+        description: Planning identifier
+        required: true
+        schema:
+          type: string
+    get:
+      description: Returns the planning result.
+      tags:
+        - planning [optional]
+        - TO
+      responses:
+        "200":
+          description: The planning was found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planning"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "410":
+          $ref: "#/components/responses/410Gone"
+
   /bookings/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -112,7 +153,7 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
     post:
       description:
-        Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planningOptions).
+        Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planning).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
         <p>The optional webhook can be used to post updates from TO to MP. If it isn't used, the subscription possibility in this API can be used or the events can be posted directly.
@@ -121,12 +162,12 @@ paths:
         - booking
         - TO
       requestBody:
-        description: One of available options, returned by /planning-options, with an ID.
+        description: One of available legs, returned by /plannings, with an ID.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/bookingOption"
+              $ref: "#/components/schemas/bookingRequest"
 
       responses:
         "201":
@@ -137,15 +178,18 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: ISO 639-1 two letter language code
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
               required: true
             Expires:
               description: The result is valid until this timestamp. The pending booking is expired after this timestamp. This option can be used, but there is also a facility to use the webhook, mentioned in '#/component/schemas/booking'.
               schema:
-                $ref: "#/components/schemas/timestamp"
+                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+                type: string
+                format: http-date
               required: true
         "202":
           $ref: "#/components/responses/202Accepted"
@@ -189,11 +233,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -229,11 +275,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "204":
           $ref: "#/components/responses/204NoContent"
         "400":
@@ -271,11 +319,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
@@ -303,11 +353,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/booking"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -407,11 +459,13 @@ paths:
         "200":
           description: The bookings matching the query
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -457,30 +511,32 @@ paths:
       - $ref: "#/components/parameters/apiVersion"
       - name: id
         in: path
-        description: Booking identifier
+        description: Leg identifier
         required: true
         schema:
           type: string
     get:
-      description: Returns a list of available assets for the given booking. These assets can be used to POST to /legs/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.7) in the process flow. - trip execution
+      description: Returns a list of available assets for the given leg. These assets can be used to POST to /legs/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.7) in the process flow. - trip execution
       tags:
         - trip execution
         - TO
       responses:
         "200":
-          description: Available assets for the booking. If no suitable assets are found an empty array is to be returned.
+          description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/typeOfAsset"
+                  $ref: "#/components/schemas/asset"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -500,7 +556,7 @@ paths:
         schema:
           type: string
     get:
-      description: Retrieves the latest summary of the leg, being the execution of a portion of a journey travelled using one asset (vehicle). Every leg belongs to one booking, every booking has at most one current leg. Where the booking describes the agreement between user/MP and TO, the leg describes the journey as it occured. See (4.3) in the flow chart - trip execution
+      description: Retrieves the latest summary of the leg, being the execution of a portion of a journey travelled using one asset (vehicle). Every leg belongs to one booking, every booking has at least one leg. Where the booking describes the agreement between user/MP and TO, the leg describes the journey as it occured. See (4.3) in the flow chart - trip execution
       tags:
         - trip execution
         - TO
@@ -533,34 +589,6 @@ paths:
           $ref: "#/components/responses/204NoContent"
         "400":
           $ref: "#/components/responses/400BadRequest"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-
-  /legs/{id}/asset:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - name: id
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          type: string
-    get:
-      description: Optional - The specific asset used for this leg. If no asset is assigned, this will result in an asset object with only the asset type completed.
-      tags:
-        - trip execution [optional]
-        - TO
-      responses:
-        "200":
-          description: operation successful
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/asset"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
@@ -665,6 +693,35 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /operator/meta:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+    get:
+      tags:
+        - operator information
+        - TO
+        - MP
+      summary: describes the running implementations
+      description: all versions that are implemented on this url, are described in the result of this endpoint. In contains all versions and per version the endpoints, their status
+        and the supported scenarios.
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/endpointImplementation"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+
   /operator/stations:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -686,11 +743,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/stationInformation"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -710,17 +769,19 @@ paths:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/typeOfAsset"
+                  $ref: "#/components/schemas/assetType"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -749,11 +810,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemAlert"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -779,11 +842,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemCalendar"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -810,11 +875,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemHours"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -839,11 +906,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/systemInformation"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -871,11 +940,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/systemPricingPlan"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -922,13 +993,15 @@ paths:
           description: start of the selection
           required: true
           schema:
-            $ref: "#/components/schemas/timestamp"
+            type: string
+            format: date-time
         - name: to
           in: query
           description: end of the selection
           required: true
           schema:
-            $ref: "#/components/schemas/timestamp"
+            type: string
+            format: date-time
         - name: state
           in: query
           required: true
@@ -960,11 +1033,13 @@ paths:
         "200":
           description: journal entries
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -1003,11 +1078,13 @@ paths:
         "200":
           description: journal entry received, will be processed (state = INVOICED)
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
           content:
             application/json:
               schema:
@@ -1017,47 +1094,36 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /support/{id}/request/{support-type}:
+  /support/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
-    put:
-      description: identifies a request for support from user via MP
+    post:
+      description: creates a request for support from end user via MP
       tags:
         - support
         - TO
-      parameters:
-        - name: id
-          in: path
-          description: Booking identifier
-          required: true
-          schema:
-            type: string
-        - name: support-type
-          in: path
-          description: type of support needed
-          required: true
-          schema:
-            enum:
-              [
-                BROKEN_DOWN,
-                NOT_AT_LOCATION,
-                NOT_CLEAN,
-                NOT_AVAILABLE,
-                UNABLE_TO_OPEN,
-                UNABLE_TO_CLOSE,
-                OTHER,
-              ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/supportRequest"
       responses:
         "200":
           description: support request acknowledged
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supportStatus"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1071,7 +1137,7 @@ paths:
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
     get:
-      description: Identifies the current status of the support request
+      description: Gets the status report of the support request. Last status (highest order number) is the current status
       tags:
         - support
         - TO
@@ -1088,13 +1154,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/supportStatus"
+                type: array
+                items:
+                  $ref: "#/components/schemas/supportStatus"
           headers:
-            "Content-Language":
-              description: ISO 639-1 two letter language code
+            Content-Language:
+              description: The language/localization of user-facing content
               example: nl
               schema:
                 type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1108,11 +1178,11 @@ components:
       type: object
       properties:
         streetAddress:
-          description: street address, including number OR PO box number, eventually extended with internal referencce like room number
+          description: street address, including number OR PO box number, eventually extended with internal referencce like room number, could match Content-Language
           type: string
           example: example street 18, 2nd floor, 18-B33
         areaReference:
-          description: city or town, principal subdivision such as province, state or county
+          description: city or town, principal subdivision such as province, state or county, could match Content-Language
           type: string
           example: Smallcity, Pinetree county
         postalCode:
@@ -1143,43 +1213,34 @@ components:
           $ref: "#/components/schemas/country"
 
     asset:
-      allOf:
-        - $ref: "#/components/schemas/typeOfAsset"
-        - type: object
-          required:
-            - assetId
-          properties:
-            assetId:
-              type: string
-              description: unique identifier of an asset
-            place:
-              $ref: "#/components/schemas/place"
-            isReserved:
-              type: boolean
-              description: true indicates the bike is currently reserved for someone else
-            isReservedFrom:
-              $ref: "#/components/schemas/timestamp"
-              description: optional addition to determine if an asset is reserved in the future
-            isReservedTo:
-              $ref: "#/components/schemas/timestamp"
-              description: optional addition to determine when asset is available in the future
-            isDisabled:
-              type: boolean
-              description: true indicates the asset is currently disabled (broken)
-            image:
-              description: specific image, overruling asset-type image
-              type: string
-              format: URL
-              example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
-            rentalUrl:
-              type: string
-              description: deep-linking option from GBFS+
-              format: URL
-              example: https://www.rentmyfreebike.com/rental
+      type: object
+      required:
+        - id
+        - properties
+      properties:
+        id:
+          type: string
+          description: Unique identifier of an asset
+        isReserved:
+          type: boolean
+          description: true indicates the bike is currently reserved for someone else
+        isReservedFrom:
+          description: optional addition to determine if an asset is reserved in the future
+          type: string
+          format: date-time
+        isReservedTo:
+          description: optional addition to determine when asset is available in the future
+          type: string
+          format: date-time
+        isDisabled:
+          type: boolean
+          description: true indicates the asset is currently disabled (broken)
+        properties:
+          $ref: "#/components/schemas/assetProperties"
 
     assetClass:
       type: string
-      description: the class of asset. It's possible to specify it more in the assetSubType in typeOfAsset. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
+      description: the class of asset. It's possible to specify it more in the assetSubType in assetType. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
       enum:
         [
           AIR,
@@ -1207,6 +1268,167 @@ components:
           STEP,
         ]
 
+    assetType:
+      type: object
+      required:
+        - id
+        - amountAvailable
+        - assets
+        - assetClass
+        - sharedProperties
+      properties:
+        id:
+          type: string
+          description: Unique identifier of an asset type, 
+        nrAvailable:
+          type: integer
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/asset"
+        assetClass:
+          $ref: "#/components/schemas/assetClass"
+        assetSubClass:
+          type: string
+          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
+        sharedProperties:
+          $ref: "#/components/schemas/assetProperties"
+              
+    assetProperties:
+      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      properties:
+        name:
+          description: name of asset (type), required in either assetType or asset, should match Content-Language
+          type: string
+        location:
+          $ref: "#/components/schemas/place"
+        fuel:
+          type: string
+          enum:
+            [
+              NONE,
+              GASOLINE,
+              DIESEL,
+              ELECTRIC,
+              HYBRID_GASOLINE,
+              HYBRID_DIESEL,
+              HYBRID_GAS,
+              HYDROGEN,
+              GAS,
+              BIO_MASS,
+              KEROSINE,
+              OTHER,
+            ]
+        energyLabel:
+          description: Energy efficiency
+          type: string
+          enum: [A, B, C, D, E]
+        co2PerKm:
+          type: number
+        brand:
+          type: string
+          description: brand of the asset
+        model:
+          type: string
+        buildingYear:
+          type: integer
+        travelAbroad:
+          type: boolean
+          description: true indicates asset is allowed to travel abroad
+        airConditioning:
+          type: boolean
+          description: true indicates airconditioning required
+        cabrio:
+          type: boolean
+          description: true indicates cabrio required
+        colour:
+          type: string
+          description: colour of the asset, should match Content-Language
+        cargo:
+          type: string
+          description: describes options to carry cargo, should match Content-Language
+        easyAccessibility:
+          type: string
+          description: describes if asset is or needs to be easily accessible
+          enum:
+            [
+              LIFT,
+              ESCALATOR,
+              GROUND_LEVEL,
+              SIGHTIMPAIRMENT,
+              HEARINGIMPAIRMENT,
+              WHEELCHAIR,
+            ]
+        gears:
+          type: integer
+          description: number of gears of the asset
+        gearbox:
+          type: string
+          description: type of gearbox
+          enum: 
+            [
+              MANUAL, 
+              AUTOMATIC, 
+              SEMIAUTOMATIC
+            ]
+        image:
+          description: Link to an image of the asset
+          type: string
+          format: URL
+          example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
+        rentalUrl:
+          type: string
+          description: deep-linking option from GBFS+
+          format: URL
+          example: https://www.rentmyfreebike.com/rental
+        infantSeat:
+          type: boolean
+          description: true indicates infant seat required
+        persons:
+          type: integer
+          description: number of persons able to use the asset
+          minimum: 1
+        pets:
+          type: boolean
+          description: true indicates pets are allowed on asset
+        propulsion:
+          type: string
+          description: way in which the asset is powered
+          enum: 
+            [
+              MUSCLE, 
+              ELECTRIC, 
+              GASOLINE, 
+              DIESEL, 
+              HYBRID, 
+              LPG, 
+              HYDROGEN
+            ]
+        smoking:
+          type: boolean
+          description: true indicates smoking is allowed on asset
+        stateOfCharge:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: percentage of charge available
+        towingHook:
+          type: boolean
+          description: true indicates towing hook required
+        undergroundParking:
+          type: boolean
+          description: true indicates underground parking is allowed with asset
+        winterTires:
+          type: boolean
+          description: true indicates winter tires required
+        other:
+          type: string
+          description: free text to describe asset, should match Content-Language
+        meta:
+          description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
+          type: object
+          additionalProperties: true
+
     bankAccount:
       type: object
       properties:
@@ -1223,38 +1445,28 @@ components:
           type: string
 
     booking:
-      description: The booking information describing the state and details of the transaction
+      description: The booking information describing the state and details of an agreed upon trip
+      type: object
       allOf:
-        - $ref: "#/components/schemas/bookingOption"
+        - $ref: "#/components/schemas/bookingRequest"
         - type: object
           required:
-            - id
-            - state
-            - leg
-            - customer
-            - token
+            - legs
           properties:
-            id:
-              description: The identifier MaaS will be using to referring to the booking
-              type: string
             state:
               $ref: "#/components/schemas/bookingState"
-            conditions:
+            legs:
+              description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled
               type: array
               items:
-                $ref: "#/components/schemas/condition"
-            token:
-              $ref: "#/components/schemas/token"
-            webhook:
-              type: string
-              description: in case this field is used, the webhook ``must`` be used to communicate, even though the URL of cancelling or expiring the booking is derivable.
-              format: uri
-              example: https://myserver.com/booking/{id}/events
-            meta:
-              description: Arbitrary metadata that a TO can add
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
+                $ref: "#/components/schemas/leg"
+            pricing:
+              description: The pricing information of the overall booking, in addition to any leg pricing, if not all legs have pricing the booking should have the fare
+              $ref: "#/components/schemas/fare"
+            extraData:
+              description: Arbitrary information that a TO can add
+              type: object
+              additionalProperties: true
 
     bookingOperation:
       type: object
@@ -1266,22 +1478,19 @@ components:
           type: string
           enum: [CANCEL, EXPIRE, DENY, COMMIT]
 
-    bookingOption:
+    bookingRequest:
+      description: A booking requested by the MP
       type: object
-      description: A new booking, created by MaaS POST request in 'PENDING' state. The ID is generated by the TO in the 'availability-check'. The fromAddress, toAddress and the personal data should only be provided if there is an actual request for it (see conditions)
-      required:
-        - id
-        - customer
-      properties:
-        id:
-          description: unique ID (TO's perspective) for identifying this specific available (type of) asset
-          type: string
-        customer:
-          $ref: "#/components/schemas/customer"
-        fromAddress:
-          $ref: "#/components/schemas/address"
-        toAddress:
-          $ref: "#/components/schemas/address"
+      allOf:
+        - $ref: "#/components/schemas/planningRequest"
+        - type: object
+          properties:
+            id:
+              description: A unique identifier for the TO to know this booking by, required from the point on where booking-intent is true
+              type: string
+            customer:
+              description: The user that wants to make this booking under their name, should contain all the information required in a conditionRequireBookingData
+              $ref: "#/components/schemas/customer"
 
     bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
@@ -1301,61 +1510,59 @@ components:
       example: CONFIRMED
 
     card:
+      description: Any kind of card that isn't a license, only provide the cards that are required
+      allOf:
+        - $ref: "#/components/schemas/cardType"
+        - type: object
+          required:
+            - cardNumber
+            - validUntil
+          properties:
+            cardDescription:
+              description: description of the card
+              type: string
+            cardNumber:
+              description: number of the card, like ID number, credit card or bank account number
+              type: string
+            cardAdditionalNumber:
+              description: additional number, like CVC code or IBAN code
+              type: string
+            validUntil:
+              type: string
+              format: date
+            country:
+              $ref: "#/components/schemas/country"
+    
+    cardType:
+      description: A generic description of a card, asset class and acceptors is only allowed for DISCOUNT/TRAVEL/OTHER cards
       type: object
-      description: card object. Only provide the cards that are requested. The asset type property is only allowed for the DISCOUNT card in combination with certain card-acceptors.
       required:
-        - cardType
-        - cardNumber
-        - validUntil
+        - type
       properties:
-        cardType:
+        type:
+          description: The broad category of card
           type: string
-          enum: [ID, DISCOUNT, TRAVEL, BANK, CREDIT, PASSPORT, OTHER]
-        cardSubType:
-          description: mandatory in case of OTHER. Can be used in bilateral agreements.
+          enum: 
+            [
+              ID, 
+              DISCOUNT, 
+              TRAVEL, 
+              BANK, 
+              CREDIT, 
+              PASSPORT, 
+              OTHER
+            ]
+        subType:
+          description: For use in case of OTHER. Can be used in bilateral agreements.
           type: string
-        cardDescription:
-          description: description of the card
-          type: string
-        cardAcceptors:
-          description: references to maasIds of accepting parties. Only if applicable (DISCOUNT).
+        assetClass:
+          $ref: "#/components/schemas/assetClass"
+        acceptors:
+          description: references to accepting parties, only if applicable
           type: array
           items:
             type: string
-        cardNumber:
-          description: number of the card, like ID number, credit card or bank account number
-          type: string
-        cardAdditionalNumber:
-          description: additional number, like CVC code or IBAN code
-          type: string
-        validUntil:
-          type: string
-          format: date
-        country:
-          $ref: "#/components/schemas/country"
-        assetClass:
-          $ref: "#/components/schemas/assetClass"
-
-    compositeLeg:
-      description: this leg type should be used when returning multiple legs to fullfil a single request from A to B. For instance handling overlegs or when acting as broker for multiple sub contractors.
-      allOf:
-        - $ref: "#/components/schemas/planningResult"
-        - type: object
-          properties:
-            id:
-              description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
-              type: string
-            pricing:
-              $ref: "#/components/schemas/fare"
-            legs:
-              type: array
-              items:
-                $ref: "#/components/schemas/operatorLeg"
-            conditions:
-              description: references to the 'conditions' array (start of this object).
-              type: array
-              items:
-                type: string
+            format: maas-id
 
     condition:
       oneOf:
@@ -1373,9 +1580,10 @@ components:
         conditionType:
           description: The specific subclass of condition, should match the schema name exactly
           type: string
-        name:
-          description: TODO
+        id:
+          description: An identifier for this condition that can be used to refer to this condition
           type: string
+          example: deposit50eu
 
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
@@ -1396,7 +1604,8 @@ components:
             - ultimateResponseTime
           properties:
             ultimateResponseTime:
-              $ref: "#/components/schemas/timestamp"
+              type: string
+              format: date-time
 
     conditionRequireBookingData:
       type: object
@@ -1424,6 +1633,8 @@ components:
                     TRAVEL_CARDS,
                     ID_CARDS,
                     CREDIT_CARDS,
+                    NAME,
+                    AGE,
                   ]
 
     conditionReturnArea:
@@ -1436,8 +1647,8 @@ components:
               description: station to which the asset should be returned
               type: string
             returnArea:
-              description: area in which the asset should be returned
-              $ref: "#/components/schemas/polygon"
+              description: area in which the asset should be returned as GeoJSON Polygon coordinates
+              $ref: "#/components/schemas/geojsonPolygon"
             coordinates:
               $ref: "#/components/schemas/coordinates"
             returnHours:
@@ -1454,6 +1665,9 @@ components:
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
+      required:
+        - lat
+        - lng
       properties:
         lng:
           type: number
@@ -1470,9 +1684,9 @@ components:
       example: NL
 
     customer:
-      description: a person that wants to travel. Only use the properties that are needed.
+      description: A MaaS user that wishes to make a booking, only use the fields required by booking conditions
       allOf:
-        - $ref: "#/components/schemas/user"
+        - $ref: "#/components/schemas/traveler"
         - type: object
           required:
             - id
@@ -1517,6 +1731,14 @@ components:
               description: base64 encoded
               type: string
               format: byte
+            cards:
+              type: array
+              items:
+                $ref: "#/components/schemas/card"
+            licenses:
+              type: array
+              items:
+                $ref: "#/components/schemas/license"
 
     day:
       type: string
@@ -1529,30 +1751,107 @@ components:
       example: 7250
 
     duration:
-      description: A duration of some time (relative to time) in milliseconds
+      description: A duration of some time (relative to a time) in milliseconds
       type: integer
       maximum: 2147483647
       minimum: 0
       example: 11112
 
+    endpoint:
+      type: object
+      description: a formal description of an endpoint.
+      required:
+        - method
+        - path
+        - status
+      properties:
+        method: 
+          type: string
+          enum: [
+            POST, 
+            PUT, 
+            GET, 
+            DELETE, 
+            PATCH
+          ]
+        path:
+          description: the exact path of the endpoint, starting after the base URL
+          type: string
+          example: /planning-options/
+        eventType:
+          description: in case the path is ending in /events, the event type/operator enum should be added here.
+          type: string
+          enum: [
+            PREPARE, 
+            ASSIGN_ASSET, 
+            SET_IN_USE, 
+            PAUSE, 
+            START_FINISHING, 
+            FINISH, 
+            ISSUE, 
+            CANCEL, 
+            EXPIRE, 
+            DENY, 
+            COMMIT
+          ]
+        status:
+          type: string
+          enum: [
+            NOT_IMPLEMENTED, 
+            DIALECT, 
+            IMPLEMENTED
+          ]
+      example:
+        { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
+
+    endpointImplementation:
+      type: object
+      description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
+      required:
+        - version
+        - baseUrl
+        - endpoints
+        - scenarios
+        - processIdentifiers
+      properties:
+        version:
+          type: string
+        baseUrl:
+          type: string
+        endpoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/endpoint"
+        scenarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/scenario"
+        processIdentifiers:
+          $ref: "#/components/schemas/processIdentifiers"
+      example:
+        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"], "processIdentifiers": { "planning": ["LOCATION_BASED"] }, "booking": ["ACCESS_CODE_QR", "ACCESS_CODE_IN_COMMIT_EVENT"] }
+      
     error:
       type: object
       description:
         An error that the service may send, e.g. in case of invalid input,
-        missing authorization or internal service error. see https://tools.ietf.org/html/rfc7807
+        missing authorization or internal service error. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       properties:
+        errorcode:
+          type: number
+          description: The TOMP specific error code. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for more details of this error.
         type:
           type: string
-          description: A URI reference [RFC3986] that identifies the problem type.  This specification encourages that, when  dereferenced, it provide human-readable documentation for the problem type (e.g., using HTML [W3C.REC-html5-20141028]).  When this member is not present, its value is assumed to be "about:blank".
+          description: The category of this type of error.
         title:
           type: string
-          description: A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization (e.g., using proactive content negotiation; see [RFC7231], Section 3.4).
+          description: A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except to match Content-Language
         status:
-          type: number
+          type: integer
           description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
         detail:
           type: string
-          description: A human-readable explanation specific to this occurrence of the problem.
+          description: A human-readable explanation specific to this occurrence of the problem, could match Content-Language
         instance:
           type: string
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
@@ -1570,7 +1869,7 @@ components:
             category:
               $ref: "#/components/schemas/journalCategory"
             description:
-              description: free text to describe the extra costs. Mandatory in case of 'OTHER'
+              description: free text to describe the extra costs. Mandatory in case of 'OTHER', should match Content-Language
               type: string
             number:
               type: number
@@ -1582,18 +1881,20 @@ components:
               $ref: "#/components/schemas/bankAccount"
             meta:
               description: Arbitrary metadata that a TO can add, like voucher codes
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
+              type: object
+              additionalProperties: true
 
     fare:
       description: the total fare is the sum of all parts, except for the 'MAX' farePart. This one descripes the maximum price for the complete leg.
+      required:
+        - estimated
+        - parts
       properties:
         estimated:
           description: is this fare an estimation?
           type: boolean
         description:
-          description: user friendly description of the fare (e.g. 'full fare')
+          description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
           type: string
         class:
           description: in the future we'll set up an enumeration of possible "fare classes". For now it's free format.
@@ -1617,6 +1918,10 @@ components:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
+          required:
+            - vatRate
+            - unitType
+            - amount
           properties:
             type:
               description: type of fare part
@@ -1641,9 +1946,31 @@ components:
             class:
               type: string
             meta:
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
+              type: object
+              additionalProperties: true
+
+    geojsonLine:
+      description: An array  of WGS84 coordinate pairs 
+      type: array
+      example: [[6.169639, 52.253279], [6.05623, 52.63473]]
+      items:
+        $ref: "#/components/schemas/geojsonPoint"
+
+    geojsonPoint:
+      description: Geojson Coordinate 
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: number
+      example: [lon, lat]
+
+    geojsonPolygon:
+      description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4
+      type: array
+      items:
+        $ref: "#/components/schemas/geojsonLine"
+      example: [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]]
 
     journalEntry:
       allOf:
@@ -1659,11 +1986,13 @@ components:
             invoiceId:
               description: the number of the invoice. Should be filled in when invoiced.
             invoiceDate:
-              $ref: "#/components/schemas/timestamp"
+              type: string
+              format: date-time
             state:
               $ref: "#/components/schemas/journalState"
             expirationDate:
-              $ref: "#/components/schemas/timestamp"
+              type: string
+              format: date-time
             comment:
               type: string
             distance:
@@ -1705,35 +2034,46 @@ components:
           OTHER,
         ]
 
-    keyValue:
-      type: object
-      additionalProperties: true
-      minProperties: 1
-      maxProperties: 2
-      example: { "wheelchair": true }
-
     leg:
+      description: A planned (segment of) a booked trip using one asset type
       type: object
-      description: A OpenlegPlanner compatible definition of a leg (see OpenlegPlanner docs for reference)
       required:
         - from
-        - to
-        - mode
-        - startTime
-        - endTime
+        - assetType
       properties:
+        id:
+          description: The unique identifier (TO) of this leg
+          type: string
         from:
-          description: The coordinate the TO should use to resolve leg start location
+          description: The departure location of this leg, using this asset type
           $ref: "#/components/schemas/place"
         to:
-          description: The coordinate the TO should use to resolve leg finish location
+          description: The destination of this leg, using this asset type
           $ref: "#/components/schemas/place"
-        startTime:
-          $ref: "#/components/schemas/timestamp"
-        endTime:
-          $ref: "#/components/schemas/timestamp"
-        mode:
-          $ref: "#/components/schemas/typeOfAsset"
+        departureTime:
+          description: The departure time of this leg
+          type: string
+          format: date-time
+        arrivalTime:
+          description: The intended arrival time at the to place
+          type: string
+          format: date-time
+        assetType:
+          description: The asset type used in this leg as determined during booking
+          $ref: "#/components/schemas/assetType"
+        asset:
+          description: The concrete asset used for the execution of the leg
+          $ref: "#/components/schemas/asset"
+        pricing:
+          description: The leg-specific pricing information, all fares are additive, if the booking does not have pricing set all legs should
+          $ref: "#/components/schemas/fare"
+        suboperator:
+          $ref: "#/components/schemas/suboperator"
+        conditions:
+              description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
+              type: array
+              items:
+                $ref: "#/components/schemas/condition"
         state:
           $ref: "#/components/schemas/legState"
         departureDelay:
@@ -1742,32 +2082,26 @@ components:
           $ref: "#/components/schemas/duration"
         distance:
           $ref: "#/components/schemas/distance"
-        fare:
-          $ref: "#/components/schemas/fare"
-        route:
-          type: string
-        routeShortName:
-          type: string
-        routeLongName:
-          type: string
-        agencyId:
-          type: string
-        legGeometry:
-          type: string
-          description: format as in geojson linestring eg. [[6.169639, 52.253279], .. ] WGS84, [lng,lat]
-        assetAccessData:
+        progressGeometry:
+          description: A list of coordinates describing the progress so far along the leg, as GeoJSON LineString coordinates
+          $ref: "#/components/schemas/geojsonLine"
+        ticket:
+          description: The MaaS user's proof of their right to travel on this leg
           $ref: "#/components/schemas/token"
-          description: data to open a specific asset (e.g. QR code, image base64). This can be provided when using assign_asset, when it's not provided in the booking.
+        assetAccessData:
+          description: Data to open a specific asset (e.g. QR code, image base64)
+          $ref: "#/components/schemas/token"
 
     legEvent:
       type: object
-      description: event for the leg
+      description: event for the execution
       required:
         - time
         - event
       properties:
         time:
-          $ref: "#/components/schemas/timestamp"
+          type: string
+          format: date-time
         event:
           type: string
           enum:
@@ -1782,7 +2116,7 @@ components:
             ]
         comment:
           type: string
-          description: free text
+          description: free text, should match Content-Language
         asset:
           $ref: "#/components/schemas/asset"
 
@@ -1814,23 +2148,32 @@ components:
         ]
 
     license:
-      type: object
       description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
+      allOf:
+        - $ref: "#/components/schemas/licenseType"
+        - type: object
+          properties:
+            number:
+              type: string
+              example: "1287948792"
+            licenseCode:
+              description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
+              example: D4
+              type: string
+            validUntil:
+              type: string
+              format: date
+
+    licenseType:
+      description: A category of license to use a certain asset class
+      type: object
+      required:
+        - assetClass
       properties:
-        number:
-          type: string
-          example: 1287948792
         assetClass:
           $ref: "#/components/schemas/assetClass"
-        licenseCode:
-          description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
-          example: D4
-          type: string
-        country:
+        issuingCountry:
           $ref: "#/components/schemas/country"
-        validUntil:
-          type: string
-          format: date
 
     notification:
       type: object
@@ -1842,42 +2185,7 @@ components:
           example: VEHICLE_NOT_AVAILABLE
         comment:
           type: string
-          description: free text
-
-    operatorLeg:
-      allOf:
-        - $ref: "#/components/schemas/simpleLeg"
-        - type: object
-          properties:
-            operatorName:
-              type: string
-            operatorMaasId:
-              type: string
-              description: the maasId from the operator
-            operatorDescription:
-              type: string
-              description: short description of the operator
-            operatorContact:
-              type: string
-              description: contact information
-
-    optionsLeg:
-      allOf:
-        - $ref: "#/components/schemas/period"
-        - type: object
-          properties:
-            from:
-              $ref: "#/components/schemas/coordinates"
-            to:
-              $ref: "#/components/schemas/coordinates"
-
-    period:
-      type: object
-      properties:
-        startTime:
-          $ref: "#/components/schemas/timestamp"
-        endTime:
-          $ref: "#/components/schemas/timestamp"
+          description: free text, should match Content-Language
 
     phone:
       type: object
@@ -1904,7 +2212,7 @@ components:
         - coordinates
       properties:
         name:
-          description: Human readable name of the place
+          description: Human readable name of the place, could match Content-Language
           type: string
         stopReference:
           type: array
@@ -1915,100 +2223,121 @@ components:
           type: string
         coordinates:
           $ref: "#/components/schemas/coordinates"
-        extraInfo:
-          type: array
-          items:
-            $ref: "#/components/schemas/keyValue"
         physicalAddress:
           $ref: "#/components/schemas/address"
+        extraInfo:
+          type: object
+          additionalProperties: true
 
-    planningCheck:
-      description: the request for available assets. User's location in comma separated form e.g. 60.123,27.456 (lat/long, WGS84)
-      allOf:
-        - $ref: "#/components/schemas/period"
-        - type: object
-          required:
-            - from
-          properties:
-            from:
-              $ref: "#/components/schemas/coordinates"
-            radius:
-              description: Maximum distance a user wants to travel to reach asset in metres, e.g. 500 metres
-              type: number
-            to:
-              $ref: "#/components/schemas/coordinates"
-            travellers:
-              description: the amount of people that have to travel from `from` to `to` [https://github.com/efel85/TOMP-API/issues/56]
-              type: number
-            useAssets:
-              description: when you use the /operator/available-assets and you want to book a displayed asset, you must be able to request o a planning-option for the specific asset (with provideIds=true), post a booking with the provided id and send directly a commit. This field should contain the asset to book.
-              type: array
-              items:
-                type: string
-            provideIds:
-              description: default false (during planning phase). Whenever entering the booking phase to present the options to the user, set it to true to refert to this option. The returned ID can be used througout the complete process. [https://github.com/efel85/TOMP-API/issues/57]
-              type: boolean
-            users:
-              type: array
-              items:
-                $ref: "#/components/schemas/user"
-
-    planningOptions:
+    planningRequest:
+      description: A travel planning for which bookable options are requested
       type: object
-      description: Available option matching the query. Optionally including asset information for claiming specific assets. The pricing is also included.
+      required:
+        - from
+        - nrOftravelers
+      properties:
+        from:
+          $ref: "#/components/schemas/place"
+        radius:
+          description: Maximum distance in meters a user wants to travel to reach the travel option
+          type: number
+        to:
+          $ref: "#/components/schemas/place"
+        departureTime:
+          description: The intended departure time. If left out and no arrivalTime is set, the current time should be assumed.
+          type: string
+          format: date-time
+        arrivalTime:
+          description: The intended arrival time, at the to place if set otherwise the time the user intends to stop using the asset.
+          type: string
+          format: date-time
+        nrOfTravelers:
+          description: The number of people that intend to travel, including the customer.
+          type: integer
+          minimum: 1
+        travelers:
+          description: Extra information about the people that intend to travel if relevant, length must be less than or equal to nrOftravelers.
+          type: array
+          items:
+            $ref: "#/components/schemas/traveler"
+        useAssets:
+          description: The specific asset(s), the user wishes to receive leg options for
+          type: array
+          items:
+            type: string
+            format: an asset id for this operator
+
+    planning:
+      description: A travel planning with bookable options that fulfil the constraints of the planning
+      type: object
+      required:
+        - validUntil
+        - options
       properties:
         validUntil:
-          $ref: "#/components/schemas/timestamp"
-        conditions:
+          description: The time until which the presented options are (likely) available
+          type: string
+          format: date-time
+        options:
           type: array
           items:
-            $ref: "#/components/schemas/condition"
-        results:
-          type: array
-          items:
-            $ref: "#/components/schemas/planningResult"
+            $ref: "#/components/schemas/booking"
 
-    planningResult:
-      oneOf:
-        - $ref: "#/components/schemas/simpleLeg"
-        - $ref: "#/components/schemas/compositeLeg"
-      discriminator:
-        propertyName: resultType
-
-    polygon:
+    processIdentifiers:
       type: object
+      required:
+        - operatorInformation
+        - planning
+        - booking
+        - tripExecution
+        - support
+        - payment
+        - general
       properties:
-        points:
+        operatorInformation:
           type: array
           items:
-            $ref: "#/components/schemas/coordinates"
-          minLength: 3
+            type: string
+        planning: 
+          type: array
+          items:
+            type: string
+        booking:
+          type: array
+          items:
+            type: string
+        tripExecution:
+          type: array
+          items: 
+            type: string
+        support:
+          type: array
+          items: 
+            type: string
+        payment:
+          type: array
+          items: 
+            type: string
+        general:
+          type: array
+          items: 
+            type: string
 
     requirements:
       description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/efel85/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW%20Eindversie%208%20mei%202019.pdf' [https://github.com/efel85/TOMP-API/issues/17 and https://github.com/efel85/TOMP-API/issues/27]
-      type: array
-      items:
-        $ref: "#/components/schemas/keyValue"
+      type: object
+      additionalProperties: true
 
-    simpleLeg:
-      allOf:
-        - $ref: "#/components/schemas/planningResult"
-        - type: object
-          properties:
-            id:
-              description: unique ID (TO's perspective) for this option. This ID is used during the complete process booking of a specific asset or an asset of a specific type. If the availability-request is not fired within f.i. 30 minutes, it can savely be removed.
-              type: string
-            leg:
-              $ref: "#/components/schemas/optionsLeg"
-            typeOfAsset:
-              $ref: "#/components/schemas/typeOfAsset"
-            pricing:
-              $ref: "#/components/schemas/fare"
-            conditions:
-              description: references to the 'conditions' array (start of this object).
-              type: array
-              items:
-                type: string
+    scenario:
+      type: string
+      enum: [
+        POSTPONED_COMMIT, 
+        DEPOSIT, 
+        PAY_WHEN_FINISHED, 
+        REQUIRE_BOOKING_DATA, 
+        RETURN_AREA, 
+        UPFRONT_PAYMENT
+      ]
 
     stationInformation:
       type: object
@@ -2023,7 +2352,7 @@ components:
           example: XX:Y:12345678
         name:
           type: string
-          description: public name of the station
+          description: public name of the station, could match Content-Language
           example: Island Central
         coordinates:
           $ref: "#/components/schemas/coordinates"
@@ -2031,7 +2360,7 @@ components:
           $ref: "#/components/schemas/address"
         crossStreet:
           type: string
-          description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc.
+          description: Cross street of where the station is located. This field is intended to be a descriptive field for human consumption. In cities, this would be a cross street, but could also be a description of a location in a park, etc, should match Content-Language
           example: on the corner with Secondary Road
         regionId:
           type: string
@@ -2085,9 +2414,58 @@ components:
         country:
           $ref: "#/components/schemas/country"
 
+    suboperator:
+      type: object
+      description: The operator of a leg or asset, in case this is not the TO itself but should be shown to the user
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the operator, could match Content-Language
+        maasId:
+          type: string
+          description: the maasId from the operator
+        description:
+          type: string
+          description: short description of the operator, should match Content-Language
+        contact:
+          type: string
+          description: contact information, should match Content-Language
+
+    supportRequest:
+      description: request for support
+      type: object
+      properties:
+        id:
+          type: string
+          description: the booking id
+        supportType:
+          type: string
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+        location:
+          $ref: '#/components/schemas/place'
+        time:
+          type: string
+          format: date-time
+        priority:
+          description: the priority of the support request. 
+          type: string
+          enum: [ERROR_CANNOT_CONTINUE, ERROR_CAN_CONTINUE, DISTURBING_ISSUE, QUESTION, OTHER]
+        contactInformationEndUser:
+          description: contact information of the end user in case of direct response requests, like phone number
+          type: string
+        comment:
+          type: string
+        requestedResponseTime:
+          type: number
+          description: time to respond in minutes.
+
     supportStatus:
       description: the current status of support
       type: object
+      allOf:
+        - $ref: '#/components/schemas/supportRequest'
       properties:
         status:
           type: string
@@ -2097,6 +2475,12 @@ components:
           type: integer
           description: time in minutes to expected resolution of support request
           example: 9
+        order:
+          type: integer
+          description: the sequence number of status of the support issue
+        comment:
+          type: string
+          description: free text to send to the end user.
 
     systemAlert:
       type: object
@@ -2115,7 +2499,12 @@ components:
           description: Array of hashes with the keys "start" and "end" indicating when the alert is in effect (e.g. when the system or station is actually closed, or when it is scheduled to be moved). If this array is omitted then the alert should be displayed as long as it is in the feed.
           type: array
           items:
-            $ref: "#/components/schemas/period"
+            type: array
+            items:
+              type: string
+              format: date-time
+              minItems: 2
+              maxItems: 2
         stationIds:
           type: array
           items:
@@ -2135,14 +2524,15 @@ components:
           example: http://www.rentmyfreebike.com/alerts
         summary:
           type: string
-          description: A short summary of this alert to be displayed to the customer
+          description: A short summary of this alert to be displayed to the customer, should match Content-Language
           example: station closed
         description:
           type: string
-          description: Detailed text description of the alert
+          description: Detailed text description of the alert, should match Content-Language
           example: station closed indefinitely due to vandalism
         lastUpdated:
-          $ref: "#/components/schemas/timestamp"
+          type: string
+          format: date-time
 
     systemCalendar:
       type: object
@@ -2198,9 +2588,11 @@ components:
           enum: [MEMBER, NON_MEMBERS]
           example: MEMBER
         startTime:
-          $ref: "#/components/schemas/time"
+          type: string
+          format: HH:MM time
         endTime:
-          $ref: "#/components/schemas/time"
+          type: string
+          format: HH:MM time
         days:
           type: array
           description: An array of abbreviations (first 3 letters) of English names of the days of the week that this hour object applies to (i.e. ["mon", "tue"]). Each day can only appear once within all of the hours objects in this feed.
@@ -2220,12 +2612,14 @@ components:
           type: string
           example: XXTO0001
         language:
-          description: An IETF language tag indicating the language that will be used throughout the rest of the files. This is a string that defines a single language tag only.
-          type: string
-          format: ietf
-          example: eng
+          description: The languages supported by this operator for user-facing text. These can be requested using the Accept-Language header and should then be returned in Content-Language
+          type: array
+          items:
+            type: string
+            format: One IETF BCP 47 (RFC 5646) language tag
+            example: fr-FR
         name:
-          description: Full name of the system to be displayed to customers
+          description: Full name of the system to be displayed to customers, could match Content-Language
           type: string
           example: FreeBike
         shortName:
@@ -2233,7 +2627,7 @@ components:
           type: string
           example: FB
         operator:
-          description: Name of the operator of the system
+          description:  Name of the operator of the system, could match Content-Language
           type: string
           example: FreeBike
         url:
@@ -2280,6 +2674,7 @@ components:
         - name
         - isTaxable
         - description
+        - fare
       properties:
         planId:
           type: string
@@ -2291,7 +2686,7 @@ components:
           example: https://www.rentmyfreebike.com/freeplan
         name:
           type: string
-          description: name of this pricing scheme
+          description: name of this pricing scheme, could match Content-Language
           example: Free Plan
         fare:
           $ref: "#/components/schemas/fare"
@@ -2300,7 +2695,7 @@ components:
           description: false indicates that no additional tax will be added (either because tax is not charged, or because it is included) true indicates that tax will be added to the base price
         description:
           type: string
-          description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations
+          description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations, should match Content-Language
           example: Unlimited plan for free bikes, as long as you don't break them!
 
     systemRegion:
@@ -2315,186 +2710,56 @@ components:
           example: BikeRegion
         name:
           type: string
-          description: Public name for this region
+          description: Public name for this region, could match Content-Language
           example: BikeTown
         serviceArea:
-          description: The area served by the region (i.e. where one may travel using the service's assets)
-          $ref: "#/components/schemas/polygon"
-
-    time:
-      description: A time description in hh:mm, 24-hour notation.
-      type: object
-      properties:
-        time:
-          type: string
-        timezone:
-          type: string
-
-    timestamp:
-      description:
-        A UTC timestamp (number of milliseconds in a Date object since January
-        1, 1970, 00:00:00)
-      example: 1546336800
-      type: number
+          description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
+          $ref: "#/components/schemas/geojsonPolygon"
 
     token:
-      description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to validate the leg when starting the leg.
-      allOf:
-        - $ref: "#/components/schemas/period"
-        - type: object
-          properties:
-            meta:
-              description: Arbitrary metadata the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary)
-              type: array
-              items:
-                $ref: "#/components/schemas/keyValue"
-
-    typeOfAsset:
-      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
+      type: object
       required:
-        - typeId
-        - name
-        - assetClass
-        - energyLabel
+        - validFrom
+        - validUntil
+        - tokenType
+        - tokenData
       properties:
-        typeId:
+        validFrom:
           type: string
-          description: unique identifier of a type, scope TO
-        name:
+          format: date-time
+        validUntil:
           type: string
-          description: name of asset type
-        assetClass:
-          $ref: "#/components/schemas/assetClass"
-        assetSubClass:
+          format: date-time
+        tokenType:
+          description: The type of data held in this token, will later be an enum
           type: string
-          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
-        amountAvailable:
-          type: number
-        assets:
-          type: array
-          items:
-            $ref: "#/components/schemas/asset"
-        fuel:
-          type: string
-          enum:
-            [
-              NONE,
-              GASOLINE,
-              DIESEL,
-              ELECTRIC,
-              HYBRID_GASOLINE,
-              HYBRID_DIESEL,
-              HYBRID_GAS,
-              HYDROGEN,
-              GAS,
-              BIO_MASS,
-              KEROSINE,
-              OTHER,
-            ]
-        energyLabel:
-          type: string
-          enum: [A, B, C, D, E]
-        co2PerKm:
-          type: number
-        brand:
-          type: string
-          description: brand of the asset
-        model:
-          type: string
-        buildingYear:
-          type: number
-        travelAbroad:
-          type: boolean
-          description: true indicates asset is allowed to travel abroad
-        airConditioning:
-          type: boolean
-          description: true indicates airconditioning required
-        cabrio:
-          type: boolean
-          description: true indicates cabrio required
-        colour:
-          type: string
-          description: colour of the asset
-        cargo:
-          type: string
-          description: describes options to carry cargo
-        easyAccessibility:
-          type: string
-          description: describes if asset is or needs to be easily accessible
-          enum:
-            [
-              LIFT,
-              ESCALATOR,
-              GROUND_LEVEL,
-              SIGHTIMPAIRMENT,
-              HEARINGIMPAIRMENT,
-              WHEELCHAIR,
-            ]
-        gears:
-          type: integer
-          description: number of gears of the asset
-        gearbox:
-          type: string
-          description: type of gearbox
-          enum: [MANUAL, AUTOMATIC, SEMIAUTOMATIC]
-        image:
-          type: string
-          format: url
-        infantSeat:
-          type: boolean
-          description: true indicates infant seat required
-        persons:
-          type: integer
-          description: number of persons able to use the asset
-        pets:
-          type: boolean
-          description: true indicates pets are allowed on asset
-        propulsion:
-          type: string
-          description: way in which the asset is powered
-          enum: [MUSCLE, ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN]
-        smoking:
-          type: boolean
-          description: true indicates smoking is allowed on asset
-        stateOfCharge:
-          type: integer
-          minimum: 0
-          maximum: 100
-          description: percentage of charge available
-        towingHook:
-          type: boolean
-          description: true indicates towing hook required
-        undergroundParking:
-          type: boolean
-          description: true indicates underground parking is allowed with asset
-        winterTires:
-          type: boolean
-          description: true indicates winter tires required
-        other:
-          type: string
-          description: free text to describe asset
-        meta:
-          description: this array can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning-options.
-          type: array
-          items:
-            $ref: "#/components/schemas/keyValue"
+          example: QR-code
+        tokenData:
+          description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
+          type: object
+          additionalProperties: true
 
-    user:
+    traveler:
+      description: A generic description of a traveler, not including any identifying information
       type: object
       properties:
-        validated:
-          description: for anonymous usage this property should be false.
+        isValidated:
+          description: Whether this traveler's identity and properties have been verified by the MaaS provider
           type: boolean
         age:
-          type: number
-        licenses:
+          description: Age of the traveler, may be approximate
+          type: integer
+        cardTypes:
+          description: The kind of cards this traveler possesses
           type: array
           items:
-            $ref: "#/components/schemas/license"
-        cards:
+            $ref: "#/components/schemas/cardType"
+        licenseTypes:
+          description: The kind of licenses this traveler possesses
           type: array
           items:
-            $ref: "#/components/schemas/card"
+            $ref: "#/components/schemas/licenseType"
         requirements:
           $ref: "#/components/schemas/requirements"
 
@@ -2505,8 +2770,9 @@ components:
       required: true
       schema:
         type: string
-      description: ISO 639-1 two letter language code
-      example: NL
+        format: A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5
+      description: A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible, ideally just one language tag from the list in operator/information
+      example: nl, de;q=0.7
     api:
       in: header
       name: Api
@@ -2522,7 +2788,7 @@ components:
       schema:
         type: string
       description: Version of the API.
-      example: 0.5.2
+      example: 0.6.0
     maasId:
       in: header
       name: maas-id
@@ -2530,6 +2796,14 @@ components:
       schema:
         type: string
       description: The ID of the sending maas operator
+      example: 1324A-DFB3482-32ACD
+    addressedTo:
+      in: header
+      name: addressed-to
+      required: false
+      schema:
+        type: string
+      description: The ID of the maas operator that has to receive this message
       example: 1324A-DFB3482-32ACD
 
   securitySchemes:
@@ -2566,19 +2840,19 @@ components:
     204NoContent:
       description: Request was successful, no content to return.
     400BadRequest:
-      description: Bad request (invalid query or body parameters).
+      description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
     401Unauthorized:
-      description: Authorization error (invalid API key) or insufficient access rights given current authorization.
+      description: Authorization error (invalid API key) or insufficient access rights given current authorization. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
     403Forbidden:
-      description: The request will not be fulfilled, because the request is not legal in the current state. Authorization will not help.
+      description: The request will not be fulfilled, because the request is not legal in the current state. Authorization will not help. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       content:
         application/json:
           schema:
