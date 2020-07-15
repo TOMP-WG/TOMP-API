@@ -1484,8 +1484,6 @@ components:
       allOf:
         - $ref: "#/components/schemas/planningRequest"
         - type: object
-          required:
-            - customer
           properties:
             id:
               description: A unique identifier for the TO to know this booking by, required from the point on where booking-intent is true
