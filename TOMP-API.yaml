@@ -1056,7 +1056,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
-    patch:
+    post:
       tags:
         - payment
         - MP
