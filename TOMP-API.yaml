@@ -1235,7 +1235,7 @@ components:
         isDisabled:
           type: boolean
           description: true indicates the asset is currently disabled (broken)
-        properties:
+        overridenProperties:
           $ref: "#/components/schemas/assetProperties"
 
     assetClass:
