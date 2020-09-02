@@ -1280,6 +1280,9 @@ components:
         id:
           type: string
           description: Unique identifier of an asset type,
+        stationId:
+          type: string
+          description: If staionId is present, the nrAvailable is expected to find the availableity at that particular station
         nrAvailable:
           type: integer
         assets:
@@ -2542,6 +2545,9 @@ components:
         - endMonth
         - endDay
       properties:
+        stationId:
+          type: string
+          description: If this parameter is present, it means that star and end prameters correspond to the opening and closing days of the station.
         startMonth:
           type: integer
           minimum: 1
