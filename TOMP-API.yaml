@@ -1220,7 +1220,7 @@ components:
       properties:
         id:
           type: string
-          description: Unique identifier of an asset
+          description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).
         isReserved:
           type: boolean
           description: true indicates the bike is currently reserved for someone else
