@@ -991,26 +991,31 @@ paths:
         - name: from
           in: query
           description: start of the selection
-          required: true
+          required: false
           schema:
             type: string
             format: date-time
         - name: to
           in: query
           description: end of the selection
-          required: true
+          required: false
           schema:
             type: string
             format: date-time
         - name: state
           in: query
-          required: true
+          required: false
           schema:
             $ref: "#/components/schemas/journalState"
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
         - name: category
           in: query
           description: type of booking line (e.g. fare, addition costs, fines, ...)
-          required: true
+          required: false
           schema:
             type: string
             enum:
