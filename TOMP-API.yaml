@@ -1240,7 +1240,7 @@ components:
 
     assetClass:
       type: string
-      description: the class of asset. It's possible to specify it more in the assetSubType in assetType. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
+      description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
       enum:
         [
           AIR,
@@ -2666,6 +2666,14 @@ components:
         conditions:
           description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
           type: string
+        productType:
+          description: the type of product offered. SHARING should also be used for public transport.
+          type: string
+          enum: [RENTAL, SHARING, PARKING, CHARGING]
+        assetClasses:
+          type: array
+          items:
+            $ref: "#/components/schemas/assetClass"
 
     systemPricingPlan:
       type: object
