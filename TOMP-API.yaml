@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.9.0"
+  version: "0.9.1"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -1497,16 +1497,21 @@ components:
     bookingRequest:
       description: A booking requested by the MP
       type: object
-      allOf:
-        - $ref: "#/components/schemas/planningRequest"
-        - type: object
-          properties:
-            id:
-              description: A unique identifier for the TO to know this booking by, required from the point on where booking-intent is true
-              type: string
-            customer:
-              description: The user that wants to make this booking under their name, should contain all the information required in a conditionRequireBookingData
-              $ref: "#/components/schemas/customer"
+      required:
+        - id
+      properties:
+        id:
+          description: A unique identifier for the TO to know this booking by
+          type: string
+        from:
+          description: information about the origin, only to supply when requested in the conditionRequireBookingData
+          $ref: "#/components/schemas/place"
+        to:
+          description: information about the destination, only to supply when requested in the conditionRequireBookingData
+          $ref: "#/components/schemas/place"
+        customer:
+          description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
+          $ref: "#/components/schemas/customer"
 
     bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
