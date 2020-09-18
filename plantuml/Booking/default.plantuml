@@ -13,11 +13,12 @@ access code (if applicable):
  ACCESS_CODE_IN_COMMIT_EVENT or 
  ACCESS_CODE_IN_PREPARE_EVENT (trip exec module).
 
-The access code itself should also be specified using a process identifier.
+One of these access code moments must be accompanied
+by ACCESS_CODE_QR, ACCESS_CODE_PDF, ACCESS_CODE_TOKEN, 
+ACCESS_CODE_LINK, ACCESS_CODE_TICKETSTOCK.
 
 At last, to provide direct planning-booking-unlocking 
-you must add ATOMIC_BOOKING_UNLOCKING, or in case of 
-planning-booking-set-in-use, add ATOMIC_BOOKING_SET_IN_USE
+you must add ATOMIC_BOKKING_UNLOCKING.
 end note
 
 MP -> TO : POST /booking/ \nMUST be directly executed in\ncase of ATOMIC_PLANNING_AND_BOOKING
@@ -33,7 +34,7 @@ return booking in PENDING state\nIn case of ACCESS_CODE_IN_BOOKING\nit must cont
 
 note over MP
 The MP has to book all the legs of the trip.
-If all TOs reply with a booking in PENDING state,
+If all reply with a booking in PENDING state,
 he can continue COMMITting the bookings
 end note
 
