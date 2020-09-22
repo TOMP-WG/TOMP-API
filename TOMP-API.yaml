@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "0.9.0"
+  version: "0.9.1"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -199,8 +199,6 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
-        "409":
-          $ref: "#/components/responses/409Conflict"
     get:
       description: Optional - Returns bookings that has been created earlier, selected on state.
       tags:
@@ -629,6 +627,14 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          headers:
+            Retry-After:
+              description: seconds after response
+              example: 120
+              schema:
+                type: integer
 
   /legs/{id}/progress:
     parameters:
@@ -982,26 +988,31 @@ paths:
         - name: from
           in: query
           description: start of the selection
-          required: true
+          required: false
           schema:
             type: string
             format: date-time
         - name: to
           in: query
           description: end of the selection
-          required: true
+          required: false
           schema:
             type: string
             format: date-time
         - name: state
           in: query
-          required: true
+          required: false
           schema:
             $ref: "#/components/schemas/journalState"
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
         - name: category
           in: query
           description: type of booking line (e.g. fare, addition costs, fines, ...)
-          required: true
+          required: false
           schema:
             type: string
             enum:
@@ -1047,7 +1058,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
-    patch:
+    post:
       tags:
         - payment
         - MP
@@ -1211,7 +1222,7 @@ components:
       properties:
         id:
           type: string
-          description: Unique identifier of an asset
+          description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).
         isReserved:
           type: boolean
           description: true indicates the bike is currently reserved for someone else
@@ -1226,12 +1237,12 @@ components:
         isDisabled:
           type: boolean
           description: true indicates the asset is currently disabled (broken)
-        properties:
+        overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
     assetClass:
       type: string
-      description: the class of asset. It's possible to specify it more in the assetSubType in assetType. These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
+      description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
       enum:
         [
           AIR,
@@ -1270,7 +1281,10 @@ components:
       properties:
         id:
           type: string
-          description: Unique identifier of an asset type, 
+          description: Unique identifier of an asset type,
+        stationId:
+          type: string
+          description: If staionId is present, the nrAvailable is expected to find the availableity at that particular station
         nrAvailable:
           type: integer
         assets:
@@ -1284,7 +1298,7 @@ components:
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         sharedProperties:
           $ref: "#/components/schemas/assetProperties"
-              
+
     assetProperties:
       description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
       properties:
@@ -1356,10 +1370,10 @@ components:
         gearbox:
           type: string
           description: type of gearbox
-          enum: 
+          enum:
             [
-              MANUAL, 
-              AUTOMATIC, 
+              MANUAL,
+              AUTOMATIC,
               SEMIAUTOMATIC
             ]
         image:
@@ -1385,14 +1399,14 @@ components:
         propulsion:
           type: string
           description: way in which the asset is powered
-          enum: 
+          enum:
             [
-              MUSCLE, 
-              ELECTRIC, 
-              GASOLINE, 
-              DIESEL, 
-              HYBRID, 
-              LPG, 
+              MUSCLE,
+              ELECTRIC,
+              GASOLINE,
+              DIESEL,
+              HYBRID,
+              LPG,
               HYDROGEN
             ]
         smoking:
@@ -1472,16 +1486,21 @@ components:
     bookingRequest:
       description: A booking requested by the MP
       type: object
-      allOf:
-        - $ref: "#/components/schemas/planningRequest"
-        - type: object
-          properties:
-            id:
-              description: A unique identifier for the TO to know this booking by, required from the point on where booking-intent is true
-              type: string
-            customer:
-              description: The user that wants to make this booking under their name, should contain all the information required in a conditionRequireBookingData
-              $ref: "#/components/schemas/customer"
+      required:
+        - id
+      properties:
+        id:
+          description: A unique identifier for the TO to know this booking by
+          type: string
+        from:
+          description: information about the origin, only to supply when requested in the conditionRequireBookingData
+          $ref: "#/components/schemas/place"
+        to:
+          description: information about the destination, only to supply when requested in the conditionRequireBookingData
+          $ref: "#/components/schemas/place"
+        customer:
+          description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
+          $ref: "#/components/schemas/customer"
 
     bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
@@ -1490,6 +1509,7 @@ components:
         [
           NEW,
           PENDING,
+          REJECTED,
           RELEASED,
           EXPIRED,
           CONDITIONAL_CONFIRMED,
@@ -1523,7 +1543,7 @@ components:
               format: date
             country:
               $ref: "#/components/schemas/country"
-    
+
     cardType:
       description: A generic description of a card, asset class and acceptors is only allowed for DISCOUNT/TRAVEL/OTHER cards
       type: object
@@ -1533,14 +1553,14 @@ components:
         type:
           description: The broad category of card
           type: string
-          enum: 
+          enum:
             [
-              ID, 
-              DISCOUNT, 
-              TRAVEL, 
-              BANK, 
-              CREDIT, 
-              PASSPORT, 
+              ID,
+              DISCOUNT,
+              TRAVEL,
+              BANK,
+              CREDIT,
+              PASSPORT,
               OTHER
             ]
         subType:
@@ -1756,13 +1776,13 @@ components:
         - path
         - status
       properties:
-        method: 
+        method:
           type: string
           enum: [
-            POST, 
-            PUT, 
-            GET, 
-            DELETE, 
+            POST,
+            PUT,
+            GET,
+            DELETE,
             PATCH
           ]
         path:
@@ -1773,23 +1793,23 @@ components:
           description: in case the path is ending in /events, the event type/operator enum should be added here.
           type: string
           enum: [
-            PREPARE, 
-            ASSIGN_ASSET, 
-            SET_IN_USE, 
-            PAUSE, 
-            START_FINISHING, 
-            FINISH, 
-            ISSUE, 
-            CANCEL, 
-            EXPIRE, 
-            DENY, 
+            PREPARE,
+            ASSIGN_ASSET,
+            SET_IN_USE,
+            PAUSE,
+            START_FINISHING,
+            FINISH,
+            ISSUE,
+            CANCEL,
+            EXPIRE,
+            DENY,
             COMMIT
           ]
         status:
           type: string
           enum: [
-            NOT_IMPLEMENTED, 
-            DIALECT, 
+            NOT_IMPLEMENTED,
+            DIALECT,
             IMPLEMENTED
           ]
       example:
@@ -1821,7 +1841,7 @@ components:
           $ref: "#/components/schemas/processIdentifiers"
       example:
         { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"], "processIdentifiers": { "planning": ["LOCATION_BASED"] }, "booking": ["ACCESS_CODE_QR", "ACCESS_CODE_IN_COMMIT_EVENT"] }
-      
+
     error:
       type: object
       description:
@@ -1941,14 +1961,14 @@ components:
               additionalProperties: true
 
     geojsonLine:
-      description: An array  of WGS84 coordinate pairs 
+      description: An array  of WGS84 coordinate pairs
       type: array
       example: [[6.169639, 52.253279], [6.05623, 52.63473]]
       items:
         $ref: "#/components/schemas/geojsonPoint"
 
     geojsonPoint:
-      description: Geojson Coordinate 
+      description: Geojson Coordinate
       type: array
       minItems: 2
       maxItems: 2
@@ -2289,7 +2309,7 @@ components:
           type: array
           items:
             type: string
-        planning: 
+        planning:
           type: array
           items:
             type: string
@@ -2299,19 +2319,19 @@ components:
             type: string
         tripExecution:
           type: array
-          items: 
+          items:
             type: string
         support:
           type: array
-          items: 
+          items:
             type: string
         payment:
           type: array
-          items: 
+          items:
             type: string
         general:
           type: array
-          items: 
+          items:
             type: string
 
     requirements:
@@ -2322,11 +2342,11 @@ components:
     scenario:
       type: string
       enum: [
-        POSTPONED_COMMIT, 
-        DEPOSIT, 
-        PAY_WHEN_FINISHED, 
-        REQUIRE_BOOKING_DATA, 
-        RETURN_AREA, 
+        POSTPONED_COMMIT,
+        DEPOSIT,
+        PAY_WHEN_FINISHED,
+        REQUIRE_BOOKING_DATA,
+        RETURN_AREA,
         UPFRONT_PAYMENT
       ]
 
@@ -2440,7 +2460,7 @@ components:
           type: string
           format: date-time
         priority:
-          description: the priority of the support request. 
+          description: the priority of the support request.
           type: string
           enum: [ERROR_CANNOT_CONTINUE, ERROR_CAN_CONTINUE, DISTURBING_ISSUE, QUESTION, OTHER]
         contactInformationEndUser:
@@ -2533,6 +2553,9 @@ components:
         - endMonth
         - endDay
       properties:
+        stationId:
+          type: string
+          description: If this parameter is present, it means that star and end prameters correspond to the opening and closing days of the station.
         startMonth:
           type: integer
           minimum: 1
@@ -2578,6 +2601,9 @@ components:
           description: This indicates that this set of rental hours applies to either members or non-members only.
           enum: [MEMBER, NON_MEMBERS]
           example: MEMBER
+        stationId:
+          type: string
+          description: If this parameter is present, it means that starTime and endTime correspond to the opening and closing hour of the station.
         startTime:
           type: string
           format: HH:MM time
@@ -2654,9 +2680,19 @@ components:
           type: string
           enum: [FREE_FLOATING, STATION_BASED, VIRTUAL_STATION_BASED]
           example: FREE_FLOATING
+        chamberOfCommerceInfo:
+          $ref: "#/components/schemas/chamberOfCommerceInfo"
         conditions:
           description: Added to include possibility to communicatie general rental conditions like minimum age, max. reservation time etc. [amended]
           type: string
+        productType:
+          description: the type of product offered. SHARING should also be used for public transport.
+          type: string
+          enum: [RENTAL, SHARING, PARKING, CHARGING]
+        assetClasses:
+          type: array
+          items:
+            $ref: "#/components/schemas/assetClass"
 
     systemPricingPlan:
       type: object
@@ -2730,6 +2766,15 @@ components:
           description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
           type: object
           additionalProperties: true
+
+    chamberOfCommerceInfo:
+      description: To identify the operator
+      type: object
+      properties:
+        number:
+          type: string
+        place:
+          type: string
 
     traveler:
       description: A generic description of a traveler, not including any identifying information
@@ -2852,5 +2897,6 @@ components:
       description: The requested resources does not exist or the requester is not authorized to see it or know it exists.
     409Conflict:
       description: The request will not be fulfilled. The request itself is legal, but the content conflicts with the server and might be stale. The user might try again after looking up the current state of the resource.
+
     410Gone:
       description: The requested resource is no longer available. This is permanent.
