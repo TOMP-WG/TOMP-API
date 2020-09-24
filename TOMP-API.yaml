@@ -199,15 +199,6 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
-      callbacks: # webhooks
-        # as described in https://swagger.io/docs/specification/callbacks/
-        booking-operations:
-          "{$request.body#/webhook}":
-            patch:
-              description: see POST /bookings/{id}/events
-              responses:
-                "200":
-                  description: operation ok
     get:
       description: Optional - Returns bookings that has been created earlier, selected on state.
       tags:
@@ -388,11 +379,6 @@ paths:
         - booking [optional]
         - TO
         - MP
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/booking"
       responses:
         "204":
           $ref: "#/components/responses/204NoContent"
@@ -408,8 +394,13 @@ paths:
         # as described in https://swagger.io/docs/specification/callbacks/
         booking-operations:
           "{$request.body#/webhook}":
-            patch:
-              description: see POST /booking/{id}/events
+            post:
+              description: see POST /legs/{id}/events
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: "#/components/schemas/legEvent"
               responses:
                 "200":
                   description: operation ok
