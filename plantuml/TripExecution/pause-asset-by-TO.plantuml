@@ -1,0 +1,25 @@
+@startuml pause-asset-by-TO
+title Trip execution Scenario Part 'pause asset by TO' - V1.0.0
+
+participant App
+participant MP
+participant TO
+participant Asset
+
+App -> MP : pause
+MP -> TO : /executions/{id}/events { "operation" : "PAUSE" }
+TO -> Asset : lock
+return ok
+TO -> MP: execution, in case of 'LOCK_CODE_IN_PAUSE_EVENT'\nit must contain acces information
+
+...
+
+App -> MP : start again
+MP -> TO : /executions/{id}/events { "operation" : "SET_IN_USE" }
+
+TO -> Asset : unlock
+return ok
+
+TO -> MP : ok
+
+@enduml

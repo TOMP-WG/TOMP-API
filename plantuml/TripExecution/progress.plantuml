@@ -1,0 +1,25 @@
+@startuml Support
+title Trip execution - progress - V1.0.0
+participant MP
+participant TO
+
+autoactivate on
+
+MP -> TO : GET /legs/{id}/progress
+note over TO
+Report the last recorded location 
+of the executing trip, including the
+distance and duration of the trip until the reported
+location.
+end note
+return location report
+
+note over MP
+In case of PROGRESS_NOTIFICATION the TO will
+send the progress to the MP.
+end note
+
+TO -> MP : POST /issue/{id}/status
+return ok
+
+@enduml
