@@ -2266,7 +2266,7 @@ components:
           items:
             type: string
             format: an asset id for this operator
-        userGroup:
+        userGroups:
           description: Id(s) of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. Id's are agreed upon by TO and MP.
           type: array
           items:
