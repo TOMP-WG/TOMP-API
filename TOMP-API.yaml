@@ -1678,9 +1678,9 @@ components:
       description: a lon, lat (WGS84, EPSG:4326)
       required:
         - lat
-        - lng
+        - lon
       properties:
-        lng:
+        lon:
           type: number
           example: 6.169639
         lat:
