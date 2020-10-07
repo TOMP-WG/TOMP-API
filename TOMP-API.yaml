@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.0.0"
+  version: "1.0.1"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -107,44 +107,6 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
-
-  /plannings/{id}:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - name: id
-        in: path
-        description: Planning identifier
-        required: true
-        schema:
-          type: string
-    get:
-      description: Returns the planning result.
-      tags:
-        - planning [optional]
-        - TO
-      responses:
-        "200":
-          description: The planning was found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/planning"
-          headers:
-            Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-        "410":
-          $ref: "#/components/responses/410Gone"
 
   /bookings/:
     parameters:
