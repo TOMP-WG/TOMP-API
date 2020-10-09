@@ -1930,6 +1930,7 @@ components:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           required:
+            - type
             - vatRate
             - unitType
             - amount
