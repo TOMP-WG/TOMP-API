@@ -1275,7 +1275,6 @@ components:
       required:
         - id
         - amountAvailable
-        - assets
         - assetClass
         - sharedProperties
       properties:
