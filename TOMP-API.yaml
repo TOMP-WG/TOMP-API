@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.0.1"
+  version: "1.1.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -471,6 +471,20 @@ paths:
       tags:
         - trip execution
         - TO
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
@@ -692,6 +706,20 @@ paths:
         - TO
       summary: describes all available stations
       description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
@@ -724,6 +752,20 @@ paths:
       tags:
         - operator information
         - TO
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
@@ -759,6 +801,20 @@ paths:
         - TO
       summary: informs customers about changes to the system outside of normal operations
       description: This feed is intended to inform customers about changes to the system that do not fall within the normal system operations. For example, system closures due to weather would be listed here, but a system that only operated for part of the year would have that schedule listed in the system-calendar.json feed. This file is an array of alert objects defined as below. Obsolete alerts should be removed so the client application can safely present to the end user everything present in the feed. The consumer could use the start/end information to determine if this is a past, ongoing or future alert and adjust the presentation accordingly. [from GBFS]
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: returns currently active system alerts
@@ -921,6 +977,20 @@ paths:
         - operator information
         - TO
       summary: describes regions for a system that is broken up by geographic or political region. It is defined as a separate feed to allow for additional region metadata (such as shape definitions). [from GBFS]
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
@@ -992,7 +1062,19 @@ paths:
                 DEPOSIT,
                 OTHER,
               ]
-
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: journal entries
@@ -1237,7 +1319,6 @@ components:
       required:
         - id
         - amountAvailable
-        - assets
         - assetClass
         - sharedProperties
       properties:
@@ -2234,11 +2315,17 @@ components:
           items:
             $ref: "#/components/schemas/traveler"
         useAssets:
-          description: The specific asset(s), the user wishes to receive leg options for
+          description: The specific asset(s) the user wishes to receive leg options for
           type: array
           items:
             type: string
-            format: an asset id for this operator
+            format: an asset id for this operator, this might be an asset id from /operator/available-assets, but can also be another identification for this asset (e.g. bluetooth id)
+        useAssetTypes:
+          description: The specific asset type(s) the user wishes to receive leg options for
+          type: array
+          items:
+            type: string
+            format: an asset type id for this operator (from /operator/available-assets)
 
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
