@@ -2232,11 +2232,16 @@ components:
     notification:
       type: object
       description: notifies the MaaS operator of issues with a booking [addendum]
+      required:
+       - type
       properties:
         type:
           type: string
-          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, OTHER]
+          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, OTHER]
           example: VEHICLE_NOT_AVAILABLE
+        minutes:
+          description: in case of ETA, the number of minutes until arrival at the pickup location
+          type: number
         comment:
           type: string
           description: free text, should match Content-Language
