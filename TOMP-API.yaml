@@ -2272,11 +2272,17 @@ components:
           items:
             $ref: "#/components/schemas/traveler"
         useAssets:
-          description: The specific asset(s), the user wishes to receive leg options for
+          description: The specific asset(s) the user wishes to receive leg options for
           type: array
           items:
             type: string
-            format: an asset id for this operator
+            format: an asset id for this operator, this might be an asset id from /operator/available-assets, but can also be another identification for this asset (e.g. bluetooth id)
+        useAssetTypes:
+          description: The specific asset type(s) the user wishes to receive leg options for
+          type: array
+          items:
+            type: string
+            format: an asset type id for this operator (from /operator/available-assets)
 
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
