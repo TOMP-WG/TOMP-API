@@ -2657,7 +2657,7 @@ components:
           example: MEMBER
         stationId:
           type: string
-          description: If this parameter is present, it means that starTime and endTime correspond to the opening and closing hour of the station.
+          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hour of the station.
         startTime:
           type: string
           format: HH:MM time
