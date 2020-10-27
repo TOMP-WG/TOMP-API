@@ -1,0 +1,26 @@
+@startuml Default payment
+title Payment Scenario - V1.0.0
+participant MP
+participant TO
+
+autoactivate on
+
+note over MP
+to facilitate the clearance process, the MP can request the 
+list of all legs he has to pay to the TO.
+end note
+
+MP -> TO : /payment/journal-entry
+return list of all journal entries matching the query
+
+note over MP
+to report extra costs (as well from TO to MP as vice versa)
+end note
+
+MP -> TO : /payment/{id}/claim-extra-costs
+return ok
+
+TO -> MP : /payment/{id}/claim-extra-costs
+return ok
+
+@enduml
