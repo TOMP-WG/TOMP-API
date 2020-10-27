@@ -108,44 +108,6 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /plannings/{id}:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - name: id
-        in: path
-        description: Planning identifier
-        required: true
-        schema:
-          type: string
-    get:
-      description: Returns the planning result.
-      tags:
-        - planning [optional]
-        - TO
-      responses:
-        "200":
-          description: The planning was found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/planning"
-          headers:
-            Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-        "410":
-          $ref: "#/components/responses/410Gone"
-
   /bookings/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
