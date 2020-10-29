@@ -2293,7 +2293,7 @@ components:
       type: object
       required:
         - from
-        - nrOftravelers
+        - nrOfTravelers
       properties:
         from:
           $ref: "#/components/schemas/place"
