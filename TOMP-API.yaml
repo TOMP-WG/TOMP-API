@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.0.0"
+  version: "1.1.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -108,44 +108,6 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /plannings/{id}:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - name: id
-        in: path
-        description: Planning identifier
-        required: true
-        schema:
-          type: string
-    get:
-      description: Returns the planning result.
-      tags:
-        - planning [optional]
-        - TO
-      responses:
-        "200":
-          description: The planning was found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/planning"
-          headers:
-            Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-        "410":
-          $ref: "#/components/responses/410Gone"
-
   /bookings/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -246,7 +208,7 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (seel <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. <br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twide should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give garantees directly to fullfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will be come expired. Otherwise it can be commmitted when the leg is confirmed or denied (using this event).
+      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (see <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. <br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twice should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
       tags:
         - booking
         - MP
@@ -509,6 +471,20 @@ paths:
       tags:
         - trip execution
         - TO
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
@@ -730,6 +706,20 @@ paths:
         - TO
       summary: describes all available stations
       description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
@@ -762,6 +752,20 @@ paths:
       tags:
         - operator information
         - TO
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
@@ -797,6 +801,20 @@ paths:
         - TO
       summary: informs customers about changes to the system outside of normal operations
       description: This feed is intended to inform customers about changes to the system that do not fall within the normal system operations. For example, system closures due to weather would be listed here, but a system that only operated for part of the year would have that schedule listed in the system-calendar.json feed. This file is an array of alert objects defined as below. Obsolete alerts should be removed so the client application can safely present to the end user everything present in the feed. The consumer could use the start/end information to determine if this is a past, ongoing or future alert and adjust the presentation accordingly. [from GBFS]
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: returns currently active system alerts
@@ -959,6 +977,20 @@ paths:
         - operator information
         - TO
       summary: describes regions for a system that is broken up by geographic or political region. It is defined as a separate feed to allow for additional region metadata (such as shape definitions). [from GBFS]
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
@@ -1030,7 +1062,19 @@ paths:
                 DEPOSIT,
                 OTHER,
               ]
-
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: number
+            default: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: journal entries
@@ -1275,7 +1319,6 @@ components:
       required:
         - id
         - amountAvailable
-        - assets
         - assetClass
         - sharedProperties
       properties:
@@ -2189,11 +2232,16 @@ components:
     notification:
       type: object
       description: notifies the MaaS operator of issues with a booking [addendum]
+      required:
+       - type
       properties:
         type:
           type: string
-          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, OTHER]
+          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, OTHER]
           example: VEHICLE_NOT_AVAILABLE
+        minutes:
+          description: in case of ETA, the number of minutes until arrival at the pickup location
+          type: number
         comment:
           type: string
           description: free text, should match Content-Language
@@ -2272,12 +2320,24 @@ components:
           items:
             $ref: "#/components/schemas/traveler"
         useAssets:
-          description: The specific asset(s), the user wishes to receive leg options for
+          description: The specific asset(s) the user wishes to receive leg options for
           type: array
           items:
             type: string
-            format: an asset id for this operator
-
+            format: an asset id for this operator, this might be an asset id from /operator/available-assets, but can also be another identification for this asset (e.g. bluetooth id)
+        userGroups:
+          description: Id(s) of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. Id's are agreed upon by TO and MP.
+          type: array
+          items:
+            type: string
+            format: a usergroup id for this operator
+        useAssetTypes:
+          description: The specific asset type(s) the user wishes to receive leg options for
+          type: array
+          items:
+            type: string
+            format: an asset type id for this operator (from /operator/available-assets)
+            
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
@@ -2603,7 +2663,7 @@ components:
           example: MEMBER
         stationId:
           type: string
-          description: If this parameter is present, it means that starTime and endTime correspond to the opening and closing hour of the station.
+          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hour of the station.
         startTime:
           type: string
           format: HH:MM time
