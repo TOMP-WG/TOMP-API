@@ -574,8 +574,9 @@ paths:
       description: This endpoint must be used to alter the state of a leg.<br>
         Operations:<br> `PREPARE` the TO can send a message telling the MP that he is preparing the booked leg [To be implemented by the MP] (see (7.2) in the process flow - trip execution),<br>
         `ASSIGN_ASSET` can assign an asset to a leg. Can be to assign an asset in case there is still an asset type assigned [Optionally implementable by the MP]. See (4.7) in the process flow - trip execution<br>
-        `RESERVE` will claim an asset ahead in time [Optionally implementable by the TO],<br>
         `SET_IN_USE` will activate the leg or resume the leg [TO and MP] (see (4.6) in process flow),<br>
+        `TIME_EXTEND` will be used to request an extension in time; the end user wants to use the asset longer, the `time` field contains the new end time,<br>
+        `TIME_POSTPONE` will be used to request a delay in the departure time, the end user wants to depart later, the `time` field contains the new departure time,<br>
         `PAUSE` will pause the leg [TO and MP] (see (4.6) in process flow),<br>
         `START_FINISHING` will start the end-of-leg [Optionally implementable by TO and MP],<br>
         `FINISH` will end this leg (see (4.6) in process flow) [TO and MP]
@@ -2166,7 +2167,8 @@ components:
               PAUSE,
               START_FINISHING,
               FINISH,
-              ISSUE,
+              TIME_EXTEND,
+              TIME_POSTPONE,
             ]
         comment:
           type: string
