@@ -1,0 +1,60 @@
+@startuml
+
+title TOMP API workflow - planned trip
+
+start
+
+floating note right: Green nodes are \nimplemented by TOMP API
+
+partition "planning process" {
+:Create routes;
+#green:Search TOs;
+note right
+  operator module
+end note
+#green:Find out availability TOs;
+note right
+  /plannings/?booking-intent=false
+end note
+#green:Prebook best routes;
+note right
+  /plannings/?booking-intent=true
+end note
+}
+
+:Propose best trips to end user;
+
+partition "booking process" {
+#green:Book leg per TO;
+note right
+  /bookings/
+end note
+#green:Commit legs;
+note right
+  /bookings/{id}/events COMMIT
+end note
+}
+
+partition "trip execution" {
+repeat 
+#green:Start leg;
+note right
+  /legs/{id}/events SET_IN_USE
+end note
+:Travel;
+#green:Stop leg;
+note right
+  /legs/{id}/events FINISH
+end note
+repeat while (last leg?) is (no)
+->:yes;
+}
+
+#green:Payment overview;
+note right
+  /payment/journal-entry
+end note
+
+stop
+
+@enduml
