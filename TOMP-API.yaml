@@ -2112,6 +2112,9 @@ components:
           description: The intended arrival time at the to place
           type: string
           format: date-time
+        userSequenceNumber:
+          description: reference to the sequence number in the travelers field of the request. If missing, it is refering to the first (if any).
+          type: integer
         assetType:
           description: The asset type used in this leg as determined during booking
           $ref: "#/components/schemas/assetType"
@@ -2845,6 +2848,9 @@ components:
           type: boolean
         age:
           description: Age of the traveler, may be approximate
+          type: integer
+        sequenceNumber:
+          description: sequence number of the traveler. Starting with 0. If missing, it is default 0. This number should be used to refer in the planning result.
           type: integer
         cardTypes:
           description: The kind of cards this traveler possesses
