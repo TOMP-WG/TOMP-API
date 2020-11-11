@@ -101,12 +101,12 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
-        "202":
-          $ref: "#/components/responses/202Accepted"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
 
   /bookings/:
     parameters:
@@ -118,7 +118,6 @@ paths:
         Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planning).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
-        <p>The optional webhook can be used to post updates from TO to MP. If it isn't used, the subscription possibility in this API can be used or the events can be posted directly.
         <p> see (3.2) in the process flow - booking
       tags:
         - booking
@@ -147,18 +146,18 @@ paths:
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. This option can be used, but there is also a facility to use the webhook, mentioned in '#/component/schemas/booking'.
+              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
               schema:
                 description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
                 type: string
                 format: http-date
               required: true
-        "202":
-          $ref: "#/components/responses/202Accepted"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
     get:
@@ -233,8 +232,6 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
-        "204":
-          $ref: "#/components/responses/204NoContent"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -286,7 +283,7 @@ paths:
     put:
       description: Optional - This endpoint should be used to adjust the parameters of the booking. Changes not acceptable to the TO should return 400. If a booking is started and can no longer be adjusted the TO should return 403. The state of the booking should **never** be adjusted using this method. Use /bookings/{id}/events for that. See also (7.2) in the flow diagram - booking.
       tags:
-        - booking
+        - booking [optional]
         - TO
       requestBody:
         content:
@@ -348,6 +345,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
         "410":
@@ -379,6 +378,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
         "410":
@@ -428,6 +429,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
         "410":
@@ -450,6 +453,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
         "410":
@@ -535,6 +540,8 @@ paths:
                 $ref: "#/components/schemas/leg"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
     put:
@@ -556,6 +563,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
 
@@ -601,6 +610,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
         "503":
@@ -663,6 +674,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
 
@@ -966,6 +979,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
 
   /operator/regions:
     parameters:
@@ -1096,6 +1111,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
 
   /payment/{id}/claim-extra-costs:
     parameters:
@@ -1139,6 +1156,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
 
   /support/:
     parameters:
@@ -1174,6 +1193,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
 
@@ -1215,6 +1236,8 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
 
@@ -2942,13 +2965,13 @@ components:
           schema:
             $ref: "#/components/schemas/error"
     401Unauthorized:
-      description: Authorization error (invalid API key) or insufficient access rights given current authorization. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      description: Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
     403Forbidden:
-      description: The request will not be fulfilled, because the request is not legal in the current state. Authorization will not help. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      description: The client does not have access rights to the content, i.e. they are unauthorized, so server is rejecting to give proper response. Unlike 401, the client's identity is known to the server.
       content:
         application/json:
           schema:
