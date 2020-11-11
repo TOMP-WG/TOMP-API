@@ -1262,7 +1262,7 @@ components:
       type: object
       required:
         - id
-        - properties
+        - overriddenProperties
       properties:
         id:
           type: string
@@ -1318,7 +1318,6 @@ components:
       type: object
       required:
         - id
-        - amountAvailable
         - assetClass
         - sharedProperties
       properties:
