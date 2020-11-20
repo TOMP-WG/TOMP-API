@@ -1352,6 +1352,24 @@ components:
         isDisabled:
           type: boolean
           description: true indicates the asset is currently disabled (broken)
+        rentalUrl:
+          type: string
+          description: deep-linking option from GBFS+. Only added to be consistent with GBFS 2.0
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890
+          deprecated: true
+        rentalUrlAndroid:
+          type: string
+          description: deep-linking option from GBFS 2.0. Only added to be consistent with GBFS 2.0
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=android
+          deprecated: true
+        rentalUrlIOS:
+          type: string
+          description: deep-linking option from GBFS 2.0. Only added to be consistent with GBFS 2.0
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
+          deprecated: true
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -1495,11 +1513,6 @@ components:
           type: string
           format: URL
           example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
-        rentalUrl:
-          type: string
-          description: deep-linking option from GBFS+
-          format: URL
-          example: https://www.rentmyfreebike.com/rental
         infantSeat:
           type: boolean
           description: true indicates infant seat required
@@ -2539,8 +2552,22 @@ components:
           example: [CREDITCARD, PAYPASS, APPLEPAY]
         rentalUrl:
           type: string
+          description: web uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
           format: URL
           example: https://www.rentmyfreebike.com
+          deprecated: true
+        rentalUrlAndroid:
+          type: string
+          description: android uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
+          format: URL
+          example: https://www.rentmyfreebikecom/app?sid=1234567890&platform=android
+          deprecated: true
+        rentalUrlIOS:
+          type: string
+          description: ios uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
+          deprecated: true
 
     stopReference:
       type: object
@@ -2799,11 +2826,31 @@ components:
         url:
           description: The URL of the transport operator. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped.
           type: string
+          format: URL
           example: https://www.rentmyfreebike.com
         purchaseUrl:
           description: A fully qualified URL where a customer can purchase a membership or learn more about purchasing memberships
           type: string
+          format: URL
           example: https://www.rentmyfreebike.com/purchase
+        discoveryUriAndroid:
+          description: Uri to detect if the app is available at the mobile.
+          format: URL
+          type: string
+        discoveryUriIOS:
+          description: Uri to detect if the app is available at the mobile.
+          format: URL
+          type: string
+        storeUriAndroid:
+          description: Uri to the app in the store.
+          format: URL
+          type: string
+          example: https://play.google.com/store/apps/details?id=com.rentmyfreebike.android
+        storeUriIOS:
+          description: Uri to the app in the store.
+          format: URL
+          type: string
+          example: itms-apps://itunes.apple.com/app/idcom.rentmyfreebike.ios
         startDate:
           type: string
           format: date
@@ -2816,6 +2863,10 @@ components:
           type: string
           format: email
           example: rent@freebike.com
+        feedContactEmail:
+          description: A single contact email address for consumers of this feed to report technical issues.
+          type: string
+          format: email
         timezone:
           description: The time zone where the system is located. Time zone names never contain the space character but may contain an underscore. Please refer to the "TZ" value in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of valid values
           type: string
