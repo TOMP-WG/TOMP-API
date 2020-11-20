@@ -1,0 +1,24 @@
+@startuml
+
+title TOMP API workflow - booking process
+
+start
+
+while (foreach leg)
+  #green:Book leg per TO;
+  if (booking ok?) then (yes)
+  else (no)
+    while (foreach booked leg)
+      #green:Cancel leg;
+    end while (ready)
+    stop;
+  endif
+end while (ready)
+
+while (foreach leg)
+  #green:Commit leg;
+end while  (ready)
+
+stop
+
+@enduml
