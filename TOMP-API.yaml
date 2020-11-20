@@ -1964,8 +1964,15 @@ components:
             DIALECT,
             IMPLEMENTED
           ]
+        supportsPaging:
+          description: does this endpoint support paging? In that case this endpoint can be accessed using query parameters offset=x and limit=y. Only allowed at endpoints that have specified these query parameters.
+          type: boolean
+          default: false
       example:
-        { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
+        withoutPaging:
+          { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
+        withPaging:
+          { "method": "POST", "path": "/operator/stations", "status": "IMPLEMENTED", "supportsPaging": true }
 
     endpointImplementation:
       type: object
@@ -1992,7 +1999,7 @@ components:
         processIdentifiers:
           $ref: "#/components/schemas/processIdentifiers"
       example:
-        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"], "processIdentifiers": { "planning": ["LOCATION_BASED"] }, "booking": ["ACCESS_CODE_QR", "ACCESS_CODE_IN_COMMIT_EVENT"] }
+        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"], "processIdentifiers": { "planning": ["LOCATION_BASED"], "booking": ["ACCESS_CODE_QR", "ACCESS_CODE_IN_COMMIT_EVENT"] } }
 
     error:
       type: object
