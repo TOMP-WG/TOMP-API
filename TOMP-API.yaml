@@ -2051,7 +2051,7 @@ components:
         {
           "amount": 9.96,
           "currencyCode": "EUR",
-          "taxRate": 21.0,
+          "vatRate": 21.0,
           "type": "FLEX",
           "unitType": "HOUR",
           "units": 1,
