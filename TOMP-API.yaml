@@ -16,17 +16,8 @@ tags:
   - name: booking
     description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or assetType), including the non-happy paths (cancel, expire etc).
 
-  - name: booking [optional]
-    description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
-
   - name: trip execution
     description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating an execution (not the state!).
-
-  - name: trip execution [optional]
-    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
-
-  - name: general
-    description: general operations (e.g. notifications)
 
   - name: operator information
     description: gives information about systems, stations, operating hours [from GBFS]
@@ -36,6 +27,15 @@ tags:
 
   - name: support
     description: support for the user while the leg is ongoing
+
+  - name: general
+    description: general operations (e.g. notifications)
+
+  - name: booking [optional]
+    description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
+
+  - name: trip execution [optional]
+    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
 
   - name: TO
     description: the Transport Operator's endpoints
@@ -156,6 +156,8 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
+        "409":
+          $ref: "#/components/responses/409Conflict"
     get:
       description: Optional - Returns bookings that has been created earlier, selected on state.
       tags:
@@ -569,8 +571,9 @@ paths:
       description: This endpoint must be used to alter the state of a leg.<br>
         Operations:<br> `PREPARE` the TO can send a message telling the MP that he is preparing the booked leg [To be implemented by the MP] (see (7.2) in the process flow - trip execution),<br>
         `ASSIGN_ASSET` can assign an asset to a leg. Can be to assign an asset in case there is still an asset type assigned [Optionally implementable by the MP]. See (4.7) in the process flow - trip execution<br>
-        `RESERVE` will claim an asset ahead in time [Optionally implementable by the TO],<br>
         `SET_IN_USE` will activate the leg or resume the leg [TO and MP] (see (4.6) in process flow),<br>
+        `TIME_EXTEND` will be used to request an extension in time; the end user wants to use the asset longer, the `time` field contains the new end time,<br>
+        `TIME_POSTPONE` will be used to request a delay in the departure time, the end user wants to depart later, the `time` field contains the new departure time,<br>
         `PAUSE` will pause the leg [TO and MP] (see (4.6) in process flow),<br>
         `START_FINISHING` will start the end-of-leg [Optionally implementable by TO and MP],<br>
         `FINISH` will end this leg (see (4.6) in process flow) [TO and MP]
@@ -715,6 +718,12 @@ paths:
           required: false
           schema:
             type: number
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: successful operation
@@ -761,6 +770,18 @@ paths:
           required: false
           schema:
             type: number
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
@@ -810,6 +831,18 @@ paths:
           required: false
           schema:
             type: number
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string    
       responses:
         "200":
           description: returns currently active system alerts
@@ -842,6 +875,19 @@ paths:
         - operator information
         - TO
       summary: describes the operating calendar for a system. An array of year objects defined as follows (if start/end year are omitted, then assume the start and end months do not change from year to year). [from GFBS]
+      parameters:
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: successful operation
@@ -875,6 +921,19 @@ paths:
         - TO
       summary: describes the system hours of operation
       description: Describes the hours of operation of all available systems of the transport operator [from GBFS]
+      parameters:
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: successful operation
@@ -939,7 +998,19 @@ paths:
         - TO
       summary: gives pricing information
       description: Describes pricing of systems or assets [from GBFS]
-
+      parameters:
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: returns standard pricing plans for an operator
@@ -1257,7 +1328,7 @@ components:
       type: object
       required:
         - id
-        - properties
+        - overriddenProperties
       properties:
         id:
           type: string
@@ -1276,6 +1347,24 @@ components:
         isDisabled:
           type: boolean
           description: true indicates the asset is currently disabled (broken)
+        rentalUrl:
+          type: string
+          description: deep-linking option from GBFS+. Only added to be consistent with GBFS 2.0
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890
+          deprecated: true
+        rentalUrlAndroid:
+          type: string
+          description: deep-linking option from GBFS 2.0. Only added to be consistent with GBFS 2.0
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=android
+          deprecated: true
+        rentalUrlIOS:
+          type: string
+          description: deep-linking option from GBFS 2.0. Only added to be consistent with GBFS 2.0
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
+          deprecated: true
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -1313,7 +1402,6 @@ components:
       type: object
       required:
         - id
-        - amountAvailable
         - assetClass
         - sharedProperties
       properties:
@@ -1419,11 +1507,6 @@ components:
           type: string
           format: URL
           example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
-        rentalUrl:
-          type: string
-          description: deep-linking option from GBFS+
-          format: URL
-          example: https://www.rentmyfreebike.com/rental
         infantSeat:
           type: boolean
           description: true indicates infant seat required
@@ -1749,6 +1832,9 @@ components:
               description: The identifier MaaS uses to identify the customer
               type: string
               example: "A0-123456"
+            travelerReference:
+              description: optional reference field to the travelers in the planning request.
+              type: string
             initials:
               type: string
             firstName:
@@ -1964,7 +2050,7 @@ components:
         {
           "amount": 9.96,
           "currencyCode": "EUR",
-          "taxRate": 21.0,
+          "vatRate": 21.0,
           "type": "FLEX",
           "unitType": "HOUR",
           "units": 1,
@@ -2020,11 +2106,11 @@ components:
       example: [lon, lat]
 
     geojsonPolygon:
-      description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4
+      description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
       type: array
       items:
         $ref: "#/components/schemas/geojsonLine"
-      example: [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]]
+      example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
 
     journalEntry:
       allOf:
@@ -2114,10 +2200,18 @@ components:
           description: The intended arrival time at the to place
           type: string
           format: date-time
+        travelerReferenceNumbers:
+          description: reference to the travelers field of the request. If missing, it is refering to the first (if any). it is an array to facilitate multiple users on one leg (e.g. using a car). If multiple access informations are needed, please create a leg per used asset.
+          type: array
+          items:
+            type: string
         assetType:
           description: The asset type used in this leg as determined during booking
           allOf:
             - $ref: "#/components/schemas/assetType"
+        legSequenceNumber:
+          description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
+          type: integer
         asset:
           description: The concrete asset used for the execution of the leg
           allOf:
@@ -2129,10 +2223,10 @@ components:
         suboperator:
           $ref: "#/components/schemas/suboperator"
         conditions:
-              description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
-              type: array
-              items:
-                $ref: "#/components/schemas/condition"
+          description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
+          type: array
+          items:
+            $ref: "#/components/schemas/condition"
         state:
           $ref: "#/components/schemas/legState"
         departureDelay:
@@ -2174,7 +2268,8 @@ components:
               PAUSE,
               START_FINISHING,
               FINISH,
-              ISSUE,
+              TIME_EXTEND,
+              TIME_POSTPONE,
             ]
         comment:
           type: string
@@ -2263,7 +2358,7 @@ components:
         number:
           description: phone number. In case of international usage, always provide the country code.
           type: string
-          pattern: '^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$'
+          pattern: '^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.0-9]*$'
           example: +31-48934758 or +(0075)-834923384 or 020 1234 1234
         kind:
           type: string
@@ -2301,7 +2396,7 @@ components:
       type: object
       required:
         - from
-        - nrOftravelers
+        - nrOfTravelers
       properties:
         from:
           $ref: "#/components/schemas/place"
@@ -2464,8 +2559,22 @@ components:
           example: [CREDITCARD, PAYPASS, APPLEPAY]
         rentalUrl:
           type: string
+          description: web uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
           format: URL
           example: https://www.rentmyfreebike.com
+          deprecated: true
+        rentalUrlAndroid:
+          type: string
+          description: android uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
+          format: URL
+          example: https://www.rentmyfreebikecom/app?sid=1234567890&platform=android
+          deprecated: true
+        rentalUrlIOS:
+          type: string
+          description: ios uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
+          format: URL
+          example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
+          deprecated: true
 
     stopReference:
       type: object
@@ -2623,7 +2732,10 @@ components:
       properties:
         stationId:
           type: string
-          description: If this parameter is present, it means that star and end prameters correspond to the opening and closing days of the station.
+          description: If this parameter is present, it means that start and end prameters correspond to the opening and closing days of the station. (GET /operator/stations)
+        regionId:
+          type: string
+          description: If this parameter is present, it means that start and end prameters correspond to the opening and closing days for the region. (GET /operator/regions)
         startMonth:
           type: integer
           minimum: 1
@@ -2671,7 +2783,10 @@ components:
           example: MEMBER
         stationId:
           type: string
-          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hour of the station.
+          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours of the station. (GET /operator/stations)
+        regionId:
+          type: string
+          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours for the region. (GET /operator/regions)
         startTime:
           type: string
           format: HH:MM time
@@ -2718,11 +2833,31 @@ components:
         url:
           description: The URL of the transport operator. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped.
           type: string
+          format: URL
           example: https://www.rentmyfreebike.com
         purchaseUrl:
           description: A fully qualified URL where a customer can purchase a membership or learn more about purchasing memberships
           type: string
+          format: URL
           example: https://www.rentmyfreebike.com/purchase
+        discoveryUriAndroid:
+          description: Uri to detect if the app is available at the mobile.
+          format: URL
+          type: string
+        discoveryUriIOS:
+          description: Uri to detect if the app is available at the mobile.
+          format: URL
+          type: string
+        storeUriAndroid:
+          description: Uri to the app in the store.
+          format: URL
+          type: string
+          example: https://play.google.com/store/apps/details?id=com.rentmyfreebike.android
+        storeUriIOS:
+          description: Uri to the app in the store.
+          format: URL
+          type: string
+          example: itms-apps://itunes.apple.com/app/idcom.rentmyfreebike.ios
         startDate:
           type: string
           format: date
@@ -2735,6 +2870,10 @@ components:
           type: string
           format: email
           example: rent@freebike.com
+        feedContactEmail:
+          description: A single contact email address for consumers of this feed to report technical issues.
+          type: string
+          format: email
         timezone:
           description: The time zone where the system is located. Time zone names never contain the space character but may contain an underscore. Please refer to the "TZ" value in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of valid values
           type: string
@@ -2783,6 +2922,12 @@ components:
           type: string
           description: name of this pricing scheme, could match Content-Language
           example: Free Plan
+        stationId:
+          type: string
+          description: pricing plan for a specific station
+        regionId:
+          type: string
+          description: pricing plan for a specific region
         fare:
           $ref: "#/components/schemas/fare"
         isTaxable:
@@ -2855,6 +3000,9 @@ components:
         age:
           description: Age of the traveler, may be approximate
           type: integer
+        referenceNumber:
+          description: reference number of the traveler. This number could be used to refer to in the planning result.
+          type: string
         cardTypes:
           description: The kind of cards this traveler possesses
           type: array
