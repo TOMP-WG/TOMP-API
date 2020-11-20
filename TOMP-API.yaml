@@ -2350,7 +2350,7 @@ components:
         number:
           description: phone number. In case of international usage, always provide the country code.
           type: string
-          pattern: '^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$'
+          pattern: '^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.0-9]*$'
           example: +31-48934758 or +(0075)-834923384 or 020 1234 1234
         kind:
           type: string
