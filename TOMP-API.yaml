@@ -161,6 +161,8 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
+        "409":
+          $ref: "#/components/responses/409Conflict"
     get:
       description: Optional - Returns bookings that has been created earlier, selected on state.
       tags:
