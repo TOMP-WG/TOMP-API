@@ -16,17 +16,8 @@ tags:
   - name: booking
     description: a booking is the main object exchanged between MaaS and a TO [from MaaS-API]. <br>See also <a href='https://github.com/maasglobal/maas-tsp-api/blob/master/specs/Booking.md'>Booking.md</a><p>This section contains functionality to book a leg (part of a trip) for one asset (or assetType), including the non-happy paths (cancel, expire etc).
 
-  - name: booking [optional]
-    description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
-
   - name: trip execution
     description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating an execution (not the state!).
-
-  - name: trip execution [optional]
-    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
-
-  - name: general
-    description: general operations (e.g. notifications)
 
   - name: operator information
     description: gives information about systems, stations, operating hours [from GBFS]
@@ -36,6 +27,15 @@ tags:
 
   - name: support
     description: support for the user while the leg is ongoing
+
+  - name: general
+    description: general operations (e.g. notifications)
+
+  - name: booking [optional]
+    description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
+
+  - name: trip execution [optional]
+    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
 
   - name: TO
     description: the Transport Operator's endpoints
@@ -2106,11 +2106,11 @@ components:
       example: [lon, lat]
 
     geojsonPolygon:
-      description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4
+      description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
       type: array
       items:
         $ref: "#/components/schemas/geojsonLine"
-      example: [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]]
+      example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
 
     journalEntry:
       allOf:
