@@ -1820,6 +1820,9 @@ components:
               description: The identifier MaaS uses to identify the customer
               type: string
               example: "A0-123456"
+            travelerReference:
+              description: optional reference field to the travelers in the planning request.
+              type: string
             initials:
               type: string
             firstName:
@@ -2183,6 +2186,11 @@ components:
           description: The intended arrival time at the to place
           type: string
           format: date-time
+        travelerReferenceNumbers:
+          description: reference to the travelers field of the request. If missing, it is refering to the first (if any). it is an array to facilitate multiple users on one leg (e.g. using a car). If multiple access informations are needed, please create a leg per used asset.
+          type: array
+          items:
+            type: string
         assetType:
           description: The asset type used in this leg as determined during booking
           $ref: "#/components/schemas/assetType"
@@ -2195,10 +2203,10 @@ components:
         suboperator:
           $ref: "#/components/schemas/suboperator"
         conditions:
-              description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
-              type: array
-              items:
-                $ref: "#/components/schemas/condition"
+          description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
+          type: array
+          items:
+            $ref: "#/components/schemas/condition"
         state:
           $ref: "#/components/schemas/legState"
         departureDelay:
@@ -2930,6 +2938,9 @@ components:
         age:
           description: Age of the traveler, may be approximate
           type: integer
+        referenceNumber:
+          description: reference number of the traveler. This number could be used to refer to in the planning result.
+          type: string
         cardTypes:
           description: The kind of cards this traveler possesses
           type: array
