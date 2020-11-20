@@ -723,6 +723,12 @@ paths:
           required: false
           schema:
             type: number
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: successful operation
@@ -769,6 +775,18 @@ paths:
           required: false
           schema:
             type: number
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
@@ -818,6 +836,18 @@ paths:
           required: false
           schema:
             type: number
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string    
       responses:
         "200":
           description: returns currently active system alerts
@@ -850,6 +880,19 @@ paths:
         - operator information
         - TO
       summary: describes the operating calendar for a system. An array of year objects defined as follows (if start/end year are omitted, then assume the start and end months do not change from year to year). [from GFBS]
+      parameters:
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: successful operation
@@ -883,6 +926,19 @@ paths:
         - TO
       summary: describes the system hours of operation
       description: Describes the hours of operation of all available systems of the transport operator [from GBFS]
+      parameters:
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: successful operation
@@ -947,7 +1003,19 @@ paths:
         - TO
       summary: gives pricing information
       description: Describes pricing of systems or assets [from GBFS]
-
+      parameters:
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
           description: returns standard pricing plans for an operator
@@ -2619,7 +2687,10 @@ components:
       properties:
         stationId:
           type: string
-          description: If this parameter is present, it means that star and end prameters correspond to the opening and closing days of the station.
+          description: If this parameter is present, it means that start and end prameters correspond to the opening and closing days of the station. (GET /operator/stations)
+        regionId:
+          type: string
+          description: If this parameter is present, it means that start and end prameters correspond to the opening and closing days for the region. (GET /operator/regions)
         startMonth:
           type: integer
           minimum: 1
@@ -2667,7 +2738,10 @@ components:
           example: MEMBER
         stationId:
           type: string
-          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hour of the station.
+          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours of the station. (GET /operator/stations)
+        regionId:
+          type: string
+          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours for the region. (GET /operator/regions)
         startTime:
           type: string
           format: HH:MM time
@@ -2779,6 +2853,12 @@ components:
           type: string
           description: name of this pricing scheme, could match Content-Language
           example: Free Plan
+        stationId:
+          type: string
+          description: pricing plan for a specific station
+        regionId:
+          type: string
+          description: pricing plan for a specific region
         fare:
           $ref: "#/components/schemas/fare"
         isTaxable:
