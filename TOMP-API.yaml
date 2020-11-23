@@ -1631,8 +1631,6 @@ components:
     bookingRequest:
       description: A booking requested by the MP
       type: object
-      required:
-        - id
       properties:
         id:
           description: A unique identifier for the TO to know this booking by
