@@ -56,7 +56,7 @@ security:
   - OpenId: []
 
 paths:
-  /plannings/:
+  /plannings:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
@@ -103,7 +103,7 @@ paths:
         "403":
           $ref: "#/components/responses/403Forbidden"
 
-  /bookings/:
+  /bookings:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
