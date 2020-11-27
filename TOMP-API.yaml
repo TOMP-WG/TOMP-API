@@ -2090,7 +2090,6 @@ components:
         - type: object
           required:
             - vatRate
-            - unitType
             - amount
           properties:
             type:
