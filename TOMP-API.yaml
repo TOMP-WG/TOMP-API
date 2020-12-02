@@ -506,6 +506,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/asset"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -814,6 +816,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/assetType"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "403":
@@ -1968,11 +1972,14 @@ components:
           description: does this endpoint support paging? In that case this endpoint can be accessed using query parameters offset=x and limit=y. Only allowed at endpoints that have specified these query parameters.
           type: boolean
           default: false
+        maxPageSize:
+          description: the maximum size of the pages (only valid when supportsPaging=true). If the limit-parameter of the request is above this amount, a http code 400 will be returned.
+          type: number
       example:
         withoutPaging:
           { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
         withPaging:
-          { "method": "POST", "path": "/operator/stations", "status": "IMPLEMENTED", "supportsPaging": true }
+          { "method": "POST", "path": "/operator/stations", "status": "IMPLEMENTED", "supportsPaging": true, "maxPageSize": 100 }
 
     endpointImplementation:
       type: object
