@@ -2303,6 +2303,12 @@ components:
         comment:
           type: string
           description: free text, should match Content-Language
+        url:
+          type: array
+          description: urls to support the event e.g. pictures justifying the exit conditions
+          items:
+            type: string
+            format: url
         asset:
           $ref: "#/components/schemas/asset"
 
