@@ -37,7 +37,7 @@ The workgroup has active participation from (pending permission to disclose furt
 - Stichting OpenGeo - Stefan de Konink
 - Mobiliteitsfabriek - Martijn van der Linden
 - Taxistop - Tjalle Groen
-- PON (Next Urban Mobility, Shuttel, Dockr, Check) - Marijn Roverts
+- PON (Hely, Shuttel, Dockr, Check) - Marijn Roverts
 - XXImo Mobility - Christiaan Rakowski
 - Innovactory - Stefan Bollars
 - DAT.Mobility - Edwin van den Belt
