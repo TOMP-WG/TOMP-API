@@ -1,37 +1,20 @@
-## Welcome to GitHub Pages
+## About TOMP
+The TOMP-WG (Transport Operator, MaaS Provider – Working Group) is an collaborative initiative to create a standardized language for the technical communication between Transport Operators and MaaS Providers within the MaaS ecosystem by means of an API (Applicable Programming Interface). The standard language describes how the different stakeholders should communicate with each other.
 
-You can use the [editor on GitHub](https://github.com/TOMP-WG/TOMP-API/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+The TOMP-API is being developed by an open source working group with public and private stakeholders, aimed at facilitating the implementation of MaaS and the corresponding exchange of data. The TOMP-API describes a full MaaS journey, including operator information, planning, booking, support, payments and trip execution.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Standardization
+Speaking the same language is key for an efficient ecosystem. For MaaS to be successful, transport operators have to share their transport services, and availability of their assets, in a digital form. The TOMP-API is the standardized technical interface between MaaS-providers and Transport Operators.
 
-### Markdown
+## Transport Operators
+In the context of the TOMP-API, a Transport Operator is an organisation that facilitates either the transportation of people (public transport, shared cars, bikes, scooters, etc), or providing subsidiary assets or services within the MaaS ecosystem (like on-street or off-street parking facilities). The TOMP-API provides a streamlined and efficient opportunity to engage and inter-operate through a wide range of extra sales channels (the MaaS Providers), while always staying in control of your assets and services. Through the adoption and implementation of the TOMP-API you are not enforced to deliver assets to unknown MaaS providers.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## MaaS Providers
+A MaaS Provider allows end users to travel from A to B using a singular instance of an asset or service, or mix thereof, provided by a Transport Operators. As a MaaS Provider you need to be able to communicate with all Transport Operators in order to provide the best journey experience to your customers. As more and more Transport Operators adhere to the TOMP-API, the opportunity for MaaS Providers grows to be able to provide more possibilities for your customer travel by their prefered means.
 
-```markdown
-Syntax highlighted code block
+Use of the TOMP-API opens up a world of available Transport Operators within a minimum of technical overhead!
 
-# Header 1
-## Header 2
-### Header 3
+## Cities
+As a city you need to keep the overview of the mobility movements in your city that are made by Transport Operators. The CDS-M API allow City Planners and their data partners to easily gather data from all the operators in your environment in a uniform and standardised way.
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/TOMP-WG/TOMP-API/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+[editor on GitHub](https://github.com/TOMP-WG/TOMP-API/edit/gh-pages/index.md)
