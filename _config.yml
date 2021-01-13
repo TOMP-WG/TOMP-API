@@ -1,1 +1,51 @@
+title: TOMP-API
+
+description: >- # this means to ignore newlines until "baseurl:"
+  Open Sales and Distribution Model to simplify rail distribution.
+baseurl: "/" # the subpath of your site, e.g. /blog
+
+# url: "https://tomp-wg.org"
+
+permalink: pretty
+
+favicon: favicon.png
+
+fixed_navbar: top
+
+# Build settings
+# remote_theme: chrisrhymes/bulma-clean-theme
 theme: jekyll-theme-architect
+
+# Don't publish files in the future
+future: false
+
+# Measuring hits
+#google-analytics: UA-185392233-1
+
+#jekyll_analytics:
+#  GoogleAnalytics: 
+#    id: UA-185392233-1
+
+plugins:
+  - jekyll-analytics
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-paginate
+  - jekyll-seo-tag
+  - jekyll-remote-theme
+  - kramdown-parser-gfm
+
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+livereload: true
+
+markdown: kramdown
