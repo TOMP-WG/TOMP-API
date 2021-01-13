@@ -1,7 +1,7 @@
 title: TOMP-API
 
 description: >- # this means to ignore newlines until "baseurl:"
-  Open Sales and Distribution Model to simplify rail distribution.
+  The TOMP-WG (Transport Operator, MaaS Provider – Working Group) is an collaborative initiative to create a standardized language for the technical communication between Transport Operators and MaaS Providers
 baseurl: "/" # the subpath of your site, e.g. /blog
 
 # url: "https://tomp-wg.org"
