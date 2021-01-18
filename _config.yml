@@ -63,7 +63,7 @@ timezone: Europe/London # Timezone for blog posts and alike
 collections:
   posts:
     output: true
-    feature_image: "https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/bg.jpg"
+    feature_image: "/TOMP-API/assets/bg.jpg"
 
 # 6. Jekyll collections settings
 defaults:
@@ -71,7 +71,7 @@ defaults:
     scope:
       path: ""
     values:
-      image: "https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/default-social-image.png" # Default image for sharing
+      image: "/TOMP-API/assets/default-social-image.png" # Default image for sharing
   -
     scope:
       path: ""
@@ -89,7 +89,7 @@ defaults:
 encoding: utf-8 # Make sure the encoding is right
 lang: en-GB # Set the site language
 title: "TOMP workgroup" # Site name or title, also used in jekyll-seo-tag
-logo: "https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/tompwg.svg" # Site logo, also used in jekyll-seo-tag
+logo: "/TOMP-API/assets/logos/tompwg.svg" # Site logo, also used in jekyll-seo-tag
 description: "Alembic is a starting point for Jekyll projects. Rather than starting from scratch, this boilerplate is designed to get the ball rolling immediately" # Site description and default description, also used in jekyll-seo-tag
 url: "https://tomp-wg.github.io/TOMP-API" # Site url, also used in jekyll-seo-tag
 baseurl: ""
@@ -103,29 +103,29 @@ css_inline: true # Will insert all styles into a single <style> block in the <he
 
 # 8. Site favicons & manifest icons
 favicons: # Favicons are also used in the manifest file. Syntax is 'size: path'
-  16: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@16px.png'
-  32: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@32px.png'
-  96: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@96px.png'
-  120: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@120px.png'
-  144: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@144px.png'
-  180: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@180px.png'
-  512: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@512px.png'
-  1024: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@1024px.png'
+  16: '/TOMP-API/assets/logos/logo@16px.png'
+  32: '/TOMP-API/assets/logos/logo@32px.png'
+  96: '/TOMP-API/assets/logos/logo@96px.png'
+  120: '/TOMP-API/assets/logos/logo@120px.png'
+  144: '/TOMP-API/assets/logos/logo@144px.png'
+  180: '/TOMP-API/assets/logos/logo@180px.png'
+  512: '/TOMP-API/assets/logos/logo@512px.png'
+  1024: '/TOMP-API/assets/logos/logo@1024px.png'
 
 # 9. Site navigation
 navigation_header:
 - title: Home
-  url: https://tomp-wg.github.io/TOMP-API/
+  url: /TOMP-API/
 - title: Transport Operators
-  url: https://tomp-wg.github.io/TOMP-API//index.html#transport-operators
+  url: /TOMP-API/index.html#transport-operators
 - title: MaaS providers
-  url: https://tomp-wg.github.io/TOMP-API//index.html#maas-providers
+  url: /TOMP-API/index.html#maas-providers
 - title: Cities
-  url: https://tomp-wg.github.io/TOMP-API//index.html#cities
+  url: /TOMP-API/index.html#cities
 - title: Blog
-  url: https://tomp-wg.github.io/TOMP-API//blog/
+  url: /TOMP-API/blog/
 - title: Contact
-  url: https://tomp-wg.github.io/TOMP-API//index.html#contact
+  url: /TOMP-API/index.html#contact
 
 navigation_footer:
 - title: Maintained by TOMP workgroup
