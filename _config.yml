@@ -16,7 +16,6 @@ exclude:
 - CONTRIBUTING.md
 - screenshot.png
 - LICENSE
-- CNAME
 - Gemfile
 - Gemfile.lock
 - alembic-jekyll-theme.gemspec
@@ -64,7 +63,7 @@ timezone: Europe/London # Timezone for blog posts and alike
 collections:
   posts:
     output: true
-    feature_image: "/assets/bg.jpg"
+    feature_image: "https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/bg.jpg"
 
 # 6. Jekyll collections settings
 defaults:
@@ -72,7 +71,7 @@ defaults:
     scope:
       path: ""
     values:
-      image: "/assets/default-social-image.png" # Default image for sharing
+      image: "https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/default-social-image.png" # Default image for sharing
   -
     scope:
       path: ""
@@ -90,7 +89,7 @@ defaults:
 encoding: utf-8 # Make sure the encoding is right
 lang: en-GB # Set the site language
 title: "TOMP workgroup" # Site name or title, also used in jekyll-seo-tag
-logo: "/assets/logos/tompwg.svg" # Site logo, also used in jekyll-seo-tag
+logo: "https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/tompwg.svg" # Site logo, also used in jekyll-seo-tag
 description: "Alembic is a starting point for Jekyll projects. Rather than starting from scratch, this boilerplate is designed to get the ball rolling immediately" # Site description and default description, also used in jekyll-seo-tag
 url: "https://tomp-wg.github.io/TOMP-API" # Site url, also used in jekyll-seo-tag
 baseurl: ""
@@ -104,29 +103,29 @@ css_inline: true # Will insert all styles into a single <style> block in the <he
 
 # 8. Site favicons & manifest icons
 favicons: # Favicons are also used in the manifest file. Syntax is 'size: path'
-  16: '/assets/logos/logo@16px.png'
-  32: '/assets/logos/logo@32px.png'
-  96: '/assets/logos/logo@96px.png'
-  120: '/assets/logos/logo@120px.png'
-  144: '/assets/logos/logo@144px.png'
-  180: '/assets/logos/logo@180px.png'
-  512: '/assets/logos/logo@512px.png'
-  1024: '/assets/logos/logo@1024px.png'
+  16: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@16px.png'
+  32: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@32px.png'
+  96: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@96px.png'
+  120: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@120px.png'
+  144: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@144px.png'
+  180: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@180px.png'
+  512: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@512px.png'
+  1024: 'https://github.com/TOMP-WG/TOMP-API/blob/gh-pages/assets/logos/logo@1024px.png'
 
 # 9. Site navigation
 navigation_header:
 - title: Home
-  url: /
+  url: https://tomp-wg.github.io/TOMP-API/
 - title: Transport Operators
-  url: /index.html#transport-operators
+  url: https://tomp-wg.github.io/TOMP-API//index.html#transport-operators
 - title: MaaS providers
-  url: /index.html#maas-providers
+  url: https://tomp-wg.github.io/TOMP-API//index.html#maas-providers
 - title: Cities
-  url: /index.html#cities
+  url: https://tomp-wg.github.io/TOMP-API//index.html#cities
 - title: Blog
-  url: /blog/
+  url: https://tomp-wg.github.io/TOMP-API//blog/
 - title: Contact
-  url: /index.html#contact
+  url: https://tomp-wg.github.io/TOMP-API//index.html#contact
 
 navigation_footer:
 - title: Maintained by TOMP workgroup
@@ -136,7 +135,7 @@ social_links: # Appears in sidebar. Set the urls then uncomment and comment out 
   LinkedIn: https://www.linkedin.com/company/tomp-wg
   GitHub: https://github.com/TOMP-WG
   link: https://tomp-wp.org
-  RSS: /feed.xml
+  RSS: https://tomp-wg.github.io/TOMP-API/feed.xml
 
 sharing_links: # Appear at the bottom of single blog posts, add as desired. The value can be 'true' or the desired button colour
   ## Twitter: "#0d94e7"
