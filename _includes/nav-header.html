@@ -1,0 +1,64 @@
+{% if site.navigation_header %}
+<nav class="nav  nav--header">
+  <ul class="list  list--nav">
+    {% for item in site.navigation_header %}
+
+      {% if item.url contains '://' %}
+        {% assign url = item.url %}
+      {% else %}
+        {% assign url = item.url | relative_url %}
+      {% endif %}
+
+      <li class="item  item--nav{% if item.url == page.url %}  item--current{% endif %}">
+        <a href="{{ url }}">{{ item.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  <button class="button  button--nav" aria-label="Menu toggle">
+    {% include icon.html id="nav" title="Menu" %}
+  </button>
+</nav>
+{% else %}
+  {% include nav-default.html %}
+{% endif %}
+
+<script type="text/javascript">
+  // Get list and button
+  const navList = document.querySelector('.header .list--nav')
+  const button  = document.querySelector('.header .button--nav')
+
+  // Hide nav and apply toggle
+  const collapseNav = () => {
+    if (document.body.clientWidth < 640) {
+      //navList.style.setProperty('--listHeight', `-${navList.offsetHeight}px`)
+      navList.style.setProperty('--listHeight', `200px`)
+      navList.style.setProperty('position', 'absolute')
+      navList.style.setProperty('z-index', '200')
+      navList.style.setProperty('height', '200')
+      navList.style.setProperty('top', '50px')
+      navList.style.setProperty('background-color', 'black')
+      navList.style.setProperty('visibility', 'hidden')
+    } else {
+      navList.removeAttribute('style')
+    }
+
+    button.onclick = () => {
+      navList.style.setProperty('transition', `margin .1s`)
+      if (navList.style.getPropertyValue('visibility') == 'visible') {
+        navList.style.removeProperty('--listHeight')
+        navList.style.setProperty('visibility', 'hidden')
+      } else {
+        //navList.style.setProperty('--listHeight', `-${navList.offsetHeight}px`)
+        navList.style.setProperty('--listHeight', `200px`)
+        navList.style.setProperty('visibility', 'visible')
+      }
+    }
+  }
+
+  collapseNav()
+
+  // Check on resize if to collapse nav
+  window.addEventListener('resize', () => {
+    collapseNav()
+  })
+</script>
