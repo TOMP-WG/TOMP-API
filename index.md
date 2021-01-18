@@ -1,6 +1,6 @@
 ---
 title: TOMP Working Group
-feature_image: "/assets/bg.jpg"
+feature_image: "https://tomp-wg.github.io/TOMP-API/assets/bg.jpg"
 excerpt: "The TOMP-WG (Transport Operator, MaaS Provider – Working Group) is an collaborative initiative to create a standardized language for the technical communication between Transport Operators and MaaS Providers."
 ---
 
