@@ -141,7 +141,7 @@ paths:
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
+              description: The result is valid until this timestamp. The pending booking is expired after this timestamp.
               schema:
                 description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
                 type: string
@@ -739,7 +739,7 @@ paths:
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
           required: false
-          schema: 
+          schema:
             type: string
       responses:
         "200":
@@ -791,13 +791,13 @@ paths:
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
           required: false
-          schema: 
+          schema:
             type: string
         - name: stationId
           in: query
           description: optional id of the station to use in the filter (/operator/stations)
           required: false
-          schema: 
+          schema:
             type: string
       responses:
         "200":
@@ -854,14 +854,14 @@ paths:
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
           required: false
-          schema: 
+          schema:
             type: string
         - name: stationId
           in: query
           description: optional id of the station to use in the filter (/operator/stations)
           required: false
-          schema: 
-            type: string    
+          schema:
+            type: string
       responses:
         "200":
           description: returns currently active system alerts
@@ -899,13 +899,13 @@ paths:
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
           required: false
-          schema: 
+          schema:
             type: string
         - name: stationId
           in: query
           description: optional id of the station to use in the filter (/operator/stations)
           required: false
-          schema: 
+          schema:
             type: string
       responses:
         "200":
@@ -945,13 +945,13 @@ paths:
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
           required: false
-          schema: 
+          schema:
             type: string
         - name: stationId
           in: query
           description: optional id of the station to use in the filter (/operator/stations)
           required: false
-          schema: 
+          schema:
             type: string
       responses:
         "200":
@@ -1022,13 +1022,13 @@ paths:
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
           required: false
-          schema: 
+          schema:
             type: string
         - name: stationId
           in: query
           description: optional id of the station to use in the filter (/operator/stations)
           required: false
-          schema: 
+          schema:
             type: string
       responses:
         "200":
@@ -2482,7 +2482,7 @@ components:
           items:
             type: string
             format: an asset type id for this operator (from /operator/available-assets)
-            
+
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
@@ -2581,6 +2581,10 @@ components:
         regionId:
           type: string
           description: ID of the region where the station operates (see "systemRegions")
+        operatingHours:
+          type: array
+          items:
+                  $ref: "#/components/schemas/systemHours"
         rentalMethods:
           type: array
           description: Array of enumerables containing the payment methods accepted at this station.
