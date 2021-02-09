@@ -681,6 +681,39 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /legs/{id}/confirmation:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - name: id
+        in: path
+        description: Leg identifier
+        required: true
+        schema:
+          type: string
+    post:
+      description: The TO can request confirmation for certain actions from the MP.
+      tags:
+        - trip execution
+        - MP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/confirmationRequest"
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                type: boolean
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+          
   /operator/meta:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -1826,6 +1859,17 @@ components:
       allOf:
         - $ref: "#/components/schemas/condition"
 
+    confirmationRequest:
+      type: object
+      description: the TO can ask permission to do something to the MP, as the MP is financially responsible. 
+      properties:
+        type:
+          type: string
+          enum: [ REPLACE_ASSET, START_LEG ]
+        assetTypeId:
+          type: string
+          description: reference to the assetType in /operator/available-assets, this property can be set when replacing an asset (for another type). In case of a succesfull replacement, the /legs/{id}/events - ASSIGN_ASSET should be send to the MP to inform a change of asset has been made.
+        
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
@@ -2672,7 +2716,7 @@ components:
           description: the booking id
         supportType:
           type: string
-          enum: [BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
         location:
           $ref: '#/components/schemas/place'
         time:
