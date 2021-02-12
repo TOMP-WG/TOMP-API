@@ -2423,6 +2423,10 @@ components:
 
     period:
       type: object
+      description: this concept is describing a time slot (within a day). If the date fields are absent, it is today. This period is in UTC.
+      required:
+      - startTime
+      - endTime
       properties:
         startTime:
           type: string
@@ -2430,6 +2434,12 @@ components:
         endTime:
           type: string
           format: HH:MM time
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
 
     place:
       type: object
