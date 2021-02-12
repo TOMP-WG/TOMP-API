@@ -2306,6 +2306,7 @@ components:
               FINISH,
               TIME_EXTEND,
               TIME_POSTPONE,
+              CANCEL,
             ]
         comment:
           type: string
@@ -2344,6 +2345,7 @@ components:
           FINISHING,
           FINISHED,
           ISSUE_REPORTED,
+          CANCELLED,
         ]
 
     license:
