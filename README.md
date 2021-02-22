@@ -42,7 +42,7 @@ The workgroup has active participation from (pending permission to disclose furt
 - Innovactory - Stefan Bollars
 - DAT.Mobility - Edwin van den Belt
 - SBB/MOVI+ (Project Arc Mobilité) - Stephan Röösli
-- Pitane Mobility – Gerrit Saey
+- Pitane Mobility - Gerrit Saey
 - Urbee
 - Mobike
 - RET
