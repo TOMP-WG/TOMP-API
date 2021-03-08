@@ -118,7 +118,7 @@ paths:
         - booking
         - TO
       requestBody:
-        description: One of available legs, returned by /plannings, with an ID.
+        description: One of available booking options, returned by /plannings, with an ID.
         required: true
         content:
           application/json:
