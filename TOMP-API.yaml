@@ -815,9 +815,7 @@ paths:
               schema:
                 type: array
                 items:
-                  oneOf:
-                  - $ref: "#/components/schemas/assetType"
-                  - $ref: "#/components/schemas/availability"
+                  $ref: "#/components/schemas/assetType"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1585,16 +1583,6 @@ components:
           description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
           type: object
           additionalProperties: true
-    
-    availability:
-      type: object
-      properties:
-        allOf:
-          $ref: "#/components/schemas/assetType"
-        schedule:
-          type: array
-          items:
-            $ref: "#/components/schemas/period"
 
     bankAccount:
       type: object
@@ -2420,16 +2408,6 @@ components:
         type:
           type: string
           enum: [PRIVATE, BUSINESS, OTHER]
-
-    period:
-      type: object
-      properties:
-        startTime:
-          type: string
-          format: HH:MM time
-        endTime:
-          type: string
-          format: HH:MM time
 
     place:
       type: object
