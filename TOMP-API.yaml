@@ -2161,6 +2161,7 @@ components:
               type: string
             invoiceId:
               description: the number of the invoice. Should be filled in when invoiced.
+              type: string
             invoiceDate:
               type: string
               format: date-time
