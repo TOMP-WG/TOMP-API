@@ -3057,6 +3057,13 @@ components:
             $ref: "#/components/schemas/licenseType"
         requirements:
           $ref: "#/components/schemas/requirements"
+        knownIdentifier: 
+          type: string
+          description: identifier for this traveler in the personal data store. This identifier can be used to get personal information
+            from the provider specified in the "knownIdentifierProvider"
+        knownIdentifierProvider:
+          type: string
+          description: provider for personal information. Can be a URI or identifier.
 
   parameters:
     acceptLanguage:
