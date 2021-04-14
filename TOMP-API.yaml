@@ -1583,6 +1583,24 @@ components:
           description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
           type: object
           additionalProperties: true
+        accessMethods: 
+          type: array
+          description: access method for trip execution. Data will be delivered in the response of /booking/{id}/events - COMMIT 
+            or /leg/{id}/events - PREPARE (preferred).
+          items:
+            $ref: "#/components/schemas/assetAccessMethods"
+
+    assetAccessMethods:
+      type: string
+      enum: [DEEPLINK, 
+              QR, 
+              AZTEC,
+              TOMP-API, 
+              AXA-EKEY-OTP, 
+              PHYSICAL-KEY,
+              OVC,
+              EMV,
+              NONE]
 
     bankAccount:
       type: object
@@ -2281,8 +2299,11 @@ components:
             - $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/token"
+            - type: array
+              items:
+                $ref: "#/components/schemas/token"
 
     legEvent:
       type: object
@@ -3018,10 +3039,86 @@ components:
           description: The type of data held in this token, will later be an enum
           type: string
           example: QR-code
+          $ref: "#/components/schemas/assetAccessMethods"
         tokenData:
-          description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
+          $ref: "#/components/schemas/tokenData"
+
+    tokenData:
+      oneOf: 
+      - $ref: "#/components/schemas/tokenDefault"
+      - $ref: "#/components/schemas/tokenDeeplink"
+      - $ref: "#/components/schemas/tokenEKey"
+      - $ref: "#/components/schemas/tokenQR"
+      - $ref: "#/components/schemas/tokenEmpty"
+
+    tokenDefault:
+      description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
+      type: object
+      additionalProperties: true
+
+    tokenDeeplink:
+      type: object
+      required: 
+      - url
+      description: deeplink info
+      properties:
+        url:
+          description: the base deeplink url for the MP app. Can be extended by
+            the 'knownParamaters'. Including the scheme
+          type: string
+          example: mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf
+          format: URI
+        knownParameters:
+          type: array
+          example: [ "return-url"
+                  , "error-url"
+                  , "error-code"
+                  , "error-description"
+                  ]
+          items:
+            type: string
+
+    tokenEKey:
+      type: object
+      required:
+      - ekey
+      - lock
+      description: Axa EKey information
+      properties:
+        ekey: 
           type: object
-          additionalProperties: true
+          properties:
+            key: 
+              description: certificate
+              type: string
+            passkey:
+              description: one time pass key
+              type: string
+        lock:
+          type: object
+          properties:
+            bdAddress:
+              description: physical address 
+              type: string
+            deviceName:
+              description: how it advertises itself
+              type: string
+
+    tokenEmpty:
+      type: object
+      description: For anonymous access information
+
+    tokenQR:
+      type: object
+      required:
+      - base64
+      description: QR information
+      properties:
+        base64: 
+          description: base 64 QR code
+          type: string
+        version: 
+          type: string
 
     chamberOfCommerceInfo:
       description: To identify the operator
