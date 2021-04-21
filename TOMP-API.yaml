@@ -3027,7 +3027,6 @@ components:
         - validFrom
         - validUntil
         - tokenType
-        - tokenData
       properties:
         validFrom:
           type: string
@@ -3041,6 +3040,7 @@ components:
           example: QR-code
           $ref: "#/components/schemas/assetAccessMethods"
         tokenData:
+          description: this field should be filled depending on the process identifiers (https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers)
           $ref: "#/components/schemas/tokenData"
 
     tokenData:
@@ -3058,13 +3058,11 @@ components:
 
     tokenDeeplink:
       type: object
-      required: 
-      - url
       description: deeplink info
       properties:
         url:
           description: the base deeplink url for the MP app. Can be extended by
-            the 'knownParamaters'. Including the scheme
+            the 'knownParamaters'. Including the scheme.
           type: string
           example: mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf
           format: URI
