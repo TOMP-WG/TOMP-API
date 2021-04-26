@@ -2608,10 +2608,46 @@ components:
           items:
             type: string
 
+    requirement:
+      type: object
+      required:
+        - category
+        - number
+      properties:
+        category:
+          type: string
+          description: references to the first column of the specification 
+          enum: [ HR, AV, HV, AB, AER, K, ZR, RR ]
+        number:
+          type: string
+          description: references to the second column of the specification
+          minLength: 2
+          maxLength: 2
+        type:
+          description: conditionally extra information, referencing to the 3th column
+          type: string
+        memo:
+          description: extra field for detailed information, not standardized
+          type: string
+        variable-number:
+          description: in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)
+          type: number
+        applicable-days:
+          description: days of week that are applicable
+          type: array
+          items: 
+            type: string
+            enum: [MO, TU, WE, TH, FR, SA, SU]
+
     requirements:
       description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/TOMP-WG/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW.pdf'
       type: object
       additionalProperties: true
+      properties:
+        abilities: 
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement" 
 
     scenario:
       type: string
