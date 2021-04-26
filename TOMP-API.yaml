@@ -1649,7 +1649,7 @@ components:
           description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
           type: object
           additionalProperties: true
-    
+
     bankAccount:
       type: object
       properties:
@@ -2227,6 +2227,7 @@ components:
               type: string
             invoiceId:
               description: the number of the invoice. Should be filled in when invoiced.
+              type: string
             invoiceDate:
               type: string
               format: date-time
