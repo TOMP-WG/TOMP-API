@@ -1386,7 +1386,7 @@ components:
       description: street address, including number OR PO box number, eventually extended with internal reference like room number, could match Content-Language
       properties:
         streetAddress:
-          anyOf:
+          oneOf:
           - type: string
             example: example street 18, 2nd floor, 18-B33
           - type: object 
@@ -1406,7 +1406,7 @@ components:
                 type: string
         areaReference:
           description: city or town, principal subdivision such as province, state or county, could match Content-Language
-          anyOf:
+          oneOf:
             - type: string
               example: Smallcity, Pinetree county
             - type: object
