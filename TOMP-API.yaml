@@ -720,7 +720,7 @@ paths:
         - operator information
         - TO
       summary: describes all available stations
-      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]
+      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]. This endpoint can be filtered using the regionId OR with the combination lon, lat and range.
       parameters:
         - name: offset
           in: query
@@ -741,6 +741,24 @@ paths:
           required: false
           schema: 
             type: string
+        - name: lon
+          in: query
+          description: the longitude of the search location (WGS84)
+          required: false
+          schema:
+            type: number
+        - name: lat
+          in: query
+          description: the latitude of the search location (WGS84)
+          required: false
+          schema:
+            type: number
+        - name: radius
+          in: query
+          description: the range in meters from the search location to look for stations
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
