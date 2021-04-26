@@ -1,0 +1,14 @@
+@startuml
+
+title TO is booking a leg
+
+TO->MP: /bookings, body containing already an id assigned by the TO
+MP->TO: 201
+alt status of booking is PENDING
+MP->TO: /bookings/{id}/events - COMMIT
+TO->MP: 200
+else
+
+end
+
+@enduml

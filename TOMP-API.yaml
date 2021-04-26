@@ -61,6 +61,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       description:
         Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
@@ -108,17 +110,21 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       description:
         Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planning).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
-        <p> see (3.2) in the process flow - booking
+        <p> see (3.2) in the process flow - booking.
+        <p>The MP can implement this endpoint when it allows direct booking by TOs. The specific TO can book an asset from themselves to get it registrated and handled (financially) by the MP.
       tags:
         - booking
         - TO
+        - MP
       requestBody:
-        description: One of available legs, returned by /plannings, with an ID.
+        description: One of available booking options, returned by /plannings, with an ID.
         required: true
         content:
           application/json:
@@ -199,6 +205,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -247,6 +255,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Booking identifier
@@ -325,6 +335,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Booking identifier
@@ -395,6 +407,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Booking identifier
@@ -464,6 +478,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -520,6 +536,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -574,6 +592,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -630,6 +650,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -684,6 +706,8 @@ paths:
   /operator/meta:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -715,12 +739,14 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
         - TO
       summary: describes all available stations
-      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]
+      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]. This endpoint can be filtered using the regionId OR with the combination lon, lat and range.
       parameters:
         - name: offset
           in: query
@@ -741,6 +767,24 @@ paths:
           required: false
           schema: 
             type: string
+        - name: lon
+          in: query
+          description: the longitude of the search location (WGS84)
+          required: false
+          schema:
+            type: number
+        - name: lat
+          in: query
+          description: the latitude of the search location (WGS84)
+          required: false
+          schema:
+            type: number
+        - name: radius
+          in: query
+          description: the range in meters from the search location to look for stations
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
@@ -768,6 +812,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       description: Returns a list of available assets.
       tags:
@@ -830,6 +876,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -889,6 +937,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -934,6 +984,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -980,6 +1032,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -1011,6 +1065,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -1059,6 +1115,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -1097,6 +1155,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - payment
@@ -1191,6 +1251,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       tags:
         - payment
@@ -1236,6 +1298,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       description: creates a request for support from end user via MP
       tags:
@@ -1275,6 +1339,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       description: Gets the status report of the support request. Last status (highest order number) is the current status
       tags:
@@ -2307,6 +2373,7 @@ components:
               FINISH,
               TIME_EXTEND,
               TIME_POSTPONE,
+              CANCEL,
             ]
         comment:
           type: string
@@ -2345,6 +2412,7 @@ components:
           FINISHING,
           FINISHED,
           ISSUE_REPORTED,
+          CANCELLED,
         ]
 
     license:
