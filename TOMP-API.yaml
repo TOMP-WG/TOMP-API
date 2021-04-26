@@ -113,10 +113,12 @@ paths:
         Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planning).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
-        <p> see (3.2) in the process flow - booking
+        <p> see (3.2) in the process flow - booking.
+        <p>The MP can implement this endpoint when it allows direct booking by TOs. The specific TO can book an asset from themselves to get it registrated and handled (financially) by the MP.
       tags:
         - booking
         - TO
+        - MP
       requestBody:
         description: One of available legs, returned by /plannings, with an ID.
         required: true
