@@ -3179,16 +3179,12 @@ components:
           example: QR-code
           $ref: "#/components/schemas/assetAccessMethods"
         tokenData:
-          description: this field should be filled depending on the process identifiers (https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers)
-          $ref: "#/components/schemas/tokenData"
-
-    tokenData:
-      oneOf: 
-      - $ref: "#/components/schemas/tokenDefault"
-      - $ref: "#/components/schemas/tokenDeeplink"
-      - $ref: "#/components/schemas/tokenEKey"
-      - $ref: "#/components/schemas/tokenQR"
-      - $ref: "#/components/schemas/tokenEmpty"
+          oneOf: 
+            - $ref: "#/components/schemas/tokenDefault"
+            - $ref: "#/components/schemas/tokenDeeplink"
+            - $ref: "#/components/schemas/tokenEKey"
+            - $ref: "#/components/schemas/tokenQR"
+            - $ref: "#/components/schemas/tokenEmpty"
 
     tokenDefault:
       description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
