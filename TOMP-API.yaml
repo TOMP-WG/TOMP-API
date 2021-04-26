@@ -1383,15 +1383,43 @@ components:
   schemas:
     address:
       type: object
+      description: street address, including number OR PO box number, eventually extended with internal reference like room number, could match Content-Language
       properties:
         streetAddress:
-          description: street address, including number OR PO box number, eventually extended with internal referencce like room number, could match Content-Language
-          type: string
-          example: example street 18, 2nd floor, 18-B33
+          anyOf:
+          - type: string
+            example: example street 18, 2nd floor, 18-B33
+          - type: object 
+            description: in fields specified (recommended)
+            required:
+              - street
+              - houseNumber
+            properties:
+              street:
+                type: string
+              houseNumber:
+                type: number
+                minimum: 0                
+              houseNumberAddition:
+                type: string
+              additional:
+                type: string
         areaReference:
           description: city or town, principal subdivision such as province, state or county, could match Content-Language
-          type: string
-          example: Smallcity, Pinetree county
+          anyOf:
+            - type: string
+              example: Smallcity, Pinetree county
+            - type: object
+              description: in fields separated 
+              required:
+                - city
+              properties:
+                city:
+                  type: string
+                province:
+                  type: string
+                state:
+                  type: string
         postalCode:
           type: string
         country:
