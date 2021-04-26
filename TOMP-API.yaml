@@ -753,7 +753,7 @@ paths:
           required: false
           schema:
             type: number
-        - name: range
+        - name: radius
           in: query
           description: the range in meters from the search location to look for stations
           required: false
