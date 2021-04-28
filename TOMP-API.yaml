@@ -710,6 +710,33 @@ paths:
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
 
+  /operator/ping:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+    get:
+      tags:
+        - operator information
+        - TO
+        - MP
+      summary: Describes the status of the Transport Operator - whether the APIs are running or not
+      description: This is a healthcheck endpoint to see if the TO is up and running perfectly. 
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+            description: TOs APIs dont run properly
+
+              
   /operator/stations:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -2096,7 +2123,6 @@ components:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           required:
-            - type
             - vatRate
             - amount
           properties:
@@ -3160,3 +3186,6 @@ components:
 
     410Gone:
       description: The requested resource is no longer available. This is permanent.
+      
+      
+      
