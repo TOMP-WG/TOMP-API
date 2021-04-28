@@ -1763,6 +1763,9 @@ components:
           description: information about the origin, only to supply when requested in the conditionRequireBookingData
           allOf:
             - $ref: "#/components/schemas/place"
+        leg-url: 
+          description: The base url of the Mass Provider o which the TO seds trip execution callbacks through POST legs/{id}/evets
+          type: string
         to:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
           allOf:
