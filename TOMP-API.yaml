@@ -3177,7 +3177,6 @@ components:
           description: The type of data held in this token, will later be an enum
           type: string
           example: QR-code
-          $ref: "#/components/schemas/assetAccessMethods"
         tokenData:
           oneOf: 
             - $ref: "#/components/schemas/tokenDefault"
