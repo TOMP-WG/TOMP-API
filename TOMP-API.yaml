@@ -703,6 +703,32 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /operator/ping:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+    get:
+      tags:
+        - operator information
+        - TO
+        - MP
+      summary: Describes the status of the Transport Operator - whether the APIs are running or not
+      description: This is a healthcheck endpoint to see if the TO is up and running perfectly. 
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+            description: TOs APIs dont run properly
+
   /operator/meta:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
