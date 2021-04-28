@@ -2152,12 +2152,12 @@ components:
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
 
     extraCosts:
-      description: Costs that the TO is charging the MP; credits are negative
+      description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           required:
-            - reason
+            - category
             - description
             - amount
           properties:
