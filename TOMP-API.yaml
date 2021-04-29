@@ -703,6 +703,24 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /operator/ping:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+    get:
+      tags:
+        - operator information
+        - TO
+        - MP
+      summary: Describes the status of the Transport Operator - whether the APIs are running or not
+      description: This is a healthcheck endpoint to see if the TO is up and running perfectly. 
+      responses:
+        "200":
+          description: successful operation
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          description: not every endpoint functions properly
+
   /legs/{id}/confirmation:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -735,7 +753,7 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
-          
+
   /operator/meta:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
