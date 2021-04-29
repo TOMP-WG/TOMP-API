@@ -1318,42 +1318,39 @@ components:
     address:
       type: object
       description: street address, including number OR PO box number, eventually extended with internal reference like room number, could match Content-Language
+      required:
+        - streetAddress
+        - areaReference
       properties:
         streetAddress:
-          anyOf:
-          - type: string
-            example: example street 18, 2nd floor, 18-B33
-          - type: object 
-            description: in fields specified (recommended)
-            required:
-              - street
-              - houseNumber
-            properties:
-              street:
-                type: string
-              houseNumber:
-                type: number
-                minimum: 0                
-              houseNumberAddition:
-                type: string
-              additional:
-                type: string
+          type: string
+          example: example street 18, 2nd floor, 18-B33
+        street:
+          type: string
+          description: street, consistent with streetAddress
+        houseNumber:
+          type: number
+          description: house number, consistent with streetAddress
+          minimum: 0
+        houseNumberAddition:
+          type: string
+          description: the additional part of the house number (f.x. 13bis, where 'bis' is the additional part), consistent with streetAddress
+        addressAdditionalInfo:
+          type: string
+          description: additional information to find the address (f.x. just around the corner)
         areaReference:
           description: city or town, principal subdivision such as province, state or county, could match Content-Language
-          anyOf:
-            - type: string
-              example: Smallcity, Pinetree county
-            - type: object
-              description: in fields separated 
-              required:
-                - city
-              properties:
-                city:
-                  type: string
-                province:
-                  type: string
-                state:
-                  type: string
+          type: string
+          example: Smallcity, Pinetree county
+        city:
+          type: string
+          description: specified city or town, consistent with areaReference
+        province:
+          type: string
+          description: province or region, consistent with areaReference
+        state:
+          type: string
+          description: state, consistent with areaReference
         postalCode:
           type: string
         country:
