@@ -43,8 +43,7 @@ tags:
   - name: MP
     description: the MaaS Service Provider's endpoints
 
-# sec
-ty. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
+# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
 #                           OAuth2 and OpenId are also available
