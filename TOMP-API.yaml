@@ -43,7 +43,8 @@ tags:
   - name: MP
     description: the MaaS Service Provider's endpoints
 
-# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
+# sec
+ty. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
 #                           OAuth2 and OpenId are also available
@@ -1763,9 +1764,11 @@ components:
           description: information about the origin, only to supply when requested in the conditionRequireBookingData
           allOf:
             - $ref: "#/components/schemas/place"
-        leg-url: 
-          description: The base url of the Mass Provider o which the TO seds trip execution callbacks through POST legs/{id}/evets
+        callbackUrl: 
+          description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
+            when this deviates from standard or agreed URL.
           type: string
+          format: URL
         to:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
           allOf:
