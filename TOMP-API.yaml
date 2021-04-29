@@ -721,6 +721,39 @@ paths:
         "500":
           description: not every endpoint functions properly
 
+  /legs/{id}/confirmation:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - name: id
+        in: path
+        description: Leg identifier
+        required: true
+        schema:
+          type: string
+    post:
+      description: The TO can request confirmation for certain actions from the MP.
+      tags:
+        - trip execution
+        - MP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/confirmationRequest"
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                type: boolean
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+
   /operator/meta:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -1781,6 +1814,11 @@ components:
           description: information about the origin, only to supply when requested in the conditionRequireBookingData
           allOf:
             - $ref: "#/components/schemas/place"
+        callbackUrl: 
+          description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
+            when this deviates from standard or agreed URL.
+          type: string
+          format: URL
         to:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
           allOf:
@@ -1962,6 +2000,17 @@ components:
       allOf:
         - $ref: "#/components/schemas/condition"
 
+    confirmationRequest:
+      type: object
+      description: the TO can ask permission to do something to the MP, as the MP is financially responsible. 
+      properties:
+        type:
+          type: string
+          enum: [ REPLACE_ASSET, START_LEG ]
+        assetTypeId:
+          type: string
+          description: reference to the assetType in /operator/available-assets, this property can be set when replacing an asset (for another type). In case of a succesfull replacement, the /legs/{id}/events - ASSIGN_ASSET should be send to the MP to inform a change of asset has been made.
+        
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
@@ -2170,12 +2219,12 @@ components:
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
 
     extraCosts:
-      description: Costs that the TO is charging the MP; credits are negative
+      description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           required:
-            - reason
+            - category
             - description
             - amount
           properties:
@@ -2420,9 +2469,7 @@ components:
           description: Data to open a specific asset (e.g. QR code, image base64)
           oneOf:
             - $ref: "#/components/schemas/token"
-            - type: array
-              items:
-                $ref: "#/components/schemas/token"
+            - $ref: "#/components/schemas/tokenArray" 
 
     legEvent:
       type: object
@@ -2850,7 +2897,7 @@ components:
           description: the booking id
         supportType:
           type: string
-          enum: [BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
         location:
           $ref: '#/components/schemas/place'
         time:
@@ -3202,6 +3249,11 @@ components:
             - $ref: "#/components/schemas/tokenEKey"
             - $ref: "#/components/schemas/tokenQR"
             - $ref: "#/components/schemas/tokenEmpty"
+
+    tokenArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/token"
 
     tokenDefault:
       description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
