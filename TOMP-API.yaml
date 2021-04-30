@@ -1734,15 +1734,20 @@ components:
 
     assetAccessMethods:
       type: string
-      enum: [DEEPLINK, 
+      enum:  [
+              DEEPLINK, 
               QR, 
               AZTEC,
               TOMP-API, 
               AXA-EKEY-OTP, 
               PHYSICAL-KEY,
+              BARCODE,
+              PDF,
+              HTML,
               OVC,
               EMV,
-              NONE]
+              NONE
+            ]
 
     bankAccount:
       type: object
