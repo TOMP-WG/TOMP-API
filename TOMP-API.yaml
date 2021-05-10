@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.1.0"
+  version: "1.2.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -61,6 +61,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       description:
         Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
@@ -108,17 +110,21 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       description:
         Creates a new `Booking` for the TO in **Pending** state. The ID of the posted booking should be the ID provided in the previous step (planning).
         <p>The Booking may be modified in the response, e.g. location being adjusted for a more suitable pick-up location.
         In addition, the service may contain a **meta** attribute for arbitrary TO metadata that the TO needs later, and **token** attribute depicting how long the current state is valid.
-        <p> see (3.2) in the process flow - booking
+        <p> see (3.2) in the process flow - booking.
+        <p>The MP can implement this endpoint when it allows direct booking by TOs. The specific TO can book an asset from themselves to get it registrated and handled (financially) by the MP.
       tags:
         - booking
         - TO
+        - MP
       requestBody:
-        description: One of available legs, returned by /plannings, with an ID.
+        description: One of available booking options, returned by /plannings, with an ID.
         required: true
         content:
           application/json:
@@ -199,6 +205,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -247,6 +255,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Booking identifier
@@ -325,6 +335,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Booking identifier
@@ -395,6 +407,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Booking identifier
@@ -464,6 +478,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -520,6 +536,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -574,6 +592,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -630,6 +650,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
       - name: id
         in: path
         description: Leg identifier
@@ -681,9 +703,62 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /operator/ping:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+    get:
+      tags:
+        - operator information
+        - TO
+        - MP
+      summary: Describes the status of the Transport Operator - whether the APIs are running or not
+      description: This is a healthcheck endpoint to see if the TO is up and running perfectly. 
+      responses:
+        "200":
+          description: successful operation
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          description: not every endpoint functions properly
+
+  /legs/{id}/confirmation:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - name: id
+        in: path
+        description: Leg identifier
+        required: true
+        schema:
+          type: string
+    post:
+      description: The TO can request confirmation for certain actions from the MP.
+      tags:
+        - trip execution
+        - MP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/confirmationRequest"
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                type: boolean
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+
   /operator/meta:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -715,12 +790,14 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
         - TO
       summary: describes all available stations
-      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]
+      description: All stations contained in this list are considered public (ie, can be shown on a map for public use). If there are private stations (such as Capital Bikeshare's White House station) these should not be exposed here and their status should not be included [from GBFS]. This endpoint can be filtered using the regionId OR with the combination lon, lat and range.
       parameters:
         - name: offset
           in: query
@@ -741,6 +818,24 @@ paths:
           required: false
           schema: 
             type: string
+        - name: lon
+          in: query
+          description: the longitude of the search location (WGS84)
+          required: false
+          schema:
+            type: number
+        - name: lat
+          in: query
+          description: the latitude of the search location (WGS84)
+          required: false
+          schema:
+            type: number
+        - name: radius
+          in: query
+          description: the range in meters from the search location to look for stations
+          required: false
+          schema:
+            type: number
       responses:
         "200":
           description: successful operation
@@ -768,6 +863,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       description: Returns a list of available assets.
       tags:
@@ -830,6 +927,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -889,6 +988,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -934,6 +1035,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -980,6 +1083,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -1011,6 +1116,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -1059,6 +1166,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - operator information
@@ -1097,6 +1206,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       tags:
         - payment
@@ -1191,6 +1302,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       tags:
         - payment
@@ -1236,6 +1349,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     post:
       description: creates a request for support from end user via MP
       tags:
@@ -1275,6 +1390,8 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/api"
       - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
     get:
       description: Gets the status report of the support request. Last status (highest order number) is the current status
       tags:
@@ -1317,15 +1434,40 @@ components:
   schemas:
     address:
       type: object
+      description: street address, including number OR PO box number, eventually extended with internal reference like room number, could match Content-Language
+      required:
+        - streetAddress
+        - areaReference
       properties:
         streetAddress:
-          description: street address, including number OR PO box number, eventually extended with internal referencce like room number, could match Content-Language
           type: string
           example: example street 18, 2nd floor, 18-B33
+        street:
+          type: string
+          description: street, consistent with streetAddress
+        houseNumber:
+          type: number
+          description: house number, consistent with streetAddress
+          minimum: 0
+        houseNumberAddition:
+          type: string
+          description: the additional part of the house number (f.x. 13bis, where 'bis' is the additional part), consistent with streetAddress
+        addressAdditionalInfo:
+          type: string
+          description: additional information to find the address (f.x. just around the corner)
         areaReference:
           description: city or town, principal subdivision such as province, state or county, could match Content-Language
           type: string
           example: Smallcity, Pinetree county
+        city:
+          type: string
+          description: specified city or town, consistent with areaReference
+        province:
+          type: string
+          description: province or region, consistent with areaReference
+        state:
+          type: string
+          description: state, consistent with areaReference
         postalCode:
           type: string
         country:
@@ -1583,6 +1725,29 @@ components:
           description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
           type: object
           additionalProperties: true
+        accessMethods: 
+          type: array
+          description: access method for trip execution. Data will be delivered in the response of /booking/{id}/events - COMMIT 
+            or /leg/{id}/events - PREPARE (preferred).
+          items:
+            $ref: "#/components/schemas/assetAccessMethods"
+
+    assetAccessMethods:
+      type: string
+      enum:  [
+              DEEPLINK, 
+              QR, 
+              AZTEC,
+              TOMP-API, 
+              AXA-EKEY-OTP, 
+              PHYSICAL-KEY,
+              BARCODE,
+              PDF,
+              HTML,
+              OVC,
+              EMV,
+              NONE
+            ]
 
     bankAccount:
       type: object
@@ -1633,6 +1798,12 @@ components:
         operation:
           type: string
           enum: [CANCEL, EXPIRE, DENY, COMMIT]
+        origin:
+          type: string
+          description: This operation can be done on behalf of another party. The MP can act on behalf of the END_USER (cancel this booking for me); 
+            to override the default origin. In case this field is missing, it must be assumed that the events the MP is sending, this field should 
+            contain "MP". And in case the TO is sending, "TO".
+          enum: [TO, MP, END_USER, OTHER]
 
     bookingRequest:
       description: A booking requested by the MP
@@ -1645,6 +1816,11 @@ components:
           description: information about the origin, only to supply when requested in the conditionRequireBookingData
           allOf:
             - $ref: "#/components/schemas/place"
+        callbackUrl: 
+          description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
+            when this deviates from standard or agreed URL.
+          type: string
+          format: URL
         to:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
           allOf:
@@ -1826,6 +2002,17 @@ components:
       allOf:
         - $ref: "#/components/schemas/condition"
 
+    confirmationRequest:
+      type: object
+      description: the TO can ask permission to do something to the MP, as the MP is financially responsible. 
+      properties:
+        type:
+          type: string
+          enum: [ REPLACE_ASSET, START_LEG ]
+        assetTypeId:
+          type: string
+          description: reference to the assetType in /operator/available-assets, this property can be set when replacing an asset (for another type). In case of a succesfull replacement, the /legs/{id}/events - ASSIGN_ASSET should be send to the MP to inform a change of asset has been made.
+        
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
@@ -2034,12 +2221,12 @@ components:
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
 
     extraCosts:
-      description: Costs that the TO is charging the MP; credits are negative
+      description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           required:
-            - reason
+            - category
             - description
             - amount
           properties:
@@ -2161,6 +2348,7 @@ components:
               type: string
             invoiceId:
               description: the number of the invoice. Should be filled in when invoiced.
+              type: string
             invoiceDate:
               type: string
               format: date-time
@@ -2281,8 +2469,9 @@ components:
             - $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/token"
+            - $ref: "#/components/schemas/tokenArray" 
 
     legEvent:
       type: object
@@ -2306,6 +2495,7 @@ components:
               FINISH,
               TIME_EXTEND,
               TIME_POSTPONE,
+              CANCEL,
             ]
         comment:
           type: string
@@ -2344,6 +2534,7 @@ components:
           FINISHING,
           FINISHED,
           ISSUE_REPORTED,
+          CANCELLED,
         ]
 
     license:
@@ -2539,10 +2730,46 @@ components:
           items:
             type: string
 
+    requirement:
+      type: object
+      required:
+        - category
+        - number
+      properties:
+        category:
+          type: string
+          description: references to the first column of the specification 
+          enum: [ HR, AV, HV, AB, AER, K, ZR, RR ]
+        number:
+          type: string
+          description: references to the second column of the specification
+          minLength: 2
+          maxLength: 2
+        type:
+          description: conditionally extra information, referencing to the 3th column
+          type: string
+        memo:
+          description: extra field for detailed information, not standardized
+          type: string
+        variable-number:
+          description: in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)
+          type: number
+        applicable-days:
+          description: days of week that are applicable
+          type: array
+          items: 
+            type: string
+            enum: [MO, TU, WE, TH, FR, SA, SU]
+
     requirements:
       description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/TOMP-WG/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW.pdf'
       type: object
       additionalProperties: true
+      properties:
+        abilities: 
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement" 
 
     scenario:
       type: string
@@ -2672,7 +2899,7 @@ components:
           description: the booking id
         supportType:
           type: string
-          enum: [BROKEN_DOWN, NOT_AT_LOCATION, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
         location:
           $ref: '#/components/schemas/place'
         time:
@@ -3006,7 +3233,6 @@ components:
         - validFrom
         - validUntil
         - tokenType
-        - tokenData
       properties:
         validFrom:
           type: string
@@ -3019,9 +3245,84 @@ components:
           type: string
           example: QR-code
         tokenData:
-          description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
+          oneOf: 
+            - $ref: "#/components/schemas/tokenDefault"
+            - $ref: "#/components/schemas/tokenDeeplink"
+            - $ref: "#/components/schemas/tokenEKey"
+            - $ref: "#/components/schemas/tokenQR"
+            - $ref: "#/components/schemas/tokenEmpty"
+
+    tokenArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/token"
+
+    tokenDefault:
+      description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
+      type: object
+      additionalProperties: true
+
+    tokenDeeplink:
+      type: object
+      description: deeplink info
+      properties:
+        url:
+          description: the base deeplink url for the MP app. Can be extended by
+            the 'knownParamaters'. Including the scheme.
+          type: string
+          example: mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf
+          format: URI
+        knownParameters:
+          type: array
+          example: [ "return-url"
+                  , "error-url"
+                  , "error-code"
+                  , "error-description"
+                  ]
+          items:
+            type: string
+
+    tokenEKey:
+      type: object
+      required:
+      - ekey
+      - lock
+      description: Axa EKey information
+      properties:
+        ekey: 
           type: object
-          additionalProperties: true
+          properties:
+            key: 
+              description: certificate
+              type: string
+            passkey:
+              description: one time pass key
+              type: string
+        lock:
+          type: object
+          properties:
+            bdAddress:
+              description: physical address 
+              type: string
+            deviceName:
+              description: how it advertises itself
+              type: string
+
+    tokenEmpty:
+      type: object
+      description: For anonymous access information
+
+    tokenQR:
+      type: object
+      required:
+      - base64
+      description: QR information
+      properties:
+        base64: 
+          description: base 64 QR code
+          type: string
+        version: 
+          type: string
 
     chamberOfCommerceInfo:
       description: To identify the operator
@@ -3057,6 +3358,13 @@ components:
             $ref: "#/components/schemas/licenseType"
         requirements:
           $ref: "#/components/schemas/requirements"
+        knownIdentifier: 
+          type: string
+          description: identifier for this traveler in the personal data store. This identifier can be used to get personal information
+            from the provider specified in the "knownIdentifierProvider"
+        knownIdentifierProvider:
+          type: string
+          description: provider for personal information. Can be a URI or identifier.
 
   parameters:
     acceptLanguage:
