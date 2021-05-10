@@ -2251,7 +2251,6 @@ components:
     fare:
       description: the total fare is the sum of all parts, except for the 'MAX' farePart. This one descripes the maximum price for the complete leg.
       required:
-        - type
         - estimated
         - parts
       properties:
