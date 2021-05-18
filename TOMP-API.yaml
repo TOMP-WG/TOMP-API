@@ -3261,7 +3261,7 @@ components:
         - tokenType
       properties:
         tokenType:
-          $ref: '#/components/schemas/assetAccessMethods'
+          type: string
 
     tokenDefault:
       description: Arbitrary data the TO may pass along the ticket to the client
