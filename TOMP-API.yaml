@@ -1718,6 +1718,13 @@ components:
         winterTires:
           type: boolean
           description: true indicates winter tires required
+        maxSpeed:
+          type: number
+          description: the maximum allowed speed for this asset (in km/h)
+        helmetRequired:
+          type: boolean
+          default: false
+          description: is a helmet required to operate this asset
         other:
           type: string
           description: free text to describe asset, should match Content-Language
@@ -3261,7 +3268,7 @@ components:
         - tokenType
       properties:
         tokenType:
-          $ref: '#/components/schemas/assetAccessMethods'
+          type: string
 
     tokenDefault:
       description: Arbitrary data the TO may pass along the ticket to the client
