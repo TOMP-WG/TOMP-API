@@ -2470,10 +2470,13 @@ components:
             - $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          oneOf:
+          allOf:
             - $ref: "#/components/schemas/token"
-            - $ref: "#/components/schemas/tokenArray" 
-
+         allAssetAccessData:
+          description: Array of data to open a specific asset (e.g. QR code, image base64)
+          allOf:
+            - $ref: "#/components/schemas/tokenArray"   
+            
     legEvent:
       type: object
       description: event for the execution
