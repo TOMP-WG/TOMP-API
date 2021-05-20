@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.2.1"
+  version: "1.2.2"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -2470,10 +2470,13 @@ components:
             - $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          oneOf:
+          allOf:
             - $ref: "#/components/schemas/token"
-            - $ref: "#/components/schemas/tokenArray" 
-
+        allAssetAccessData:
+          description: Array of data to open a specific asset (e.g. QR code, image base64)
+          allOf:
+            - $ref: "#/components/schemas/tokenArray"   
+            
     legEvent:
       type: object
       description: event for the execution
