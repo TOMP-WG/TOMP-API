@@ -2472,7 +2472,7 @@ components:
           description: Data to open a specific asset (e.g. QR code, image base64)
           allOf:
             - $ref: "#/components/schemas/token"
-         allAssetAccessData:
+        allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
           allOf:
             - $ref: "#/components/schemas/tokenArray"   
