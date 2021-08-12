@@ -1903,6 +1903,16 @@ components:
             type: string
             format: maas-id
 
+    baseCondition:
+        type: object
+        properties:
+          conditionType:
+            description: The specific subclass of condition, should match the schema name exactly
+            type: string
+          id:
+            description: An identifier for this condition that can be used to refer to this condition
+            type: string
+            example: deposit50eu
     condition:
       oneOf:
         - $ref: "#/components/schemas/conditionDeposit"
@@ -1915,29 +1925,23 @@ components:
         propertyName: conditionType
       required:
         - conditionType
-      properties:
-        conditionType:
-          description: The specific subclass of condition, should match the schema name exactly
-          type: string
-        id:
-          description: An identifier for this condition that can be used to refer to this condition
-          type: string
-          example: deposit50eu
+      allOf:
+        - $ref: "#/components/schemas/baseCondition"
 
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/baseCondition"
         - $ref: "#/components/schemas/amountOfMoney"
 
     conditionPayWhenFinished:
       description: in case the TO demands a direct payment after usage.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/baseCondition"
 
     conditionPostponedCommit:
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/baseCondition"
         - type: object
           required:
             - ultimateResponseTime
@@ -1949,7 +1953,7 @@ components:
     conditionRequireBookingData:
       type: object
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/baseCondition"
         - type: object
           required:
             - requiredFields
@@ -1979,7 +1983,7 @@ components:
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/baseCondition"
         - type: object
           properties:
             stationId:
@@ -2000,7 +2004,7 @@ components:
     conditionUpfrontPayment:
       description: in case the TO demands a upfront payment before usage. The payment should be made in the booking phase.
       allOf:
-        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/baseCondition"
 
     confirmationRequest:
       type: object
