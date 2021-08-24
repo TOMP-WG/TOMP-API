@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.2.0"
+  version: "1.2.2"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -2470,10 +2470,13 @@ components:
             - $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          oneOf:
+          allOf:
             - $ref: "#/components/schemas/token"
-            - $ref: "#/components/schemas/tokenArray" 
-
+        allAssetAccessData:
+          description: Array of data to open a specific asset (e.g. QR code, image base64)
+          allOf:
+            - $ref: "#/components/schemas/tokenArray"   
+            
     legEvent:
       type: object
       description: event for the execution
@@ -3246,26 +3249,34 @@ components:
           type: string
           example: QR-code
         tokenData:
-          oneOf: 
-            - $ref: "#/components/schemas/tokenDefault"
-            - $ref: "#/components/schemas/tokenDeeplink"
-            - $ref: "#/components/schemas/tokenEKey"
-            - $ref: "#/components/schemas/tokenQR"
-            - $ref: "#/components/schemas/tokenEmpty"
+          $ref: "#/components/schemas/tokenData"
 
     tokenArray:
       type: array
       items:
         $ref: "#/components/schemas/token"
 
-    tokenDefault:
-      description: Arbitrary data the TO may pass along the ticket to the client (e.g. a booking code, base64 encoded binary, QR code), later will be one of several types
-      type: object
+    tokenData:
+      discriminator:
+        propertyName: tokenType
       additionalProperties: true
+      required:
+        - tokenType
+      properties:
+        tokenType:
+          type: string
+
+    tokenDefault:
+      description: Arbitrary data the TO may pass along the ticket to the client
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/tokenData"
 
     tokenDeeplink:
       type: object
       description: deeplink info
+      allOf:
+        - $ref: "#/components/schemas/tokenData"
       properties:
         url:
           description: the base deeplink url for the MP app. Can be extended by
@@ -3285,10 +3296,12 @@ components:
 
     tokenEKey:
       type: object
-      required:
-      - ekey
-      - lock
       description: Axa EKey information
+      allOf:
+        - $ref: "#/components/schemas/tokenData"
+      required:
+        - ekey
+        - lock
       properties:
         ekey: 
           type: object
@@ -3309,15 +3322,13 @@ components:
               description: how it advertises itself
               type: string
 
-    tokenEmpty:
-      type: object
-      description: For anonymous access information
-
     tokenQR:
       type: object
-      required:
-      - base64
       description: QR information
+      allOf:
+        - $ref: "#/components/schemas/tokenData"
+      required:
+        - base64
       properties:
         base64: 
           description: base 64 QR code
