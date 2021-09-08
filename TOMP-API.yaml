@@ -23,7 +23,7 @@ tags:
     description: gives information about systems, stations, operating hours [from GBFS]
 
   - name: payment
-    description: arranges financial settlement for legs
+    description: reports financial overview for legs
 
   - name: support
     description: support for the user while the leg is ongoing
@@ -33,9 +33,6 @@ tags:
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
-
-  - name: trip execution [optional]
-    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
 
   - name: TO
     description: the Transport Operator's endpoints
@@ -1581,7 +1578,7 @@ components:
           description: Unique identifier of an asset type,
         stationId:
           type: string
-          description: If staionId is present, the nrAvailable is expected to find the availableity at that particular station
+          description: If stationId is present, the nrAvailable is expected to find the availability at that particular station
         nrAvailable:
           type: integer
         assets:
@@ -1597,7 +1594,7 @@ components:
           $ref: "#/components/schemas/assetProperties"
 
     assetProperties:
-      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      description: Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.
       properties:
         name:
           description: name of asset (type), required in either assetType or asset, should match Content-Language
@@ -1731,6 +1728,10 @@ components:
             or /leg/{id}/events - PREPARE (preferred).
           items:
             $ref: "#/components/schemas/assetAccessMethods"
+        ancillaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement"
 
     assetAccessMethods:
       type: string
@@ -2308,7 +2309,9 @@ components:
             name:
               type: string
             class:
+              default: "FARE"
               type: string
+              enum: [ "FARE", "ANCILLARY" ]
             meta:
               type: object
               additionalProperties: true
@@ -2771,6 +2774,10 @@ components:
       additionalProperties: true
       properties:
         abilities: 
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement" 
+        bringAlong:
           type: array
           items:
             $ref: "#/components/schemas/requirement" 
