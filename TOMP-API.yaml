@@ -1581,7 +1581,7 @@ components:
           description: Unique identifier of an asset type,
         stationId:
           type: string
-          description: If staionId is present, the nrAvailable is expected to find the availableity at that particular station
+          description: If stationId is present, the nrAvailable is expected to find the availability at that particular station
         nrAvailable:
           type: integer
         assets:
