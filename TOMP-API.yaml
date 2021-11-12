@@ -497,14 +497,14 @@ paths:
           description: start of the selection
           required: false
           schema:
-            type: number
+            type: integer
             default: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
-            type: number
+            type: integer
       responses:
         "200":
           description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
@@ -804,14 +804,14 @@ paths:
           description: start of the selection
           required: false
           schema:
-            type: number
+            type: integer
             default: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
-            type: number
+            type: integer
         - name: regionId
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
@@ -824,18 +824,21 @@ paths:
           required: false
           schema:
             type: number
+            format: double
         - name: lat
           in: query
           description: the latitude of the search location (WGS84)
           required: false
           schema:
             type: number
+            format: double
         - name: radius
           in: query
           description: the range in meters from the search location to look for stations
           required: false
           schema:
             type: number
+            format: double
       responses:
         "200":
           description: successful operation
@@ -876,14 +879,14 @@ paths:
           description: start of the selection
           required: false
           schema:
-            type: number
+            type: integer
             default: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
-            type: number
+            type: integer
         - name: regionId
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
@@ -941,14 +944,14 @@ paths:
           description: start of the selection
           required: false
           schema:
-            type: number
+            type: integer
             default: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
-            type: number
+            type: integer
         - name: regionId
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
@@ -1179,14 +1182,14 @@ paths:
           description: start of the selection
           required: false
           schema:
-            type: number
+            type: integer
             default: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
-            type: number
+            type: integer
       responses:
         "200":
           description: successful operation
@@ -1265,14 +1268,14 @@ paths:
           description: start of the selection
           required: false
           schema:
-            type: number
+            type: integer
             default: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
-            type: number
+            type: integer
       responses:
         "200":
           description: journal entries
@@ -1446,7 +1449,7 @@ components:
           type: string
           description: street, consistent with streetAddress
         houseNumber:
-          type: number
+          type: integer
           description: house number, consistent with streetAddress
           minimum: 0
         houseNumberAddition:
@@ -1480,9 +1483,11 @@ components:
           description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT
           type: number
           example: 9.95
+          format: decimal
         amountExVat:
           type: number
           example: 8.95
+          format: decimal
         currencyCode:
           description: ISO 4217 currency code
           type: string
@@ -1492,6 +1497,7 @@ components:
           type: number
           description: value added tax rate (percentage of amount)
           example: 21.0
+          format: decimal
         vatCountryCode:
           $ref: "#/components/schemas/country"
 
@@ -1627,6 +1633,7 @@ components:
           enum: [A, B, C, D, E]
         co2PerKm:
           type: number
+          format: double
         brand:
           type: string
           description: brand of the asset
@@ -2023,9 +2030,11 @@ components:
         lng:
           type: number
           example: 6.169639
+          format: double
         lat:
           type: number
           example: 52.253279
+          format: double
 
     country:
       type: string
@@ -2161,7 +2170,7 @@ components:
           default: false
         maxPageSize:
           description: the maximum size of the pages (only valid when supportsPaging=true). If the limit-parameter of the request is above this amount, a http code 400 will be returned.
-          type: number
+          type: integer
       example:
         withoutPaging:
           { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
@@ -2202,7 +2211,7 @@ components:
         missing authorization or internal service error. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       properties:
         errorcode:
-          type: number
+          type: integer
           description: The TOMP specific error code. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for more details of this error.
         type:
           type: string
@@ -2238,6 +2247,7 @@ components:
             number:
               type: number
               description: e.g. number of litres, number of kilowatthour, etc
+              format: double
             numberType:
               type: string
               enum: [LITER, KILOWATTHOUR, CO2_COMPENSATION, OTHER]
@@ -2297,11 +2307,14 @@ components:
               enum: [KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE]
             units:
               type: number
+              format: double
               description: the number of km, seconds etc in the `per` part. In the first example of the description this should be 2.0
             scaleFrom:
               type: number
+              format: double
             scaleTo:
               type: number
+              format: double
             scaleType:
               type: string
               enum: [KM, MILE, HOUR, MINUTE]
@@ -2327,6 +2340,7 @@ components:
       maxItems: 2
       items:
         type: number
+        format: double
       example: [lon, lat]
 
     geojsonPolygon:
@@ -2363,12 +2377,14 @@ components:
             distance:
               description: the travelled distance. Only if applicable.
               type: number
+              format: double
             distanceType:
               type: string
               enum: [KM, MILE]
             usedTime:
               description: the time in seconds that the assed is used. Only if applicable.
               type: number
+              format: double
             bankAccount:
               $ref: "#/components/schemas/bankAccount"
             details:
@@ -2582,6 +2598,7 @@ components:
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
           type: number
+          format: double
         comment:
           type: string
           description: free text, should match Content-Language
@@ -2640,6 +2657,7 @@ components:
         radius:
           description: Maximum distance in meters a user wants to travel to reach the travel option
           type: number
+          format: double
         to:
           $ref: "#/components/schemas/place"
         departureTime:
@@ -2758,6 +2776,7 @@ components:
         variable-number:
           description: in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)
           type: number
+          format: double
         applicable-days:
           description: days of week that are applicable
           type: array
@@ -2920,6 +2939,7 @@ components:
           type: string
         requestedResponseTime:
           type: number
+          format: double
           description: time to respond in minutes.
 
     supportStatus:
