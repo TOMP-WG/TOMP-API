@@ -1770,13 +1770,18 @@ components:
       allOf:
         - $ref: "#/components/schemas/bookingRequest"
         - type: object
-          required:
-            - legs
           properties:
             state:
               $ref: "#/components/schemas/bookingState"
             legs:
-              description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled
+              description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled.
+                If this part is not present, it means that there is only one leg. This leg can be constructed 
+                * leg[0].id = booking.id
+                * leg[0].departureTime = booking.departureTime
+                * leg[0].arrivalTime = booking.arrivalTime
+                * leg[0].assetType = booking.mainAssetType
+                * leg[0].pricing = booking.pricing
+                This approach is not allowed in the trip execution part
               type: array
               items:
                 $ref: "#/components/schemas/leg"
@@ -1784,6 +1789,17 @@ components:
               description: The pricing information of the overall booking, in addition to any leg pricing, if not all legs have pricing the booking should have the fare
               allOf:
                 - $ref: "#/components/schemas/fare"
+            departureTime:
+              description: The initial departure time (over all legs)
+              type: string
+              format: date-time
+            arrivalTime:
+              description: The intended arrival time at the destination of the booking (over all legs)
+              type: string
+              format: date-time
+            mainAssetType:
+              description: the asset type that is used mainly in the complete trip.
+              $ref: "#/components/schemas/assetType"
             extraData:
               description: Arbitrary information that a TO can add
               type: object
