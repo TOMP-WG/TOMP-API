@@ -1766,6 +1766,12 @@ components:
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         sharedProperties:
           $ref: "#/components/schemas/assetProperties"
+        applicablePricings:
+          description: pricing plans that can be applicable for this assetType. Business logic to determine the 
+            final pricing plan is not exposed. Just call the plannings endpoint (v1.2) or the inquiries endpoint (v.1.3)
+          type: array
+          items:
+            $ref: "#/components/schemas/systemPricingPlan"
         conditions:
           description: extra information about the asset type, making it possible to f.x. specifying that booking this car requires a driver license.
           type: array
