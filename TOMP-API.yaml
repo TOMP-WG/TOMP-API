@@ -23,7 +23,7 @@ tags:
     description: gives information about systems, stations, operating hours [from GBFS]
 
   - name: payment
-    description: arranges financial settlement for legs
+    description: reports financial overview for legs
 
   - name: support
     description: support for the user while the leg is ongoing
@@ -33,9 +33,6 @@ tags:
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
-
-  - name: trip execution [optional]
-    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
 
   - name: TO
     description: the Transport Operator's endpoints
@@ -576,6 +573,76 @@ paths:
         description: changed leg (e.g. with different duration or destination)
         required: true
       responses:
+        "204":
+          $ref: "#/components/responses/204NoContent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+
+  /legs/{id}/ancillaries/{category}/{number}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+      - name: id
+        in: path
+        description: Leg identifier
+        required: true
+        schema:
+          type: string
+      - name: category
+        in: path
+        description: ancillary category
+        required: true
+        schema:
+          type: string
+      - name: number
+        in: path
+        description: ancillary number
+        required: true
+        schema:
+          type: string
+    post:
+      description: a new ancillary is added to the leg.
+      tags:
+        - trip execution
+        - TO
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/leg"
+        "204":
+          $ref: "#/components/responses/204NoContent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+    delete:
+      description: an ancillary (or amount) is removed to the leg.
+      tags:
+        - trip execution
+        - TO
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/leg"
         "204":
           $ref: "#/components/responses/204NoContent"
         "400":
@@ -1495,6 +1562,16 @@ components:
         vatCountryCode:
           $ref: "#/components/schemas/country"
 
+    ancillaryBooking:
+      type: object
+      required:
+        - legId
+      properties:
+        allOf:
+          $ref: "#/components/schemas/requirement"
+        legId:
+          type: string
+
     asset:
       type: object
       required:
@@ -1581,7 +1658,7 @@ components:
           description: Unique identifier of an asset type,
         stationId:
           type: string
-          description: If staionId is present, the nrAvailable is expected to find the availableity at that particular station
+          description: If stationId is present, the nrAvailable is expected to find the availability at that particular station
         nrAvailable:
           type: integer
         assets:
@@ -1597,7 +1674,7 @@ components:
           $ref: "#/components/schemas/assetProperties"
 
     assetProperties:
-      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      description: Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.
       properties:
         name:
           description: name of asset (type), required in either assetType or asset, should match Content-Language
@@ -1738,6 +1815,10 @@ components:
             or /leg/{id}/events - PREPARE (preferred).
           items:
             $ref: "#/components/schemas/assetAccessMethods"
+        ancillaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement"
 
     assetAccessMethods:
       type: string
@@ -2315,7 +2396,9 @@ components:
             name:
               type: string
             class:
+              default: "FARE"
               type: string
+              enum: [ "FARE", "ANCILLARY" ]
             meta:
               type: object
               additionalProperties: true
@@ -2747,14 +2830,18 @@ components:
 
     requirement:
       type: object
+      description: describes an (dis)ability or ancillary.
       required:
         - category
         - number
       properties:
+        source:
+          type: string
+          description: if obsolete, it is referencing the travelers' dictionary (https://github.com/TOMP-WG/TOMP-API/blob/master/documents/CROW%20passenger%20characteristics.xlsx)
         category:
           type: string
           description: references to the first column of the specification 
-          enum: [ HR, AV, HV, AB, AER, K, ZR, RR ]
+                       initial values [ HR, AV, HV, AB, AER, K, ZR, RR ]
         number:
           type: string
           description: references to the second column of the specification
@@ -2777,11 +2864,15 @@ components:
             enum: [MO, TU, WE, TH, FR, SA, SU]
 
     requirements:
-      description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/TOMP-WG/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW.pdf'
+      description: Requirements from the end user side.
       type: object
       additionalProperties: true
       properties:
         abilities: 
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement" 
+        bringAlong:
           type: array
           items:
             $ref: "#/components/schemas/requirement" 
