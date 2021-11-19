@@ -2341,6 +2341,8 @@ components:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           properties:
+            category:
+              $ref: "#/components/schemas/journalCategory"
             journalId:
               description: id of the entry, leg id can be reused
               type: string
