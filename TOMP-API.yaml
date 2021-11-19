@@ -2568,6 +2568,9 @@ components:
             usedTime:
               description: the time in seconds that the assed is used. Only if applicable.
               type: number
+            rentalStartMileage:
+              description: the mileage at the start of the rental. 'DistanceType' field is also applicable here
+              type: number
             bankAccount:
               $ref: "#/components/schemas/bankAccount"
             details:
