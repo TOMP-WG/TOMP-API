@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.2.2"
+  version: "1.3.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -65,9 +65,11 @@ paths:
         Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
         During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
         <p>see (2.1) in the process flow - planning
+        Replaced by /plannings/inquires (booking-intent false) and /planning/offers (booking-intent true)
       tags:
         - planning
         - TO
+      deprecated: true
       parameters:
         - name: booking-intent
           in: query
@@ -75,6 +77,91 @@ paths:
           schema:
             type: boolean
             default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/planningRequest"
+      responses:
+        "201":
+          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planning"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+
+  /planning/inquiries:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    post:
+      description:
+        Returns informative options for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        <p>see (2.1) in the process flow - planning.
+      tags:
+        - planning
+        - TO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/planningRequest"
+      responses:
+        "201":
+          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planning"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+
+  /planning/offers:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    post:
+      description:
+        Returns bookable offers for the given travel plan. 
+        <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        <p>see (2.1) in the process flow - planning
+      tags:
+        - planning
+        - TO
       requestBody:
         content:
           application/json:
@@ -1880,6 +1967,19 @@ components:
               description: Arbitrary information that a TO can add
               type: object
               additionalProperties: true
+              properties:
+                safeWaitTime: 
+                  type: number
+                  description: the predicted time before the asset will arrive
+                maxWaitTime:
+                  type: number
+                  description: the maximum time before the asset will arrive
+                safeTravelTime: 
+                  type: number
+                  description: the predicted time the legs will take
+                maxTravelTime:
+                  type: number
+                  description: the maximum time the legs will take
 
     bookingOperation:
       type: object
@@ -2118,6 +2218,9 @@ components:
         lat:
           type: number
           example: 52.253279
+        alt:
+          type: number
+          description: altitude, in meters above sea level
 
     country:
       type: string
@@ -2223,7 +2326,7 @@ components:
         path:
           description: the exact path of the endpoint, starting after the base URL
           type: string
-          example: /planning-options/
+          example: /plannings/
         eventType:
           description: in case the path is ending in /events, the event type/operator enum should be added here.
           type: string
@@ -2704,7 +2807,7 @@ components:
 
     place:
       type: object
-      description: a origin or destination of a leg, non 3D. lon/lat in WGS84.
+      description: a origin or destination of a leg, 3D. lon/lat in WGS84.
       required:
         - coordinates
       properties:
