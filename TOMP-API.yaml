@@ -1744,8 +1744,6 @@ components:
       type: object
       required:
         - id
-        - assetClass
-        - sharedProperties
       properties:
         id:
           type: string
