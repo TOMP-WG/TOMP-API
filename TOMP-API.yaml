@@ -34,9 +34,6 @@ tags:
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
 
-  - name: trip execution [optional]
-    description: endpoints that can facilitate processes in the trip execution process, but are not necessary for a minimal viable product.
-
   - name: TO
     description: the Transport Operator's endpoints
 
@@ -2269,7 +2266,11 @@ components:
             $ref: "#/components/schemas/farePart"
 
     farePart:
-      description: this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts. The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer).
+      description: this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) 
+       or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are 
+       negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts. 
+       The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay 
+       EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer).
       example:
         {
           "amount": 9.96,
@@ -2283,31 +2284,38 @@ components:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           required:
-            - type
-            - vatRate
             - amount
           properties:
             type:
-              description: type of fare part
+              description: type of fare part. If there is only one farepart and this field is missing, it should
+                be assumed it is 'FIXED'. In all other situations this field is mandatory.
               type: string
               enum: [FIXED, FLEX, MAX]
             unitType:
               type: string
-              description: in case of 'FLEX' mandatory. E.g. 0.5 EUR per HOUR
+              description: in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR
               enum: [KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE]
             units:
               type: number
-              description: the number of km, seconds etc in the `per` part. In the first example of the description this should be 2.0
+              description: the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise
+                not allowed. In case of 0.5 EUR per 15 MINUTES, `units` should contain 15 and `unitType` MINUTES.
             scaleFrom:
               type: number
+              description: in case of scaling, this is the bottom value (f.x. in the first hour 3 CAD, the `scaleFrom` should
+                contain 0 and the `scaleType` HOUR). When `scaleTo` is used, but this field is missing, it should be assumed
+                it is a 0.
             scaleTo:
               type: number
+              description: the upper value of the scale (f.x. 3 CAD in the first hour, this field should contain 1, 
+                `scaleFrom` 0 and `scaleType` HOUR)
             scaleType:
               type: string
               enum: [KM, MILE, HOUR, MINUTE]
             name:
+              description: an optional description of this fare part.
               type: string
             class:
+              description: class of this fare part. Could be FARE or ANCILLARY
               type: string
             meta:
               type: object
