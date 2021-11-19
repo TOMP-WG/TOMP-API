@@ -1595,6 +1595,11 @@ components:
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         sharedProperties:
           $ref: "#/components/schemas/assetProperties"
+        conditions:
+          description: extra information about the asset type, making it possible to f.x. specifying that booking this car requires a driver license.
+          type: array
+          items:
+            $ref: "#/components/schemas/condition"
 
     assetProperties:
       description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
@@ -1974,7 +1979,14 @@ components:
                     CREDIT_CARDS,
                     NAME,
                     AGE,
+                    BLOCKCHAIN_CLAIMS,
                   ]
+            claims:
+              description: when in the 'requiredFields' array 'BLOCKCHAIN_CLAIMS' is specified, in this array claims can be specified.
+                On the WIKI page, the known ones are enlisted, but this list isn't finalized yet. https://github.com/TOMP-WG/TOMP-API/wiki/Blockchain---Verifiable-credentials
+              type: array
+              items:
+                type: string
 
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
