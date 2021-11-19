@@ -1536,6 +1536,9 @@ components:
           format: URL
           example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
           deprecated: true
+        mileage:
+          type: number
+          description: the current mileage of the asset 
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -1721,6 +1724,9 @@ components:
         other:
           type: string
           description: free text to describe asset, should match Content-Language
+        nrOfDoors:
+          type: integer
+          description: the number of doors of the vehicle. Return only when applicable
         meta:
           description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
           type: object
