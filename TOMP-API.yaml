@@ -2633,7 +2633,6 @@ components:
       type: object
       required:
         - from
-        - nrOfTravelers
       properties:
         from:
           $ref: "#/components/schemas/place"
