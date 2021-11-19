@@ -3228,8 +3228,9 @@ components:
         type:
           type: string
           description: the type of area. Default this is 'OPERATING', but other area's can be published here as well 
-            (since 1.3.0).
+            (since 1.3.0). Before 1.3.0, it was only allowed to communicate OPERATING area's.
           enum: [ OPERATING, PROHIBITED_TO_ACCESS, PROHIBITED_TO_PAUSE, PARKING, DISCOUNT ]
+          default: OPERATING
         serviceArea:
           description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
           allOf:
