@@ -2580,7 +2580,7 @@ components:
 
     notification:
       type: object
-      description: notifies the MaaS operator of issues with a booking [addendum]
+      description: notifies the MaaS operator of issues with a booking. Asset information can be provided when needed.
       required:
        - type
       properties:
@@ -2591,6 +2591,8 @@ components:
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
           type: number
+        asset:
+          $ref: '#/components/schemas/asset'
         comment:
           type: string
           description: free text, should match Content-Language
