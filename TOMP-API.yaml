@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.2.2"
+  version: "1.3.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -23,7 +23,7 @@ tags:
     description: gives information about systems, stations, operating hours [from GBFS]
 
   - name: payment
-    description: arranges financial settlement for legs
+    description: reports financial overview for legs
 
   - name: support
     description: support for the user while the leg is ongoing
@@ -65,9 +65,11 @@ paths:
         Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
         During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
         <p>see (2.1) in the process flow - planning
+        Replaced by /plannings/inquires (booking-intent false) and /planning/offers (booking-intent true)
       tags:
         - planning
         - TO
+      deprecated: true
       parameters:
         - name: booking-intent
           in: query
@@ -75,6 +77,91 @@ paths:
           schema:
             type: boolean
             default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/planningRequest"
+      responses:
+        "201":
+          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planning"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+
+  /planning/inquiries:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    post:
+      description:
+        Returns informative options for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        <p>see (2.1) in the process flow - planning.
+      tags:
+        - planning
+        - TO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/planningRequest"
+      responses:
+        "201":
+          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/planning"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+
+  /planning/offers:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    post:
+      description:
+        Returns bookable offers for the given travel plan. 
+        <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
+        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        <p>see (2.1) in the process flow - planning
+      tags:
+        - planning
+        - TO
       requestBody:
         content:
           application/json:
@@ -573,6 +660,76 @@ paths:
         description: changed leg (e.g. with different duration or destination)
         required: true
       responses:
+        "204":
+          $ref: "#/components/responses/204NoContent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+
+  /legs/{id}/ancillaries/{category}/{number}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+      - name: id
+        in: path
+        description: Leg identifier
+        required: true
+        schema:
+          type: string
+      - name: category
+        in: path
+        description: ancillary category
+        required: true
+        schema:
+          type: string
+      - name: number
+        in: path
+        description: ancillary number
+        required: true
+        schema:
+          type: string
+    post:
+      description: a new ancillary is added to the leg.
+      tags:
+        - trip execution
+        - TO
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/leg"
+        "204":
+          $ref: "#/components/responses/204NoContent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+    delete:
+      description: an ancillary (or amount) is removed to the leg.
+      tags:
+        - trip execution
+        - TO
+      responses:
+        "200":
+          description: operation successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/leg"
         "204":
           $ref: "#/components/responses/204NoContent"
         "400":
@@ -1492,6 +1649,16 @@ components:
         vatCountryCode:
           $ref: "#/components/schemas/country"
 
+    ancillaryBooking:
+      type: object
+      required:
+        - legId
+      properties:
+        allOf:
+          $ref: "#/components/schemas/requirement"
+        legId:
+          type: string
+
     asset:
       type: object
       required:
@@ -1533,6 +1700,13 @@ components:
           format: URL
           example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
           deprecated: true
+        mileage:
+          type: number
+          description: the current mileage of the asset 
+        licensePlate:
+          type: string
+          description: the usage of this field requires a secure environment. When assets are published in available-assets, this field can be used 
+            to track assets. Be aware of this.
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -1570,15 +1744,13 @@ components:
       type: object
       required:
         - id
-        - assetClass
-        - sharedProperties
       properties:
         id:
           type: string
           description: Unique identifier of an asset type,
         stationId:
           type: string
-          description: If staionId is present, the nrAvailable is expected to find the availableity at that particular station
+          description: If stationId is present, the nrAvailable is expected to find the availability at that particular station
         nrAvailable:
           type: integer
         assets:
@@ -1592,9 +1764,20 @@ components:
           description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
         sharedProperties:
           $ref: "#/components/schemas/assetProperties"
+        applicablePricings:
+          description: pricing plans that can be applicable for this assetType. Business logic to determine the 
+            final pricing plan is not exposed. Just call the plannings endpoint (v1.2) or the inquiries endpoint (v.1.3)
+          type: array
+          items:
+            $ref: "#/components/schemas/systemPricingPlan"
+        conditions:
+          description: extra information about the asset type, making it possible to f.x. specifying that booking this car requires a driver license.
+          type: array
+          items:
+            $ref: "#/components/schemas/condition"
 
     assetProperties:
-      description: what kind of asset is this? Classify it, give the aspects. Most aspects are optional and should be used when applicable.
+      description: Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.
       properties:
         name:
           description: name of asset (type), required in either assetType or asset, should match Content-Language
@@ -1715,9 +1898,19 @@ components:
         winterTires:
           type: boolean
           description: true indicates winter tires required
+        maxSpeed:
+          type: number
+          description: the maximum allowed speed for this asset (in km/h)
+        helmetRequired:
+          type: boolean
+          default: false
+          description: is a helmet required to operate this asset
         other:
           type: string
           description: free text to describe asset, should match Content-Language
+        nrOfDoors:
+          type: integer
+          description: the number of doors of the vehicle. Return only when applicable
         meta:
           description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
           type: object
@@ -1728,6 +1921,10 @@ components:
             or /leg/{id}/events - PREPARE (preferred).
           items:
             $ref: "#/components/schemas/assetAccessMethods"
+        ancillaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement"
 
     assetAccessMethods:
       type: string
@@ -1767,13 +1964,18 @@ components:
       allOf:
         - $ref: "#/components/schemas/bookingRequest"
         - type: object
-          required:
-            - legs
           properties:
             state:
               $ref: "#/components/schemas/bookingState"
             legs:
-              description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled
+              description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled.
+                If this part is not present, it means that there is only one leg. This leg can be constructed 
+                * leg[0].id = booking.id
+                * leg[0].departureTime = booking.departureTime
+                * leg[0].arrivalTime = booking.arrivalTime
+                * leg[0].assetType = booking.mainAssetType
+                * leg[0].pricing = booking.pricing
+                This approach is not allowed in the trip execution part
               type: array
               items:
                 $ref: "#/components/schemas/leg"
@@ -1781,10 +1983,34 @@ components:
               description: The pricing information of the overall booking, in addition to any leg pricing, if not all legs have pricing the booking should have the fare
               allOf:
                 - $ref: "#/components/schemas/fare"
+            departureTime:
+              description: The initial departure time (over all legs)
+              type: string
+              format: date-time
+            arrivalTime:
+              description: The intended arrival time at the destination of the booking (over all legs)
+              type: string
+              format: date-time
+            mainAssetType:
+              description: the asset type that is used mainly in the complete trip.
+              $ref: "#/components/schemas/assetType"
             extraData:
               description: Arbitrary information that a TO can add
               type: object
               additionalProperties: true
+              properties:
+                safeWaitTime: 
+                  type: number
+                  description: the predicted time before the asset will arrive
+                maxWaitTime:
+                  type: number
+                  description: the maximum time before the asset will arrive
+                safeTravelTime: 
+                  type: number
+                  description: the predicted time the legs will take
+                maxTravelTime:
+                  type: number
+                  description: the maximum time the legs will take
 
     bookingOperation:
       type: object
@@ -1971,7 +2197,14 @@ components:
                     CREDIT_CARDS,
                     NAME,
                     AGE,
+                    BLOCKCHAIN_CLAIMS,
                   ]
+            claims:
+              description: when in the 'requiredFields' array 'BLOCKCHAIN_CLAIMS' is specified, in this array claims can be specified.
+                On the WIKI page, the known ones are enlisted, but this list isn't finalized yet. https://github.com/TOMP-WG/TOMP-API/wiki/Blockchain---Verifiable-credentials
+              type: array
+              items:
+                type: string
 
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
@@ -2023,6 +2256,9 @@ components:
         lat:
           type: number
           example: 52.253279
+        alt:
+          type: number
+          description: altitude, in meters above sea level
 
     country:
       type: string
@@ -2128,7 +2364,7 @@ components:
         path:
           description: the exact path of the endpoint, starting after the base URL
           type: string
-          example: /planning-options/
+          example: /plannings/
         eventType:
           description: in case the path is ending in /events, the event type/operator enum should be added here.
           type: string
@@ -2316,7 +2552,9 @@ components:
               type: string
             class:
               description: class of this fare part. Could be FARE or ANCILLARY
+              default: "FARE"
               type: string
+              enum: [ "FARE", "ANCILLARY" ]
             meta:
               type: object
               additionalProperties: true
@@ -2349,6 +2587,8 @@ components:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           properties:
+            category:
+              $ref: "#/components/schemas/journalCategory"
             journalId:
               description: id of the entry, leg id can be reused
               type: string
@@ -2376,6 +2616,9 @@ components:
               enum: [KM, MILE]
             usedTime:
               description: the time in seconds that the assed is used. Only if applicable.
+              type: number
+            rentalStartMileage:
+              description: the mileage at the start of the rental. 'DistanceType' field is also applicable here
               type: number
             bankAccount:
               $ref: "#/components/schemas/bankAccount"
@@ -2579,7 +2822,7 @@ components:
 
     notification:
       type: object
-      description: notifies the MaaS operator of issues with a booking [addendum]
+      description: notifies the MaaS operator of issues with a booking. Asset information can be provided when needed.
       required:
        - type
       properties:
@@ -2590,6 +2833,8 @@ components:
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
           type: number
+        asset:
+          $ref: '#/components/schemas/asset'
         comment:
           type: string
           description: free text, should match Content-Language
@@ -2614,7 +2859,7 @@ components:
 
     place:
       type: object
-      description: a origin or destination of a leg, non 3D. lon/lat in WGS84.
+      description: a origin or destination of a leg, 3D. lon/lat in WGS84.
       required:
         - coordinates
       properties:
@@ -2641,7 +2886,6 @@ components:
       type: object
       required:
         - from
-        - nrOfTravelers
       properties:
         from:
           $ref: "#/components/schemas/place"
@@ -2650,6 +2894,10 @@ components:
           type: number
         to:
           $ref: "#/components/schemas/place"
+        estimatedDistance:
+          type: number
+          description: instead of using the from/to construct, it is also possible to give an indication of the distance to travel. 
+            The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario.
         departureTime:
           description: The intended departure time. If left out and no arrivalTime is set, the current time should be assumed.
           type: string
@@ -2744,14 +2992,18 @@ components:
 
     requirement:
       type: object
+      description: describes an (dis)ability or ancillary.
       required:
         - category
         - number
       properties:
+        source:
+          type: string
+          description: if obsolete, it is referencing the travelers' dictionary (https://github.com/TOMP-WG/TOMP-API/blob/master/documents/CROW%20passenger%20characteristics.xlsx)
         category:
           type: string
           description: references to the first column of the specification 
-          enum: [ HR, AV, HV, AB, AER, K, ZR, RR ]
+                       initial values [ HR, AV, HV, AB, AER, K, ZR, RR ]
         number:
           type: string
           description: references to the second column of the specification
@@ -2774,11 +3026,15 @@ components:
             enum: [MO, TU, WE, TH, FR, SA, SU]
 
     requirements:
-      description: Requirements the users has ((dis)abilities, share [TRUE|FALSE], preferences [TBD]). See also 'https://github.com/TOMP-WG/TOMP-API/blob/master/documents/Woordenboek%20Reizigerskenmerken%20CROW.pdf'
+      description: Requirements from the end user side.
       type: object
       additionalProperties: true
       properties:
         abilities: 
+          type: array
+          items:
+            $ref: "#/components/schemas/requirement" 
+        bringAlong:
           type: array
           items:
             $ref: "#/components/schemas/requirement" 
