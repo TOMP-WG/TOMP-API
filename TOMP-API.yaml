@@ -1613,6 +1613,10 @@ components:
           format: URL
           example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
           deprecated: true
+        licensePlate:
+          type: string
+          description: the usage of this field requires a secure environment. When assets are published in available-assets, this field can be used 
+            to track assets. Be aware of this.
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
