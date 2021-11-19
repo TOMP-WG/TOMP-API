@@ -2736,6 +2736,10 @@ components:
           type: number
         to:
           $ref: "#/components/schemas/place"
+        estimatedDistance:
+          type: number
+          description: instead of using the from/to construct, it is also possible to give an indication of the distance to travel. 
+            The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario.
         departureTime:
           description: The intended departure time. If left out and no arrivalTime is set, the current time should be assumed.
           type: string
