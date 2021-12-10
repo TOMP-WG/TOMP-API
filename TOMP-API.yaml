@@ -1003,7 +1003,6 @@ paths:
             type: number
             format: float
             minimum: 0
-
       responses:
         "200":
           description: successful operation
@@ -3239,6 +3238,7 @@ components:
           type: string
         requestedResponseTime:
           type: number
+          format: double
           description: time to respond in minutes.
           format: float
           minimum: 0
