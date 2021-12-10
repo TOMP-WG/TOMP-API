@@ -2507,15 +2507,6 @@ components:
        negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts. 
        The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay 
        EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer).
-      example:
-        {
-          "amount": 9.96,
-          "currencyCode": "EUR",
-          "vatRate": 21.0,
-          "type": "FLEX",
-          "unitType": "HOUR",
-          "units": 1,
-        }
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
@@ -2527,6 +2518,11 @@ components:
                 be assumed it is 'FIXED'. In all other situations this field is mandatory.
               type: string
               enum: [FIXED, FLEX, MAX]
+            kind:
+              description: is this the default price or is this an additional part (discount, price surge). In case of a DISCOUNT, the amount
+                must always be negative and in case of SURGE it must be positive.
+              type: string
+              enum: [DEFAULT, DISCOUNT, SURGE]
             unitType:
               type: string
               description: in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR
@@ -2555,6 +2551,14 @@ components:
               default: "FARE"
               type: string
               enum: [ "FARE", "ANCILLARY" ]
+            minimumAmount:
+              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
+              type: number
+              example: 9.00
+            maximumAmount:
+              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
+              type: number
+              example: 11.00
             meta:
               type: object
               additionalProperties: true
