@@ -52,6 +52,9 @@ security:
   - OAuth: []
   - OpenId: []
 
+servers:
+  - url: https://tomp.dat.nl/bike/
+
 paths:
   /plannings:
     parameters:
@@ -583,12 +586,14 @@ paths:
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
             type: integer
+            minimum: 0
       responses:
         "200":
           description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
@@ -960,12 +965,14 @@ paths:
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
             type: integer
+            minimum: 0
         - name: regionId
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
@@ -978,21 +985,24 @@ paths:
           required: false
           schema:
             type: number
-            format: double
+            format: float
+            minimum: 0
         - name: lat
           in: query
           description: the latitude of the search location (WGS84)
           required: false
           schema:
             type: number
-            format: double
+            format: float
+            minimum: 0
         - name: radius
           in: query
           description: the range in meters from the search location to look for stations
           required: false
           schema:
             type: number
-            format: double
+            format: float
+            minimum: 0
       responses:
         "200":
           description: successful operation
@@ -1035,12 +1045,14 @@ paths:
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
             type: integer
+            minimum: 0
         - name: regionId
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
@@ -1100,12 +1112,14 @@ paths:
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
             type: integer
+            minimum: 0
         - name: regionId
           in: query
           description: optional id of the region to use in the filter (/operator/regions)
@@ -1338,12 +1352,14 @@ paths:
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
             type: integer
+            minimum: 0
       responses:
         "200":
           description: successful operation
@@ -1424,12 +1440,14 @@ paths:
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: limit
           in: query
           description: count of the selection
           required: false
           schema:
             type: integer
+            minimum: 0
       responses:
         "200":
           description: journal entries
@@ -1637,11 +1655,13 @@ components:
           description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT
           type: number
           example: 9.95
-          format: decimal
+          format: float
+          minimum: 0
         amountExVat:
           type: number
           example: 8.95
-          format: decimal
+          format: float
+          minimum: 0
         currencyCode:
           description: ISO 4217 currency code
           type: string
@@ -1651,19 +1671,10 @@ components:
           type: number
           description: value added tax rate (percentage of amount)
           example: 21.0
-          format: decimal
+          format: float
+          minimum: 0
         vatCountryCode:
           $ref: "#/components/schemas/country"
-
-    ancillaryBooking:
-      type: object
-      required:
-        - legId
-      properties:
-        allOf:
-          $ref: "#/components/schemas/requirement"
-        legId:
-          type: string
 
     asset:
       type: object
@@ -1709,6 +1720,8 @@ components:
         mileage:
           type: number
           description: the current mileage of the asset 
+          format: float
+          minimum: 0
         licensePlate:
           type: string
           description: the usage of this field requires a secure environment. When assets are published in available-assets, this field can be used 
@@ -1780,7 +1793,16 @@ components:
           description: extra information about the asset type, making it possible to f.x. specifying that booking this car requires a driver license.
           type: array
           items:
-            $ref: "#/components/schemas/condition"
+            oneOf:
+              - $ref: "#/components/schemas/conditionDeposit"
+              - $ref: "#/components/schemas/conditionPayWhenFinished"
+              - $ref: "#/components/schemas/conditionPostponedCommit"
+              - $ref: "#/components/schemas/conditionRequireBookingData"
+              - $ref: "#/components/schemas/conditionReturnArea"
+              - $ref: "#/components/schemas/conditionUpfrontPayment"
+            discriminator:
+              propertyName: conditionType
+
 
     assetProperties:
       description: Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.
@@ -1813,7 +1835,8 @@ components:
           enum: [A, B, C, D, E]
         co2PerKm:
           type: number
-          format: double
+          format: float
+          minimum: 0
         brand:
           type: string
           description: brand of the asset
@@ -1906,7 +1929,7 @@ components:
           type: boolean
           description: true indicates winter tires required
         maxSpeed:
-          type: number
+          type: integer
           description: the maximum allowed speed for this asset (in km/h)
         helmetRequired:
           type: boolean
@@ -1988,8 +2011,7 @@ components:
                 $ref: "#/components/schemas/leg"
             pricing:
               description: The pricing information of the overall booking, in addition to any leg pricing, if not all legs have pricing the booking should have the fare
-              allOf:
-                - $ref: "#/components/schemas/fare"
+              $ref: "#/components/schemas/fare"
             departureTime:
               description: The initial departure time (over all legs)
               type: string
@@ -2007,17 +2029,21 @@ components:
               additionalProperties: true
               properties:
                 safeWaitTime: 
-                  type: number
-                  description: the predicted time before the asset will arrive
+                  type: integer
+                  description: the predicted time before the asset will arrive, in minutes
+                  minimum: 0
                 maxWaitTime:
-                  type: number
-                  description: the maximum time before the asset will arrive
+                  type: integer
+                  description: the maximum time before the asset will arrive, in minutes
+                  minimum: 0
                 safeTravelTime: 
-                  type: number
-                  description: the predicted time the legs will take
+                  type: integer
+                  description: the predicted time the legs will take, in minutes
+                  minimum: 0
                 maxTravelTime:
-                  type: number
-                  description: the maximum time the legs will take
+                  type: integer
+                  description: the maximum time the legs will take, in minutes
+                  minimum: 0
 
     bookingOperation:
       type: object
@@ -2044,8 +2070,7 @@ components:
           type: string
         from:
           description: information about the origin, only to supply when requested in the conditionRequireBookingData
-          allOf:
-            - $ref: "#/components/schemas/place"
+          $ref: "#/components/schemas/place"
         callbackUrl: 
           description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
             when this deviates from standard or agreed URL.
@@ -2053,12 +2078,10 @@ components:
           format: URL
         to:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
-          allOf:
-            - $ref: "#/components/schemas/place"
+          $ref: "#/components/schemas/place"
         customer:
           description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
-          allOf:
-            - $ref: "#/components/schemas/customer"
+          $ref: "#/components/schemas/customer"
 
     bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
@@ -2134,15 +2157,6 @@ components:
             format: maas-id
 
     condition:
-      oneOf:
-        - $ref: "#/components/schemas/conditionDeposit"
-        - $ref: "#/components/schemas/conditionPayWhenFinished"
-        - $ref: "#/components/schemas/conditionPostponedCommit"
-        - $ref: "#/components/schemas/conditionRequireBookingData"
-        - $ref: "#/components/schemas/conditionReturnArea"
-        - $ref: "#/components/schemas/conditionUpfrontPayment"
-      discriminator:
-        propertyName: conditionType
       required:
         - conditionType
       properties:
@@ -2177,7 +2191,6 @@ components:
               format: date-time
 
     conditionRequireBookingData:
-      type: object
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2224,8 +2237,7 @@ components:
               type: string
             returnArea:
               description: area in which the asset should be returned as GeoJSON Polygon coordinates
-              allOf:
-                - $ref: "#/components/schemas/geojsonPolygon"
+              $ref: "#/components/schemas/geojsonPolygon"
             coordinates:
               $ref: "#/components/schemas/coordinates"
             returnHours:
@@ -2260,14 +2272,18 @@ components:
         lng:
           type: number
           example: 6.169639
-          format: double
+          format: float
+          minimum: 0
         lat:
           type: number
           example: 52.253279
-          format: double
+          format: float
+          minimum: 0
         alt:
           type: number
           description: altitude, in meters above sea level
+          format: float
+          minimum: 0
 
     country:
       type: string
@@ -2404,6 +2420,7 @@ components:
         maxPageSize:
           description: the maximum size of the pages (only valid when supportsPaging=true). If the limit-parameter of the request is above this amount, a http code 400 will be returned.
           type: integer
+          minimum: 1
       example:
         withoutPaging:
           { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
@@ -2434,8 +2451,6 @@ components:
             $ref: "#/components/schemas/scenario"
         processIdentifiers:
           $ref: "#/components/schemas/processIdentifiers"
-      example:
-        { "version": "0.5.0", "baseUrl": "https://dummy-bikes.org/", "endpoints": [], "scenarios": ["POSTPONED_COMMIT"], "processIdentifiers": { "planning": ["LOCATION_BASED"], "booking": ["ACCESS_CODE_QR", "ACCESS_CODE_IN_COMMIT_EVENT"] } }
 
     error:
       type: object
@@ -2480,7 +2495,8 @@ components:
             number:
               type: number
               description: e.g. number of litres, number of kilowatthour, etc
-              format: double
+              format: float
+              minimum: 0
             numberType:
               type: string
               enum: [LITER, KILOWATTHOUR, CO2_COMPENSATION, OTHER]
@@ -2530,7 +2546,9 @@ components:
               enum: [FIXED, FLEX, MAX]
             kind:
               description: is this the default price or is this an additional part (discount, price surge). In case of a DISCOUNT, the amount
-                must always be negative and in case of SURGE it must be positive.
+                must always be negative and in case of SURGE it must be positive. This also means, that when you're working with discounts or surges,
+                you have to deliver 2 fareparts, one for the default price and one for the discount/surge. This can be used in combination with as
+                well the fixed price parts as with the flex price parts.
               type: string
               enum: [DEFAULT, DISCOUNT, SURGE]
             unitType:
@@ -2539,14 +2557,23 @@ components:
               enum: [KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE]
             units:
               type: number
-              format: double
-              description: the number of km, seconds etc in the `per` part. In the first example of the description this should be 2.0
+              description: the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise
+                not allowed. In case of 0.5 EUR per 15 MINUTES, `units` should contain 15 and `unitType` MINUTES.
+              format: float
+              minimum: 0
             scaleFrom:
               type: number
-              format: double
+              description: in case of scaling, this is the bottom value (f.x. in the first hour 3 CAD, the `scaleFrom` should
+                contain 0 and the `scaleType` HOUR). When `scaleTo` is used, but this field is missing, it should be assumed
+                it is a 0.
+              format: float
+              minimum: 0
             scaleTo:
               type: number
-              format: double
+              description: the upper value of the scale (f.x. 3 CAD in the first hour, this field should contain 1, 
+                `scaleFrom` 0 and `scaleType` HOUR)
+              format: float
+              minimum: 0
             scaleType:
               type: string
               enum: [KM, MILE, HOUR, MINUTE]
@@ -2562,10 +2589,14 @@ components:
               description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
               type: number
               example: 9.00
+              format: float
+              minimum: 0
             maximumAmount:
               description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
               type: number
               example: 11.00
+              format: float
+              minimum: 0
             meta:
               type: object
               additionalProperties: true
@@ -2584,8 +2615,9 @@ components:
       maxItems: 2
       items:
         type: number
-        format: double
-      example: [lon, lat]
+        format: float
+        minimum: 0.0
+      example: [4.53432, 55.324523]
 
     geojsonPolygon:
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
@@ -2623,17 +2655,20 @@ components:
             distance:
               description: the travelled distance. Only if applicable.
               type: number
-              format: double
+              format: float
+              minimum: 0
             distanceType:
               type: string
               enum: [KM, MILE]
             usedTime:
               description: the time in seconds that the assed is used. Only if applicable.
-              type: number
-              format: double
+              type: integer
+              minimum: 0
             rentalStartMileage:
               description: the mileage at the start of the rental. 'DistanceType' field is also applicable here
               type: number
+              format: float
+              minimum: 0
             bankAccount:
               $ref: "#/components/schemas/bankAccount"
             details:
@@ -2648,7 +2683,7 @@ components:
 
     journalCategory:
       type: string
-      description: `ALL` and `FARE` are not allowed to use in the journalEntry object. They are there for filtering purposes in the journal entry endpoint. 
+      description: ALL and FARE are not allowed to use in the journalEntry object. They are there for filtering purposes in the journal entry endpoint. 
       enum:
         [
           ALL,
@@ -2678,12 +2713,10 @@ components:
           type: string
         from:
           description: The departure location of this leg, using this asset type
-          allOf:
-            - $ref: "#/components/schemas/place"
+          $ref: "#/components/schemas/place"
         to:
           description: The destination of this leg, using this asset type
-          allOf:
-            - $ref: "#/components/schemas/place"
+          $ref: "#/components/schemas/place"
         departureTime:
           description: The departure time of this leg
           type: string
@@ -2699,26 +2732,31 @@ components:
             type: string
         assetType:
           description: The asset type used in this leg as determined during booking
-          allOf:
-            - $ref: "#/components/schemas/assetType"
+          $ref: "#/components/schemas/assetType"
         legSequenceNumber:
           description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
           type: integer
         asset:
           description: The concrete asset used for the execution of the leg
-          allOf:
-            - $ref: "#/components/schemas/asset"
+          $ref: "#/components/schemas/asset"
         pricing:
           description: The leg-specific pricing information, all fares are additive, if the booking does not have pricing set all legs should
-          allOf:
-            - $ref: "#/components/schemas/fare"
+          $ref: "#/components/schemas/fare"
         suboperator:
           $ref: "#/components/schemas/suboperator"
         conditions:
           description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
           type: array
           items:
-            $ref: "#/components/schemas/condition"
+            oneOf:
+              - $ref: "#/components/schemas/conditionDeposit"
+              - $ref: "#/components/schemas/conditionPayWhenFinished"
+              - $ref: "#/components/schemas/conditionPostponedCommit"
+              - $ref: "#/components/schemas/conditionRequireBookingData"
+              - $ref: "#/components/schemas/conditionReturnArea"
+              - $ref: "#/components/schemas/conditionUpfrontPayment"
+            discriminator:
+              propertyName: conditionType
         state:
           $ref: "#/components/schemas/legState"
         departureDelay:
@@ -2729,20 +2767,16 @@ components:
           $ref: "#/components/schemas/distance"
         progressGeometry:
           description: A list of coordinates describing the progress so far along the leg, as GeoJSON LineString coordinates
-          allOf:
-            -  $ref: "#/components/schemas/geojsonLine"
+          $ref: "#/components/schemas/geojsonLine"
         ticket:
           description: The MaaS user's proof of their right to travel on this leg
-          allOf:
-            - $ref: "#/components/schemas/token"
+          $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          allOf:
-            - $ref: "#/components/schemas/token"
+          $ref: "#/components/schemas/token"
         allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
-          allOf:
-            - $ref: "#/components/schemas/tokenArray"   
+          $ref: "#/components/schemas/tokenArray"   
             
     legEvent:
       type: object
@@ -2848,8 +2882,8 @@ components:
           example: VEHICLE_NOT_AVAILABLE
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
-          type: number
-          format: double
+          type: integer
+          minimum: 0
         asset:
           $ref: '#/components/schemas/asset'
         comment:
@@ -2908,14 +2942,15 @@ components:
           $ref: "#/components/schemas/place"
         radius:
           description: Maximum distance in meters a user wants to travel to reach the travel option
-          type: number
-          format: double
+          type: integer
+          minimum: 0
         to:
           $ref: "#/components/schemas/place"
         estimatedDistance:
-          type: number
+          type: integer
           description: instead of using the from/to construct, it is also possible to give an indication of the distance to travel. 
-            The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario.
+            The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario. Also in meters
+          minimum: 0
         departureTime:
           description: The intended departure time. If left out and no arrivalTime is set, the current time should be assumed.
           type: string
@@ -3035,8 +3070,8 @@ components:
           type: string
         variable-number:
           description: in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)
-          type: number
-          format: double
+          type: integer
+          minimum: 0
         applicable-days:
           description: days of week that are applicable
           type: array
@@ -3205,6 +3240,8 @@ components:
           type: number
           format: double
           description: time to respond in minutes.
+          format: float
+          minimum: 0
 
     supportStatus:
       description: the current status of support
@@ -3223,6 +3260,7 @@ components:
         order:
           type: integer
           description: the sequence number of status of the support issue
+          minimum: 0
         comment:
           type: string
           description: free text to send to the end user.
@@ -3248,20 +3286,20 @@ components:
             items:
               type: string
               format: date-time
-              minItems: 2
-              maxItems: 2
+            minItems: 2
+            maxItems: 2
         stationIds:
           type: array
           items:
             type: string
           description: Array of strings - If this is an alert that affects one or more stations, include their ids, otherwise omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
-          example: stationID0001
+          example: ["stationID0001"]
         regionId:
           type: array
           items:
             type: string
           description: Array of strings - If this system has regions, and if this alert only affects certain regions, include their ids, otherwise, omit this field. If both stationIDs and regionIDs are omitted, assume this alert affects the entire system
-          example: regionID0001
+          example: ["regionID0001"]
         url:
           type: string
           format: hostname
@@ -3532,9 +3570,8 @@ components:
           description: the end time of this area (mostly applicable in case of limitations)
           format: date-time
         serviceArea:
-          description: The applicable area as GeoJSON Polygon coordinates
-          allOf:
-            - $ref: "#/components/schemas/geojsonPolygon"
+          description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
+          $ref: "#/components/schemas/geojsonPolygon"
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
@@ -3553,9 +3590,15 @@ components:
         tokenType:
           description: The type of data held in this token, will later be an enum
           type: string
-          example: QR-code
+          enum: [tokenDefault, tokenDeeplink, tokenEKey, tokenQR]
         tokenData:
-          $ref: "#/components/schemas/tokenData"
+          oneOf:
+          - $ref: "#/components/schemas/tokenDefault"
+          - $ref: "#/components/schemas/tokenDeeplink"
+          - $ref: "#/components/schemas/tokenEKey"
+          - $ref: "#/components/schemas/tokenQR"
+          discriminator:
+            propertyName: tokenType
 
     tokenArray:
       type: array
@@ -3563,8 +3606,7 @@ components:
         $ref: "#/components/schemas/token"
 
     tokenData:
-      discriminator:
-        propertyName: tokenType
+      type: object
       additionalProperties: true
       required:
         - tokenType
@@ -3574,73 +3616,78 @@ components:
 
     tokenDefault:
       description: Arbitrary data the TO may pass along the ticket to the client
-      type: object
       allOf:
         - $ref: "#/components/schemas/tokenData"
+        - type: object
+          properties:
+            url:
+              description: download url for html/pdf
+              type: string
+              format: URI
 
     tokenDeeplink:
-      type: object
       description: deeplink info
       allOf:
         - $ref: "#/components/schemas/tokenData"
-      properties:
-        url:
-          description: the base deeplink url for the MP app. Can be extended by
-            the 'knownParamaters'. Including the scheme.
-          type: string
-          example: mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf
-          format: URI
-        knownParameters:
-          type: array
-          example: [ "return-url"
-                  , "error-url"
-                  , "error-code"
-                  , "error-description"
-                  ]
-          items:
-            type: string
+        - type: object
+          properties:
+            url:
+              description: the base deeplink url for the MP app. Can be extended by
+                the 'knownParamaters'. Including the scheme.
+              type: string
+              example: mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf
+              format: URI
+            knownParameters:
+              type: array
+              example: [ "return-url"
+                      , "error-url"
+                      , "error-code"
+                      , "error-description"
+                      ]
+              items:
+                type: string
 
-    tokenEKey:
-      type: object
+    tokenEKey:      
       description: Axa EKey information
       allOf:
         - $ref: "#/components/schemas/tokenData"
-      required:
-        - ekey
-        - lock
-      properties:
-        ekey: 
-          type: object
+        - type: object
+          required:
+            - ekey
+            - lock
           properties:
-            key: 
-              description: certificate
-              type: string
-            passkey:
-              description: one time pass key
-              type: string
-        lock:
-          type: object
-          properties:
-            bdAddress:
-              description: physical address 
-              type: string
-            deviceName:
-              description: how it advertises itself
-              type: string
+            ekey: 
+              type: object
+              properties:
+                key: 
+                  description: certificate
+                  type: string
+                passkey:
+                  description: one time pass key
+                  type: string
+            lock:
+              type: object
+              properties:
+                bdAddress:
+                  description: physical address 
+                  type: string
+                deviceName:
+                  description: how it advertises itself
+                  type: string
 
     tokenQR:
-      type: object
       description: QR information
       allOf:
         - $ref: "#/components/schemas/tokenData"
-      required:
-        - base64
-      properties:
-        base64: 
-          description: base 64 QR code
-          type: string
-        version: 
-          type: string
+        - type: object
+          required:
+            - base64
+          properties:
+            base64: 
+              description: base 64 QR code
+              type: string
+            version: 
+              type: string
 
     chamberOfCommerceInfo:
       description: To identify the operator
