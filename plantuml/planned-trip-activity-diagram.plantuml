@@ -1,4 +1,4 @@
-@startuml
+@startuml planned-trip
 
 title TOMP API workflow - planned trip
 
@@ -14,11 +14,11 @@ note right
 end note
 #green:Find out availability TOs;
 note right
-  /plannings/?booking-intent=false
+  /planning/inquiries
 end note
 #green:Prebook best routes;
 note right
-  /plannings/?booking-intent=true
+  /planning/offers
 end note
 }
 
