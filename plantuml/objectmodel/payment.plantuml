@@ -1,49 +1,11 @@
-@startuml generated
-class JournalEntry <<amountOfMoney>> {
-  JournalCategory category
-  String journalId
-  String journalSequenceId
-  String invoiceId
-  String invoiceDate
-  String expirationDate
-  String comment
-  Number distance
-  String distanceType
-  Integer usedTime
-  Number rentalStartMileage
-  BankAccount bankAccount
+@startuml 
+skinparam package {
+	BorderStyle dotted
 }
-JournalEntry --  "0..1" JournalState : state >
-JournalEntry --  "0..1" ExtraCosts : details >
-JournalEntry --  "0..1" Fare : details >
-enum JournalState {
+
+frame "Payment" {
+	JournalEntry <-- Fare
+	JournalEntry <-- ExtraCosts
 }
-class ExtraCosts <<amountOfMoney>> {
- +JournalCategory category
- +String description
-  Number number
-  String numberType
-  BankAccount account
-  Object meta
-}
-class Fare {
- +Boolean estimated
-  String description
-  String class
-}
-Fare -{ FarePart : parts >
-class FarePart <<amountOfMoney>> {
-  String type
-  String kind
-  String unitType
-  Number units
-  Number scaleFrom
-  Number scaleTo
-  String scaleType
-  String name
-  String class
-  Number minimumAmount
-  Number maximumAmount
-  Object meta
-}
+
 @enduml

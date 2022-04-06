@@ -2430,7 +2430,7 @@ components:
           type: array
           items:
             type: string
-        assetType:
+        assetType: 
           description: The asset type used in this leg as determined during booking
           allOf:
             - $ref: "#/components/schemas/assetType"
