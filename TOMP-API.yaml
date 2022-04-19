@@ -873,8 +873,9 @@ paths:
       summary: Describes the status of the Transport Operator - whether the APIs are running or not
       description: This is a healthcheck endpoint to see if the TO is up and running perfectly. 
       responses:
-        "200":
+        "204":
           description: successful operation
+          $ref: "#/components/responses/204NoContent"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "500":
