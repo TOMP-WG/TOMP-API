@@ -1680,7 +1680,6 @@ components:
       type: object
       required:
         - id
-        - overriddenProperties
       properties:
         id:
           type: string
