@@ -1,0 +1,10 @@
+@startuml 
+skinparam package {
+	BorderStyle dotted
+}
+
+frame "Operations" {
+	Booking --{ BookingOperation
+}
+
+@enduml

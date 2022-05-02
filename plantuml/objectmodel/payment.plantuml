@@ -1,0 +1,11 @@
+@startuml 
+skinparam package {
+	BorderStyle dotted
+}
+
+frame "Payment" {
+	JournalEntry <-- Fare
+	JournalEntry <-- ExtraCosts
+}
+
+@enduml
