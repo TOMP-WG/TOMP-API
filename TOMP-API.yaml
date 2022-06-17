@@ -1757,6 +1757,7 @@ components:
           PARKING,
           MOPED,
           STEP,
+          FERRY
         ]
 
     assetType:
