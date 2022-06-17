@@ -2878,7 +2878,14 @@ components:
       properties:
         type:
           type: string
-          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, OTHER]
+          enum: [ VEHICLE_NOT_AVAILABLE, 
+            USER_NO_SHOW, 
+            ETA, 
+            MESSAGE_TO_DRIVER, 
+            MESSAGE_TO_END_USER, 
+            USER_OUT_OF_LIMITS, 
+            OTHER
+            ]
           example: VEHICLE_NOT_AVAILABLE
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
