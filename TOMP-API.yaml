@@ -2236,8 +2236,8 @@ components:
               description: station to which the asset should be returned
               type: string
             returnArea:
-              description: area in which the asset should be returned as GeoJSON Polygon coordinates
-              $ref: "#/components/schemas/geojsonPolygon"
+              description: area in which the asset should be returned as GeoJSON (multi)Polygon coordinates
+              $ref: "#/components/schemas/geojsonArea"
             coordinates:
               $ref: "#/components/schemas/coordinates"
             returnHours:
@@ -2601,6 +2601,22 @@ components:
               type: object
               additionalProperties: true
 
+    geojsonArea:
+      type: object
+      required:
+        - type
+        - geometry
+      properties:
+        type:
+          type: string
+          enum:
+          - Polygon
+          - MultiPolygon
+        geometry:
+          oneOf:
+          - $ref: "#/components/schemas/geojsonPolygon"
+          - $ref: "#/components/schemas/geojsonMultiPolygon"
+
     geojsonLine:
       description: An array  of WGS84 coordinate pairs
       type: array
@@ -2625,6 +2641,11 @@ components:
       items:
         $ref: "#/components/schemas/geojsonLine"
       example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
+
+    geojsonMultiPolygon:
+      type: array
+      items:
+        $ref: "#/components/schemas/geojsonPolygon"
 
     journalEntry:
       allOf:
@@ -3569,8 +3590,8 @@ components:
           description: the end time of this area (mostly applicable in case of limitations)
           format: date-time
         serviceArea:
-          description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
-          $ref: "#/components/schemas/geojsonPolygon"
+          description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON (multipolygon) Polygon coordinates
+          $ref: "#/components/schemas/geojsonArea"
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
