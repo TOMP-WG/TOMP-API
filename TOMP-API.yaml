@@ -2486,7 +2486,13 @@ components:
             - category
             - description
             - amount
+            - class
           properties:
+            class:
+              type: string
+              description: discriminator property
+              default: "extraCosts"
+              enum: [extraCosts]
             category:
               $ref: "#/components/schemas/journalCategory"
             description:
@@ -2520,8 +2526,10 @@ components:
           description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
           type: string
         class:
-          description: in the future we'll set up an enumeration of possible "fare classes". For now it's free format.
+          description: discriminator property
           type: string
+          default: fare
+          enum: [fare]
         parts:
           type: array
           items:
@@ -2616,6 +2624,8 @@ components:
           oneOf:
           - $ref: "#/components/schemas/geojsonPolygon"
           - $ref: "#/components/schemas/geojsonMultiPolygon"
+          discriminator:
+            propertyName: type
 
     geojsonLine:
       description: An array  of WGS84 coordinate pairs
@@ -2697,6 +2707,8 @@ components:
               oneOf:
                 - $ref: "#/components/schemas/fare"
                 - $ref: "#/components/schemas/extraCosts"
+              discriminator:
+                propertyName: class
 
     journalState:
       type: string
