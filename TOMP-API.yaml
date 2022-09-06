@@ -1955,6 +1955,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/requirement"
+        regionId:
+          type: string
+          description: the region where this asset or assetType is used.
 
     assetAccessMethods:
       type: string
