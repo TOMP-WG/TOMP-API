@@ -417,6 +417,40 @@ paths:
         "410":
           $ref: "#/components/responses/410Gone"
 
+  /bookings/{id}/forget:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+      - name: id
+        in: path
+        description: Booking identifier
+        required: true
+        schema:
+          type: string
+    post:
+      description: Optional - implement the GDPR's request of right-to-forget. The MP requests the TO to 
+        remove (references to) personal information, obtained for this specific booking. Whenever fixed personal
+        identifiers are used (not preferable), the other bookings for these traveler(s) should be depersonalized as well.
+      tags:
+        - booking [optional]
+        - TO
+      responses:
+        "204":
+          $ref: "#/components/responses/204NoContent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "410":
+          $ref: "#/components/responses/410Gone"
+
   /bookings/{id}/subscription:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
