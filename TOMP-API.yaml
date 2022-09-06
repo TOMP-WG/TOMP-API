@@ -2889,6 +2889,10 @@ components:
         comment:
           type: string
           description: free text, should match Content-Language
+        legId:
+          type: string
+          description: whenever the booking contains multiple legs, this field is mandatory and contain
+            the id of the leg related to the notification.
 
     phone:
       type: object
