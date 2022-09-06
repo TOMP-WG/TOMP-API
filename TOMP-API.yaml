@@ -2834,6 +2834,7 @@ components:
         [
           NOT_STARTED,
           PREPARING,
+          READY_TO_USE,
           IN_USE,
           PAUSED,
           FINISHING,
@@ -2878,7 +2879,7 @@ components:
       properties:
         type:
           type: string
-          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, OTHER]
+          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, ARRIVED, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, OTHER]
           example: VEHICLE_NOT_AVAILABLE
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
