@@ -2421,7 +2421,34 @@ components:
           description: the maximum size of the pages (only valid when supportsPaging=true). If the limit-parameter of the request is above this amount, a http code 400 will be returned.
           type: integer
           minimum: 1
+        externalType:
+          type: string
+          description: this field must be used when adressing other standards for exchanging 'static' data (Level 1 MaaS)
+          enum: [GBFS, GTFS, NeTEx, OSDM_Offline, IXSI5, APDS]
+        useAssetTypes:
+          type: array
+          items: 
+            type: string
+            description: field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_type_id' should be 
+              specified to book a bike from the particular vehicle type in the field 'useAssetTypes' in the offer request.
+        useAssets:
+          type: array
+          items: 
+            type: string
+            description: field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_id' should be 
+              specified to book a bike from the particular vehicle type in the field 'useAssets' in the offer request.
+
       example:
+        warning: "Don't copy this example. There are multiple examples in this section. Each object is an example on itself."
+        externalStandard1:
+          { "method": "GET", "externalType": "GBFS", "path": "https://some-external.url/GBFS/vehicle_types.json", 
+            "useAssetTypes": ["vehicle_type_id"], "status": "IMPLEMENTED" }
+        externalStandard2:
+          { "method": "GET", "externalType": "GBFS", "path": "https://some-external.url/GBFS/vehicle_status.json", 
+            "useAssets": ["vehicle_id"], "status": "IMPLEMENTED" }
+        externalStandard3:
+          { "method": "GET", "externalType": "NeTEx", "path": "https://data.ndovloket.nl/netex/wsf/NeTEx_WSF_20190903.xml.gz", 
+            "useAssetTypes": ["ScheduledStopPoint.id", "Line.id", "QuayRef.ref"], "status": "IMPLEMENTED" }            
         withoutPaging:
           { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
         withPaging:
