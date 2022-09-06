@@ -1,0 +1,17 @@
+@startuml 
+skinparam package {
+	BorderStyle dotted
+}
+
+frame "Traveler" {
+	[Traveler] -up-> [Customer] 
+}
+
+package "Travel right" {
+	[Traveler] .right.> [PlanningRequest]
+	[PlanningRequest] .down.> [Planning]
+	[Planning] .down.> [BookingRequest]
+	[BookingRequest] .down.> [Booking]
+}
+
+@enduml

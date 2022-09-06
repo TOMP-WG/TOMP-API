@@ -1,0 +1,30 @@
+@startuml
+class EndpointImplementation {
+ +String version
+ +String baseUrl
+}
+EndpointImplementation -{ Endpoint : endpoints >
+EndpointImplementation -{ Scenario : scenarios >
+EndpointImplementation --  "1..1" ProcessIdentifiers : processIdentifiers >
+class Endpoint {
+ +String method
+ +String path
+  String eventType
+ +String status
+  Boolean supportsPaging
+  Integer maxPageSize
+   withoutPaging
+   withPaging
+}
+enum Scenario {
+}
+class ProcessIdentifiers {
+ +String operatorInformation
+ +String planning
+ +String booking
+ +String tripExecution
+ +String support
+ +String payment
+ +String general
+}
+@enduml

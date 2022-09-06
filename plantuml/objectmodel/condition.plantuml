@@ -1,0 +1,43 @@
+@startuml generated
+class Condition {
+ +String conditionType
+  String id
+}
+class ConditionDeposit {
+}
+ConditionDeposit -up-|> Condition
+class ConditionPayWhenFinished {
+}
+ConditionPayWhenFinished -up-|> Condition
+class ConditionPostponedCommit {
+ +String ultimateResponseTime
+}
+ConditionPostponedCommit -up-|> Condition
+class ConditionRequireBookingData {
+ +String requiredFields
+  String claims
+}
+ConditionRequireBookingData -up-|> Condition
+class ConditionReturnArea {
+  String stationId
+  Coordinates coordinates
+}
+ConditionReturnArea -up-|> Condition
+ConditionReturnArea --  "0..1" GeojsonPolygon : returnArea >
+ConditionReturnArea -down-{ SystemHours : returnHours >
+class GeojsonPolygon {
+}
+class SystemHours {
+  String userType
+  String stationId
+  String regionId
+ +String startTime
+ +String endTime
+}
+SystemHours -down-{ Day : days >
+enum Day {
+}
+class ConditionUpfrontPayment {
+}
+ConditionUpfrontPayment -up-|> Condition
+@enduml
