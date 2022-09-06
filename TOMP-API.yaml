@@ -3138,6 +3138,8 @@ components:
             enum:
               [
                 KEY,
+                CASH,
+                BANKCARD,
                 CREDITCARD,
                 PAYPASS,
                 APPLEPAY,
@@ -3148,6 +3150,10 @@ components:
                 OTHER,
               ]
           example: [CREDITCARD, PAYPASS, APPLEPAY]
+        rentalMethodOther:
+          type: string
+          description: whenever `OTHER` is specified in the field 'rentalMethods', this field contains a free-format definition.
+          example: iDEAL
         rentalUrl:
           type: string
           description: web uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
