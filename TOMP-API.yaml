@@ -2264,7 +2264,21 @@ components:
         assetTypeId:
           type: string
           description: reference to the assetType in /operator/available-assets, this property can be set when replacing an asset (for another type). In case of a succesfull replacement, the /legs/{id}/events - ASSIGN_ASSET should be send to the MP to inform a change of asset has been made.
-        
+
+    connectedLegInfo:
+      type: object
+      description: this object describes the previous leg. It can contain f.x. a flight number, a used parking to get a discount, etc.
+      properties:
+        provider:
+          type: string
+          description: the provider of the previous leg (usually a Transport Operator reference)
+        assetReference:
+          type: string
+          description: the identification of the previous asset, like a flight number. This field (in case of a specific asset) or assetTypeReference must be filled.
+        assetTypeReference:
+          type: string
+          description: the identification of the previous asset type, like a discount combi. This field (in case of a specific asset type) or asset reference must be filled.
+
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
@@ -2947,6 +2961,8 @@ components:
       properties:
         from:
           $ref: "#/components/schemas/place"
+        previousLegInfo:
+          $ref: "#/components/schemas/connectedLegInfo"
         radius:
           description: Maximum distance in meters a user wants to travel to reach the travel option
           type: integer
