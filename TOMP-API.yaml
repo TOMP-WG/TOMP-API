@@ -2730,7 +2730,7 @@ components:
           type: array
           items:
             type: string
-        assetType:
+        assetType: 
           description: The asset type used in this leg as determined during booking
           $ref: "#/components/schemas/assetType"
         legSequenceNumber:
@@ -2889,6 +2889,10 @@ components:
         comment:
           type: string
           description: free text, should match Content-Language
+        legId:
+          type: string
+          description: whenever the booking contains multiple legs, this field is mandatory and contain
+            the id of the leg related to the notification.
 
     phone:
       type: object

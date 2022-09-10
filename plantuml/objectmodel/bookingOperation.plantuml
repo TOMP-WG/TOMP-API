@@ -1,0 +1,6 @@
+@startuml g
+class BookingOperation {
+ +String operation
+  String origin
+}
+@enduml
