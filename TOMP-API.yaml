@@ -117,7 +117,7 @@ paths:
     post:
       description:
         Returns informative options for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        During the routing phase this service can be used to check availability without any state changes. 
         <p>see (2.1) in the process flow - planning.
       tags:
         - planning
@@ -160,7 +160,7 @@ paths:
       description:
         Returns bookable offers for the given travel plan. 
         <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        During the routing phase this service can be used to check availability without any state changes. 
         <p>see (2.1) in the process flow - planning
       tags:
         - planning
