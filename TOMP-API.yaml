@@ -2156,6 +2156,8 @@ components:
                   type: integer
                   description: the maximum time the legs will take, in minutes
                   minimum: 0
+                memo:
+                  type: string
 
     bookingOperation:
       type: object
@@ -2979,6 +2981,8 @@ components:
         allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
           $ref: "#/components/schemas/tokenArray"   
+        memo:
+          type: string
             
     legEvent:
       type: object
