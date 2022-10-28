@@ -287,6 +287,50 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
+  /bookings/one-stop:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    post:
+      description:
+        Returns a booking for the given travel plan. This endpoint executes POST /planning/offers and POST /booking in one blow, the information provided should lead 
+        to only one possible offer, that is booked directly. The returned booking is still in `PENDING` state, you have to commit it. Unless 'AUTO_COMMIT' process identifier
+        is applied. In that case the booking is in state 'CONFIRMED'.
+      tags:
+        - planning
+        - TO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/oneStopBookingRequest"
+      responses:
+        "201":
+          description: A single booking, or when it's not possible, return a 406.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/booking"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "406":
+          description: this booking cannot be done.
+
   /bookings/{id}/events:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -3058,6 +3102,19 @@ components:
           type: string
           description: whenever the booking contains multiple legs, this field is mandatory and contain
             the id of the leg related to the notification.
+
+    oneStopBookingRequest:
+      type: object
+      anyOf:
+        - required: ["useAssets"]
+        - required: ["useAssetTypes"]
+      allOf:
+      - $ref: "#/components/schemas/planningRequest"
+      - type: object
+        properties:
+          customer:
+            description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
+            $ref: "#/components/schemas/customer"
 
     phone:
       type: object
