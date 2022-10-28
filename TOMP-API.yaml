@@ -2872,6 +2872,9 @@ components:
               type: number
               format: float
               minimum: 0
+            vatNumber:
+              description: VAT identification number.
+              type: string
             bankAccount:
               $ref: "#/components/schemas/bankAccount"
             details:
