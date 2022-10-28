@@ -1800,9 +1800,9 @@ components:
               - $ref: "#/components/schemas/conditionRequireBookingData"
               - $ref: "#/components/schemas/conditionReturnArea"
               - $ref: "#/components/schemas/conditionUpfrontPayment"
+              - $ref: "#/components/schemas/conditionRequireEvidence"
             discriminator:
               propertyName: conditionType
-
 
     assetProperties:
       description: Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.
@@ -2228,6 +2228,25 @@ components:
               type: array
               items:
                 type: string
+
+    conditionRequireEvidence:
+      description: use this condition to specify the evidence you require as TO in the off-boarding process. It can be used in addition with the 
+        static process identifier 'OFF_BOARDING_REQUIRED'. The evidence should be delivered in the /legs/{id}/events object (legEvent), in the `url` array
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - evidenceTypes
+          properties:
+            evidenceTypes:
+              type: array
+              items:
+                type: string
+                enum: [
+                  PARKED, 
+                  HELMET_IN_BASKET, 
+                  CHARGING
+                ]
 
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
@@ -2799,6 +2818,7 @@ components:
               - $ref: "#/components/schemas/conditionRequireBookingData"
               - $ref: "#/components/schemas/conditionReturnArea"
               - $ref: "#/components/schemas/conditionUpfrontPayment"
+              - $ref: "#/components/schemas/conditionRequireEvidence"
             discriminator:
               propertyName: conditionType
         state:
