@@ -2974,11 +2974,13 @@ components:
             The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario. Also in meters
           minimum: 0
         departureTime:
-          description: The intended departure time. If left out and no arrivalTime is set, the current time should be assumed.
+          description: The intended departure time. 
+            If left out and no arrivalTime is set, the current time should be assumed. 
+            If only the arrival time is specified, this is an implicit request for a guaranteed arrival at that time.
           type: string
           format: date-time
         arrivalTime:
-          description: The intended arrival time, at the to place if set otherwise the time the user intends to stop using the asset.
+          description: The intended arrival time, at the `to place`. If not set, the time the user intends to stop using the asset (implicit request for arrival guarantee).
           type: string
           format: date-time
         nrOfTravelers:
