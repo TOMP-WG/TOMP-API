@@ -1995,6 +1995,9 @@ components:
         nrOfDoors:
           type: integer
           description: the number of doors of the vehicle. Return only when applicable
+        nrOfHelmets:
+          type: integer
+          description: the number of available helmets. Return only when applicable
         navigation:
           type: boolean
           description: navigation available
