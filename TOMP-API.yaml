@@ -1461,22 +1461,7 @@ paths:
           description: type of booking line (e.g. fare, addition costs, fines, ...)
           required: false
           schema:
-            type: string
-            enum:
-              [
-                ALL,
-                DAMAGE,
-                LOSS,
-                STOLEN,
-                EXTRA_USAGE,
-                REFUND,
-                FINE,
-                OTHER_ASSET_USED,
-                CREDIT,
-                VOUCHER,
-                DEPOSIT,
-                OTHER,
-              ]
+            $ref: "#/components/schemas/journalCategory"
         - name: offset
           in: query
           description: start of the selection
