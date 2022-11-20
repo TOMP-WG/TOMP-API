@@ -2044,6 +2044,11 @@ components:
                   type: integer
                   description: the maximum time the legs will take, in minutes
                   minimum: 0
+            userCommunication:
+              description: Additional information a TO can send to a customer (instructions, sales info, ...)
+              type: array
+              items: 
+                $ref: "#/components/schemas/information"
 
     bookingOperation:
       type: object
@@ -2626,6 +2631,22 @@ components:
         $ref: "#/components/schemas/geojsonLine"
       example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
 
+    information:
+      description: Information provided to end users
+      type: object
+      properties:
+        type:
+          description: the type of the information provided
+          type: string
+          enum: [URL, IMAGE]
+        url:
+          description: the internet location of the information
+          type: string
+        goal:
+          description: the purpose of the information
+          type: string
+          enum: [INSTRUCTIONS, SALES]
+
     journalEntry:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
@@ -2776,7 +2797,12 @@ components:
           $ref: "#/components/schemas/token"
         allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
-          $ref: "#/components/schemas/tokenArray"   
+          $ref: "#/components/schemas/tokenArray"  
+        userCommunication:
+              description: Additional information a TO can send to a customer (instructions, sales info, ...)
+              type: array
+              items: 
+                $ref: "#/components/schemas/information" 
             
     legEvent:
       type: object
