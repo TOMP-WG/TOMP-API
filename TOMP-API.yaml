@@ -2646,6 +2646,10 @@ components:
           description: the purpose of the information
           type: string
           enum: [INSTRUCTIONS, SALES]
+        showTime:
+          description: the moment when the information must be displayed
+          type: string
+          enum: [PLANNING, COMMITTED_BOOKING, PREPARE, SET_IN_USE, PAUSE, START_FINISHING, FINISH]
 
     journalEntry:
       allOf:
