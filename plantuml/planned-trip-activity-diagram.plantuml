@@ -8,27 +8,41 @@ floating note right: Green nodes are \nimplemented by TOMP API
 
 partition "planning process" {
 :Create routes;
-#green:Search TOs;
-note right
-  operator module
-end note
-#green:Find out availability TOs;
-note right
-  /planning/inquiries
-end note
-#green:Prebook best routes;
-note right
-  /planning/offers
-end note
+#green:Search TOs for legs;
+repeat
+	if (offer required) then (yes)
+		#green:Find out availability TOs;
+		note right
+		  /planning/inquiries
+		end note
+		#green:Prebook best routes;
+		note right
+		  /planning/offers
+		end note
+	else (no)
+		:fetch external information\nfrom TO;
+	endif 
+repeat while(last TO?) is (no)
+->:yes;
 }
 
 :Propose best trips to end user;
 
 partition "booking process" {
-#green:Book leg per TO;
-note right
-  /bookings/
-end note
+repeat
+	if (offer required) then (yes)
+		#green:Book leg;
+		note right
+		  /bookings/
+		end note
+	else (no)
+		#green:One stop booking leg;
+		note right
+		  /bookings/one-stop
+		end note
+	endif
+repeat while(last TO?) is (no)
+->:yes;
 #green:Commit legs;
 note right
   /bookings/{id}/events COMMIT
