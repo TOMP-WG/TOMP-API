@@ -2082,6 +2082,10 @@ components:
         customer:
           description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
           $ref: "#/components/schemas/customer"
+        extraInfo:
+          description: dictionary for extra fields (bilatural agreements)
+          type: object
+          additionalProperties: true
 
     bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
@@ -2351,6 +2355,10 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/license"
+            extraInfo:
+              description: dictionary for extra fields (bilatural agreements)
+              type: object
+              additionalProperties: true
 
     day:
       type: string
@@ -2986,7 +2994,11 @@ components:
           items:
             type: string
             format: an asset type id for this operator (from /operator/available-assets)
-            
+        extraInfo:
+          description: dictionary for extra fields (bilatural agreements)
+          type: object
+          additionalProperties: true
+
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
