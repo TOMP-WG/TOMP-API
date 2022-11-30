@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.3.0"
+  version: "1.4.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -117,7 +117,7 @@ paths:
     post:
       description:
         Returns informative options for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        During the routing phase this service can be used to check availability without any state changes. 
         <p>see (2.1) in the process flow - planning.
       tags:
         - planning
@@ -160,7 +160,7 @@ paths:
       description:
         Returns bookable offers for the given travel plan. 
         <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
+        During the routing phase this service can be used to check availability without any state changes. 
         <p>see (2.1) in the process flow - planning
       tags:
         - planning
@@ -287,6 +287,50 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
+  /bookings/one-stop:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    post:
+      description:
+        Returns a booking for the given travel plan. This endpoint executes POST /planning/offers and POST /booking in one blow, the information provided should lead 
+        to only one possible offer, that is booked directly. The returned booking is still in `PENDING` state, you have to commit it. Unless 'AUTO_COMMIT' process identifier
+        is applied. In that case the booking is in state 'CONFIRMED'.
+      tags:
+        - planning
+        - TO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/oneStopBookingRequest"
+      responses:
+        "201":
+          description: A single booking, or when it's not possible, return a 406.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/booking"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "406":
+          description: this booking cannot be done.
+
   /bookings/{id}/events:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -301,7 +345,7 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (see <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking. Cancelling twice should still return 204. <br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twice should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
+      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (see <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking.<br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twice should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
       tags:
         - booking
         - MP
@@ -1417,22 +1461,7 @@ paths:
           description: type of booking line (e.g. fare, addition costs, fines, ...)
           required: false
           schema:
-            type: string
-            enum:
-              [
-                ALL,
-                DAMAGE,
-                LOSS,
-                STOLEN,
-                EXTRA_USAGE,
-                REFUND,
-                FINE,
-                OTHER_ASSET_USED,
-                CREDIT,
-                VOUCHER,
-                DEPOSIT,
-                OTHER,
-              ]
+            $ref: "#/components/schemas/journalCategory"
         - name: offset
           in: query
           description: start of the selection
@@ -1680,11 +1709,11 @@ components:
       type: object
       required:
         - id
-        - overriddenProperties
       properties:
         id:
           type: string
           description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).
+        
         isReserved:
           type: boolean
           description: true indicates the bike is currently reserved for someone else
@@ -1699,6 +1728,12 @@ components:
         isDisabled:
           type: boolean
           description: true indicates the asset is currently disabled (broken)
+        availableUntil:
+          type: string
+          description: The date and time when any rental of the vehicle must be completed. The vehicle must be returned and made available for the next user by this time. If this field is empty, it indicates that the vehicle is available indefinitely.
+            This field SHOULD be published by carsharing or other mobility systems where vehicles can be booked in advance for future travel.
+          format: date-time
+
         rentalUrl:
           type: string
           description: deep-linking option from GBFS+. Only added to be consistent with GBFS 2.0
@@ -1717,15 +1752,33 @@ components:
           format: URL
           example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
           deprecated: true
+        
         mileage:
           type: number
           description: the current mileage of the asset 
           format: float
           minimum: 0
+        stateOfCharge:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: percentage of charge available
+        maxRange:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: maximum range in meters
         licensePlate:
           type: string
           description: the usage of this field requires a secure environment. When assets are published in available-assets, this field can be used 
             to track assets. Be aware of this.
+        stationId:
+          type: string
+          description: reference to station_id in /operator/stations, station where it is located
+        homeStationId:
+          type: string
+          description: reference to station_id in /operator/stations, station where it is assigned to
+
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -1757,6 +1810,7 @@ components:
           PARKING,
           MOPED,
           STEP,
+          FERRY
         ]
 
     assetType:
@@ -1774,6 +1828,7 @@ components:
           type: integer
         assets:
           type: array
+          description: use this field only in the map-oriented scenario or in the committed bookings. Don't use it in public data (to prevent GDPR issues).
           items:
             $ref: "#/components/schemas/asset"
         assetClass:
@@ -1789,6 +1844,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/systemPricingPlan"
+        defaultPricingPlan:
+          $ref: "#/components/schemas/systemPricingPlan"
         conditions:
           description: extra information about the asset type, making it possible to f.x. specifying that booking this car requires a driver license.
           type: array
@@ -1800,9 +1857,9 @@ components:
               - $ref: "#/components/schemas/conditionRequireBookingData"
               - $ref: "#/components/schemas/conditionReturnArea"
               - $ref: "#/components/schemas/conditionUpfrontPayment"
+              - $ref: "#/components/schemas/conditionRequireEvidence"
             discriminator:
               propertyName: conditionType
-
 
     assetProperties:
       description: Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.
@@ -1812,6 +1869,40 @@ components:
           type: string
         location:
           $ref: "#/components/schemas/place"
+
+        brand:
+          type: string
+          description: brand of the asset
+        model:
+          type: string
+        buildingYear:
+          type: integer
+        colour:
+          type: string
+          description: colour of the asset, should match Content-Language
+        maxSpeed:
+          type: integer
+          description: the maximum allowed speed for this asset (in km/h)
+        wheelCount:
+          type: integer
+          minimum: 0
+          description: the number of wheels
+        image:
+          description: Link to an image of the asset
+          type: string
+          format: URL
+          example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
+        icon:
+          description: Link to an icon of the asset
+          type: string
+          format: URL
+        accessMethods: 
+          type: array
+          description: access method for trip execution. Data will be delivered in the response of /booking/{id}/events - COMMIT 
+            or /leg/{id}/events - PREPARE (preferred) or GET /bookings/{id}.
+          items:
+            $ref: "#/components/schemas/assetAccessMethods"
+
         fuel:
           type: string
           enum:
@@ -1829,75 +1920,6 @@ components:
               KEROSINE,
               OTHER,
             ]
-        energyLabel:
-          description: Energy efficiency
-          type: string
-          enum: [A, B, C, D, E]
-        co2PerKm:
-          type: number
-          format: float
-          minimum: 0
-        brand:
-          type: string
-          description: brand of the asset
-        model:
-          type: string
-        buildingYear:
-          type: integer
-        travelAbroad:
-          type: boolean
-          description: true indicates asset is allowed to travel abroad
-        airConditioning:
-          type: boolean
-          description: true indicates airconditioning required
-        cabrio:
-          type: boolean
-          description: true indicates cabrio required
-        colour:
-          type: string
-          description: colour of the asset, should match Content-Language
-        cargo:
-          type: string
-          description: describes options to carry cargo, should match Content-Language
-        easyAccessibility:
-          type: string
-          description: describes if asset is or needs to be easily accessible
-          enum:
-            [
-              LIFT,
-              ESCALATOR,
-              GROUND_LEVEL,
-              SIGHTIMPAIRMENT,
-              HEARINGIMPAIRMENT,
-              WHEELCHAIR,
-            ]
-        gears:
-          type: integer
-          description: number of gears of the asset
-        gearbox:
-          type: string
-          description: type of gearbox
-          enum:
-            [
-              MANUAL,
-              AUTOMATIC,
-              SEMIAUTOMATIC
-            ]
-        image:
-          description: Link to an image of the asset
-          type: string
-          format: URL
-          example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
-        infantSeat:
-          type: boolean
-          description: true indicates infant seat required
-        persons:
-          type: integer
-          description: number of persons able to use the asset
-          minimum: 1
-        pets:
-          type: boolean
-          description: true indicates pets are allowed on asset
         propulsion:
           type: string
           description: way in which the asset is powered
@@ -1911,50 +1933,128 @@ components:
               LPG,
               HYDROGEN
             ]
-        smoking:
-          type: boolean
-          description: true indicates smoking is allowed on asset
-        stateOfCharge:
-          type: integer
+
+        energyLabel:
+          description: Energy efficiency
+          type: string
+          enum: [A, B, C, D, E]
+        ecoLabel:
+          description: see https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
+          type: array
+          items: 
+            type: object
+            properties:
+              countryCode:
+                $ref: "#/components/schemas/country"
+              ecoSticker:
+                type: string
+        co2PerKm:
+          type: number
+          format: float
           minimum: 0
-          maximum: 100
-          description: percentage of charge available
+
+        gears:
+          type: integer
+          description: number of gears of the asset
+        gearbox:
+          type: string
+          description: type of gearbox
+          enum:
+            [
+              MANUAL,
+              AUTOMATIC,
+              SEMIAUTOMATIC
+            ]
+        airConditioning:
+          type: boolean
+          description: airconditioning available
+        cabrio:
+          type: boolean
+          description: cabrio model
         towingHook:
           type: boolean
-          description: true indicates towing hook required
-        undergroundParking:
-          type: boolean
-          description: true indicates underground parking is allowed with asset
+          description: towing hook available
         winterTires:
           type: boolean
-          description: true indicates winter tires required
-        maxSpeed:
-          type: integer
-          description: the maximum allowed speed for this asset (in km/h)
-        helmetRequired:
-          type: boolean
-          default: false
-          description: is a helmet required to operate this asset
-        other:
-          type: string
-          description: free text to describe asset, should match Content-Language
+          description: winter tires applied
         nrOfDoors:
           type: integer
           description: the number of doors of the vehicle. Return only when applicable
-        meta:
-          description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
-          type: object
-          additionalProperties: true
-        accessMethods: 
-          type: array
-          description: access method for trip execution. Data will be delivered in the response of /booking/{id}/events - COMMIT 
-            or /leg/{id}/events - PREPARE (preferred).
-          items:
-            $ref: "#/components/schemas/assetAccessMethods"
+        nrOfHelmets:
+          type: integer
+          description: the number of available helmets. Return only when applicable
+        navigation:
+          type: boolean
+          description: navigation available
+        cruiseControl:
+          type: boolean
+          description: cruise control available
+
+        persons:
+          type: integer
+          description: number of persons able to use the asset
+          minimum: 1
+        infantSeat:
+          type: boolean
+          description: true indicates infant seat is supplied
+        pets:
+          type: boolean
+          description: true indicates pets are allowed on asset
+        smoking:
+          type: boolean
+          description: true indicates smoking is allowed on asset
+        easyAccessibility:
+          type: string
+          description: describes if asset is or needs to be easily accessible
+          enum:
+            [
+              LIFT,
+              ESCALATOR,
+              GROUND_LEVEL,
+              SIGHTIMPAIRMENT,
+              HEARINGIMPAIRMENT,
+              WHEELCHAIR,
+            ]
         ancillaries:
           type: array
           items:
             $ref: "#/components/schemas/requirement"
+        regionId:
+          type: string
+          description: the region where this asset or assetType is used.
+
+        cargo:
+          type: string
+          description: describes options to carry cargo, should match Content-Language
+        cargoVolume:
+          type: integer
+          description: the volume in liters of the cargo
+        cargoLoad:
+          type: integer
+          description: the weight in kilograms of the cargo
+
+        travelAbroad:
+          type: boolean
+          description: true indicates asset is allowed to travel abroad
+        undergroundParking:
+          type: boolean
+          description: true indicates underground parking is allowed with asset
+        helmetRequired:
+          type: boolean
+          default: false
+          description: is a helmet required to operate this asset
+        defaultReserveTime:
+          type: integer
+          minimum: 0
+          description: Maximum time in minutes that a vehicle can be reserved before a rental begins. When a vehicle is reserved by a user, the vehicle remains locked until the rental begins. During this time the vehicle is unavailable and cannot be reserved or rented by other users. The vehicle status in free_bike_status.json MUST be set to is_reserved = true. If the value of default_reserve_time elapses without a rental beginning, the vehicle status MUST change to is_reserved = false. If default_reserve_time is set to 0, the vehicle type cannot be reserved.
+
+        other:
+          type: string
+          description: free text to describe asset, should match Content-Language
+        meta:
+          description: this object can contain extra information about the type of asset. For instance values from the 'Woordenboek Reizigerskenmerken'. [https://github.com/efel85/TOMP-API/issues/17]. These values can also be used in the planning.
+          type: object
+          additionalProperties: true
 
     assetAccessMethods:
       type: string
@@ -2044,6 +2144,8 @@ components:
                   type: integer
                   description: the maximum time the legs will take, in minutes
                   minimum: 0
+                memo:
+                  type: string
 
     bookingOperation:
       type: object
@@ -2226,6 +2328,25 @@ components:
               items:
                 type: string
 
+    conditionRequireEvidence:
+      description: use this condition to specify the evidence you require as TO in the off-boarding process. It can be used in addition with the 
+        static process identifier 'OFF_BOARDING_REQUIRED'. The evidence should be delivered in the /legs/{id}/events object (legEvent), in the `url` array
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - evidenceTypes
+          properties:
+            evidenceTypes:
+              type: array
+              items:
+                type: string
+                enum: [
+                  PARKED, 
+                  HELMET_IN_BASKET, 
+                  CHARGING
+                ]
+
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
       allOf:
@@ -2261,7 +2382,21 @@ components:
         assetTypeId:
           type: string
           description: reference to the assetType in /operator/available-assets, this property can be set when replacing an asset (for another type). In case of a succesfull replacement, the /legs/{id}/events - ASSIGN_ASSET should be send to the MP to inform a change of asset has been made.
-        
+
+    connectedLegInfo:
+      type: object
+      description: this object describes the previous leg. It can contain f.x. a flight number, a used parking to get a discount, etc.
+      properties:
+        provider:
+          type: string
+          description: the provider of the previous leg (usually a Transport Operator reference)
+        assetReference:
+          type: string
+          description: the identification of the previous asset, like a flight number. This field (in case of a specific asset) or assetTypeReference must be filled.
+        assetTypeReference:
+          type: string
+          description: the identification of the previous asset type, like a discount combi. This field (in case of a specific asset type) or asset reference must be filled.
+
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
@@ -2421,7 +2556,34 @@ components:
           description: the maximum size of the pages (only valid when supportsPaging=true). If the limit-parameter of the request is above this amount, a http code 400 will be returned.
           type: integer
           minimum: 1
+        externalType:
+          type: string
+          description: this field must be used when adressing other standards for exchanging 'static' data (Level 1 MaaS)
+          enum: [GBFS, GTFS, NeTEx, OSDM_Offline, IXSI5, APDS]
+        useAssetTypes:
+          type: array
+          items: 
+            type: string
+            description: field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_type_id' should be 
+              specified to book a bike from the particular vehicle type in the field 'useAssetTypes' in the offer request.
+        useAssets:
+          type: array
+          items: 
+            type: string
+            description: field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_id' should be 
+              specified to book a bike from the particular vehicle type in the field 'useAssets' in the offer request.
+
       example:
+        warning: "Don't copy this example. There are multiple examples in this section. Each object is an example on itself."
+        externalStandard1:
+          { "method": "GET", "externalType": "GBFS", "path": "https://some-external.url/GBFS/vehicle_types.json", 
+            "useAssetTypes": ["vehicle_type_id"], "status": "IMPLEMENTED" }
+        externalStandard2:
+          { "method": "GET", "externalType": "GBFS", "path": "https://some-external.url/GBFS/vehicle_status.json", 
+            "useAssets": ["vehicle_id"], "status": "IMPLEMENTED" }
+        externalStandard3:
+          { "method": "GET", "externalType": "NeTEx", "path": "https://data.ndovloket.nl/netex/wsf/NeTEx_WSF_20190903.xml.gz", 
+            "useAssetTypes": ["ScheduledStopPoint.id", "Line.id", "QuayRef.ref"], "status": "IMPLEMENTED" }            
         withoutPaging:
           { "method": "POST", "path": "/booking/{id}/events", "eventType": "COMMIT", "status": "IMPLEMENTED" }
         withPaging:
@@ -2626,6 +2788,35 @@ components:
         $ref: "#/components/schemas/geojsonLine"
       example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
 
+    geojsonMultiPolygon:
+      description: geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon
+      type: array
+      items:
+        $ref: "#/components/schemas/geojsonPolygon"
+      example: [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]]
+
+    geojsonGeometry:
+      required:
+      - type
+      description: 
+        geoJSON geometry
+      properties:
+        type:
+          type: string
+          enum:
+          - Point
+          - LineString
+          - Polygon
+          - MultiPolygon
+        coordinates:
+          oneOf: 
+            - $ref: "#/components/schemas/geojsonPoint"
+            - $ref: "#/components/schemas/geojsonLine"
+            - $ref: "#/components/schemas/geojsonPolygon"
+            - $ref: "#/components/schemas/geojsonMultiPolygon"
+      discriminator:
+        propertyName: type
+
     journalEntry:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
@@ -2669,6 +2860,9 @@ components:
               type: number
               format: float
               minimum: 0
+            vatNumber:
+              description: VAT identification number.
+              type: string
             bankAccount:
               $ref: "#/components/schemas/bankAccount"
             details:
@@ -2755,6 +2949,7 @@ components:
               - $ref: "#/components/schemas/conditionRequireBookingData"
               - $ref: "#/components/schemas/conditionReturnArea"
               - $ref: "#/components/schemas/conditionUpfrontPayment"
+              - $ref: "#/components/schemas/conditionRequireEvidence"
             discriminator:
               propertyName: conditionType
         state:
@@ -2777,6 +2972,8 @@ components:
         allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
           $ref: "#/components/schemas/tokenArray"   
+        memo:
+          type: string
             
     legEvent:
       type: object
@@ -2878,7 +3075,14 @@ components:
       properties:
         type:
           type: string
-          enum: [VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, OTHER]
+          enum: [ VEHICLE_NOT_AVAILABLE, 
+            USER_NO_SHOW, 
+            ETA, 
+            MESSAGE_TO_DRIVER, 
+            MESSAGE_TO_END_USER, 
+            USER_OUT_OF_LIMITS, 
+            OTHER
+            ]
           example: VEHICLE_NOT_AVAILABLE
         minutes:
           description: in case of ETA, the number of minutes until arrival at the pickup location
@@ -2889,6 +3093,23 @@ components:
         comment:
           type: string
           description: free text, should match Content-Language
+        legId:
+          type: string
+          description: whenever the booking contains multiple legs, this field is mandatory and contain
+            the id of the leg related to the notification.
+
+    oneStopBookingRequest:
+      type: object
+      anyOf:
+        - required: ["useAssets"]
+        - required: ["useAssetTypes"]
+      allOf:
+      - $ref: "#/components/schemas/planningRequest"
+      - type: object
+        properties:
+          customer:
+            description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
+            $ref: "#/components/schemas/customer"
 
     phone:
       type: object
@@ -2940,6 +3161,8 @@ components:
       properties:
         from:
           $ref: "#/components/schemas/place"
+        previousLegInfo:
+          $ref: "#/components/schemas/connectedLegInfo"
         radius:
           description: Maximum distance in meters a user wants to travel to reach the travel option
           type: integer
@@ -2952,11 +3175,13 @@ components:
             The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario. Also in meters
           minimum: 0
         departureTime:
-          description: The intended departure time. If left out and no arrivalTime is set, the current time should be assumed.
+          description: The intended departure time. 
+            If left out and no arrivalTime is set, the current time should be assumed. 
+            If only the arrival time is specified, this is an implicit request for a guaranteed arrival at that time.
           type: string
           format: date-time
         arrivalTime:
-          description: The intended arrival time, at the to place if set otherwise the time the user intends to stop using the asset.
+          description: The intended arrival time, at the `to place`. If not set, the time the user intends to stop using the asset (implicit request for arrival guarantee).
           type: string
           format: date-time
         nrOfTravelers:
@@ -3119,6 +3344,10 @@ components:
           type: string
           description: public name of the station, could match Content-Language
           example: Island Central
+        contactPhone:
+          description: Contact phone of the station
+          type: string
+
         coordinates:
           $ref: "#/components/schemas/coordinates"
         physicalAddress:
@@ -3130,6 +3359,80 @@ components:
         regionId:
           type: string
           description: ID of the region where the station operates (see "systemRegions")
+        stationArea:
+          $ref: "#/components/schemas/geojsonGeometry"
+
+        parkingType:
+          type: string
+          description: parking_lot (Off-street parking lot) 
+            street_parking (Curbside parking) 
+            underground_parking (Parking that is below street level, station may be non-communicating)
+            sidewalk_parking (Park vehicle on sidewalk, out of the pedestrian right of way)
+            other
+          enum: [
+            PARKING_LOT,
+            STREET_PARKING,
+            UNDERGROUND_PARKING,
+            SIDEWALK_PARKING,
+            OTHER
+          ]
+
+        isVirtual:
+          type: boolean
+          description: Is this station a location with or without smart dock technology? true - The station is a location without smart docking infrastructure. the station may be defined by a point (lat/lon) and/or station_area (below). false - The station consists of smart docking infrastructure (docks). This field SHOULD be published by mobility systems that have station locations without standard, internet connected physical docking infrastructure. These may be racks or geofenced areas designated for rental and/or return of vehicles. Locations that fit within this description SHOULD have the is_virtual_station boolean set to true.
+        isValetStation:
+          type: boolean
+          description: Are valet services provided at this station? Valet service is defined as providing unlimited capacity at a station.
+        isChargingStation:
+          type: boolean
+          description: Does the station support charging of electric vehicles?
+        parkingHoop:
+          description: Parking hoops are lockable devices that are used to secure a parking space to prevent parking of unauthorized vehicles.
+          type: boolean
+        isInstalled:
+          type: boolean
+          description: Is the station currently on the street?
+        isRenting:
+          type: boolean
+          description: Is the station currently renting vehicles?
+        isReturning:
+          type: boolean
+          description: Is the station accepting vehicle returns?
+        
+        capacity:
+          description: the total capacity of this station
+          type: integer
+        assetTypeCapacity:
+          type: array
+          description: An object used to describe the docking capacity of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total docking points installed at this station, both available and unavailable for the specified vehicle type.
+          items:
+            type: object
+            additionalProperties: true
+          example:
+            { "child-bike-01": 3, "general-bike": 18 }
+        assetsAvailable:
+          type: integer
+          description: the number of available assets in this station (total)
+        assetTypesAvailable:
+          type: array
+          description: An object used to describe the available assets of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total available asset of this type at this station.
+          items:
+            type: object
+            additionalProperties: true
+          example:
+            { "child-bike-01": 1, "general-bike": 3 }
+        docksAvailable:
+          type: integer
+          description: the number of free docks
+        assetDocksAvailable:
+          type: array
+          description: An object used to describe the free slots of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total free docks for this assetType at this station.
+          items:
+            type: object
+            additionalProperties: true
+          example:
+            { "child-bike-01": 1, "general-bike": 3 }
+      
         rentalMethods:
           type: array
           description: Array of enumerables containing the payment methods accepted at this station.
@@ -3138,6 +3441,8 @@ components:
             enum:
               [
                 KEY,
+                CASH,
+                BANKCARD,
                 CREDITCARD,
                 PAYPASS,
                 APPLEPAY,
@@ -3148,6 +3453,10 @@ components:
                 OTHER,
               ]
           example: [CREDITCARD, PAYPASS, APPLEPAY]
+        rentalMethodOther:
+          type: string
+          description: whenever `OTHER` is specified in the field 'rentalMethods', this field contains a free-format definition.
+          example: iDEAL
         rentalUrl:
           type: string
           description: web uri for renting assets at this station. Only added to be consistent with GBFS 2.0.
@@ -3241,6 +3550,12 @@ components:
           format: double
           description: time to respond in minutes.
           minimum: 0
+        urls:
+          type: array
+          description: urls to clarify the support request e.g. pictures showing damage
+          items:
+            type: string
+            format: url
 
     supportStatus:
       description: the current status of support
@@ -3527,6 +3842,9 @@ components:
         isTaxable:
           type: boolean
           description: false indicates that no additional tax will be added (either because tax is not charged, or because it is included) true indicates that tax will be added to the base price
+        surgePricing:
+          type: boolean
+          description: Is there currently an increase in price in response to increased demand in this pricing plan? If this field is empty, it means there is no surge pricing in effect.
         description:
           type: string
           description: Text field describing the particular pricing plan in human readable terms. This should include the duration, price, conditions, etc. that the publisher would like users to see. This is intended to be a human-readable description and should not be used for automatic calculations, should match Content-Language
