@@ -13,7 +13,7 @@ Where can I find the API-documentation?
 ---
 OpenAPI 3.0 documentation is available at [Swaggerhub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/).
 
-The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is available at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents)
+The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is available at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents). 
 
 How can I join the TOMP working group?
 ---
