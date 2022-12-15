@@ -18,7 +18,7 @@ https://github.com/TOMP-WG/TOMP-API/tree/master/documents
 
 How can I join the TOMP working group?
 ---
-Please contact Bon Bakermans (bon.bakermans@minienw.nl). He will add you to our mailing lists and will send you the invites for the meetings.
+Join our Slack space: https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease or contact Bon Bakermans (bon.bakermans@minienw.nl) to be added to our mailing list and to receive invites for the working group meetings.
 
 There are working group meetings every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers.
 
