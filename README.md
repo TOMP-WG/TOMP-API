@@ -21,31 +21,4 @@ Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun
 
 There are working group meetings every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers.
 
-Participants
----
-The workgroup has active participation from (pending permission to disclose further names):
 
-- Radiuz - Jef Heyse and Himanshu Gautam
-- Nazza - Rob Verkerk and Gerke Henkes
-- Trevvel/Paxx - Robert Baart
-- TURNN - Pim van der Toolen
-- Cargoroo - Ross Curzon-Butler
-- University of Twente - Steven Haveman and J. Roberto Reyes García
-- Stapp.in - Reinald Bronkhorst
-- Stichting OpenGeo - Stefan de Konink
-- Mobiliteitsfabriek - Martijn van der Linden
-- Taxistop - Tjalle Groen
-- Pon (Moves, Hely, Check) - Marijn Roverts
-- XXImo Mobility - Christiaan Rakowski
-- Innovactory - Stefan Bollars
-- DAT.Mobility - Edwin van den Belt
-- SBB/SKI+ - Stephan Röösli
-- Pitane Mobility - Gerrit Saey
-- Urbee
-- Mobike
-- RET
-- HTM
-- NS
-- Cityway
-- European Travellers Club
-- Donkey Republic
