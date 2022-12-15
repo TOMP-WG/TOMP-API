@@ -1,8 +1,7 @@
 Transport Operator Mobility-as-a-service Provider (TOMP) API development Github
 ====
 
-Working group meeting in the Netherlands every two weeks with the goal to develop 
-and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers by Jan 1st 2020.
+Working group meeting every month  with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers by Jan 1st 2020.
 
 I need help, where can I find it? / How do I start implementing TOMP?
 ---
