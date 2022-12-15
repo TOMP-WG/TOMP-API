@@ -24,4 +24,4 @@ The working group meetings take place every month with the goal to develop and s
 
 
 
-<img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/tompwg_logo.jpg" width="550">
+<img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/tompwg_logo.jpg" width="800">
