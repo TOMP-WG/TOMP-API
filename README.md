@@ -11,14 +11,13 @@ If you need help with your TOMP-integration as a Transport Operator or a MaaS-Pr
 
 Where can I find the API-documentation?
 ---
-OpenAPI 3.0 documentation is also available at https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/
+OpenAPI 3.0 documentation is available at [Swaggerhub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/).
 
-The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is available at:
-https://github.com/TOMP-WG/TOMP-API/tree/master/documents 
+The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is available at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents)
 
 How can I join the TOMP working group?
 ---
-Join our Slack space: https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease or contact Bon Bakermans (bon.bakermans@minienw.nl) to be added to our mailing list and to receive invites for the working group meetings.
+Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease) or contact Bon Bakermans (bon.bakermans@minienw.nl) to be added to our mailing list and to receive invites for the working group meetings.
 
 There are working group meetings every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers.
 
