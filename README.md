@@ -20,6 +20,8 @@ How can I join the TOMP working group?
 ---
 Please contact Bon Bakermans (bon.bakermans@minienw.nl). He will add you to our mailing lists and will send you the invites for the meetings.
 
+There are working group meetings every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers.
+
 Participants
 ---
 The workgroup has active participation from (pending permission to disclose further names):
