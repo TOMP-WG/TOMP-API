@@ -22,3 +22,6 @@ Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun
 The working group meetings take place every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers. All reports can be found at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents/working%20group%20reports).
 
 
+
+
+<src="https://github.com/TOMP-WG/website/blob/master/wiki/images/tompwg_logo.jpg" width="550">
