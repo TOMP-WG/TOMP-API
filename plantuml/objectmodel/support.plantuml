@@ -1,0 +1,12 @@
+@startuml 
+skinparam package {
+	BorderStyle dotted
+}
+
+frame "Support" {
+	Booking --{ SupportRequest
+	SupportRequest -- Place
+	SupportRequest -- SupportStatus
+}
+
+@enduml

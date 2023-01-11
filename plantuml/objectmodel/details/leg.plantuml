@@ -1,0 +1,49 @@
+@startuml generated
+class Leg {
+  String id
+ +Place from
+  Place to
+  String departureTime
+  String arrivalTime
+  String travelerReferenceNumbers
+  Integer legSequenceNumber
+  Fare pricing
+  Suboperator suboperator
+  ConditionUpfrontPayment[] conditions
+  LegState state
+  Duration departureDelay
+  Duration arrivalDelay
+  Distance distance
+  Token ticket
+  Token assetAccessData
+  TokenArray allAssetAccessData
+}
+Leg --  "1..1" AssetType : assetType >
+Leg --  "0..1" Asset : asset >
+Leg --  "0..1" GeojsonLine : progressGeometry >
+class AssetType {
+ +String id
+  String stationId
+  Integer nrAvailable
+  AssetClass assetClass
+  String assetSubClass
+  AssetProperties sharedProperties
+  SystemPricingPlan[] applicablePricings
+  ConditionUpfrontPayment[] conditions
+}
+class Asset {
+ +String id
+  Boolean isReserved
+  String isReservedFrom
+  String isReservedTo
+  Boolean isDisabled
+  String rentalUrl
+  String rentalUrlAndroid
+  String rentalUrlIOS
+  Number mileage
+  String licensePlate
+ +AssetProperties overriddenProperties
+}
+class GeojsonLine {
+}
+@enduml
