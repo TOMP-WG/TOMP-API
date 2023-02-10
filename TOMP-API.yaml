@@ -1245,54 +1245,6 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /operator/operating-hours:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - $ref: "#/components/parameters/maasId"
-      - $ref: "#/components/parameters/addressedTo"
-    get:
-      tags:
-        - operator information
-        - TO
-      summary: describes the system hours of operation
-      description: Describes the hours of operation of all available systems of the transport operator [from GBFS]
-      parameters:
-        - name: regionId
-          in: query
-          description: optional id of the region to use in the filter (/operator/regions)
-          required: false
-          schema: 
-            type: string
-        - name: stationId
-          in: query
-          description: optional id of the station to use in the filter (/operator/stations)
-          required: false
-          schema: 
-            type: string
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/systemHours"
-          headers:
-            Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-        "400":
-          $ref: "#/components/responses/400BadRequest"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-
   /operator/information:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -3638,6 +3590,7 @@ components:
         - startDay
         - endMonth
         - endDay
+        - operatingHours
       properties:
         stationId:
           type: string
@@ -3677,6 +3630,33 @@ components:
           type: integer
           description: Ending year for the system operations
           example: 2099
+        operatingHours:
+          type: array
+          description: Describes the hours of operation of all available systems of the transport operator [from GBFS]
+          items: 
+            $ref: "#/components/schemas/systemHours"
+        vacations:
+          type: array
+          description: Contains a start and end date time from wich the operating hours don't apply
+          items:
+            $ref: "#/components/schemas/systemVacations"
+
+    systemVacations:
+      type: object
+      required:
+        - startDateTime
+        - endDateTime
+      properties:
+        startDateTime:
+          type: string
+          description: Start date of a vacation
+          example: 2019-02-06T08:00:00.000Z
+          format: date-time
+        endDateTime:
+          type: string
+          description: End date of a vacation
+          example: 2019-02-06T19:00:00.000Z
+          format: date-time
 
     systemHours:
       type: object
@@ -3690,17 +3670,13 @@ components:
           description: This indicates that this set of rental hours applies to either members or non-members only.
           enum: [MEMBER, NON_MEMBERS]
           example: MEMBER
-        stationId:
-          type: string
-          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours of the station. (GET /operator/stations)
-        regionId:
-          type: string
-          description: If this parameter is present, it means that startTime and endTime correspond to the opening and closing hours for the region. (GET /operator/regions)
         startTime:
           type: string
+          example: 08:00
           format: HH:MM time
         endTime:
           type: string
+          example: 19:00
           format: HH:MM time
         days:
           type: array
