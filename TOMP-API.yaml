@@ -588,6 +588,7 @@ paths:
         `TIME_EXTEND` will be used to request an extension in time; the end user wants to use the asset longer, the `time` field contains the new end time,<br>
         `TIME_POSTPONE` will be used to request a delay in the departure time, the end user wants to depart later, the `time` field contains the new departure time,<br>
         `PAUSE` will pause the leg [TO and MP] (see (4.6) in process flow),<br>
+        `OPEN_TRUNK` request the TO to open up the trunk (of the scooter), e.g. to store the helmet<br>
         `START_FINISHING` will start the end-of-leg [Optionally implementable by TO and MP],<br>
         `FINISH` will end this leg (see (4.6) in process flow) [TO and MP]
       tags:
@@ -1953,6 +1954,7 @@ components:
             ASSIGN_ASSET,
             SET_IN_USE,
             PAUSE,
+            OPEN_TRUNK,
             START_FINISHING,
             FINISH,
             ISSUE,
@@ -2303,6 +2305,7 @@ components:
               ASSIGN_ASSET,
               SET_IN_USE,
               PAUSE,
+              OPEN_TRUNK,
               START_FINISHING,
               FINISH,
               TIME_EXTEND,
