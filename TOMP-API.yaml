@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.4.0"
+  version: "2.0.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -56,57 +56,6 @@ servers:
   - url: https://tomp.dat.nl/bike/
 
 paths:
-  /plannings:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/api"
-      - $ref: "#/components/parameters/apiVersion"
-      - $ref: "#/components/parameters/maasId"
-      - $ref: "#/components/parameters/addressedTo"
-    post:
-      description:
-        Returns plannings for the given travel plan. <p>Start time can be defined, but is optional. If startTime is not provided, but required by the third party API, a default value of "Date.now()" is used. [from MaaS-API /listing].
-        During the routing phase this service can be used to check availability without any state changes. <p>In the final check, just before presenting the alternatives to the user, a call should be made using `booking-intent`, requesting the TO to provide booking IDs to reference to during communication with the MP.
-        <p>see (2.1) in the process flow - planning
-        Replaced by /plannings/inquires (booking-intent false) and /planning/offers (booking-intent true)
-      tags:
-        - planning
-        - TO
-      deprecated: true
-      parameters:
-        - name: booking-intent
-          in: query
-          description: Specifies whether IDs should be returned for the leg options that can be referred to when booking
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/planningRequest"
-      responses:
-        "201":
-          description: Available transport methods matching the given query parameters. If no transport methods are available, an empty array is returned.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/planning"
-          headers:
-            Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
-        "400":
-          $ref: "#/components/responses/400BadRequest"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        "403":
-          $ref: "#/components/responses/403Forbidden"
-
   /planning/inquiries:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -300,7 +249,7 @@ paths:
         to only one possible offer, that is booked directly. The returned booking is still in `PENDING` state, you have to commit it. Unless 'AUTO_COMMIT' process identifier
         is applied. In that case the booking is in state 'CONFIRMED'.
       tags:
-        - planning
+        - booking
         - TO
       requestBody:
         content:
@@ -1054,9 +1003,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/stationInformation"
+                $ref: "#/components/schemas/stations"
           headers:
             Content-Language:
               description: The language/localization of user-facing content
@@ -1124,9 +1071,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/assetType"
+                $ref: "#/components/schemas/availableAssets"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1136,6 +1081,67 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
 
+  /operator/types:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    get:
+      tags:
+        - operator information
+        - TO
+      summary: informs about the types of assets
+      description: This feed is intended to inform customers about the types of assets the TO services
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: regionId
+          in: query
+          description: optional id of the region to use in the filter (/operator/regions)
+          required: false
+          schema: 
+            type: string
+        - name: stationId
+          in: query
+          description: optional id of the station to use in the filter (/operator/stations)
+          required: false
+          schema: 
+            type: string    
+      responses:
+        "200":
+          description: returns currently available asset types
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/availableAssetTypes"
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"    
+  
   /operator/alerts:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
@@ -1183,9 +1189,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/systemAlert"
+                $ref: "#/components/schemas/systemAlerts"
           headers:
             Content-Language:
               description: The language/localization of user-facing content
@@ -1411,9 +1415,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/systemRegion"
+                $ref: "#/components/schemas/systemRegions"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1492,9 +1494,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/journalEntry"
+                $ref: "#/components/schemas/journalEntries"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1714,7 +1714,9 @@ components:
         id:
           type: string
           description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).
-        
+        location:
+          $ref: "#/components/schemas/place"
+
         isReserved:
           type: boolean
           description: true indicates the bike is currently reserved for someone else
@@ -1822,16 +1824,6 @@ components:
         id:
           type: string
           description: Unique identifier of an asset type,
-        stationId:
-          type: string
-          description: If stationId is present, the nrAvailable is expected to find the availability at that particular station
-        nrAvailable:
-          type: integer
-        assets:
-          type: array
-          description: use this field only in the map-oriented scenario or in the committed bookings. Don't use it in public data (to prevent GDPR issues).
-          items:
-            $ref: "#/components/schemas/asset"
         assetClass:
           $ref: "#/components/schemas/assetClass"
         assetSubClass:
@@ -1868,8 +1860,6 @@ components:
         name:
           description: name of asset (type), required in either assetType or asset, should match Content-Language
           type: string
-        location:
-          $ref: "#/components/schemas/place"
 
         brand:
           type: string
@@ -2073,6 +2063,26 @@ components:
               EMV,
               NONE
             ]
+
+    availableAssets:
+      allOf:
+      - $ref: "#/components/schemas/paging"
+      - type: object
+        properties:
+          assets:
+            type: array
+            items: 
+              $ref: "#/components/schemas/asset"
+
+    availableAssetTypes:
+      allOf:
+      - $ref: "#/components/schemas/paging"
+      - type: object
+        properties:
+          assets:
+            type: array
+            items: 
+              $ref: "#/components/schemas/assetType"
 
     bankAccount:
       type: object
@@ -2852,6 +2862,16 @@ components:
           type: string
           enum: [PLANNING, COMMITTED_BOOKING, PREPARE, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH]
 
+    journalEntries:
+      allOf:
+      - $ref: "#/components/schemas/paging"
+      - type: object
+        properties:
+          entries:
+            type: array
+            items:
+              $ref: "#/components/schemas/journalEntry"
+
     journalEntry:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
@@ -3151,6 +3171,22 @@ components:
           customer:
             description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
             $ref: "#/components/schemas/customer"
+
+    paging:
+      type: object
+      properties:
+        links:
+          type: object
+          properties:
+            next: 
+              type: string
+              format: URI
+              example: https://tomp.dat.nl/bikes/available-assets/?offset=100&limit=100
+            previous:
+              type: string
+              format: URI
+              example: https://tomp.dat.nl/bikes/available-assets/?offset=100&limit=100
+
 
     phone:
       type: object
@@ -3521,6 +3557,16 @@ components:
           example: https://www.rentmyfreebike.com/app?sid=1234567890&platform=ios
           deprecated: true
 
+    stations:
+      allOf:
+      - $ref: "#/components/schemas/paging"
+      - type: object
+        properties:
+          stations: 
+            type: array
+            items:
+              $ref: "#/components/schemas/stationInformation"
+
     stopReference:
       type: object
       description: reference to a stop (can be nation specific). This can help to specific pinpoint a (bus) stop. Extra information about the stop is not supplied; you should find it elsewhere.
@@ -3675,6 +3721,17 @@ components:
         lastUpdated:
           type: string
           format: date-time
+
+    systemAlerts:
+      allOf:
+      - $ref: "#/components/schemas/paging"
+      - type: object
+        properties:
+          alerts:
+            type: array
+            items:
+              $ref: "#/components/schemas/systemAlert"
+
 
     systemCalendar:
       type: object
@@ -3934,6 +3991,16 @@ components:
         serviceArea:
           description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
           $ref: "#/components/schemas/geojsonPolygon"
+
+    systemRegions:
+      allOf:
+      - $ref: "#/components/schemas/paging"
+      - type: object
+        properties:
+          regions:
+            type: array
+            items: 
+              $ref: "#/components/schemas/systemRegion"
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
