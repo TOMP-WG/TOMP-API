@@ -1,53 +1,28 @@
 Transport Operator Mobility-as-a-service Provider (TOMP) API development Github
 ====
 
-Working group meeting in the Netherlands every two weeks with the goal to develop 
-and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers by Jan 1st 2020.
+The TOMP working group aims to develop and sustain an internationally governed interoperable open standard for technical communication between Transport Operators and MaaS Providers, by means of definition, improvement, alignment and dissemination.
 
 I need help, where can I find it? / How do I start implementing TOMP?
 ---
 If you need help with your TOMP-integration as a Transport Operator or a MaaS-Provider, use the following channels:
  1. First look at the [Wiki](https://github.com/TOMP-WG/TOMP-API/wiki), a lot of flows are described there. The wiki relates to the latest API-version.
- 2. If you have any questions regarding TOMP or how to implement it, please find us in Slack. There are a lot of developers there that can help you. Slack is a chat tool and very easy to use. Use this link to join our Slack space: https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0Q
+ 2. If you have any questions regarding TOMP or how to implement it, please find us in Slack. There are a lot of developers there that can help you. Slack is a chat tool and very easy to use. Use this link to join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0Q).
 
 Where can I find the API-documentation?
 ---
-OpenAPI 3.0 documentation is also available at https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/
+OpenAPI 3.0 documentation is available at [Swaggerhub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/).
 
-To document the latest developments, a Blueprint for an Transport Operator to Mobility-as-a-service Provider API is provided
-The latest version of this Blueprint is available at:
-
-https://github.com/TOMP-WG/TOMP-API/tree/master/documents or through dutchmobilityinnovations.com.
+The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is available at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents). 
 
 How can I join the TOMP working group?
 ---
-Please contact Bon Bakermans (bon.bakermans@minienw.nl). He will add you to our mailing lists and will send you the invites for the meetings.
+Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease) or contact Ayse (aysehilal.ocal@ndw.nu) to be added to our mailing list and to receive invites for the working group meetings.
 
-Participants
----
-The workgroup has active participation from (pending permission to disclose further names):
+The working group meetings take place every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers. All reports can be found at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents/working%20group%20reports).
 
-- Radiuz - Jef Heyse and Himanshu Gautam
-- Nazza - Rob Verkerk and Gerke Henkes
-- Trevvel/Paxx - Robert Baart
-- TURNN - Pim van der Toolen
-- Cargoroo - Ross Curzon-Butler
-- University of Twente - Steven Haveman and J. Roberto Reyes García
-- Stapp.in - Reinald Bronkhorst
-- Stichting OpenGeo - Stefan de Konink
-- Mobiliteitsfabriek - Martijn van der Linden
-- Taxistop - Tjalle Groen
-- Pon (Moves, Hely, Check) - Marijn Roverts
-- XXImo Mobility - Christiaan Rakowski
-- Innovactory - Stefan Bollars
-- DAT.Mobility - Edwin van den Belt
-- SBB/SKI+ - Stephan Röösli
-- Pitane Mobility - Gerrit Saey
-- Urbee
-- Mobike
-- RET
-- HTM
-- NS
-- Cityway
-- European Travellers Club
-- Donkey Republic
+
+
+
+
+<img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/TOMP%20WG%20grey.png" width="300">
