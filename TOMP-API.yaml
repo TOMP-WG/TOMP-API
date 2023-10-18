@@ -2912,7 +2912,7 @@ components:
 
     journalCategory:
       type: string
-      description: ALL and FARE are not allowed to use in the journalEntry object. They are there for filtering purposes in the journal entry endpoint. 
+      description: They are there for filtering purposes in the journal entry endpoint. 
       enum:
         [
           ALL,
