@@ -1779,7 +1779,11 @@ components:
         homeStationId:
           type: string
           description: reference to station_id in /operator/stations, station where it is assigned to
-
+        damages:
+          type: array
+          description: List of known vehicle damages.
+          items: 
+            $ref: "#/components/schemas/damage"
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -2500,6 +2504,27 @@ components:
               description: dictionary for extra fields (bilatural agreements)
               type: object
               additionalProperties: true
+
+    damage:
+      description: A damage of the vehicle.
+      type: object
+      required:
+        - vehicleComponent
+        - description
+      properties:
+        vehicleComponent:
+          description: Part/Component of the vehicle effected
+          type: string
+          enum: [FRONT, BACK, DRIVERS-SIDE, PASSENGER-SIDE, TOP, INTERIOR, TIRE, TRUNK, OTHER]
+        description:
+          description: Description of the damage.
+          type: string
+        pictures:
+          type: array
+          description: URL where pictures of the damage can be accessed. Any special characters in the URL must be correctly escaped.
+          items:
+            type: string
+            format: url
 
     day:
       type: string
@@ -3575,7 +3600,7 @@ components:
           description: the booking id
         supportType:
           type: string
-          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL,  ACCIDENT, OTHER]
         location:
           $ref: '#/components/schemas/place'
         time:
