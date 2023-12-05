@@ -2513,9 +2513,9 @@ components:
         - description
       properties:
         vehicleComponent:
-          description: Part/Component of the vehicle effected
+          description: Part/Component of the vehicle affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.
           type: string
-          enum: [FRONT, BACK, DRIVERS-SIDE, PASSENGER-SIDE, TOP, INTERIOR, TIRE, TRUNK, OTHER]
+          enum: [FRONT, REAR, LEFT, RIGHT, TOP, BOTTOM, INTERIOR, TIRE, ANCILLARY, OTHER]
         description:
           description: Description of the damage.
           type: string
@@ -3600,7 +3600,7 @@ components:
           description: the booking id
         supportType:
           type: string
-          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL,  ACCIDENT, OTHER]
+          enum: [BROKEN_DOWN, NOT_AT_LOCATION, MISSING_AFTER_PAUSE, NOT_CLEAN, NOT_AVAILABLE, UNABLE_TO_OPEN, UNABLE_TO_CLOSE, API_TECHNICAL, API_FUNCTIONAL, ACCIDENT, OTHER]
         location:
           $ref: '#/components/schemas/place'
         time:
