@@ -2917,6 +2917,11 @@ components:
               example: 11.00
               format: float
               minimum: 0
+            assetState:
+              description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
+              type: string
+              enum: [ "IN_USE", "PAUSED" ]
+              default: "IN_USE"
             meta:
               type: object
               additionalProperties: true
