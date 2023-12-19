@@ -322,6 +322,13 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
+            Expires:
+              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
+              schema:
+                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+                type: string
+                format: http-date
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -345,7 +352,11 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (see <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking.<br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twice should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
+      description: This endpoint **must** be used to alter the state of a booking:<br>
+        `CANCEL` - Cancels a confirmed booking.<br> 
+        `EXTEND_EXPIRY_TIME` - the MP request to extend the expiry time of the booking. Only available when the Process Identifier 'ALLOW_EXTEND_BOOKING_EXPIRY_TIME' is used. Whenever the extension is not granted, 410 should be returned.<br> 
+        `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. If the booking is in state COMMITTED, CANCELLED or EXPIRED, a commit will result a 403. <BR> 
+        `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
       tags:
         - booking
         - MP
@@ -370,6 +381,13 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
+            Expires:
+              description: Mandatory whenever the EXTEND_EXPIRY_TIME is used. It must contain the updated expiry time
+              schema:
+                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+                type: string
+                format: http-date
+              required: false
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -2161,7 +2179,13 @@ components:
       properties:
         operation:
           type: string
-          enum: [CANCEL, EXPIRE, DENY, COMMIT]
+          description: the operation that is requested. When extra time is needed to complete the initial booking, EXTEND_EXPIRY_TIME can be used. 
+            In the response there is the 'Expiry' header field to supply the new expiry timestamp.
+          enum: [CANCEL, DENY, COMMIT, EXTEND_EXPIRY_TIME]
+        extendReason:
+          type: string
+          description: in case `operation` is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.
+          enum: [BOOKING_PENDING, PAYMENT_PENDING, OTHER]
         origin:
           type: string
           description: This operation can be done on behalf of another party. The MP can act on behalf of the END_USER (cancel this booking for me); 
