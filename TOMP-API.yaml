@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.4.1"
+  version: "1.5.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -322,6 +322,13 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
+            Expires:
+              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
+              schema:
+                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+                type: string
+                format: http-date
+              required: true
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -345,7 +352,11 @@ paths:
         schema:
           type: string
     post:
-      description: This endpoint **must** be used to alter the state of a booking:<br>- The operation 'CANCEL' Cancels the booking (see <4> in the process flow - booking), <br>- the operation 'EXPIRE' informs that the booking-option is expired (see <5> in the process flow - booking) and <br>- the 'COMMIT' actually makes this booking option a real confirmed booking. (see also (3.2) in process flow - booking). This event should also be used to commit in the 'postponed-commit' scenario.<br> - 'DENY' tells the MP that the leg is cancelled in the post-commit scenario. <p> `CANCEL` - Cancels a confirmed booking.<br> `EXPIRE` - Typically for sending back a signal from TO to MP to tell the pending state is expired. Expiring twice should return 204. Expiring a booking in a non-pending state will result in 403. <BR> `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. Committing twice will result in 204. If the booking is in state CANCELLED or EXPIRED, a commit will result a 403. <BR> `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
+      description: This endpoint **must** be used to alter the state of a booking:<br>
+        `CANCEL` - Cancels a confirmed booking.<br> 
+        `EXTEND_EXPIRY_TIME` - the MP request to extend the expiry time of the booking. Only available when the Process Identifier 'ALLOW_EXTEND_BOOKING_EXPIRY_TIME' is used. Whenever the extension is not granted, 410 should be returned.<br> 
+        `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. If the booking is in state COMMITTED, CANCELLED or EXPIRED, a commit will result a 403. <BR> 
+        `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
       tags:
         - booking
         - MP
@@ -370,6 +381,13 @@ paths:
                 type: string
                 format: One IETF BCP 47 (RFC 5646) language tag
               required: true
+            Expires:
+              description: Mandatory whenever the EXTEND_EXPIRY_TIME is used. It must contain the updated expiry time
+              schema:
+                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+                type: string
+                format: http-date
+              required: false
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1859,6 +1877,10 @@ components:
               - $ref: "#/components/schemas/conditionReturnArea"
               - $ref: "#/components/schemas/conditionUpfrontPayment"
               - $ref: "#/components/schemas/conditionRequireEvidence"
+              - $ref: "#/components/schemas/conditionRequireOnboardingSteps"
+              - $ref: "#/components/schemas/conditionRequireOffboardingSteps"
+              - $ref: "#/components/schemas/conditionRequirePausingSteps"
+              - $ref: "#/components/schemas/conditionRequireResumingSteps"
             discriminator:
               propertyName: conditionType
 
@@ -2121,6 +2143,14 @@ components:
               description: The intended arrival time at the destination of the booking (over all legs)
               type: string
               format: date-time
+            actualDepartureTime:
+              description: the 'departureTime' can be used as 'plannedDepartureTime' whenever the trip has started. Use this field to ease searching for discrepances between planned and actual departure times
+              type: string
+              format: date-time
+            actualArrivalTime:
+              description: the 'arrivalTime' can be used as 'plannedArrivalTime' whenever the trip has ended. Use this field to ease searching for discrepances between planned and actual arrival times
+              type: string
+              format: date-time
             mainAssetType:
               description: the asset type that is used mainly in the complete trip.
               $ref: "#/components/schemas/assetType"
@@ -2161,7 +2191,13 @@ components:
       properties:
         operation:
           type: string
-          enum: [CANCEL, EXPIRE, DENY, COMMIT]
+          description: the operation that is requested. When extra time is needed to complete the initial booking, EXTEND_EXPIRY_TIME can be used. 
+            In the response there is the 'Expiry' header field to supply the new expiry timestamp.
+          enum: [CANCEL, DENY, COMMIT, EXTEND_EXPIRY_TIME]
+        extendReason:
+          type: string
+          description: in case `operation` is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.
+          enum: [BOOKING_PENDING, PAYMENT_PENDING, OTHER]
         origin:
           type: string
           description: This operation can be done on behalf of another party. The MP can act on behalf of the END_USER (cancel this booking for me); 
@@ -2212,6 +2248,31 @@ components:
           FINISHED,
         ]
       example: CONFIRMED
+
+    bookingStep:
+      type: object
+      allOf:
+      - $ref: "#/components/schemas/information"
+      - type: object
+        properties:
+          action:
+            type: string
+            description: The possible steps are described here<br>
+                  `PENDING` - to show whenever the booking is in PENDING state (not confirmed)<br>
+                  `WAITING` - to indicate that the TO is processing the booking, optionally after an extension of the expiry time<br>
+                  `WAITING_FOR_PAYMENT` - to indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br>
+                  `CONFIRMED` - to show whenever the booking is in a COMMITTED state (confirmed)<br>
+                  `CANCELLED` - to show whenever the booking is cancelled<br>
+                  `CONDITIONAL_CONFIRMED` - to show whenever the booking is conditionally confirmed (see process identifiers)<br>
+                  `EXPIRED` - to show whenever the booking is expired (the expiry time has passed)<br>
+            enum: [
+              PENDING,
+              WAITING_FOR_PAYMENT,
+              CONFIRMED,
+              CONDITIONAL_CONFIRMED,
+              CANCELLED,
+              EXPIRED
+            ]
 
     card:
       description: Any kind of card that isn't a license, only provide the cards that are required
@@ -2341,6 +2402,8 @@ components:
     conditionRequireEvidence:
       description: use this condition to specify the evidence you require as TO in the off-boarding process. It can be used in addition with the 
         static process identifier 'OFF_BOARDING_REQUIRED'. The evidence should be delivered in the /legs/{id}/events object (legEvent), in the `url` array
+        This construct is deprecated since v1.5. Please migrate it to conditionRequireOffboardingSteps
+      deprecated: true
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2356,6 +2419,54 @@ components:
                   HELMET_IN_BASKET, 
                   CHARGING
                 ]
+
+    conditionRequireOnboardingSteps:
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - steps
+          properties:
+            steps:
+              type: array
+              items: 
+                $ref: "#/components/schemas/onBoardingStep"                
+
+    conditionRequireOffboardingSteps:
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - steps
+          properties:
+            steps:
+              type: array
+              items: 
+                $ref: "#/components/schemas/offBoardingStep"
+
+    conditionRequirePausingSteps:
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - steps
+          properties:
+            steps:
+              type: array
+              items: 
+                $ref: "#/components/schemas/pausingStep"
+
+    conditionRequireResumingSteps:
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - steps
+          properties:
+            steps:
+              type: array
+              items: 
+                $ref: "#/components/schemas/resumingStep"
 
     conditionReturnArea:
       description: a return area. In the condition list there can be multiple return area's.
@@ -2606,7 +2717,7 @@ components:
 
     endpointImplementation:
       type: object
-      description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
+      description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers<br>
       required:
         - version
         - baseUrl
@@ -2628,6 +2739,38 @@ components:
             $ref: "#/components/schemas/scenario"
         processIdentifiers:
           $ref: "#/components/schemas/processIdentifiers"
+        steps:
+          type: object
+          description: The steps can be specified here, when they are uniform over all assets. If some assets should be handled differently, it can be specified as a condition in the booking for that specific asset(type).
+          properties:
+            planning:
+              type: array
+              items:
+                $ref: "#/components/schemas/planningStep"
+            booking:
+              type: array
+              items:
+                $ref: "#/components/schemas/bookingStep"
+            onboarding:
+              type: array
+              description: this array should be considered as a sequence!
+              items:
+                $ref: "#/components/schemas/onBoardingStep"
+            offboarding:
+              type: array
+              description: this array should be considered as a sequence!
+              items:
+                $ref: "#/components/schemas/offBoardingStep"
+            pausing:
+              type: array
+              description: this array should be considered as a sequence!
+              items:
+                $ref: "#/components/schemas/pausingStep"
+            resuming:
+              type: array
+              description: this array should be considered as a sequence!
+              items:
+                $ref: "#/components/schemas/resumingStep"
 
     error:
       type: object
@@ -2839,16 +2982,20 @@ components:
         type:
           description: the type of the information provided
           type: string
-          enum: [URL, IMAGE]
+          enum: [URL, IMAGE, PLAIN_TEXT, HTML]
         url:
-          description: the internet location of the information
+          description: the internet location of the information, used in case or type `URL` or `IMAGE`
           type: string
         goal:
           description: the purpose of the information
           type: string
           enum: [INSTRUCTIONS, SALES]
+        text:
+          type: string
+          description: free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE` 
         showTime:
           description: the moment when the information must be displayed
+          deprecated: true
           type: string
           enum: [PLANNING, COMMITTED_BOOKING, PREPARE, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH]
 
@@ -2947,11 +3094,19 @@ components:
           description: The destination of this leg, using this asset type
           $ref: "#/components/schemas/place"
         departureTime:
-          description: The departure time of this leg
+          description: The departure time of this leg. Or, in case of a parking, the start of the usage.
           type: string
           format: date-time
         arrivalTime:
-          description: The intended arrival time at the to place
+          description: The intended arrival time at the to place. Or, in case of a parking, the end of the usage.
+          type: string
+          format: date-time
+        actualArrivalTime:
+          description: the 'arrivalTime' can be used as 'plannedArrivalTime' whenever the leg has ended. Use this field to ease searching for discrepances between planned and actual arrival times
+          type: string
+          format: date-time
+        actualDepartureTime:
+          description: the 'departureTime' can be used as 'plannedDepartureTime' whenever the leg has started. Use this field to ease searching for discrepances between planned and actual departure times
           type: string
           format: date-time
         travelerReferenceNumbers:
@@ -2985,6 +3140,10 @@ components:
               - $ref: "#/components/schemas/conditionReturnArea"
               - $ref: "#/components/schemas/conditionUpfrontPayment"
               - $ref: "#/components/schemas/conditionRequireEvidence"
+              - $ref: "#/components/schemas/conditionRequireOnboardingSteps"
+              - $ref: "#/components/schemas/conditionRequireOffboardingSteps"
+              - $ref: "#/components/schemas/conditionRequirePausingSteps"
+              - $ref: "#/components/schemas/conditionRequireResumingSteps"
             discriminator:
               propertyName: conditionType
         state:
@@ -3008,10 +3167,10 @@ components:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
           $ref: "#/components/schemas/tokenArray"  
         userCommunication:
-              description: Additional information a TO can send to a customer (instructions, sales info, ...)
-              type: array
-              items: 
-                $ref: "#/components/schemas/information" 
+          description: Additional information a TO can send to a customer (instructions, sales info, ...)
+          type: array
+          items: 
+            $ref: "#/components/schemas/information" 
         memo:
           type: string
             
@@ -3139,6 +3298,83 @@ components:
           description: whenever the booking contains multiple legs, this field is mandatory and contain
             the id of the leg related to the notification.
 
+    offBoardingStep:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/information"
+        - type: object
+          properties:
+            action:
+              type: string
+              description: these actions are available<br>
+                `SEND_START_FINISHING` - the TO needs to be informed the leg is about to finish<br>
+                `PARK_ASSIST` - user action to park (stop) using the asset<br>
+                `UNLOCK_LOCKER` - user action, could be triggered by the START_FINISH event<br>
+                `CONNECT_CHARGER` - user action<br>
+                `LOCK_ASSET` - user action, could be triggered by the FINISH event<br>
+                `SEND_OPEN_TRUNK` - the TO opens the trunk remotely <br>
+                `UNLOCK_TRUNK` - user action <br>
+                `STOW_HELMET` - user action <br>
+                `LOCK_TRUNK` - user action <br>
+                `LOCK_LOCKER` - user action <br>
+                `SEND_FINISH` - the TO wants to be informed about the end of the leg<br>
+                `SEND_EVIDENCE_PARKED` - the TO requires parking evidence<br>
+                `SEND_EVIDENCE_HELMET` - the TO requires evidence of storing the helmet<br>
+                `SEND_EVIDENCE_CHARGER` - the TO requires evidence of correct usage of the charger 
+              enum: [
+                SEND_START_FINISHING, 
+                PARK_ASSIST, 
+                UNLOCK_LOCKER,
+                CONNECT_CHARGER, 
+                LOCK_ASSET,
+                SEND_OPEN_TRUNK, 
+                UNLOCK_TRUNK,
+                STOW_HELMET, 
+                LOCK_TRUNK, 
+                LOCK_LOCKER,
+                SEND_FINISH, 
+                SEND_EVIDENCE_PARKED, 
+                SEND_EVIDENCE_HELMET, 
+                SEND_EVIDENCE_CHARGER
+              ]
+
+    onBoardingStep:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/information"
+        - type: object
+          properties:
+            action:
+              type: string
+              description:
+                The possible steps are described here<br>
+                `SEND_PREPARE` - indicate the leg is going to start <br>
+                `UNLOCK_LOCKER` - user action - optionally triggered by the PREPARE event<br> 
+                `DISCONNECT_CHARGER` - requested user action <br> 
+                `SHOW_DAMAGES` - show known damages to end user <br> 
+                `UNLOCK_ASSET` - requested user action or triggered by SET_IN_USE event <br> 
+                `START_ASSET` - requested user action <br> 
+                `SEND_OPEN_TRUNK` - request TO to open trunk/helmet case remotely<br> 
+                `UNLOCK_TRUNK` - requested user action <br> 
+                `TAKE_HELMET` - requested user action <br> 
+                `SEND_SET_IN_USE` - request to start leg <br> 
+                `SEND_ASSIGN_ASSET` - request to assign the specified asset to the leg <br> 
+                `LOCK_LOCKER` - requested user action 
+              enum: [
+                SEND_PREPARE,
+                UNLOCK_LOCKER,
+                DISCONNECT_CHARGER, 
+                SHOW_DAMAGES,
+                UNLOCK_ASSET, 
+                START_ASSET,
+                SEND_OPEN_TRUNK, 
+                UNLOCK_TRUNK, 
+                TAKE_HELMET, 
+                SEND_SET_IN_USE, 
+                SEND_ASSIGN_ASSET,
+                LOCK_LOCKER
+              ]
+
     oneStopBookingRequest:
       type: object
       anyOf:
@@ -3151,6 +3387,37 @@ components:
           customer:
             description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
             $ref: "#/components/schemas/customer"
+          callbackUrl: 
+            description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
+              when this deviates from standard or agreed URL.
+            type: string
+            format: URL
+
+    pausingStep:
+      type: object
+      allOf:
+      - $ref: "#/components/schemas/information"
+      - type: object
+        properties:
+          action:
+            type: string
+            description: allowed actions<br>
+              `SEND_PAUSE` - send leg event PAUSE to inform the TO<br>
+              `PARK_ASSIST` - user action, the end user can be informed how and where to park<br>
+              `LOCK_ASSET` - user action, can be triggered by the PAUSE event<br>
+              `SEND_OPEN_TRUNK` - request TO to open the trunk remotely<br>
+              `UNLOCK_TRUNK` - user action<br>
+              `STOW_HELMET` - user action<br>
+              `LOCK_TRUNK` - user action
+            enum: [
+              SEND_PAUSE,
+              PARK_ASSIST, 
+              LOCK_ASSET,
+              SEND_OPEN_TRUNK,
+              UNLOCK_TRUNK,
+              STOW_HELMET, 
+              LOCK_TRUNK 
+            ]
 
     phone:
       type: object
@@ -3257,6 +3524,20 @@ components:
           type: object
           additionalProperties: true
 
+    planningStep:
+      type: object
+      description: this action allows to publish advertisements together with the proposed leg.
+      allOf:
+      - $ref: "#/components/schemas/information"
+      - type: object
+        properties:
+          action:
+            type: string
+            description: the `RESULT_SHOWN` action requires the MP to display some information to the customer when it is viewing the proposed legs.
+            enum: [
+              RESULT_SHOWN
+            ]
+
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
@@ -3362,6 +3643,32 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/requirement" 
+
+    resumingStep:
+      type: object
+      allOf:
+      - $ref: "#/components/schemas/information"
+      - type: object
+        properties:
+          action:
+            type: string
+            description: possible values<br>
+              `UNLOCK_ASSET` - user action, could be triggered by SET_IN_USE event<br>
+              `SEND_OPEN_TRUNK` - request TO to open trunk remotely<br>
+              `UNLOCK_TRUNK` - user action<br>
+              `TAKE_HELMET` - user action<br>
+              `LOCK_TRUNK` - user action<br>
+              `START_ASSET` - user action<br>
+              `SEND_SET_IN_USE` - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the vehicle
+            enum: [
+              UNLOCK_ASSET,
+              SEND_OPEN_TRUNK,
+              UNLOCK_TRUNK, 
+              TAKE_HELMET,
+              LOCK_TRUNK,
+              START_ASSET,
+              SEND_SET_IN_USE
+            ]
 
     scenario:
       type: string
