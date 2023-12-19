@@ -3755,33 +3755,27 @@ components:
           description: the total capacity of this station
           type: integer
         assetTypeCapacity:
-          type: array
+          type: object
           description: An object used to describe the docking capacity of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total docking points installed at this station, both available and unavailable for the specified vehicle type.
-          items:
-            type: object
-            additionalProperties: true
+          additionalProperties: true
           example:
             { "child-bike-01": 3, "general-bike": 18 }
         assetsAvailable:
           type: integer
           description: the number of available assets in this station (total)
         assetTypesAvailable:
-          type: array
+          type: object
           description: An object used to describe the available assets of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total available asset of this type at this station.
-          items:
-            type: object
-            additionalProperties: true
+          additionalProperties: true
           example:
             { "child-bike-01": 1, "general-bike": 3 }
         docksAvailable:
           type: integer
           description: the number of free docks
         assetDocksAvailable:
-          type: array
+          type: object
           description: An object used to describe the free slots of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total free docks for this assetType at this station.
-          items:
-            type: object
-            additionalProperties: true
+          additionalProperties: true
           example:
             { "child-bike-01": 1, "general-bike": 3 }
       
