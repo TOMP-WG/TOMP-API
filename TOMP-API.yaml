@@ -3223,6 +3223,8 @@ components:
           $ref: "#/components/schemas/duration"
         distance:
           $ref: "#/components/schemas/distance"
+        asset:
+          $ref: "#/components/schemas/asset"
 
     legState:
       type: string
