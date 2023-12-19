@@ -1832,7 +1832,11 @@ components:
         homeStationId:
           type: string
           description: reference to station_id in /operator/stations, station where it is assigned to
-
+        damages:
+          type: array
+          description: List of known vehicle damages.
+          items: 
+            $ref: "#/components/schemas/damage"
         overriddenProperties:
           $ref: "#/components/schemas/assetProperties"
 
@@ -2647,6 +2651,27 @@ components:
               type: object
               additionalProperties: true
 
+    damage:
+      description: A damage of the vehicle.
+      type: object
+      required:
+        - vehicleComponent
+        - description
+      properties:
+        vehicleComponent:
+          description: Part/Component of the vehicle affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.
+          type: string
+          enum: [FRONT, REAR, LEFT, RIGHT, TOP, BOTTOM, INTERIOR, TIRE, ANCILLARY, OTHER]
+        description:
+          description: Description of the damage.
+          type: string
+        pictures:
+          type: array
+          description: URL where pictures of the damage can be accessed. Any special characters in the URL must be correctly escaped.
+          items:
+            type: string
+            format: url
+
     day:
       type: string
       enum: [MON, TUE, WED, THU, FRI, SAT, SUN]
@@ -3099,7 +3124,7 @@ components:
 
     journalCategory:
       type: string
-      description: ALL and FARE are not allowed to use in the journalEntry object. They are there for filtering purposes in the journal entry endpoint. 
+      description: They are there for filtering purposes in the journal entry endpoint. 
       enum:
         [
           ALL,
