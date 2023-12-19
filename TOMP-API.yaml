@@ -2139,6 +2139,14 @@ components:
               description: The intended arrival time at the destination of the booking (over all legs)
               type: string
               format: date-time
+            actualDepartureTime:
+              description: the 'departureTime' can be used as 'plannedDepartureTime' whenever the trip has started. Use this field to ease searching for discrepances between planned and actual departure times
+              type: string
+              format: date-time
+            actualArrivalTime:
+              description: the 'arrivalTime' can be used as 'plannedArrivalTime' whenever the trip has ended. Use this field to ease searching for discrepances between planned and actual arrival times
+              type: string
+              format: date-time
             mainAssetType:
               description: the asset type that is used mainly in the complete trip.
               $ref: "#/components/schemas/assetType"
@@ -2971,11 +2979,19 @@ components:
           description: The destination of this leg, using this asset type
           $ref: "#/components/schemas/place"
         departureTime:
-          description: The departure time of this leg
+          description: The departure time of this leg. Or, in case of a parking, the start of the usage.
           type: string
           format: date-time
         arrivalTime:
-          description: The intended arrival time at the to place
+          description: The intended arrival time at the to place. Or, in case of a parking, the end of the usage.
+          type: string
+          format: date-time
+        actualArrivalTime:
+          description: the 'arrivalTime' can be used as 'plannedArrivalTime' whenever the leg has ended. Use this field to ease searching for discrepances between planned and actual arrival times
+          type: string
+          format: date-time
+        actualDepartureTime:
+          description: the 'departureTime' can be used as 'plannedDepartureTime' whenever the leg has started. Use this field to ease searching for discrepances between planned and actual departure times
           type: string
           format: date-time
         travelerReferenceNumbers:
