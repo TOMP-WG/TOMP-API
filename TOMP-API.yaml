@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.4.1"
+  version: "1.5.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -3151,6 +3151,11 @@ components:
           customer:
             description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
             $ref: "#/components/schemas/customer"
+          callbackUrl: 
+            description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
+              when this deviates from standard or agreed URL.
+            type: string
+            format: URL
 
     phone:
       type: object
