@@ -260,9 +260,44 @@ paths:
       parameters:
         - name: state
           in: query
-          required: true
+          required: false
           schema:
             $ref: "#/components/schemas/bookingState"
+        - name: min-time
+          description: start time of the time window of all bookings (partially) overlapping with this time window
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: max-time
+          description: end time of the time window of all bookings (partially) overlapping with this time window
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: min-price
+          description: minimum search price, for the whole trip
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+        - name: max-price
+          description: maximum search price, for the whole trip
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+        - name: contains-asset-type
+          in: query
+          required: false
+          description: filter the bookings on the ID of the asset type. Should return all complete 
+            bookings containing a leg executed with this asset type.
+          schema:
+            type: string
 
       responses:
         "200":
