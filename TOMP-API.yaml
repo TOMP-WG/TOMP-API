@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.4.0"
+  version: "1.4.1"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -811,6 +811,7 @@ paths:
         `TIME_EXTEND` will be used to request an extension in time; the end user wants to use the asset longer, the `time` field contains the new end time,<br>
         `TIME_POSTPONE` will be used to request a delay in the departure time, the end user wants to depart later, the `time` field contains the new departure time,<br>
         `PAUSE` will pause the leg [TO and MP] (see (4.6) in process flow),<br>
+        `OPEN_TRUNK` request the TO to open up the trunk (of the scooter), e.g. to store the helmet<br>
         `START_FINISHING` will start the end-of-leg [Optionally implementable by TO and MP],<br>
         `FINISH` will end this leg (see (4.6) in process flow) [TO and MP]
       tags:
@@ -2123,6 +2124,13 @@ components:
             mainAssetType:
               description: the asset type that is used mainly in the complete trip.
               $ref: "#/components/schemas/assetType"
+            userCommunication:
+              description: Additional information a TO can send to a customer (instructions, sales info, ...)
+              type: array
+              items: 
+                $ref: "#/components/schemas/information"
+            memo:
+              type: string
             extraData:
               description: Arbitrary information that a TO can add
               type: object
@@ -2144,8 +2152,6 @@ components:
                   type: integer
                   description: the maximum time the legs will take, in minutes
                   minimum: 0
-                memo:
-                  type: string
 
     bookingOperation:
       type: object
@@ -2184,6 +2190,10 @@ components:
         customer:
           description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
           $ref: "#/components/schemas/customer"
+        extraInfo:
+          description: dictionary for extra fields (bilatural agreements)
+          type: object
+          additionalProperties: true
 
     bookingState:
       description: The life-cycle state of the booking (from NEW to FINISHED)
@@ -2486,6 +2496,10 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/license"
+            extraInfo:
+              description: dictionary for extra fields (bilatural agreements)
+              type: object
+              additionalProperties: true
 
     day:
       type: string
@@ -2533,6 +2547,7 @@ components:
             ASSIGN_ASSET,
             SET_IN_USE,
             PAUSE,
+            OPEN_TRUNK,
             START_FINISHING,
             FINISH,
             ISSUE,
@@ -2817,6 +2832,26 @@ components:
       discriminator:
         propertyName: type
 
+    information:
+      description: Information provided to end users
+      type: object
+      properties:
+        type:
+          description: the type of the information provided
+          type: string
+          enum: [URL, IMAGE]
+        url:
+          description: the internet location of the information
+          type: string
+        goal:
+          description: the purpose of the information
+          type: string
+          enum: [INSTRUCTIONS, SALES]
+        showTime:
+          description: the moment when the information must be displayed
+          type: string
+          enum: [PLANNING, COMMITTED_BOOKING, PREPARE, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH]
+
     journalEntry:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
@@ -2971,7 +3006,12 @@ components:
           $ref: "#/components/schemas/token"
         allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
-          $ref: "#/components/schemas/tokenArray"   
+          $ref: "#/components/schemas/tokenArray"  
+        userCommunication:
+              description: Additional information a TO can send to a customer (instructions, sales info, ...)
+              type: array
+              items: 
+                $ref: "#/components/schemas/information" 
         memo:
           type: string
             
@@ -2993,6 +3033,7 @@ components:
               ASSIGN_ASSET,
               SET_IN_USE,
               PAUSE,
+              OPEN_TRUNK,
               START_FINISHING,
               FINISH,
               TIME_EXTEND,
@@ -3211,7 +3252,11 @@ components:
           items:
             type: string
             format: an asset type id for this operator (from /operator/available-assets)
-            
+        extraInfo:
+          description: dictionary for extra fields (bilatural agreements)
+          type: object
+          additionalProperties: true
+
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
@@ -3403,33 +3448,27 @@ components:
           description: the total capacity of this station
           type: integer
         assetTypeCapacity:
-          type: array
+          type: object
           description: An object used to describe the docking capacity of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total docking points installed at this station, both available and unavailable for the specified vehicle type.
-          items:
-            type: object
-            additionalProperties: true
+          additionalProperties: true
           example:
             { "child-bike-01": 3, "general-bike": 18 }
         assetsAvailable:
           type: integer
           description: the number of available assets in this station (total)
         assetTypesAvailable:
-          type: array
+          type: object
           description: An object used to describe the available assets of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total available asset of this type at this station.
-          items:
-            type: object
-            additionalProperties: true
+          additionalProperties: true
           example:
             { "child-bike-01": 1, "general-bike": 3 }
         docksAvailable:
           type: integer
           description: the number of free docks
         assetDocksAvailable:
-          type: array
+          type: object
           description: An object used to describe the free slots of a station where each key is a reference to the ID of the assetType, and the value is a number representing the total free docks for this assetType at this station.
-          items:
-            type: object
-            additionalProperties: true
+          additionalProperties: true
           example:
             { "child-bike-01": 1, "general-bike": 3 }
       
