@@ -2417,6 +2417,8 @@ components:
             requiredFields:
               type: array
               items:
+                description: <br>
+                  `NAME` - depricated, use FIRST_NAME and LAST_NAME instead.
                 type: string
                 enum:
                   [
@@ -2424,6 +2426,12 @@ components:
                     TO_ADDRESS,
                     BIRTHDATE,
                     EMAIL,
+                    FIRST_NAME,
+                    LAST_NAME,
+                    NAME,
+                    PLACE_OF_BIRTH,
+                    COUNTRY_OF_BIRTH,
+                    AGE,
                     PERSONAL_ADDRESS,
                     PHONE_NUMBERS,
                     LICENSES,
@@ -2432,8 +2440,6 @@ components:
                     TRAVEL_CARDS,
                     ID_CARDS,
                     CREDIT_CARDS,
-                    NAME,
-                    AGE,
                     BLOCKCHAIN_CLAIMS,
                   ]
             claims:
