@@ -42,7 +42,7 @@ servers:
   - url: https://tomp.dat.nl/
 
 paths:
-  /offer:
+  /offers:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
@@ -57,7 +57,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/tripRequest"
+              $ref: "#/components/schemas/travelRequest"
       responses:
         "201":
           description: a list of bookable trips, if there is no option, it will return an empty list. Each bookable trip has a unique identifier, that can be used to book it.
@@ -75,7 +75,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripOptionsResponse"
+                $ref: "#/components/schemas/travelOptionsResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -112,7 +112,7 @@ paths:
                 $ref: "#/components/schemas/bookingResponse"
           headers:
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp.
+              description: The result is valid until this timestamp (and must be COMMITted unless it is already in state CONFIRMED). A pending booking is expired after this timestamp.
               schema:
                 description: A HTTP date string
                 externalDocs:
@@ -138,15 +138,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  booking:
-                    $ref: "#/components/schemas/booking"
-                  log:
-                    type: array
-                    maxItems: 100
-                    items:
-                      $ref: "#/components/schemas/logEntry"
+                allOf:
+                - $ref: "#/components/schemas/bookingResponse"
+                - type: object
+                  properties:
+                    log:
+                      type: array
+                      maxItems: 100
+                      items:
+                        $ref: "#/components/schemas/logEntry"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -853,7 +853,7 @@ components:
             type: string
           visualId:
             type: string
-            description: for instance, a license plate. The usage of this field requires a secure environment/connection.
+            description: for instance, a license plate or seat number. The usage of this field requires a secure environment/connection.
 
           assetType:
             $ref: "#/components/schemas/assetType"            
@@ -1192,13 +1192,9 @@ components:
               type: string
 
     booking:
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2957.htm
-        # TRAVEL PACKAGE
-        # bookingState
-        # customer => TRANSPORT CUSTOMER
-        # additionalLegs => including TRAVEL PACKAGE
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA1/EA2242.htm (SALES OFFER PACKAGE)
+      #externalDocs:
+        # url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2957.htm
+        # https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA1/EA2242.htm (SALES OFFER PACKAGE)
           # bookingState
           # customer
           # additionalLegs
@@ -1206,6 +1202,9 @@ components:
           # bookingState -> CUSTOMER PURCHASE STATUS
           # customer -> CUSTOMER ACCOUNT .registered to TRANSPORT CUSTOMER
           # additionalLegs -> CUSTOMER PURCHASE PACKAGE ELEMENTS
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2413.htm
+        description: TRAVEL SPECIFICATION
       allOf:
         - $ref: "#/components/schemas/leg"
         - type: object
@@ -1219,7 +1218,8 @@ components:
               $ref: "#/components/schemas/customer"
 
             additionalLegs:
-              description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled.
+              description: The additional legs of this booking (one booking -> all properties are already in the booking).
+                All other legs should be in this collection, using the sequenceNumber to arrange them.
               type: array
               maxItems: 100
               items:
@@ -1260,17 +1260,18 @@ components:
       - $ref: "#/components/schemas/booking"
       - $ref: "#/components/schemas/hateoasLinks"
         example: {
-            # trip offer -> booking
+            # planning: create booking, only when bookingStatus = NEW
                 "book": { "rel": "POST", "href": "/bookings/{id}", "type": "application/hal+json", "templated": true }
-            # booking -> booking
+            # booking
               # only when bookingStatus = PENDING
               , "commit": { "rel": "POST", "href": "/bookings/{id}/operations/COMMIT", "type": "application/hal+json", "templated": true } 
               , "cancel": { "rel": "POST", "href": "/bookings/{id}/operations/CANCEL", "type": "application/hal+json", "templated": true }
               , "extend_expiry_time": { "rel": "EXTEND_EXPIRY_TIME", "href": "/bookings/{id}/operations/EXTEND_EXPIRY_TIME", "type": "application/hal+json", "templated": true }
               # only when bookingStatus = CONDITIONAL_CONFIRMED
               , "deny": { "rel": "POST", "href": "/bookings/{id}/operations/DENY", "type": "application/hal+json", "templated": true }
-            # booking -> trip execution
-              , "self": { "rel": "GET", "href": "/bookings/{id}/legs/{lid}", "type": "application/hal+json", "templated": true } 
+            # trip execution
+              , "leg": { "rel": "GET", "href": "/bookings/{id}/legs/{lid}", "type": "application/hal+json", "templated": true } 
+              , "booking": { "rel": "GET", "href": "/bookings/{id}", "type": "application/hal+json", "templated": true } 
               # only when bookingStatus = CONFIRMED
               , "prepare": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/PREPARE", "type": "application/hal+json", "templated": true }
               , "set_in_use": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/SET_IN_USE", "type": "application/hal+json", "templated": true }
@@ -2339,7 +2340,7 @@ components:
         id:
           description: The unique identifier (TO) of this leg
           $ref: "#/components/schemas/uuid"
-        legSequenceNumber:
+        sequenceNumber:
           description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
           type: integer
         travelerReferenceNumbers:
@@ -2411,10 +2412,11 @@ components:
         - $ref: "#/components/schemas/leg"
         - $ref: "#/components/schemas/hateoasLinks"
           example:
-            { "details": { "rel": "GET", "href": "/bookings/{id}/legs/{lid}", "templated": true, "type": "application/hal+json" }
+            { "leg": { "rel": "GET", "href": "/bookings/{id}/legs/{lid}", "templated": true, "type": "application/hal+json" }
             # only when legState = NOT_STARTED
+            , "cancel": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/CANCEL", "templated": true, "type": "application/hal+json" }
             , "prepare": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/PREPARE", "templated": true, "type": "application/hal+json" }
-            , "assign_asset": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/ASSIGN_VEHICLE", "templated": true, "type": "application/hal+json" }
+            , "assign_asset": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/ASSIGN_ASSET", "templated": true, "type": "application/hal+json" }
             , "time_postpone": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/TIME_POSTPONE", "templated": true, "type": "application/hal+json" }
             # only when legState = NOT_STARTED OR PREPARING
             , "add_ancillaries": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/ancillaries/{category}/{number}", "templated": true, "type": "application/hal+json" }
@@ -2480,7 +2482,7 @@ components:
           enum: [ 
             OFFER, BOOK,
             CANCEL, DENY, COMMIT, EXTEND_EXPIRY_TIME,
-            PREPARE, ASSIGN_VEHICLE, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH, TIME_EXTEND, TIME_POSTPONE,
+            PREPARE, ASSIGN_ASSET, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH, TIME_EXTEND, TIME_POSTPONE,
             PAY, EXTRA_COSTS
             ]
         legId:
@@ -2599,7 +2601,7 @@ components:
 
     oneStopBookingRequest:
       allOf:
-      - $ref: "#/components/schemas/tripRequest"
+      - $ref: "#/components/schemas/travelRequest"
       - type: object
         properties:
           customer:
@@ -3083,10 +3085,11 @@ components:
         requirements:
           $ref: "#/components/schemas/requirements"
 
-    tripRequest:
+    travelRequest:
       description: A travel planning for which bookable options are requested
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3147.htm
+        description: TRIP REQUEST
       # from -> starting at 
       # to -> ending at 
       # startTime / endTime -> TimeOfTravel / TravelTimeConstraint
@@ -3171,7 +3174,7 @@ components:
           additionalProperties: 
             type: string
 
-    tripOptionsResponse:
+    travelOptionsResponse:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3156.htm
@@ -3194,7 +3197,7 @@ components:
     uuid:
       type: string
       format: UUID
-      pattern: "^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$"
+      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
       externalDocs:
         url: https://en.wikipedia.org/wiki/Universally_unique_identifier
         # also: https://www.ietf.org/rfc/rfc4122.txt
