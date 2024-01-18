@@ -2,7 +2,24 @@ openapi: 3.0.0
 info:
   title: Transport Operator MaaS Provider API
   description:
-    "The API between Transport Operators (TO) and MaaS providers (MP, and other resellers). Providing functions for Booking, Trip Execution, Support, Payment and Operation Information."
+    "<h3>Context</h3>
+    It allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    It provides functions for Booking, Trip Execution, Support, Payment and Operation Information.<br><br>
+
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>.<br><br>
+
+    <b>Convention</b><br>
+    In the specification we use these 'coding conventions':<br>
+    <table border=1>
+    <tr><td>&nbsp;`URLs`</td><td>&nbsp;to specify a URL, referring to endpoints in the specification</td></tr>
+    <tr><td>&nbsp;[conditions]</td><td>&nbsp;free format conditions for a specific line</td></tr>
+    <tr><td>&nbsp;<i>PROCESS_IDENTIFIER_NAME</i></td><td>&nbsp;see <a href='https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers'>Process Identifiers</a></td></tr>
+    <tr><td>&nbsp;<u>MODULE NAME</u></td><td>&nbsp;for the module names, like <u>BOOKING</u></td></tr>
+    <tr><td>&nbsp;CONCEPT NAME</td><td>&nbsp;referring to concepts that are described in the specification</td></tr>
+    <tr><td>&nbsp;**property name**</td><td>&nbsp;referring to fields/attributes/properties in a concept</td></tr>
+    <tr><td>&nbsp;_enumeration value_</td><td>&nbsp;referring to values from specific properties</td></tr>
+    </table>
+    "
   version: "2.0.0"
   contact:
     url: https://github.com/TOMP-WG/TOMP-API
@@ -12,24 +29,24 @@ info:
 
 tags:
   - name: booking
-    description: The `booking module` contains functionality to request offers, book them or create bookings directly based on external information. Allows also to cancel or commit a non-final booking.
+    description: The <u>BOOKING MODULE</u> contains functionality to request offers, book them or create bookings directly based on external information. Allows also to cancel or commit a non-final booking.
 
   - name: trip execution
-    description: The `trip execution module` contains functionality to execute the booked leg(s). Operations like starting, pausing and ending, but also functions like adding/removing ancillaries.
+    description: The <u>TRIP EXECUTION MODULE</u> contains functionality to execute the booked leg(s). Operations like starting, pausing and ending, but also functions like adding/removing ancillaries.
 
   - name: support
-    description: the `support module` facilitates handling support requests
+    description: the <u>SUPPORT MODULE</u> facilitates handling support requests
 
   - name: payment
-    description: the `payment module` allows to request a financial transaction and report costs
+    description: the <u>PAYMENT MODULE</u> allows to request a financial transaction and report costs
 
-  - name: operator information
-    description: This `operator module` contains technical information about the implementation and an endpoint to check the uptime.
+  - name: interoperability
+    description: the <u>INTEROPERABILITY MODULE</u> contains the technical specification of the implementation, how it works together with other standards and an endpoint to check the uptime.
 
 # security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
-#                           OAuth2 and OpenId are also available
+#                           OAutb and OpenId are also available
 # The exact ways to authenticate will be described in a later version
 security:
   - BasicAuth: []
@@ -48,34 +65,31 @@ paths:
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
     post:
-      summary: "[MP->TO] return travel offers from A to B"
+      summary: "[MP->TO] get trip offers to get from A to B"
       description: Returns offers (bookable trips) based on user requirements
       tags:
         - booking
       requestBody:
-        description: the initial request, containing locations, timestamps, card/license types, and personal preferences/(dis)abilities. Can also contain a direct reference to an asset or asset type.
+        description: the initial request, containing locations, timestamps, CARD TYPEs and LICENSE TYPEs, and personal preferences/(dis)abilities. Can also contain a direct reference to an ASSET or ASSET TYPE.
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/travelRequest"
+              $ref: "#/components/schemas/tripRequest"
       responses:
         "201":
           description: a list of bookable trips, if there is no option, it will return an empty list. Each bookable trip has a unique identifier, that can be used to book it.
           headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
+              description: The result is valid until this timestamp. The _PENDING_ booking is expired after this timestamp. 
               schema:
-                description: A HTTP date string 
-                externalDocs:
-                  url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-                example: Wed, 21 Oct 2015 07:28:00 GMT
+                $ref: "#/components/schemas/httpDate"
               required: false
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/travelOptionsResponse"
+                $ref: "#/components/schemas/tripOptionsResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -84,19 +98,15 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Trip option identifier, delivered by the trips endpoint
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
+      - $ref: "#/components/parameters/bookingId"
     post:
-      summary: "[MP->TO] book offered travel for customer"
-      description: The offered trip is transformed into a booked trip. Dependend of the process identifiers (`AUTO_COMMIT` or `ATOMIC_BOOKING_SET_IN_USE`) the booking is PENDING (to be committed using the COMMIT operation) or CONFIRMED.
+      summary: "[MP->TO] book an offered trip"
+      description: The offered trip is transformed into a booked one. Dependend of the process identifiers (<i>AUTO_COMMIT</i> or <i>ATOMIC_BOOKING_SET_IN_USE</i>) the BOOKING is _PENDING_ 
+        (to be committed using the `POST /bookings/{id}/operations/COMMIT`) or _CONFIRMED_.
       tags:
         - booking
       requestBody:
-        description: One of available booking options, returned by /trips, with an ID.
+        description: additional information required to create a BOOKING. This information can be retrieved from the the LEGs' **conditions**.
         required: true
         content:
           application/json:
@@ -105,22 +115,16 @@ paths:
 
       responses:
         "201":
-          description: A new booking was succesfully created, status pending
+          description: A new BOOKING was succesfully created, **status** _PENDING_ or _CONFIRMED_.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/bookingResponse"
           headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
             Expires:
-              description: The result is valid until this timestamp (and must be COMMITted unless it is already in state CONFIRMED). A pending booking is expired after this timestamp.
-              schema:
-                description: A HTTP date string
-                externalDocs:
-                  url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: date-time
-                example: Wed, 21 Oct 2015 07:28:00 GMT
-              required: false
+              $ref: "#/components/headers/expires"
         default:
           $ref: "#/components/responses/errorResponse"
         "409":
@@ -129,12 +133,29 @@ paths:
           $ref: "#/components/responses/410Gone"
     get:
       summary: "[MP->TO] give booking details"
-      description: Retrieves booking, including the log of this booking (all legs)
+      description: Retrieves BOOKING, including the log of this booking (all LEGs)
       tags:
-        - trip execution        
+        - trip execution
+      parameters:
+      - in: query
+        name: selection
+        description: "DETAILS - booking only<br>
+          WITH_LOGS - booking & event log<br>
+          ONLY_LOGS - event log only<br>
+          WITH_PROGRESS - booking & progress<br>
+          ONLY_PROGRESS - progress only<br>
+          ALL - booking, logs & progress<br>"
+        required: false
+        schema:
+          type: string
+          enum: [ ALL, DETAILS, WITH_LOGS, WITH_PROGRESS ]
+          default: DETAILS
       responses:
         "200":
-          description: the details of this booking, includign the log containing all events.
+          description: the details of this BOOKING, including the log containing all logged OPERATIONs and progress.
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
@@ -147,6 +168,9 @@ paths:
                       maxItems: 100
                       items:
                         $ref: "#/components/schemas/logEntry"
+                    progress:
+                      description: A list of COORDINATEs describing the progress so far as GEOJSONLINE
+                      $ref: "#/components/schemas/geojsonLine"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -156,14 +180,13 @@ paths:
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
     post:
-      summary: "[MP->TO] directly book a travel with this asset(type)"
+      summary: "[MP->TO] directly book a trip, without offer"
       description:
-        Returns a booking for the given travel plan. This endpoint executes POST /trips and POST /trips/{id} in one blow, the information provided should lead 
-        to only one possible trip, that is booked directly. The returned booking is still in `PENDING` state, you have to commit it. Unless 'AUTO_COMMIT' process identifier
-        is applied. In that case the booking is in state 'CONFIRMED'.
+        Creates a BOOKING for the given trip. This endpoint executes `POST /offers` and `POST /bookings/{id}` in one blow, the information provided by the first one should lead 
+        to only one possible trip option, that is booked directly. The returned BOOKING is in a _PENDING_ state, you have to commit it (using `POST /bookings/{id}/operations/COMMMIT`), 
+        unless one of the PROCESS IDENTIFIERs is applied that indicates that another BOOKING STATE is used.
       tags:
-        - booking
-        
+        - booking        
       requestBody:
         content:
           application/json:
@@ -171,20 +194,16 @@ paths:
               $ref: "#/components/schemas/oneStopBookingRequest"
       responses:
         "201":
-          description: A single booking, or when it's not possible, return a 406.
+          description: a BOOKING, or when it's not possible, return a 406.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/bookingResponse"
           headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-                example: Wed, 21 Oct 2015 07:28:00 GMT
-              required: false
+              $ref: "#/components/headers/expires"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -193,31 +212,28 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
+      - $ref: "#/components/parameters/bookingId"
       - name: operation
         in: path
-        description: operation to execute
+        description: OPERATION to execute
         required: true
         schema:
           type: string
           enum: [ 
-            CANCEL, 
-            DENY, 
+            EXTEND_EXPIRY_TIME, 
             COMMIT, 
-            EXTEND_EXPIRY_TIME
+            CANCEL, 
+            NOTIFY,
+            FINANCIAL_TRANSACTION
           ]
     post:
-      summary: "[MP->TO] request {operation} on this booking"
-      description: This endpoint **must** be used to alter the state of a booking:<br>
-        `CANCEL` - Cancels a confirmed booking.<br> 
-        `EXTEND_EXPIRY_TIME` - the MP request to extend the expiry time of the booking. Only available when the Process Identifier 'ALLOW_EXTEND_BOOKING_EXPIRY_TIME' is used. Whenever the extension is not granted, 410 should be returned.<br> 
-        `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. If the booking is in state CONFIRMED, CANCELLED or EXPIRED, a commit will result a 403. <BR> 
-        `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this operation).
+      summary: "[MP<->TO] request {operation} on this booking"
+      description: This endpoint **must** be used to alter the state of a BOOKING:<br>
+        _CANCEL_ - [MP->TO] Cancels a BOOKING, it returns a BOOKING in a _CANCEL_led state.<br> 
+        _EXTEND_EXPIRY_TIME_ - [MP->TO] the MP request to extend the expiry time. Only available when the Process Identifier <i>ALLOW_EXTEND_BOOKING_EXPIRY_TIME</i> is used. Whenever the extension is not granted, 410 should be returned.<br> 
+        _COMMIT_ - [MP->TO] Turns the BOOKING in a _CONFIRMED_ state, the previous state should be _PENDING_. If the BOOKING is in state _CONFIRMED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR> 
+        _NOTIFY_ - [MP<->TO] Notification to MP, traveler or TO<Br>
+        _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
       tags:
         - booking        
       requestBody:
@@ -233,16 +249,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/bookingResponse"
           headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
             Expires:
-              description: Mandatory whenever the EXTEND_EXPIRY_TIME is used. It must contain the updated expiry time
-              schema:
-                description: A HTTP date string
-                externalDocs:
-                  url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-                example: Wed, 21 Oct 2015 07:28:00 GMT
-              required: false
+              $ref: "#/components/headers/expires"
+              description: Mandatory whenever the _EXTEND_EXPIRY_TIME_ is used. It must contain the updated expiry time
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -251,28 +262,21 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier 
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
+      - $ref: "#/components/parameters/bookingId"
+      - $ref: "#/components/parameters/legId"
     get:
       summary: "[MP->TO] give leg details"
-      description: Retrieves the latest summary of the leg, being the execution of a portion of a journey travelled using one asset (type). 
-        Every leg belongs to one booking, every booking has at least one leg. Where the booking describes the agreement between user/MP and TO, 
-        the leg describes the journey as it occured.
+      description: Retrieves the latest summary of the LEG, being the execution of a part of a journey traveled using one ASSET (TYPE). 
+        Every LEG belongs to one BOOKING, every BOOKING has at least one LEG. Where the BOOKING describes the agreement between user/MP and TO, 
+        the LEG describes the journey part as it occured.
       tags:
         - trip execution        
       responses:
         "200":
-          description: operation successful
+          description: the details of the LEG, in the current LEG STATE
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
@@ -285,21 +289,11 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
+      - $ref: "#/components/parameters/bookingId"
+      - $ref: "#/components/parameters/legId"
       - name: operation
         in: path
-        description: Operation on the leg
+        description: OPERATION on the LEG
         required: true
         schema:
           type: string
@@ -313,21 +307,44 @@ paths:
             FINISH,
             TIME_EXTEND,
             TIME_POSTPONE,
-            CANCEL
+            CANCEL,
+            NOTIFY,
+            ADD_ANCILLARY,
+            REMOVE_ANCILLARY,
+            CONFIRM_REPLACE_VEHICLE,
+            CONFIRM_START_LEG,
+            FINANCIAL_TRANSACTION,
+            SEND_EVIDENCE_PARKED,
+            SEND_EVIDENCE_HELMET,
+            SEND_EVIDENCE_CHARGER
           ]
     post:
-      summary: "[MP->TO] request {operation} on this leg"
-      description: This endpoint must be used to alter the state of a leg.<br>
-        Operations:<br> `PREPARE` the TO can send a message telling the MP that he is preparing the booked leg,<br>
-        `ASSIGN_ASSET` can assign an asset to a leg. Can be used to replace an asset, or as first step in the trip execution process, <br>
-        `SET_IN_USE` will activate the leg or resume the leg,<br>
-        `TIME_EXTEND` will be used to request an extension in time; the end user wants to use the asset longer, the `time` field contains the proposed end time,<br>
-        `TIME_POSTPONE` will be used to request a delay in the departure time, the end user wants to depart later, the `time` field contains the estimated departure time,<br>
-        `PAUSE` will pause the leg,<br>
-        `OPEN_TRUNK` request the TO to open up the trunk (of the scooter), e.g. to store the helmet<br>
-        `START_FINISHING` will start the end-of-leg,<br>
-        `FINISH` will end this leg
-        `CANCEL` will cancel this leg. Only allowed when multiple legs are included in the booking.
+      summary: "[MP<->TO] request {operation} on this leg"
+      description: This ENDPOINT must be used to alter the STATE of a LEG, to request OPERATIONs.<br>
+        Operations:<br> 
+        _PREPARE_ [MP->TO, non-TO-controlled] - MP request the TO to prepare the LEG (e.g. open the locker) [ONBOARDING STEP, RESUMING STEP]<br>
+        _PREPARE_ [MP<-TO, process identifier TO-controlled] - the TO can send a message telling the MP that he is preparing the booked LEG, e.g. the taxi is heading to the pickup point<br>
+        _ASSIGN_ASSET_ [MP->TO] - can assign an ASSET to a LEG. Can be used to replace an ASSET, or as first step in the trip execution process [ONBOARDING STEP]<br>If assigning an ASSET is not allowed for this booking 403 should be returned. If the booking is unknown, 404 should be returned.<br>
+        _SET_IN_USE_ [MP->TO, non-TO-controlled] - will activate the LEG or resume the LEG [ONBOARDING STEP, RESUMING STEP]<br>
+        _SET_IN_USE_ [MP<-TO, process identifier TO-controlled] - the driver indicates the LEG is started<br>
+        _TIME_EXTEND_ [MP->TO] will be used to request an extension in time; the TRAVELER wants to use the ASSET longer, the **time** field contains the proposed end time,<br>
+        _TIME_POSTPONE_ [MP->TO] will be used to request a delay in the departure time, the TRAVELER wants to depart later, the **time** field contains the estimated departure time,<br>
+        _PAUSE_ [MP->TO] will pause the LEG [PAUSING STEP]<br>
+        _OPEN_TRUNK_ [MP->TO] request the TO to open up the trunk (of the scooter), e.g. to store the helmet [ONBOARDING STEP, OFFBOARDING STEP, PAUSING STEP, RESUMING STEP]<br>
+        _START_FINISHING_ [MP->TO] will start the end-of-leg process [OFFBOARDING STEP]<br>
+        _START_FINISHING_ [MP<-TO, process identifier TO-controlled] TO indicates that the LEG is almost finishing<br>
+        _FINISH_ [MP->TO] will end this LEG [OFFBOARDING STEP]<br>
+        _FINISH_ [MP<-TO, process identifier TO-controlled] the TO indicates that the LEG is finished, the destination has been reached.<br>
+        _CANCEL_ [MP<->TO] will cancel this LEG. Only allowed when multiple LEGs are included in the BOOKING, otherwise the complete BOOKING should be cancelled<br>
+        _NOTIFY_ [MP<->TO] will send a notification to TO, driver, MP or TRAVELER(s)<br>
+        _ADD_ANCILLARY_ [MP->TO] requests to add the specified ANCILLARY to the LEG<br>
+        _REMOVE_ANCILLARY_ [MP->TO] requests to remove the specified ANCILLARY from the LEG<br>
+        _CONFIRM_REPLACE_VEHICLE_ [MP<-TO] asks confirmation to replace the ASSET, returns a 202 when confirmed, otherwise it will return 400<br>
+        _CONFIRM_START_LEG_ [MP<-TO] asks confirmation to start the LEG, returns a 202 when confirmed, otherwise it will return 400<br>
+        _FINANCIAL_TRANSATION_ [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.<br>
+        _SEND_EVIDENCE_PARKED_ [MP->TO] sends pictures (in url field) to prove that the ASSET is parked correctly<br>
+        _SEND_EVIDENCE_HELMET_ [MP->TO] sends pictures (in url field) to prove that the helmet is stowed correctly<br>
+        _SEND_EVIDENCE_CHARGER_ [MP->TO] sends pictures (in url field) to prove that the ASSET connected correctly to the charger<br>
       tags:
         - trip execution        
       requestBody:
@@ -337,14 +354,25 @@ paths:
               $ref: "#/components/schemas/operationRequest"
       responses:
         "200":
-          description: operation successful
+          description: OPERATION successful, the leg is returned in the new state.
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/legResponse"
-        "204":
-          $ref: "#/components/responses/204NoContent"
-        default:
+        "202":
+          description: When a confirmation request has to return positive, this code has to be used
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/legResponse"
+        "400":
+          description: When a confirmation request results in a denial, this code has to be used
           $ref: "#/components/responses/errorResponse"
         "503":
           description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
@@ -352,9 +380,9 @@ paths:
             Retry-After:
               description: A date after which to retry. See the Date header for more details on the HTTP date format.
               schema:
-                type: string
-                format: http-date
-                example: Wed, 21 Oct 2015 07:28:00 GMT
+                $ref: "#/components/schemas/httpDate"
+          $ref: "#/components/responses/errorResponse"
+        default:
           $ref: "#/components/responses/errorResponse"
 
   /bookings/{id}/legs/{lid}/available-assets:
@@ -362,177 +390,23 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
+      - $ref: "#/components/parameters/bookingId"
+      - $ref: "#/components/parameters/legId"
     get:
       summary: "[MP->TO] give possible assets to assign to this leg"
-      description: Returns a list of available assets for the given leg. These assets can be used to POST to /bookings/{id}/legs/{lid}/operations/ASSIGN_ASSET if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned.
+      description: Returns a list of available ASSETs for the given leg. These results can be used to call `POST /bookings/{id}/legs/{lid}/operations/ASSIGN_ASSET`. 
       tags:
         - trip execution        
       responses:
         "200":
-          description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
+          description: Available ASSETs for the leg. If no suitable assets are found an empty array is to be returned.
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
-                type: array
-                maxItems: 100
-                items:
-                  $ref: "#/components/schemas/availableVehicleResponse"
-        default:
-          $ref: "#/components/responses/errorResponse"
-
-  /bookings/{id}/legs/{lid}/ancillaries/{category}/{number}:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/senderId"
-      - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: category
-        in: path
-        description: ancillary category
-        required: true
-        schema:
-          type: string
-          maxLength: 2
-          pattern: "[A-Z]{2,3}"
-      - name: number
-        in: path
-        description: ancillary number
-        required: true
-        schema:
-          type: string
-          maxLength: 2
-          pattern: "[0-9]{2}"
-    post:
-      summary: "[MP->TO] add this ancillary to the leg"
-      description: a new ancillary is added to the leg.
-      tags:
-        - trip execution        
-      responses:
-        "200":
-          description: operation successful
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/legResponse"
-        "204":
-          $ref: "#/components/responses/204NoContent"
-        default:
-          $ref: "#/components/responses/errorResponse"
-    delete:
-      summary: "[MP->TO] remove this ancillary to the leg"
-      description: an ancillary (or amount) is removed to the leg.
-      tags:
-        - trip execution
-      responses:
-        "200":
-          description: operation successful
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/legResponse"
-        "204":
-          $ref: "#/components/responses/204NoContent"
-        default:
-          $ref: "#/components/responses/errorResponse"
-
-  /bookings/{id}/legs/{lid}/notifications:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/senderId"
-      - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-    post:
-      summary: "[MP<->TO] send notification between MP (app), user, and driver"
-      description: "[MP|TO] notification between MaaS provider and Transport operator in case of user no-show or if specific asset is not available or some other event occurs not covered by other API calls."
-      tags:
-        - trip execution
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/notification"
-      responses:
-        "204":
-          $ref: "#/components/responses/204NoContent"
-        default:
-          $ref: "#/components/responses/errorResponse"
-          
-  /bookings/{id}/legs/{lid}/confirmation/{action}:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: action
-        in: path
-        description: action to confirm
-        required: true
-        schema:
-          type: string
-          enum: [ 
-            REPLACE_VEHICLE, 
-            START_LEG 
-          ]
-    post:
-      summary: "[TO->MP] confirm {action} on this leg"
-      description: "[MP] The TO can request confirmation for certain actions from the MP."
-      tags:
-        - trip execution
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/confirmationRequest"
-      responses:
-        "200":
-          description: operation successful
-          content:
-            application/json:
-              schema:
-                type: boolean
+                $ref: "#/components/schemas/availableVehicleResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -543,13 +417,15 @@ paths:
       - $ref: "#/components/parameters/receiverId"
     get:
       tags:
-        - operator information
+        - interoperability
       summary: "[TO<->MP] discover the API"
-      description: "[MP|TO] All versions that are implemented on this url, are described in the result of this endpoint. In contains all versions and per version the endpoints, their status
-        and the supported scenarios."
+      description: "[MP|TO] All implemented endpoints are described, including the list of PROCESS IDENTIFIERs."
       responses:
         '200':
           description: successful operation
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
@@ -562,9 +438,9 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
     get:
       tags:
-        - operator information
+        - interoperability
       summary: "[TO<->MP] is the API available?"
-      description: "[MP|TO] This is a healthcheck endpoint to see if the TO is up and running perfectly."
+      description: "[MP|TO] This is a healthcheck ENDPOINT to see if the TO is up and running perfectly."
       responses:
         "204":
           description: successful operation
@@ -580,22 +456,20 @@ paths:
       tags:
         - payment
       summary: "[MP->TO] give all financial details"        
-      description: Returns all the journal entries that should be paid per leg
+      description: Returns all the JOURNAL ENTRIES that should be paid (per LEG)
       parameters:
         - name: from
           in: query
           description: start of the selection
           required: false
           schema:
-            type: string
-            format: date-time
+            $ref: "#/components/schemas/dateTime"
         - name: to
           in: query
           description: end of the selection
           required: false
           schema:
-            type: string
-            format: date-time
+            $ref: "#/components/schemas/dateTime"
         - name: state
           in: query
           required: false
@@ -608,7 +482,7 @@ paths:
             $ref: "#/components/schemas/uuid"
         - name: category
           in: query
-          description: type of booking line (e.g. fare, addition costs, fines, ...)
+          description: type of JOURNAY ENTRY (e.g. fare, addition costs, fines, ...)
           required: false
           schema:
             $ref: "#/components/schemas/journalCategory"
@@ -634,59 +508,26 @@ paths:
           description: journal entries
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-                pattern: "^[a-zA-Z]+-[a-zA-Z]+$"
-              required: true
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
-                type: array
-                maxItems: 1000
-                items:
-                  $ref: "#/components/schemas/journalEntry"
-        default:
-          $ref: "#/components/responses/errorResponse"
-
-  /bookings/{id}/legs/{lid}/claim-costs:
-    parameters:
-      - $ref: "#/components/parameters/acceptLanguage"
-      - $ref: "#/components/parameters/senderId"
-      - $ref: "#/components/parameters/receiverId"
-    post:
-      tags:
-        - payment
-      summary: "[MP<->TO] request additional financial transaction"
-      description: "[MP|TO] (extra) costs that the TO has to charge to the MP or vice versa."
-      parameters:
-        - name: id
-          in: path
-          description: Booking identifier
-          required: true
-          schema:
-            $ref: "#/components/schemas/uuid"
-        - name: lid
-          in: path
-          description: Leg identifier
-          required: true
-          schema:
-            $ref: "#/components/schemas/uuid"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/extraCosts"
-
-      responses:
-        "200":
-          description: journal entry received, will be processed (state = INVOICED)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/journalEntry"
+                allOf:
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      maxItems: 100
+                      items:
+                        allOf:
+                          - $ref: "#/components/schemas/amountOfMoney"
+                          - $ref: "#/components/schemas/journalEntry"
+                - $ref: "#/components/schemas/halLinks"
+                  example:
+                      "_links": { "self": { "rel": "GET", "href": "/journal-entries&offset=100&limit=100", "type": "application/hal+json" },
+                        "next": { "rel": "GET", "href": "/journal-entries&offset=200&limit=100", "type": "application/hal+json" },
+                        "previous": { "rel": "GET", "href": "/journal-entries&limit=100", "type": "application/hal+json" }
+                      }
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -695,21 +536,11 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - name: id
-        in: path
-        description: Booking identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
-      - name: lid
-        in: path
-        description: Leg identifier
-        required: true
-        schema:
-          $ref: "#/components/schemas/uuid"
+      - $ref: "#/components/parameters/bookingId"
+      - $ref: "#/components/parameters/legId"
     post:
       summary: "[MP->TO] create a support ticket"
-      description: creates a request for support from end user via MP
+      description: creates a request for SUPPORT from end user via MP
       tags:
         - support        
       requestBody:
@@ -720,6 +551,9 @@ paths:
       responses:
         "200":
           description: support request acknowledged
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
@@ -728,12 +562,15 @@ paths:
           $ref: "#/components/responses/errorResponse"
     get:
       summary: "[MP->TO] request for support ticket details"
-      description: Gets the status report of the support request. Last status (highest order number) is the current status
+      description: Gets the status report of this BOOKING id. Last status (highest order number) is the current status
       tags:
         - support        
       responses:
         "200":
           description: support status delivered
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
@@ -748,6 +585,8 @@ components:
   schemas:
     address:
       type: object
+      description: address parts, where addressLine1 and 2 should contain the complete address, matches Content-Language
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA5/EA319.htm
         description: POSTAL ADDRESS
@@ -761,17 +600,17 @@ components:
       # province -> Province
       ## state -> 
       # country -> hosting COUNTRY.name
-      description: street address, including number OR PO box number, eventually extended with internal reference like room number, could match Content-Language
       required:
         - addressLine1
         - addressLine2
       properties:
         addressLine1:
           type: string
+          description: contains street, housenumber & additions
           example: example street 18, 2nd floor, 18-B33
         addressLine2:
-          description: city or town, principal subdivision such as province, state or county, could match Content-Language
           type: string
+          description: city or town, principal subdivision such as province, state or county
           example: Smallcity, Pinetree county
 
         street:
@@ -787,6 +626,7 @@ components:
           
         postalCode:
           type: string
+          description: the postal code, whenever available
         city:
           type: string
           description: specified city or town, consistent with addressLine2
@@ -806,6 +646,8 @@ components:
 
     amountOfMoney:
       type: object
+      description: an amount of money, usable in fares, fare calculations or in extra costs.
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA2/EA1688.htm
         description: FARE PRICE
@@ -813,10 +655,12 @@ components:
       # vatRate => TaxPercentageUsed
       ## currencyCode => ?
       ## vatCountryCode => ?
+      required:
+      - amount
       properties:
         amount:
-          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT
           type: number
+          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT
           example: 9.95
           format: float
           minimum: 0
@@ -832,49 +676,110 @@ components:
           $ref: "#/components/schemas/country"
 
     asset:
-      description: the asset that is applied to a leg.
+      description: the asset that can by applied to execute a leg.
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3578.htm
         description: VEHICLE
         # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA5/EA2/EA3719.htm (PARKING BAY)
         # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA5/EA3/EA1/EA3735.htm (CYCLE STORAGE EQUIPMENT)
         # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA5/EA3/EA2/EA3742.htm (VEHICLE CHARGING EQUIPMENT)
-      allOf: 
-      - $ref: "#/components/schemas/assetProperties"
-      - type: object
-        required:
-          - id
-        properties:
-          id:
-            type: string
-            description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).
-          name:
-            description: name of asset
-            type: string
-          visualId:
-            type: string
-            description: for instance, a license plate or seat number. The usage of this field requires a secure environment/connection.
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR). Preferably UUID
+        visualId:
+          type: string
+          description: for instance, a license plate or seat number. The usage of this field requires a secure environment/connection.
 
-          assetType:
-            $ref: "#/components/schemas/assetType"            
-          assetClass:
-            $ref: "#/components/schemas/assetClass"
-          assetSubClass:
-            type: string
-            description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
-            externalDocs:
-              url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA2/EA293.htm
+        assetType:
+          $ref: "#/components/schemas/assetType"            
+        assetClass:
+          $ref: "#/components/schemas/assetClass"
+        assetSubClass:
+          type: string
+          description: a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'. This is mandatory when using 'OTHER' as class.
+          externalDocs:
+            url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA2/EA293.htm
 
-          state:
-            $ref: "#/components/schemas/assetState"
-          ecoDetails:
-            $ref: "#/components/schemas/assetPropertiesEco"
-          cargoDetails:
-            $ref: "#/components/schemas/assetPropertiesCargo"
+        state:
+          $ref: "#/components/schemas/assetState"
+        eco:
+          $ref: "#/components/schemas/assetPropertiesEco"
+        cargo:
+          $ref: "#/components/schemas/assetPropertiesCargo"
 
-          accessData:
-            description: Array of data to open a specific asset (e.g. QR code, image base64)
-            $ref: "#/components/schemas/fulfillmentArray"
+        fulfilments:
+          type: array
+          description: Array of data to open a specific asset (Bluetooth, ekey, certificates, digital tokens) or travel right (e.g. AZTEC, QR code, image base64)
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/fulfilment"
+
+        # app support
+        appSupport:
+          type: object
+          properties:
+            description:
+              type: string
+              description: the description of the asset
+            image:
+              $ref: "#/components/schemas/url"
+              description: Link to an image of the asset
+              example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
+            icon:
+              $ref: "#/components/schemas/url"
+              description: Link to an icon of the asset
+
+        # booking support
+        defaultReserveTime:
+          type: integer
+          description: Maximum time in minutes that an asset can be reserved before a rental begins. When an asset is reserved by a user, the asset remains locked until the rental begins. During this time the asset is unavailable and cannot be reserved or rented by other users. The asset status in free_bike_status.json MUST be set to is_reserved = true. If the value of default_reserve_time elapses without a rental beginning, the asset status MUST change to is_reserved = false. If default_reserve_time is set to 0, the asset type cannot be reserved.
+          minimum: 0
+          maximum: 999999
+
+        ancillaries:
+          type: array
+          description: ancillaries belonging to the asset, like a child seat
+          externalDocs:
+            url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
+            description: VEHICLE EQUIPMENT PROFILE
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/requirement"
+
+        extraInfo:
+          $ref: "#/components/schemas/customProperties"
+
+          ## GENERIC
+          # name
+          # brand
+          # model
+          # buildingYear (integer)
+          # colour
+          # maxSpeed (integer)
+
+          ## BIKES
+          # nrOfHelmets (integer)
+
+          ## CARS
+          # wheelCount (integer)
+          # propulsion (enum: [ ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN ])
+          #   externalDocs https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3577.htm (TYPE OF FUEL)
+          # gears (integer)
+          #   description: number of gears
+          # gearboxType (enum: [ MANUAL, AUTOMATIC, SEMIAUTOMATIC ])
+          # airConditioning (boolean)
+          # cabrio (boolean)
+          # towingHook (boolean)
+          # wintertires (boolean) 
+          #   description: winter tires applied
+          # nrOfDoors (integer)
+          # navigation (boolean)
+          # cruiseControl (boolean)
+          # nrOfPassengers (integer)
 
     assetClass:
       type: string
@@ -882,7 +787,7 @@ components:
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA1/EA284.htm
         description: MODE
-      enum: [
+      enum: [ 
         AIR,
         BUS,
         TROLLEYBUS,
@@ -917,168 +822,14 @@ components:
         description: TRANSPORT TYPE
       # or https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3581.htm (VEHICLE TYPE)
 
-    assetProperties:
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm 
-        description: VEHICLE EQUIPMENT PROFILE
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
-      allOf:
-      - $ref: "#/components/schemas/assetPropertiesCar"
-      - $ref: "#/components/schemas/assetPropertiesBike"
-      - type: object
-        description: Aspects of an asset. Most aspects are optional and should only be used when applicable.
-        properties:
-          description:
-            type: string
-          image:
-            description: Link to an image of the asset
-            type: string
-            format: URI
-            example: "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg"
-          icon:
-            description: Link to an icon of the asset
-            type: string
-            format: URI
-
-          brand:
-            type: string
-            description: brand of the asset
-          model:
-            type: string
-          buildingYear:
-            type: integer
-          colour:
-            type: string
-            description: colour of the asset, should match Content-Language
-
-          defaultReserveTime:
-            type: integer
-            minimum: 0
-            description: Maximum time in minutes that an asset can be reserved before a rental begins. When an asset is reserved by a user, the asset remains locked until the rental begins. During this time the asset is unavailable and cannot be reserved or rented by other users. The asset status in free_bike_status.json MUST be set to is_reserved = true. If the value of default_reserve_time elapses without a rental beginning, the asset status MUST change to is_reserved = false. If default_reserve_time is set to 0, the asset type cannot be reserved.
-            maximum: 999999
-
-          accessMethods: 
-            type: array
-            description: access method for trip execution. Data will be delivered in the response of /bookings/{id}/legs/{lid}/COMMIT,
-              /bookings/{id}/legs/{lid}/PREPARE (preferred) or GET /bookings/{id}/legs/{lid}.
-            maxItems: 2
-            items:
-              type: string
-              enum:  [
-                DEEPLINK, 
-                QR, 
-                AZTEC,
-                TOMP_API, 
-                AXA_EKEY_OTP, 
-                PHYSICAL_KEY,
-                BARCODE,
-                PDF,
-                HTML,
-                OVC,
-                EMV,
-                NONE
-              ]
-
-          ancillaries:
-            externalDocs:
-              url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA249.htm
-              description: MOBILTITY NEED
-            type: array
-            maxItems: 100
-            items:
-              $ref: "#/components/schemas/requirement"
-
-          maxSpeed:
-            type: integer
-            description: the maximum allowed speed for this asset (in km/h)
-
-          extraInfo:
-            type: object
-            additionalProperties: 
-              type: string
-
-    assetPropertiesCar:
-      type: object
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
-        description: VEHICLE EQUIPMENT PROFILE
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
-      description: applicable properties for cars
-      properties:
-        wheelCount:
-          type: integer
-          minimum: 0
-          description: the number of wheels
-
-        propulsion:
-          type: string
-          description: way in which the asset is powered
-          externalDocs:
-            url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3577.htm
-          enum: [
-            ELECTRIC,
-            GASOLINE,
-            DIESEL,
-            HYBRID,
-            LPG,
-            HYDROGEN
-          ]          
-
-        gears:
-          type: integer
-          description: number of gears of the asset
-        gearboxType:
-          type: string
-          description: type of gearbox
-          enum: [
-            MANUAL,
-            AUTOMATIC,
-            SEMIAUTOMATIC
-          ]
-        airConditioning:
-          type: boolean
-          description: airconditioning available
-        cabrio:
-          type: boolean
-          description: cabrio model
-        towingHook:
-          type: boolean
-          description: towing hook available
-        winterTires:
-          type: boolean
-          description: winter tires applied
-        nrOfDoors:
-          type: integer
-          description: the number of doors of the asset. Return only when applicable
-        navigation:
-          type: boolean
-          description: navigation available
-        cruiseControl:
-          type: boolean
-          description: cruise control available
-
-        nrOfPassengers:
-          type: integer
-          description: maximum number of passengers (when not operated by a chauffeur, including the driver!) able to use the asset.
-          minimum: 1
-
-    assetPropertiesBike:
-      description: applicable properties for cars
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
-        description: VEHICLE EQUIPMENT PROFILE
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)      
-      properties:
-        nrOfHelmets:
-          type: integer
-          description: the number of available helmets
-
     assetPropertiesCargo:
+      type: object
+      description: applicable properties to specify cargo space/loads
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
         description: VEHICLE EQUIPMENT PROFILE
         # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)    
-      type: object
       properties:
         cargo:
           type: string
@@ -1088,7 +839,6 @@ components:
           description: the volume in liters of the cargo
           minimum: 0
           maximum: 999999
-
         cargoLoad:
           type: integer
           description: the weight in kilograms of the cargo
@@ -1096,35 +846,41 @@ components:
           maximum: 999999
 
     assetPropertiesEco:
+      type: object
+      description: applicable properties to specify ecological/environmental aspects
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
         description: VEHICLE EQUIPMENT PROFILE
         # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)    
-      type: object
       properties:
         energyLabel:
-          description: Energy efficiency
           type: string
+          description: Energy efficiency label
           enum: [ A, B, C, D, E ]
         ecoLabel:
-          description: see https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
           type: array
+          description: see https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
           maxItems: 3
           items: 
             type: object
+            additionalProperties: false
             properties:
-              countryCode:
-                $ref: "#/components/schemas/country"
               ecoSticker:
                 type: string
+              countryCode:
+                $ref: "#/components/schemas/country"
         co2PerKm:
           type: number
+          description: the emission of CO2 per km
           format: float
           minimum: 0
-          maximum: 1000000
+          maximum: 999999
 
     assetState:
       type: object
+      description: the state of the asset, where is it, the damages, etc
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
         description: VEHICLE EQUIPMENT PROFILE
@@ -1140,16 +896,16 @@ components:
           maximum: 999999
         stateOfCharge:
           type: number
+          description: percentage of charge available
+          format: float
           minimum: 0
           maximum: 100
-          format: float
-          description: percentage of charge available
         maxRange:
           type: number
-          minimum: 0
-          maximum: 100
-          format: float
           description: maximum range in meters
+          format: float
+          minimum: 0
+          maximum: 999999
         damages:
           type: array
           description: List of known asset damages.
@@ -1158,40 +914,48 @@ components:
             $ref: "#/components/schemas/damage"
 
     availableVehicleResponse:
-      allOf:
-        - $ref: "#/components/schemas/asset"
-        - $ref: "#/components/schemas/hateoasLinks"
+      type: array
+      description: container to return assets, including their possible operations
+      maxItems: 100
+      items:
+        allOf:
+          - $ref: "#/components/schemas/asset"
+          - $ref: "#/components/schemas/halLinks"
 
     bankAccount:
       type: object
+      description: bank account
+      additionalProperties: false
       properties:
         name:
+          type: string
           description: account name
-          type: string
         number:
-          description: account number
           type: string
+          description: account number
         country:
           $ref: "#/components/schemas/country"
         bankIdentification:
-          description: bank identification, like BIC code
           type: string
+          description: bank identification, like BIC code
 
-    binaryAccessToken:
+    binaryAccess:
       description: Binary information, like a image (QR)
       allOf:
-        - $ref: "#/components/schemas/token"
+        - $ref: "#/components/schemas/fulfilmentType"
         - type: object
+          additionalProperties: false
           required:
             - base64
           properties:
             base64: 
-              description: base 64 QR code
               type: string
+              description: base 64 QR code
             version: 
               type: string
 
     booking:
+      description: a booking is a recording of an agreement between end user and TO, to execute a trip (=set of legs) according a specification, including all conditions
       #externalDocs:
         # url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2957.htm
         # https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA1/EA2242.htm (SALES OFFER PACKAGE)
@@ -1209,6 +973,7 @@ components:
         - $ref: "#/components/schemas/leg"
         - type: object
           description: The booking information describing the state and details of an agreed upon trip
+          additionalProperties: false
           properties:
             bookingState:
               $ref: "#/components/schemas/bookingState"
@@ -1218,47 +983,24 @@ components:
               $ref: "#/components/schemas/customer"
 
             additionalLegs:
+              type: array
               description: The additional legs of this booking (one booking -> all properties are already in the booking).
                 All other legs should be in this collection, using the sequenceNumber to arrange them.
-              type: array
               maxItems: 100
               items:
                 $ref: "#/components/schemas/leg"
 
             extraInfo:
-              description: Arbitrary information that a TO can add
-              type: object
-              additionalProperties:
-                type: string
-                maxLength: 400
-              properties:
-                memo:
-                  type: string
-                  maxLength: 500
-                safeWaitTime: 
-                  type: integer
-                  description: the predicted time before the asset will arrive, in minutes
-                  minimum: 0
-                maxWaitTime:
-                  type: integer
-                  description: the maximum time before the asset will arrive, in minutes
-                  minimum: 0
-                safeTravelTime: 
-                  type: integer
-                  description: the predicted time the legs will take, in minutes
-                  minimum: 0
-                maxTravelTime:
-                  type: integer
-                  description: the maximum time the legs will take, in minutes
-                  minimum: 0
+              $ref: "#/components/schemas/customProperties"
                   
     bookingResponse:
+      description: a response containing a booking and the possible operations
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2413.htm
         description: TRAVEL SPECIFICATION
       allOf:
       - $ref: "#/components/schemas/booking"
-      - $ref: "#/components/schemas/hateoasLinks"
+      - $ref: "#/components/schemas/halLinks"
         example: {
             # planning: create booking, only when bookingStatus = NEW
                 "book": { "rel": "POST", "href": "/bookings/{id}", "type": "application/hal+json", "templated": true }
@@ -1277,11 +1019,13 @@ components:
               , "set_in_use": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/SET_IN_USE", "type": "application/hal+json", "templated": true }
               , "time_postpone": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/TIME_POSTPONE", "type": "application/hal+json", "templated": true }
               , "open_trunk": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/OPEN_TRUNK", "type": "application/hal+json", "templated": true }
-              , "add_ancillary": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/ancillaries/{category}/{number}", "type": "application/hal+json", "templated": true }
+              , "add_ancillary": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/ADD_ANCILLARY", "type": "application/hal+json", "templated": true }
         }
 
     bookingRequest:
-      description: A booking requested by the MP
+      type: object
+      description: A booking request, to be performed by the MP
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3147.htm
         description: TRIP REQUEST
@@ -1289,7 +1033,6 @@ components:
         # from -> TRIP ORIGIN PLACE
         # to -> TRIP DESTINATION PLACE
         ## callbackUrl
-      type: object
       properties:
         customer:
           description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
@@ -1301,55 +1044,36 @@ components:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
           $ref: "#/components/schemas/place"
         callbackUrl: 
+          $ref: "#/components/schemas/url"
           description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /bookings/{id}/legs/{lid}/operations/ and POST /bookings/{id}/operations/. Only to be provided 
             when this deviates from standard or agreed URL.
-          type: string
-          format: URI
           
     bookingState:
+      type: string
       description: The life-cycle state of the booking (from NEW to FINISHED)
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2420.htm
         description: CUSTOMER PURCHASE STATUS
-      type: string
-      enum: [
-        NEW,
-        PENDING,
-        REJECTED,
-        RELEASED,
-        EXPIRED,
-        CONDITIONAL_CONFIRMED,
-        CONFIRMED,
-        CANCELLED,
-        STARTED,
-        FINISHED,
-      ]
+      enum: [ NEW, PENDING, REJECTED, RELEASED, EXPIRED, CONFIRMED, CANCELLED, STARTED, FINISHED ]
       example: CONFIRMED
 
     bookingStep:
+      description: a step in the booking process, where the MP should show something or an action is required from the end user/traveler
       allOf:
       - $ref: "#/components/schemas/information"
       - type: object
+        additionalProperties: false
         properties:
           action:
             type: string
             description: The possible steps are described here<br>
-                  `PENDING`  show whenever the booking is in PENDING state (not confirmed)<br>
-                  `WAITING`  indicate that the TO is processing the booking, optionally after an extension of the expiry time<br>
-                  `WAITING_FOR_PAYMENT`  indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br>
-                  `CONFIRMED`  show whenever the booking is in a COMMITTED state (confirmed)<br>
-                  `CANCELLED`  show whenever the booking is cancelled<br>
-                  `CONDITIONAL_CONFIRMED`  show whenever the booking is conditionally confirmed (see process identifiers)<br>
-                  `EXPIRED`  show whenever the booking is expired (the expiry time has passed)<br>
-            enum: [
-              PENDING,
-              WAITING,
-              WAITING_FOR_PAYMENT,
-              CONFIRMED,
-              CONDITIONAL_CONFIRMED,
-              CANCELLED,
-              EXPIRED
-            ]
+                  _PENDING_  show whenever the booking is in PENDING state (not confirmed)<br>
+                  _WAITING_  indicate that the TO is processing the booking, optionally after an extension of the expiry time<br>
+                  _WAITING_FOR_PAYMENT_  indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br>
+                  _CANCELLED_  show whenever the booking is cancelled<br>
+                  _CONDITIONAL_CONFIRMED_  show whenever the booking is conditionally confirmed (see process identifiers)<br>
+                  _EXPIRED_  show whenever the booking is expired (the expiry time has passed)<br>
+            enum: [ PENDING, WAITING, WAITING_FOR_PAYMENT, CONFIRMED, CANCELLED, EXPIRED ]
 
     card:
       description: Any kind of card that isn't a license, only provide the cards that are required
@@ -1358,56 +1082,51 @@ components:
         description: CUSTOMER PAYMENT MEANS
         # MISSING: Identification/Passport
       allOf:
-        - $ref: "#/components/schemas/cardType"
-        - type: object
-          required:
-            - cardNumber
-            - validUntil
-          properties:
-            cardDescription:
-              description: description of the card
-              type: string
-            cardNumber:
-              description: number of the card, like ID number, credit card or bank account number
-              type: string
-            cardAdditionalNumber:
-              description: additional number, like CVC code or IBAN code
-              type: string
-            validUntil:
-              type: string
-              format: date
-            country:
-              $ref: "#/components/schemas/country"
+      - $ref: "#/components/schemas/cardType"
+      - type: object
+        additionalProperties: false
+        required:
+          - cardNumber
+          - validUntil
+        properties:
+          cardDescription:
+            type: string
+            description: description of the card
+          cardNumber:
+            type: string
+            description: number of the card, like ID number, credit card or bank account number
+          cardAdditionalNumber:
+            type: string
+            description: additional number, like CVC code or IBAN code
+          validUntil:
+            type: string
+            description: this card is valid until this date
+            format: date
+          country:
+            $ref: "#/components/schemas/country"
 
     cardType:
-      description: A generic description of a card, asset class and acceptors is only allowed for DISCOUNT/TRAVEL/OTHER cards
+      type: object
+      description: A generic description of a CARD
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA7/EA3626.htm
         description: TYPE OF PAYMENT METHOD
-      type: object
       required:
         - type
       properties:
         type:
+          type: string
           description: The broad category of card
-          type: string
-          enum: [
-            ID,
-            DISCOUNT,
-            TRAVEL,
-            BANK,
-            CREDIT,
-            PASSPORT,
-            OTHER
-          ]
+          enum: [ ID, DISCOUNT, TRAVEL, BANK, CREDIT, PASSPORT, OTHER ]
         subType:
-          description: For use in case of OTHER. Can be used in bilateral agreements.
           type: string
+          description: For use in case of OTHER. Can be used in bilateral agreements.
         assetClass:
           $ref: "#/components/schemas/assetClass"
         acceptors:
-          description: references to accepting parties, only if applicable
           type: array
+          description: references to accepting parties, only if applicable
           maxItems: 10
           items:
             type: string
@@ -1415,6 +1134,8 @@ components:
 
     condition:
       type: object
+      description: the superclass of all conditions
+      additionalProperties: false
       required:
         - conditionType
       properties:
@@ -1485,19 +1206,23 @@ components:
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           properties:
             ancillaries:
               $ref: "#/components/schemas/requirements"
 
     conditionRequireBookingData:
+      description: specify required information to complete a booking
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           required:
             - requiredFields
           properties:
             requiredFields:
               type: array
+              description: an array containing labels that identify specific fields that are required in the booking process
               maxItems: 20
               items:
                 type: string
@@ -1519,9 +1244,11 @@ components:
                 ]
 
     conditionRequireOffboardingSteps:
+      description: required sequence of steps to take in the offboarding process
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           required:
             - steps
           properties:
@@ -1532,9 +1259,11 @@ components:
                 $ref: "#/components/schemas/offBoardingStep"
 
     conditionRequireOnboardingSteps:
+      description: required sequence of steps to take in the onboarding process
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           required:
             - steps
           properties:
@@ -1545,9 +1274,11 @@ components:
                 $ref: "#/components/schemas/onBoardingStep"                
 
     conditionRequirePausingSteps:
+      description: required sequence of steps to take when pausing the asset
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           required:
             - steps
           properties:
@@ -1558,9 +1289,11 @@ components:
                 $ref: "#/components/schemas/pausingStep"
 
     conditionRequireResumingSteps:
+      description: required sequence of steps to take when resuming the execution of the leg
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           required:
             - steps
           properties:
@@ -1571,14 +1304,15 @@ components:
                 $ref: "#/components/schemas/resumingStep"
 
     conditionReturnArea:
-      description: a return area. In the condition list there can be multiple return area's.
+      description: specify a return area. In the condition list there can be multiple return areas.
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
+          additionalProperties: false
           properties:
             stationId:
-              description: station to which the asset should be returned
               type: string
+              description: station to which the asset should be returned
             returnArea:
               description: area in which the asset should be returned as GeoJSON Polygon coordinates
               $ref: "#/components/schemas/geojsonPolygon"
@@ -1586,24 +1320,17 @@ components:
               $ref: "#/components/schemas/coordinates"
             returnBefore:
               description: the return hours of the facility (if different from operating-hours)
-              type: string
-              format: date-time
+              $ref: "#/components/schemas/dateTime"
 
     conditionUpfrontPayment:
       description: in case the TO demands a upfront payment before usage. The payment should be made in the booking phase.
       allOf:
         - $ref: "#/components/schemas/condition"
 
-    confirmationRequest:
-      type: object
-      description: the TO can ask permission to do something to the MP, as the MP is financially responsible. 
-      properties:
-        assetType:
-          $ref: "#/components/schemas/assetType"
-
     connectedLegInfo:
       type: object
       description: this object describes the previous leg. It can contain f.x. a flight number, a used parking to get a discount, etc.
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2962.htm
         description: LEG
@@ -1619,16 +1346,15 @@ components:
         assetType:
           $ref: "#/components/schemas/assetType"
         url:
-          type: string
+          $ref: "#/components/schemas/url"
           description: the URL where the details of the previous leg can be found (if authorized), using a GET http method
           example: https://penr.nl/tomp/bookings/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
-          format: URI
-          maxLength: 1000
 
     coordinates:
       type: object
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA1/EA169.htm
+      additionalProperties: false
       # lat -> Latitude
       # lng -> Longitude
       # alt -> Altitude
@@ -1666,8 +1392,8 @@ components:
       example: NL
 
     currencyCode:
-      description: ISO 4217 currency code
       type: string
+      description: ISO 4217 currency code
       minLength: 3
       maxLength: 3
       pattern: "[a-zA-Z]{3}"
@@ -1681,56 +1407,56 @@ components:
       allOf:
         - $ref: "#/components/schemas/traveler"
         - type: object
+          additionalProperties: false
           required:
             - id
           properties:
             id:
-              description: The identifier MaaS uses to identify the customer
               type: string
+              description: The identifier the MP uses to identify the customer
               example: "A0-123456"
             travelerReference:
-              description: optional reference field to the travelers in the planning request.
               type: string
+              description: optional reference field to the travelers in the planning request.
             initials:
               type: string
+              description: Initials of the customer
             firstName:
-              description: First name of the customer
               type: string
+              description: First name of the customer
               example: John
             lastName:
-              description: Last name of the customer
               type: string
+              description: Last name of the customer
               example: Doe
             middleName:
-              description: Middle name of the customer
               type: string
+              description: Middle name of the customer
               example: von
             prefix:
+              type: string
               description: prefix of the customer, like titles
-              type: string
             postfix:
-              description: postfix of the customer, like titles
               type: string
+              description: postfix of the customer, like titles
             phones:
               type: array
               maxItems: 3
               items:
                 $ref: "#/components/schemas/phone"
             email:
-              description: the email address of the customer
               type: string
+              description: the email address of the customer
             dateOfBirth:
               type: string
               format: date
             address:
               $ref: "#/components/schemas/address"
             photo:
-              description: base64 encoded
               type: string
+              description: base64 encoded
               format: byte
             cards:
-              externalDocs:
-                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA3/EA2368.htm
               type: array
               maxItems: 10
               items:
@@ -1741,52 +1467,68 @@ components:
               items:
                 $ref: "#/components/schemas/license"
             extraInfo:
-              description: dictionary for extra fields (bilatural agreements)
-              type: object
-              additionalProperties: 
-                type: string
+              $ref: "#/components/schemas/customProperties"
+
+    customProperties:
+      type: object
+      description: dictionary for extra fields (bilatural agreements)
+      additionalProperties: 
+        oneOf:
+        - type: string
+        - type: integer
+        - type: boolean
+        maxLength: 1000
+        maxProperties: 10
 
     damage:
-      description: A damage of the asset.
       type: object
+      description: A damage of the asset.
+      additionalProperties: false
       required:
         - assetComponent
         - description
       properties:
         assetComponent:
-          description: Part/Component of the asset affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.
           type: string
+          description: Part/Component of the asset affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.
           enum: [ FRONT, REAR, LEFT, RIGHT, TOP, BOTTOM, INTERIOR, TIRE, ANCILLARY, OTHER ]
         description:
+          type: string
           description: Description of the damage.
           maxLength: 1000
-          type: string
         pictures:
           type: array
           description: URL where pictures of the damage can be accessed. Any special characters in the URL must be correctly escaped.
           maxItems: 5
           items:
-            type: string
-            format: URI
+            $ref: "#/components/schemas/url"
+
+    dateTime:
+      type: string
+      format: date-time
+      example: "2019-10-12T07:20:50.52Z"
+      externalDocs:
+        url: https://www.rfc-editor.org/rfc/rfc3339#section-5.6
 
     day:
       type: string
       enum: [ MON, TUE, WED, THU, FRI, SAT, SUN ]
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA3/EA306.htm
+        description: DAY OF WEEK
 
     deeplinkAccess:
       description: deeplink info
       allOf:
-        - $ref: "#/components/schemas/token"
+        - $ref: "#/components/schemas/fulfilmentType"
         - type: object
+          additionalProperties: false
           properties:
             url:
               description: the base deeplink url for the MP app. Can be extended by
                 the 'knownParamaters'. Including the scheme.
-              type: string
               example: mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf
-              format: URI
+              $ref: "#/components/schemas/url"
             knownParameters:
               type: array
               example: [ "return-url"
@@ -1801,19 +1543,20 @@ components:
     digitalTicket:
       description: Arbitrary data the TO may pass along the ticket to the client
       allOf:
-        - $ref: "#/components/schemas/token"
+        - $ref: "#/components/schemas/fulfilmentType"
         - type: object
+          additionalProperties: false
           properties:
             url:
+              $ref: "#/components/schemas/url"
               description: download url for html/pdf
-              type: string
-              format: URI
 
-    EKeyInformation:      
+    eKeyAccess:      
       description: Axa EKey information
       allOf:
-        - $ref: "#/components/schemas/token"
+        - $ref: "#/components/schemas/fulfilmentType"
         - type: object
+          additionalProperties: false
           required:
             - ekey
             - lock
@@ -1823,21 +1566,21 @@ components:
               additionalProperties: false
               properties:
                 key: 
+                  type: string
                   description: certificate
-                  type: string
                 passkey:
-                  description: one time pass key
                   type: string
+                  description: one time pass key
             lock:
               type: object
               additionalProperties: false
               properties:
                 bdAddress:
+                  type: string
                   description: physical address 
-                  type: string
                 deviceName:
-                  description: how it advertises itself
                   type: string
+                  description: how it advertises itself
 
     endpoint:
       type: object
@@ -1850,77 +1593,39 @@ components:
       properties:
         method:
           type: string
-          enum: [
-            POST,
-            PUT,
-            GET,
-            DELETE,
-            PATCH
-          ]
+          enum: [ POST, PUT, GET, DELETE, PATCH ]
         path:
-          description: the exact path of the endpoint, starting after the base URL
           type: string
+          description: the exact path of the endpoint, starting after the base URL
           example: /plannings/
           maxLength: 2000
         status:
           type: string
-          enum: [
-            NOT_IMPLEMENTED,
-            DIALECT,
-            IMPLEMENTED
-          ]
+          enum: [ NOT_IMPLEMENTED, DIALECT, IMPLEMENTED ]
+          default: IMPLEMENTED
         externalType:
           type: string
-          description: this field must be used when adressing other standards for exchanging 'static' data (Level 1 MaaS)
-          enum: [
-            GBFS,
-            GTFS, 
-            NeTEx,
-            OSDM,
-            IXSI5, 
-            APDS, 
-            OCPI
-          ]
+          description: this field must be used when addressing other standards for exchanging 'static' data (Level 1 MaaS)
+          enum: [ GBFS, GTFS, NeTEx, OSDM, IXSI5, APDS, OCPI ]
         useAssetTypes:
           type: array
+          externalDocs:
+            url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
           maxItems: 20
           items: 
             type: string
             description: field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_type_id' should be 
               specified to book a bike from the particular vehicle type in the field 'useAssetTypes' in the trip offer request.
-            enum: [
-              # GBFS
-              "vehicle_types.vehicle_type_id",
-              # GTFS
-              "routes.route_id",
-              "trips.trip_id",
-              # NeTEx
-              "Route.id",
-              "RouteLink.id",
-              "Line.id",
-              "TimingLink.id",
-              "TimingPattern.id",
-              "ServicePattern.id",
-              "JourneyPattern.id",
-              # OSDM Online
-              "CoachLayout.layoutId::Compartment.number::PlacePosition.number"
-            ]
+
         useAssets:
           type: array
+          externalDocs:
+            url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
           maxItems: 20
           items: 
             type: string
             description: field references in external sources that are used in the booking process. E.g. when using vehicle types from GBFS, a value of 'vehicle_id' should be 
               specified to book a bike from the particular vehicle type in the field 'useAssets' in the trip offer request.
-            enum: [
-              # common, identifying codes/names on assets, QR codes
-              "visualId",
-              # GBFS
-              "free_bike_status.bike_id",
-              "vehicle_status.vehicle_id"
-              # GTFS
-              # NeTEx -> spot IDs?
-            ]
 
       example:
         warning: "Don't copy this example. There are multiple examples in this section. Each object is an example on itself."
@@ -1936,10 +1641,10 @@ components:
 
     error:
       type: object
-      additionalProperties: false
       description:
         An error that the service may send, e.g. in case of invalid input,
         missing authorization or internal service error. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      additionalProperties: false
       properties:
         errorcode:
           type: integer
@@ -1957,12 +1662,10 @@ components:
           description: The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.
         detail:
           type: string
-          maxLength: 1000
           description: A human-readable explanation specific to this occurrence of the problem, matches Content-Language
-        instance:
-          type: string
           maxLength: 1000
-          format: URI
+        instance:
+          $ref: "#/components/schemas/url"
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
 
     extraCosts:
@@ -1970,6 +1673,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
+          additionalProperties: false
           required:
             - category
             - description
@@ -1977,12 +1681,13 @@ components:
           properties:
             class:
               type: string
+              description: needed for the journalEntry.details, must be 'extraCosts'
               default: "extraCosts"
             category:
               $ref: "#/components/schemas/journalCategory"
             description:
-              description: free text to describe the extra costs. Mandatory in case of 'OTHER', matches Content-Language
               type: string
+              description: free text to describe the extra costs. Mandatory in case of 'OTHER', matches Content-Language
             number:
               type: number
               description: e.g. number of litres, number of kilowatthour, etc
@@ -1995,27 +1700,25 @@ components:
             account:
               $ref: "#/components/schemas/bankAccount"
             extraInfo:
-              description: Arbitrary metadata that a TO can add, like voucher codes
-              type: object
-              additionalProperties: 
-                type: string
+              $ref: "#/components/schemas/customProperties"
 
     fare:
       type: object
       description: the total fare is the sum of all parts, except for the 'MAX' farePart. This one descripes the maximum price for the complete leg.
+      additionalProperties: false
       required:
         - estimated
         - parts
       properties:
         estimated:
-          description: is this fare an estimation?
           type: boolean
+          description: is this fare an estimation?
         description:
+          type: string
           description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
-          type: string
         class:
-          description: needed for the discriminator in journal-entry.
           type: string
+          description: needed for the discriminator in journal-entry, must be 'fare'
           default: "fare"
         parts:
           type: array
@@ -2032,21 +1735,22 @@ components:
       allOf:
         - $ref: "#/components/schemas/amountOfMoney"
         - type: object
+          additionalProperties: false
           required:
             - amount
           properties:
             type:
+              type: string
               description: type of fare part. If there is only one farepart and this field is missing, it should
                 be assumed it is 'FIXED'. In all other situations this field is mandatory.
-              type: string
               enum: [ FIXED, FLEX, MAX ]
               # MAX -> https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1664.htm
             kind:
+              type: string
               description: is this the default price or is this an additional part (discount, price surge). In case of a DISCOUNT, the amount
                 must always be negative and in case of SURGE it must be positive. This also means, that when you're working with discounts or surges,
                 you have to deliver 2 fareparts, one for the default price and one for the discount/surge. This can be used in combination with as
                 well the fixed price parts as with the flex price parts.
-              type: string
               enum: [ DEFAULT, DISCOUNT, SURGE ]
               # DISCOUNT, SURGE -> https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1665.htm
             unitType:
@@ -2082,73 +1786,97 @@ components:
               type: string
               enum: [ KM, MILE, HOUR, MINUTE ]
             name:
-              description: an optional description of this fare part.
               type: string
+              description: an optional description of this fare part.
             class:
+              type: string
               description: class of this fare part. Could be FARE or ANCILLARY
               default: "FARE"
-              type: string
               enum: [ "FARE", "ANCILLARY" ]
             minimumAmount:
-              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
               type: number
+              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
               example: 9.00
               format: float
               minimum: 0
               externalDocs:
                 url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1664.htm
             maximumAmount:
-              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
               type: number
+              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
               example: 11.00
               format: float
               minimum: 0
               externalDocs:
                 url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1664.htm
             assetState:
-              description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
               type: string
+              description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
               enum: [ "IN_USE", "PAUSED" ]
               default: "IN_USE"
             extraInfo:
-              type: object
-              additionalProperties: 
-                type: string
+              $ref: "#/components/schemas/customProperties"
 
-    fulfillmentArray:
-      type: array
-      maxItems: 3
-      items:
-        $ref: "#/components/schemas/fulfillment"
-
-    fulfillment:
+    fulfilment:
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2421.htm
         description: TRAVEL DOCUMENT
       oneOf:
       - $ref: "#/components/schemas/digitalTicket"
       - $ref: "#/components/schemas/deeplinkAccess"
-      - $ref: "#/components/schemas/EKeyInformation"
-      - $ref: "#/components/schemas/binaryAccessToken"
+      - $ref: "#/components/schemas/eKeyAccess"
+      - $ref: "#/components/schemas/binaryAccess"
+      - $ref: "#/components/schemas/otherAccess"
       discriminator:
-        propertyName: tokenType
-      additionalProperties: true
+        propertyName: fulfilmentType
+
+    fulfilmentType:
+      type: object
+      description: The fulfilment (e.g. travel ticket) that MaaS clients will display to show their right to travel, or use to access an asset
+      additionalProperties: false
+      required:
+        - validFrom
+        - validUntil
+        - fulfilmentType
+      properties:
+        validFrom:
+          $ref: "#/components/schemas/dateTime"
+        validUntil:
+          $ref: "#/components/schemas/dateTime"
+        fulfilmentType:
+          type: string
+          description: The type of data held in this fulfilment
+          enum: [ "digitalTicket", "deeplinkAccess", "eKeyAccess", "binaryAccess", "other" ]
+        implementation: 
+          type: string
+          enum:  [ 
+            # DIGITAL_TICKET
+            QR, AZTEC, BARCODE, PDF, HTML,
+            # DEEPLINK_ACCESS
+            DEEPLINK, 
+            # EKEY
+            AXA_EKEY_OTP, 
+            # BINARY_ACCESS
+            TOMP_API,
+            # OTHER
+            PHYSICAL_KEY, OVC, EMV, NONE
+          ]
 
     geojsonLine:
+      type: array
       description: An array  of WGS84 coordinate pairs
       externalDocs:
         url: https://geojson.org/geojson-spec.html#line
-      type: array
       example: [[6.169639, 52.253279], [6.05623, 52.63473]]
       maxItems: 10000
       items:
         $ref: "#/components/schemas/geojsonPoint"
 
     geojsonPoint:
+      type: array
       description: Geojson Coordinate
       externalDocs:
         url: https://geojson.org/geojson-spec.html#point
-      type: array
       minItems: 2
       maxItems: 2
       items:
@@ -2158,20 +1886,20 @@ components:
       example: [4.53432, 55.324523]
 
     geojsonPolygon:
+      type: array
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
       externalDocs:
         url: https://geojson.org/geojson-spec.html#polygon
-      type: array
       maxItems: 200
       items:
         $ref: "#/components/schemas/geojsonLine"
       example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
 
     geojsonMultiPolygon:
+      type: array
       description: geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon
       externalDocs:
         url: https://geojson.org/geojson-spec.html#multipolygon
-      type: array
       maxItems: 200
       items:
         $ref: "#/components/schemas/geojsonPolygon"
@@ -2185,11 +1913,7 @@ components:
       properties:
         type:
           type: string
-          enum:
-          - Point
-          - LineString
-          - Polygon
-          - MultiPolygon
+          enum: [ Point, LineString, Polygon, MultiPolygon ]
         coordinates:
           oneOf: 
             - $ref: "#/components/schemas/geojsonPoint"
@@ -2199,16 +1923,20 @@ components:
       discriminator:
         propertyName: type
 
-    hateoasLinks:
+    halLinks:
       type: object
+      additionalProperties: false
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/Hypertext_Application_Language
       properties:
         _links: 
           type: object
           additionalProperties: 
-            $ref: "#/components/schemas/hateoasLink"
+            $ref: "#/components/schemas/halLink"
     
-    hateoasLink:
+    halLink:
       type: object
+      additionalProperties: false
       required:
         - href
       properties:
@@ -2217,8 +1945,7 @@ components:
           description: a misused field, to indicate the http method.
           enum: [ POST, GET, DELETE ]
         href:
-          type: string
-          format: URI
+          $ref: "#/components/schemas/url"
         type:
           type: string
           default: "application/hal+json"
@@ -2226,83 +1953,89 @@ components:
           type: boolean
           default: true
 
+    httpDate:
+      type: string
+      description: A HTTP date string 
+      externalDocs:
+        url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+      format: http-date
+      example: Wed, 21 Oct 2015 07:28:00 GMT
+
     information:
-      description: Information provided to end users
       type: object
+      description: Information provided to end users
+      additionalProperties: false
       properties:
         type:
-          description: the type of the information provided
           type: string
+          description: the type of the information provided
           enum: [ URL, IMAGE, PLAIN_TEXT, HTML ]
         url:
+          type: string
           description: the internet location of the information, used in case or type `URL` or `IMAGE`
-          type: string
         goal:
-          description: the purpose of the information
           type: string
+          description: the purpose of the information
           enum: [ INSTRUCTIONS, SALES ]
         text:
           type: string
           description: free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE` 
 
     journalEntry:
-      allOf:
-        - $ref: "#/components/schemas/amountOfMoney"
-        - type: object
-          properties:
-            category:
-              $ref: "#/components/schemas/journalCategory"
-            journalId:
-              description: id of the entry, leg id can be reused
-              $ref: "#/components/schemas/uuid"
-            journalSequenceId:
-              description: sequence id of the entry, in combination with journalId unique from TO perspective.
-              type: string
-              maxLength: 3
-            invoiceId:
-              description: the number of the invoice. Should be filled in when invoiced.
-              type: string
-            invoiceDate:
-              type: string
-              format: date-time
-            state:
-              $ref: "#/components/schemas/journalState"
-            expirationDate:
-              type: string
-              format: date-time
-            comment:
-              type: string
-              maxLength: 2000
-            distance:
-              description: the travelled distance. Only if applicable.
-              type: number
-              format: float
-              minimum: 0
-            distanceType:
-              type: string
-              enum: [ KM, MILE ]
-            usedTime:
-              description: the time in seconds that the assed is used. Only if applicable.
-              type: integer
-              minimum: 0
-            rentalStartMileage:
-              description: the mileage at the start of the rental. 'DistanceType' field is also applicable here
-              type: number
-              format: float
-              minimum: 0
-            vatNumber:
-              description: VAT identification number.
-              type: string
-              maxLength: 100
-            bankAccount:
-              $ref: "#/components/schemas/bankAccount"
-            details:
-              description: the specification of the amount; how is it composed.
-              oneOf:
-                - $ref: "#/components/schemas/fare"
-                - $ref: "#/components/schemas/extraCosts"
-              discriminator:
-                propertyName: class
+      type: object
+      additionalProperties: false
+      properties:
+        category:
+          $ref: "#/components/schemas/journalCategory"
+        journalId:
+          description: id of the entry, leg id can be reused
+          $ref: "#/components/schemas/uuid"
+        journalSequenceId:
+          type: string
+          description: sequence id of the entry, in combination with journalId unique from TO perspective.
+          maxLength: 3
+        invoiceId:
+          type: string
+          description: the number of the invoice. Should be filled in when invoiced.
+        invoiceDate:
+          $ref: "#/components/schemas/dateTime"
+        state:
+          $ref: "#/components/schemas/journalState"
+        expirationDate:
+          $ref: "#/components/schemas/dateTime"
+        comment:
+          type: string
+          maxLength: 2000
+        distance:
+          type: number
+          description: the travelled distance. Only if applicable.
+          format: float
+          minimum: 0
+        distanceType:
+          type: string
+          enum: [ KM, MILE ]
+        usedTime:
+          type: integer
+          description: the time in seconds that the assed is used. Only if applicable.
+          minimum: 0
+        rentalStartMileage:
+          type: number
+          description: the mileage at the start of the rental. 'DistanceType' field is also applicable here
+          format: float
+          minimum: 0
+        vatNumber:
+          type: string
+          description: VAT identification number.
+          maxLength: 100
+        bankAccount:
+          $ref: "#/components/schemas/bankAccount"
+        details:
+          description: the specification of the amount; how is it composed.
+          oneOf:
+            - $ref: "#/components/schemas/fare"
+            - $ref: "#/components/schemas/extraCosts"
+          discriminator:
+            propertyName: class
 
     journalState:
       type: string
@@ -2328,8 +2061,9 @@ components:
       ]
 
     leg:
-      description: A planned (segment of) a booked trip using one asset type
       type: object
+      description: A planned (segment of) a booked trip using one asset type
+      additionalProperties: false
       required:
         - from
       externalDocs:
@@ -2341,11 +2075,11 @@ components:
           description: The unique identifier (TO) of this leg
           $ref: "#/components/schemas/uuid"
         sequenceNumber:
-          description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
           type: integer
+          description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
         travelerReferenceNumbers:
-          description: reference to the travelers field of the request. If missing, it is refering to the first (if any). it is an array to facilitate multiple users on one leg (e.g. using a car). If multiple access informations are needed, please create a leg per used asset.
           type: array
+          description: reference to the travelers field of the request. If missing, it is refering to the first (if any). it is an array to facilitate multiple users on one leg (e.g. using a car). If multiple access informations are needed, please create a leg per used asset.
           maxItems: 50
           items:
             type: string
@@ -2359,15 +2093,13 @@ components:
 
         startTime:
           description: The departure time of this leg. Or, in case of a parking, the start of the usage.
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/dateTime"
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2958.htm
             description: TRIP PATTERN.StartTime
         endTime:
           description: The intended arrival time at the to place. Or, in case of a parking, the end of the usage.
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/dateTime"
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2958.htm
             description: TRIP PATTERN.EndTime
@@ -2394,11 +2126,11 @@ components:
         fulfillment:
           description: The MaaS users proof of their right to travel on this leg (visual representable) OR
             data to open an asset
-          $ref: "#/components/schemas/fulfillment"
+          $ref: "#/components/schemas/fulfilment"
 
         userCommunication:
-          description: Additional information a TO can send to a customer (instructions, sales info, ...)
           type: array
+          description: Additional information a TO can send to a customer (instructions, sales info, ...)
           maxItems: 100
           items: 
             $ref: "#/components/schemas/information" 
@@ -2410,7 +2142,7 @@ components:
     legResponse:
       allOf:
         - $ref: "#/components/schemas/leg"
-        - $ref: "#/components/schemas/hateoasLinks"
+        - $ref: "#/components/schemas/halLinks"
           example:
             { "leg": { "rel": "GET", "href": "/bookings/{id}/legs/{lid}", "templated": true, "type": "application/hal+json" }
             # only when legState = NOT_STARTED
@@ -2419,8 +2151,8 @@ components:
             , "assign_asset": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/ASSIGN_ASSET", "templated": true, "type": "application/hal+json" }
             , "time_postpone": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/TIME_POSTPONE", "templated": true, "type": "application/hal+json" }
             # only when legState = NOT_STARTED OR PREPARING
-            , "add_ancillaries": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/ancillaries/{category}/{number}", "templated": true, "type": "application/hal+json" }
-            , "remove_ancillaries": { "rel": "DELETE", "href": "/bookings/{id}/legs/{lid}/ancillaries/{category}/{number}", "templated": true, "type": "application/hal+json" }
+            , "add_ancillaries": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/ADD_ANCILLARY", "templated": true, "type": "application/hal+json" }
+            , "remove_ancillaries": { "rel": "DELETE", "href": "/bookings/{id}/legs/{lid}/operations/REMOVE_ANCILLARY", "templated": true, "type": "application/hal+json" }
             , "set_in_use": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/SET_IN_USE", "templated": true, "type": "application/hal+json" }
             # only when legState = IN_USE
             , "time_extend": { "rel": "POST", "href": "/bookings/{id}/legs/{lid}/operations/TIME_EXTEND", "templated": true, "type": "application/hal+json" }
@@ -2433,22 +2165,14 @@ components:
     legState:
       type: string
       description: status of a leg
-      enum: [
-        NOT_STARTED,
-        PREPARING,
-        IN_USE,
-        PAUSED,
-        FINISHING,
-        FINISHED,
-        ISSUE_REPORTED,
-        CANCELLED,
-      ]
+      enum: [ NOT_STARTED, PREPARING, IN_USE, PAUSED, FINISHING, FINISHED, ISSUE_REPORTED, CANCELLED ]
 
     license:
       description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
       allOf:
         - $ref: "#/components/schemas/licenseType"
         - type: object
+          additionalProperties: false
           properties:
             number:
               type: string
@@ -2462,8 +2186,9 @@ components:
               format: date
 
     licenseType:
-      description: A category of license to use a certain asset class
       type: object
+      description: A category of license to use a certain asset class
+      additionalProperties: false
       required:
         - assetClass
       properties:
@@ -2476,13 +2201,14 @@ components:
       type: object
       required:
       - operation
+      additionalProperties: false
       properties:
         operation:
           type: string
           enum: [ 
-            OFFER, BOOK,
+            OFFER, BOOK, 
             CANCEL, DENY, COMMIT, EXTEND_EXPIRY_TIME,
-            PREPARE, ASSIGN_ASSET, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH, TIME_EXTEND, TIME_POSTPONE,
+            PREPARE, ASSIGN_ASSET, SET_IN_USE, PAUSE, OPEN_TRUNK, START_FINISHING, FINISH, TIME_EXTEND, TIME_POSTPONE, ADDED_ANCILLARY, REMOVED_ANCILLARY, NOTIFY,
             PAY, EXTRA_COSTS
             ]
         legId:
@@ -2490,62 +2216,30 @@ components:
           $ref: "#/components/schemas/uuid"
         detail:
           $ref: "#/components/schemas/operationRequest"
-        progress:
-          description: A list of coordinates describing the progress so far along the leg, as GeoJSON LineString coordinates
-          $ref: "#/components/schemas/geojsonLine"
 
-    notification:
-      type: object
-      description: notifies the MaaS operator of issues with a booking. Vehicle information can be provided when needed.
-      required:
-       - type
-      properties:
-        type:
-          type: string
-          enum: [ 
-            VEHICLE_NOT_AVAILABLE,
-            USER_NO_SHOW, 
-            ETA, 
-            MESSAGE_TO_DRIVER, 
-            MESSAGE_TO_END_USER, 
-            USER_OUT_OF_LIMITS, 
-            OTHER
-          ]
-          example: VEHICLE_NOT_AVAILABLE
-        minutes:
-          description: in case of ETA, the number of minutes until arrival at the pickup location
-          type: integer
-          minimum: 0
-          maximum: 1000
-        asset:
-          $ref: '#/components/schemas/asset'
-        comment:
-          type: string
-          description: free text, should match Content-Language
-          maxLength: 2000
-        
     offBoardingStep:
       allOf:
         - $ref: "#/components/schemas/information"
         - type: object
+          additionalProperties: false
           properties:
             action:
               type: string
               description: these actions are available<br>
-                `SEND_START_FINISHING` - the TO needs to be informed the leg is about to finish<br>
-                `PARK_ASSIST` - user action to park (stop) using the asset<br>
-                `UNLOCK_LOCKER` - user action, could be triggered by the START_FINISH operation<br>
-                `CONNECT_CHARGER` - user action<br>
-                `LOCK_ASSET` - user action, could be triggered by the FINISH operation<br>
-                `SEND_OPEN_TRUNK` - the TO opens the trunk remotely <br>
-                `UNLOCK_TRUNK` - user action <br>
-                `STOW_HELMET` - user action <br>
-                `LOCK_TRUNK` - user action <br>
-                `LOCK_LOCKER` - user action <br>
-                `SEND_FINISH` - the TO wants to be informed about the end of the leg<br>
-                `SEND_EVIDENCE_PARKED` - the TO requires parking evidence<br>
-                `SEND_EVIDENCE_HELMET` - the TO requires evidence of storing the helmet<br>
-                `SEND_EVIDENCE_CHARGER` - the TO requires evidence of correct usage of the charger 
+                _SEND_START_FINISHING_ - the TO needs to be informed the leg is about to finish<br>
+                _PARK_ASSIST_ - user action to park (stop) using the asset<br>
+                _UNLOCK_LOCKER_ - user action, could be triggered by the START_FINISH operation<br>
+                _CONNECT_CHARGER_ - user action<br>
+                _LOCK_ASSET_ - user action, could be triggered by the FINISH operation<br>
+                _SEND_OPEN_TRUNK_ - the TO opens the trunk remotely <br>
+                _UNLOCK_TRUNK_ - user action <br>
+                _STOW_HELMET_ - user action <br>
+                _LOCK_TRUNK_ - user action <br>
+                _LOCK_LOCKER_ - user action <br>
+                _SEND_FINISH_ - the TO wants to be informed about the end of the leg<br>
+                _SEND_EVIDENCE_PARKED_ - the TO requires parking evidence<br>
+                _SEND_EVIDENCE_HELMET_ - the TO requires evidence of storing the helmet<br>
+                _SEND_EVIDENCE_CHARGER_ - the TO requires evidence of correct usage of the charger 
               enum: [
                 SEND_START_FINISHING, 
                 PARK_ASSIST, 
@@ -2567,23 +2261,24 @@ components:
       allOf:
         - $ref: "#/components/schemas/information"
         - type: object
+          additionalProperties: false
           properties:
             action:
               type: string
               description:
                 The possible steps are described here<br>
-                `SEND_PREPARE` - indicate the leg is going to start <br>
-                `UNLOCK_LOCKER` - user action - optionally triggered by the PREPARE operation<br> 
-                `DISCONNECT_CHARGER` - requested user action <br> 
-                `SHOW_DAMAGES` - show known damages to end user <br> 
-                `UNLOCK_ASSET` - requested user action or triggered by SET_IN_USE operation <br> 
-                `START_ASSET` - requested user action <br> 
-                `SEND_OPEN_TRUNK` - request TO to open trunk/helmet case remotely<br> 
-                `UNLOCK_TRUNK` - requested user action <br> 
-                `TAKE_HELMET` - requested user action <br> 
-                `SEND_SET_IN_USE` - request to start leg <br> 
-                `SEND_ASSIGN_ASSET` - request to assign the specified asset to the leg <br> 
-                `LOCK_LOCKER` - requested user action 
+                _SEND_PREPARE_ - indicate the leg is going to start <br>
+                _UNLOCK_LOCKER_ - user action - optionally triggered by the PREPARE operation<br> 
+                _DISCONNECT_CHARGER_ - requested user action <br> 
+                _SHOW_DAMAGES_ - show known damages to end user <br> 
+                _UNLOCK_ASSET_ - requested user action or triggered by SET_IN_USE operation <br> 
+                _START_ASSET_ - requested user action <br> 
+                _SEND_OPEN_TRUNK_ - request TO to open trunk/helmet case remotely<br> 
+                _UNLOCK_TRUNK_ - requested user action <br> 
+                _TAKE_HELMET_ - requested user action <br> 
+                _SEND_SET_IN_USE_ - request to start leg <br> 
+                _SEND_ASSIGN_ASSET_ - request to assign the specified asset to the leg <br> 
+                _LOCK_LOCKER_ - requested user action 
               enum: [
                 SEND_PREPARE,
                 UNLOCK_LOCKER,
@@ -2601,30 +2296,31 @@ components:
 
     oneStopBookingRequest:
       allOf:
-      - $ref: "#/components/schemas/travelRequest"
+      - $ref: "#/components/schemas/tripRequest"
       - type: object
+        additionalProperties: false
         properties:
           customer:
             description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
             $ref: "#/components/schemas/customer"
           callbackUrl: 
+            $ref: "#/components/schemas/url"
             description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /bookings/{id}/legs/{lid}/operations and POST /bookings/{id}/operations. Only to be provided when this deviates from standard or agreed URL.
-            type: string
-            format: URI
 
     operationRequest:
       type: object
       description: operation during the trip execution 
       required:
         - timestamp
+      additionalProperties: false
       properties:
         timestamp:
-          type: string
-          format: date-time
+          description: timestamp of the operation, or in case of notification - ETA, the expected time of arrival.
+          $ref: "#/components/schemas/dateTime"
 
-        reason:
+        comment:
           type: string
-          description: free text, should match Content-Language
+          description: free text, should match Content-Language. Reason or notification.
           maxLength: 2000
 
         urls:
@@ -2632,37 +2328,68 @@ components:
           description: urls to support the operation e.g. pictures justifying the exit conditions
           maxItems: 10
           items:
-            type: string
-            format: URI
+            $ref: "#/components/schemas/url"
             
-        asset:
-          $ref: "#/components/schemas/asset"
-
-        extendReason:
-          type: string
-          description: in case `operation` is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.
-          enum: [ BOOKING_PENDING, PAYMENT_PENDING, OTHER ]
+        assetState:
+          $ref: "#/components/schemas/assetState"
 
         origin:
           type: string
           description: This operation can be done on behalf of another party. The MP can act on behalf of the END_USER (cancel this booking for me); to override the default origin. In case this field is missing, it must be assumed that the MP is requesting the operations.
           enum: [ TO, MP, END_USER, OTHER ]
 
+        # for CONFIRMATION purposes
+        assetType:
+          $ref: "#/components/schemas/assetType"
+
+        # EXTEND_EXPIRY_TIME
+        extendReason:
+          type: string
+          description: in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.
+          enum: [ BOOKING_PENDING, PAYMENT_PENDING, OTHER ]
+
+        # NOTIFICATIONS
+        notificationType:
+          type: string
+          enum: [ VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, USER_OUT_OF_LIMITS, OTHER ]
+          example: VEHICLE_NOT_AVAILABLE
+
+        # ANCILLARIES
+        category:
+          type: string
+          maxLength: 2
+          pattern: "[A-Z]{2,3}"        
+        number:
+          type: string
+          maxLength: 2
+          pattern: "[0-9]{2}"
+
+        # FINANCIAL_TRANSACTION
+        transaction:
+          $ref: "#/components/schemas/extraCosts"
+
+    otherAccess:
+      description: Generic fulfilment, non-standardized (yet)
+      allOf:
+        - $ref: "#/components/schemas/fulfilmentType"
+        - $ref: "#/components/schemas/customProperties"
+
     pausingStep:
       allOf:
       - $ref: "#/components/schemas/information"
       - type: object
+        additionalProperties: false
         properties:
           action:
             type: string
             description: allowed actions<br>
-              `SEND_PAUSE` - send leg operations PAUSE to inform the TO<br>
-              `PARK_ASSIST` - user action, the end user can be informed how and where to park<br>
-              `LOCK_ASSET` - user action, can be triggered by the PAUSE operations<br>
-              `SEND_OPEN_TRUNK` - request TO to open the trunk remotely<br>
-              `UNLOCK_TRUNK` - user action<br>
-              `STOW_HELMET` - user action<br>
-              `LOCK_TRUNK` - user action
+              _SEND_PAUSE_ - send leg operations PAUSE to inform the TO<br>
+              _PARK_ASSIST_ - user action, the end user can be informed how and where to park<br>
+              _LOCK_ASSET_ - user action, can be triggered by the PAUSE operations<br>
+              _SEND_OPEN_TRUNK_ - request TO to open the trunk remotely<br>
+              _UNLOCK_TRUNK_ - user action<br>
+              _STOW_HELMET_ - user action<br>
+              _LOCK_TRUNK_ - user action
             enum: [
               SEND_PAUSE,
               PARK_ASSIST, 
@@ -2675,13 +2402,14 @@ components:
 
     phone:
       type: object
+      additionalProperties: false
       properties:
         preferred:
-          description: only one phone in this array can have a true in this property
           type: boolean
+          description: only one phone in this array can have a true in this property
         number:
-          description: phone number. In case of international usage, always provide the country code.
           type: string
+          description: phone number. In case of international usage, always provide the country code.
           pattern: '^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.0-9]*$'
           example: +31-48934758 or +(0075)-834923384 or 020 1234 1234
         kind:
@@ -2694,6 +2422,7 @@ components:
     place:
       type: object
       description: a origin or destination of a leg, 3D. lon/lat in WGS84.
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA3/EA184.htm
         description: POINT
@@ -2709,38 +2438,34 @@ components:
         coordinates:
           $ref: "#/components/schemas/coordinates"
         name:
-          description: Human readable name of the place, could match Content-Language
           type: string
+          description: Human readable name of the place, could match Content-Language
           maxLength: 1000
         stopReference:
           $ref: "#/components/schemas/stopReference"
         station:
-          description: reference to a station
           type: string
+          description: reference to a station
         physicalAddress:
           $ref: "#/components/schemas/address"
         extraInfo:
-          type: object
-          additionalProperties: 
-            type: string
-            maxLength: 1000
-            maxProperties: 10
+          $ref: "#/components/schemas/customProperties"
 
     planningStep:
       description: this action allows to publish advertisements together with the proposed leg.
       allOf:
       - $ref: "#/components/schemas/information"
       - type: object
+        additionalProperties: false
         properties:
           action:
             type: string
-            description: the `RESULT_SHOWN` action requires the MP to display some information to the customer when it is viewing the proposed legs.
-            enum: [
-              RESULT_SHOWN
-            ]
+            description: the _RESULT_SHOWN_ action requires the MP to display some information to the customer when it is viewing the proposed legs.
+            enum: [ RESULT_SHOWN ]
 
     processIdentifiers:
       type: object
+      additionalProperties: false
       required:
         - operatorInformation
         - booking
@@ -2777,8 +2502,11 @@ components:
     requirement:
       type: object
       description: describes an (dis)ability or ancillary.
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA254.htm
+        description: TYPE OF USER NEED
+      # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm (VEHICLE EQUIPMENT PROFILE)
       required:
         - category
         - number
@@ -2796,19 +2524,19 @@ components:
           minLength: 2
           maxLength: 2
         type:
+          type: string
           description: conditionally extra information, referencing to the 3th column
-          type: string
         memo:
-          description: extra field for detailed information, not standardized
           type: string
+          description: extra field for detailed information, not standardized
         variableNumber:
-          description: in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)
           type: integer
+          description: in some requirements there is references to '[variable number]' e.g. of meters (like ZR06)
           minimum: 0
           maximum: 1000
         applicableDays:
-          description: days of week that are applicable
           type: array
+          description: days of week that are applicable
           maxItems: 7
           items: 
             type: string
@@ -2817,7 +2545,7 @@ components:
     requirements:
       description: Requirements from the end user side.
       type: object
-      additionalProperties: true
+      additionalProperties: false
       properties:
         abilities: 
           type: array
@@ -2834,17 +2562,18 @@ components:
       allOf:
       - $ref: "#/components/schemas/information"
       - type: object
+        additionalProperties: false
         properties:
           action:
             type: string
             description: possible values<br>
-              `UNLOCK_VEHICLE` - user action, could be triggered by SET_IN_USE operations<br>
-              `SEND_OPEN_TRUNK` - request TO to open trunk remotely<br>
-              `UNLOCK_TRUNK` - user action<br>
-              `TAKE_HELMET` - user action<br>
-              `LOCK_TRUNK` - user action<br>
-              `START_VEHICLE` - user action<br>
-              `SEND_SET_IN_USE` - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the asset
+              _UNLOCK_VEHICLE_ - user action, could be triggered by SET_IN_USE operations<br>
+              _SEND_OPEN_TRUNK_ - request TO to open trunk remotely<br>
+              _UNLOCK_TRUNK_ - user action<br>
+              _TAKE_HELMET_ - user action<br>
+              _LOCK_TRUNK_ - user action<br>
+              _START_VEHICLE_ - user action<br>
+              _SEND_SET_IN_USE_ - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the asset
             enum: [
               UNLOCK_VEHICLE,
               SEND_OPEN_TRUNK,
@@ -2858,6 +2587,7 @@ components:
     serviceDescription:
       type: object
       description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers<br>
+      additionalProperties: false
       required:
         - endpoints
       properties:
@@ -2874,6 +2604,7 @@ components:
     serviceSteps:
       type: object
       description: The steps can be specified here, when they are uniform over all assets. If some assets should be handled differently, it can be specified as a condition in the booking for that specific asset(type).
+      additionalProperties: false
       properties:
         planning:
           type: array
@@ -2913,6 +2644,7 @@ components:
     stopReference:
       type: object
       description: reference to a stop (can be nation specific). This can help to specific pinpoint a (bus) stop. Extra information about the stop is not supplied; you should find it elsewhere.
+      additionalProperties: false
       required:
         - type
         - id
@@ -2939,6 +2671,7 @@ components:
     suboperator:
       type: object
       description: The operator of a leg or asset, in case this is not the TO itself but should be shown to the user
+      additionalProperties: false
       required:
         - name
       properties:
@@ -2958,6 +2691,7 @@ components:
     supportRequest:
       description: request for support
       type: object
+      additionalProperties: false
       properties:
         id:
           type: string
@@ -2981,27 +2715,20 @@ components:
         location:
           $ref: '#/components/schemas/place'
         timestamp:
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/dateTime"
         priority:
+          type: string
           description: the priority of the support request.
-          type: string
-          enum: [
-            ERROR_CANNOT_CONTINUE, 
-            ERROR_CAN_CONTINUE, 
-            DISTURBING_ISSUE, 
-            QUESTION, 
-            OTHER
-          ]
+          enum: [ ERROR_CANNOT_CONTINUE,  ERROR_CAN_CONTINUE, DISTURBING_ISSUE, QUESTION, OTHER ]
         contactInformationEndUser:
-          description: contact information of the end user in case of direct response requests, like phone number
           type: string
+          description: contact information of the end user in case of direct response requests, like phone number
         comment:
           type: string
         requestedResponseTime:
           type: number
-          format: float
           description: time to respond in minutes.
+          format: float
           minimum: 0
           maximum: 10000
         urls:
@@ -3009,12 +2736,12 @@ components:
           description: urls to clarify the support request e.g. pictures showing damage
           maxItems: 10
           items:
-            type: string
-            format: URI
+            $ref: "#/components/schemas/url"
 
     supportTicket:
-      description: the current status of support
       type: object
+      description: the current status of support
+      additionalProperties: false
       allOf:
         - $ref: '#/components/schemas/supportRequest'
       properties:
@@ -3036,57 +2763,41 @@ components:
           description: the sequence number of status of the support issue
           minimum: 0
 
-    token:
-      description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
-      type: object
-      required:
-        - validFrom
-        - validUntil
-        - tokenType
-      properties:
-        validFrom:
-          type: string
-          format: date-time
-        validUntil:
-          type: string
-          format: date-time
-        tokenType:
-          description: The type of data held in this token, will later be an enum
-          type: string
-          enum: [ DIGITAL_TICKET, DEEPLINK_ACCESS, EKEY, BINARY_ACCESS ]
-
     traveler:
-      description: A generic description of a traveler, not including any identifying information
       type: object
+      description: A generic description of a traveler, not including any identifying information
+      additionalProperties: false
       properties:
         isValidated:
-          description: Whether this traveler's identity and properties have been verified by the MaaS provider
           type: boolean
+          description: Whether this traveler's identity and properties have been verified by the MaaS provider
         age:
-          description: Age of the traveler, may be approximate
           type: integer
+          description: Age of the traveler, may be approximate
           minimum: 0
           maximum: 200
         referenceNumber:
-          description: reference number of the traveler. This number could be used to refer to in the planning result.
           type: string
+          description: reference number of the traveler. This number could be used to refer to in the planning result.
         cardTypes:
-          description: The kind of cards this traveler possesses
           type: array
+          description: The kind of cards this traveler possesses
           maxItems: 10
           items:
             $ref: "#/components/schemas/cardType"
         licenseTypes:
-          description: The kind of licenses this traveler possesses
           type: array
+          description: The kind of licenses this traveler possesses
           maxItems: 10
           items:
             $ref: "#/components/schemas/licenseType"
         requirements:
           $ref: "#/components/schemas/requirements"
 
-    travelRequest:
-      description: A travel planning for which bookable options are requested
+    tripRequest:
+      type: object
+      description: A trip planning request, resulting in bookable trip options
+      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3147.htm
         description: TRIP REQUEST
@@ -3101,7 +2812,6 @@ components:
       ## estimatedDistance ->
       # travelers -> limit to TRIP REQUEST FILTER limit to TRIP MOBILITY FILTER limit to ACCESSIBILITY ASSESSMENT (see "#/components/schemas/traveler")
       ## userGroups -> 
-      type: object
       required:
         - from
       properties:
@@ -3113,33 +2823,31 @@ components:
           description: The intended departure time. 
             If left out and no endTime is set, the current time should be assumed. 
             If only the arrival time is specified, this is an implicit request for a guaranteed arrival at that time.
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/dateTime"
         endTime:
           description: The intended arrival time, at the `to place`. If not set, the time the user intends to stop using the asset (implicit request for arrival guarantee).
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/dateTime"
         useAssets:
-          description: The specific asset(s) the user wishes to receive trip options for. See also endpoint.useAssets specification
           type: array
+          description: The specific asset(s) the user wishes to receive trip options for. See also endpoint.useAssets specification
           maxItems: 25
           items:
             type: string
         useAssetTypes:
-          description: The specific asset type(s) the user wishes to receive trip options for. See also endpoint.useAssetTypes specification
           type: array
+          description: The specific asset type(s) the user wishes to receive trip options for. See also endpoint.useAssetTypes specification
           maxItems: 5
           items:
             $ref: "#/components/schemas/assetType"
           
         nrOfTravelers:
-          description: The number of people that intend to travel, including the customer.
           type: integer
+          description: The number of people that intend to travel. Do not use when *travelers* is used.
           minimum: 1
           maximum: 100
         radius:
-          description: Maximum distance in meters a user wants to travel to reach the travel option
           type: integer
+          description: Maximum distance in meters a user wants to travel to reach the travel option
           minimum: 0
           maximum: 1000
         previousLegs:
@@ -3156,48 +2864,51 @@ components:
           maximum: 1000000
 
         travelers:
-          description: Extra information about the people that intend to travel if relevant, length must be less than or equal to nrOftravelers.
           type: array
+          description: Extra information about the people that intend to travel if relevant, length must be less than or equal to nrOftravelers.
           maxItems: 50
           items:
             $ref: "#/components/schemas/traveler"
         userGroups:
-          description: Id(s) of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. Id's are agreed upon by TO and MP.
           type: array
+          description: Id(s) of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. Id's are agreed upon by TO and MP.
           maxItems: 10
           items:
             type: string
             format: a usergroup id for this operator
         extraInfo:
-          description: dictionary for extra fields (bilatural agreements)
-          type: object
-          additionalProperties: 
-            type: string
+          $ref: "#/components/schemas/customProperties"
 
-    travelOptionsResponse:
-      description: A travel planning with bookable options that fulfil the constraints of the planning
+    tripOptionsResponse:
+      description: Bookable trip options that fulfil the constraints of the request
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3156.htm
         description: TRIP DELIVERY
       type: object
+      additionalProperties: false
       required:
         - validUntil
         - options
       properties:
         validUntil:
           description: The time until which the presented options are (likely) available
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/dateTime"
         options:
           type: array
           maxItems: 100
           items: 
             $ref: "#/components/schemas/bookingResponse"
 
+    url:
+      type: string
+      description: valid URL
+      format: URL
+
     uuid:
       type: string
       format: UUID
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      example: ae76f51c-a1a6-46af-b9ab-8233564adcae
       externalDocs:
         url: https://en.wikipedia.org/wiki/Universally_unique_identifier
         # also: https://www.ietf.org/rfc/rfc4122.txt
@@ -3209,8 +2920,8 @@ components:
       required: true
       schema:
         type: string
-        format: A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5
-      description: A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible, ideally just one language tag from the list in operator/information
+        format: comma separated language tags
+      description: "A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5. A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible"
       example: nl, de;q=0.7
     senderId:
       in: header
@@ -3219,7 +2930,6 @@ components:
       schema:
         $ref: "#/components/schemas/uuid"
       description: The ID of the sending operator
-      example: 1324A-DFB3482-32ACD
     receiverId:
       in: header
       name: receiving-id
@@ -3227,7 +2937,40 @@ components:
       schema:
         $ref: "#/components/schemas/uuid"
       description: the ID of the intended receiver
-      example: 1324A-DFB3482-32ACD
+    bookingId:
+      in: path
+      name: id
+      description: BOOKING identifier
+      required: true
+      schema:
+        $ref: "#/components/schemas/uuid"
+    legId:
+      in: path
+      name: lid
+      description: LEG identifier
+      required: true
+      schema:
+        $ref: "#/components/schemas/uuid"
+
+  headers:
+    contentLanguage:
+      description: The language/localization of user-facing content
+      example: nl
+      schema:
+        type: string
+        format: One IETF BCP 47 (RFC 5646) language tag
+        pattern: "^[a-zA-Z]+-[a-zA-Z]+$"
+      required: true
+    expires:
+      description: The result is valid until this timestamp (and must be committed unless it is already in state _CONFIRMED_). A pending BOOKING is expired after this timestamp.
+      schema:
+        description: A HTTP date string
+        externalDocs:
+          url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+        type: string
+        format: http-date
+        example: Wed, 21 Oct 2015 07:28:00 GMT
+      required: false
 
   securitySchemes:
     BasicAuth:
@@ -3256,18 +2999,27 @@ components:
       description: Request was successful, no content to return.
     409Conflict:
       description: The request will not be fulfilled. The request itself is legal, but the content conflicts with the server and might be stale. The user might try again after looking up the current state of the resource.
+      headers:
+        Content-Language:
+          $ref: "#/components/headers/contentLanguage"
       content:
         application/json:
           schema:
             type: object
     410Gone:
       description: The requested resource is no longer available. This is permanent.
+      headers:
+        Content-Language:
+          $ref: "#/components/headers/contentLanguage"
       content:
         application/json:
           schema:
             type: object
     errorResponse:
       description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      headers:
+        Content-Language:
+          $ref: "#/components/headers/contentLanguage"
       content:
         application/json:
           schema:
