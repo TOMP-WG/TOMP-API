@@ -64,6 +64,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/callbackUrl"
     post:
       summary: "[MP->TO] get trip offers to get from A to B"
       description: Returns offers (bookable trips) based on user requirements
@@ -99,6 +100,7 @@ paths:
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/bookingId"
+      - $ref: "#/components/parameters/callbackUrl"
     post:
       summary: "[MP->TO] book an offered trip"
       description: The offered trip is transformed into a booked one. Dependend of the process identifiers (<i>AUTO_COMMIT</i> or <i>ATOMIC_BOOKING_SET_IN_USE</i>) the BOOKING is _PENDING_ 
@@ -168,6 +170,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/callbackUrl"
     post:
       summary: "[MP->TO] directly book a trip, without offer"
       description:
@@ -202,6 +205,7 @@ paths:
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/bookingId"
+      - $ref: "#/components/parameters/callbackUrl"
       - name: operation
         in: path
         description: OPERATION to execute
@@ -241,6 +245,7 @@ paths:
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/bookingId"
       - $ref: "#/components/parameters/legId"
+      - $ref: "#/components/parameters/callbackUrl"
     get:
       summary: "[MP->TO] give leg details"
       description: Retrieves the latest summary of the LEG, being the execution of a part of a journey traveled using one ASSET (TYPE). 
@@ -268,6 +273,7 @@ paths:
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/bookingId"
       - $ref: "#/components/parameters/legId"
+      - $ref: "#/components/parameters/callbackUrl"
       - name: operation
         in: path
         description: OPERATION on the LEG
@@ -276,7 +282,7 @@ paths:
           $ref: "#/components/schemas/legOperation"
     post:
       summary: "[MP<->TO] request {operation} on this leg"
-      description: This ENDPOINT must be used to alter the STATE of a LEG, to request OPERATIONs.
+      description: This endpoint must be used to alter the STATE of a LEG, using OPERATION requests.
       tags:
         - trip execution        
       requestBody:
@@ -324,9 +330,10 @@ paths:
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/bookingId"
       - $ref: "#/components/parameters/legId"
+      - $ref: "#/components/parameters/callbackUrl"
     get:
       summary: "[MP->TO] give possible assets to assign to this leg"
-      description: Returns a list of available ASSETs for the given leg. These results can be used to call `POST /bookings/{id}/legs/{lid}/operations/ASSIGN_ASSET`. 
+      description: Returns a list of available ASSETs for the given LEG. These results can be used to call `POST /bookings/{id}/legs/{lid}/operations/ASSIGN_ASSET`. 
       tags:
         - trip execution        
       responses:
@@ -384,6 +391,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/callbackUrl"
     get:
       tags:
         - payment
@@ -465,6 +473,7 @@ paths:
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/bookingId"
       - $ref: "#/components/parameters/legId"
+      - $ref: "#/components/parameters/callbackUrl"
     post:
       summary: "[MP->TO] create a support ticket"
       description: creates a request for SUPPORT from end user via MP
@@ -510,6 +519,33 @@ paths:
 
 components:
   schemas:
+    additionalCosts:
+      description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
+      # category
+      # description =>
+      # number =>
+      # units =>
+      allOf:
+        - $ref: "#/components/schemas/amountOfMoney"
+        - type: object
+          required:
+            - category
+            - description
+          properties:
+            category:
+              $ref: "#/components/schemas/journalCategory"
+            description:
+              $ref: "#/components/schemas/longString"
+              description: free text to describe the extra costs. Mandatory in case of 'OTHER', matches Content-Language
+            number:
+              $ref: "#/components/schemas/float"
+              description: e.g. number of litres, number of kilowatthour, etc
+            units:
+              type: string
+              enum: [ LITER, KILOWATTHOUR, CO2_COMPENSATION, OTHER ]
+            extraInfo:
+              $ref: "#/components/schemas/customProperties"
+
     address:
       type: object
       description: address parts, where addressLine1 and 2 should contain the complete address, matches Content-Language
@@ -598,7 +634,7 @@ components:
         vatCountryCode:
           $ref: "#/components/schemas/country"
 
-    appSupport:
+    appSupportProperties:
       type: object
       properties:
         displayName:
@@ -638,6 +674,9 @@ components:
 
       required:
         - id
+        - appSupport
+        - assetType
+        - mode
       properties:
         id:
           $ref: "#/components/schemas/shortString"
@@ -647,7 +686,7 @@ components:
           description: for instance, a license plate or seat number. The usage of this field requires a secure environment/connection.
 
         assetType:
-          $ref: "#/components/schemas/assetTypeId"            
+          $ref: "#/components/schemas/assetTypeReference"            
         mode:
           $ref: "#/components/schemas/mode"
         subMode:
@@ -657,15 +696,15 @@ components:
         state:
           $ref: "#/components/schemas/assetState"
         eco:
-          $ref: "#/components/schemas/assetPropertiesEco"
+          $ref: "#/components/schemas/environmentalProperties"
         cargo:
-          $ref: "#/components/schemas/assetPropertiesCargo"
+          $ref: "#/components/schemas/cargoProperties"
         appSupport:
-          $ref: "#/components/schemas/appSupport"
+          $ref: "#/components/schemas/appSupportProperties"
 
-        ancillaries:
+        equipment:
           type: array
-          description: ancillaries belonging to the asset, like a child seat
+          description: (optional) equipment belonging to the asset, like a child seat
           maxItems: 100
           items:
             $ref: "#/components/schemas/requirement"
@@ -722,39 +761,6 @@ components:
            #                             https://gtfs.org/schedule/reference/#fare_mediatxt
            #                             https://gtfs.org/schedule/reference/#attributionstxt can be used in the **extraInfo** field, case sensitive.
 
-    mode:
-      type: string
-      description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA1/EA284.htm
-        description: MODE
-      enum: [ 
-        AIR,
-        BUS,
-        TROLLEYBUS,
-        TRAM,
-        COACH,
-        RAIL,
-        INTERCITYRAIL,
-        URBANRAIL,
-        METRO,
-        WATER,
-        CABLEWAY,
-        FUNICULAR,
-        TAXI,
-        SELFDRIVE,
-        FOOT,
-        BICYCLE,
-        MOTORCYCLE,
-        CAR,
-        SHUTTLE,
-        OTHER,
-        PARKING,
-        MOPED,
-        STEP,
-        FERRY
-      ]
-
     assetState:
       type: object
       description: the state of the asset, where is it, the damages, etc
@@ -786,57 +792,6 @@ components:
           maxItems: 100
           items: 
             $ref: "#/components/schemas/damage"
-
-    assetPropertiesCargo:
-      type: object
-      description: applicable properties to specify cargo space/loads
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
-        description: VEHICLE EQUIPMENT PROFILE
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
-        #  description =>
-        #  volumne =>
-        #  weight =>
-      properties:
-        description:
-          $ref: "#/components/schemas/longString"
-          description: describes options to carry cargo, should match Content-Language
-        volume:
-          $ref: "#/components/schemas/normalInt"
-          description: the volume in liters of the cargo
-        weight:
-          $ref: "#/components/schemas/normalInt"
-          description: the weight in kilograms of the cargo
-
-    assetPropertiesEco:
-      type: object
-      description: applicable properties to specify ecological/environmental aspects. Derived from GBFS.
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
-        description: VEHICLE EQUIPMENT PROFILE
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
-        #  energyLabel =>
-        #  ecoLabel =>
-        #  co2PerKm =>
-      properties:
-        energyLabel:
-          type: string
-          description: Energy efficiency label
-          enum: [ A, B, C, D, E ]
-        ecoLabel:
-          type: array
-          description: see https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
-          maxItems: 3
-          items: 
-            type: object
-            properties:
-              ecoSticker:
-                type: string
-              countryCode:
-                $ref: "#/components/schemas/country"
-        co2PerKm:
-          $ref: "#/components/schemas/float"
-          description: the emission of CO2 per km
 
     availableVehicleResponse:
       type: array
@@ -910,10 +865,6 @@ components:
             bookingState:
               $ref: "#/components/schemas/bookingState"
 
-            customer:
-              $ref: "#/components/schemas/customer"
-              description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
-
             additionalLegs:
               type: array
               description: The additional legs of this booking (one booking -> all properties are already in the booking).
@@ -924,6 +875,41 @@ components:
 
             extraInfo:
               $ref: "#/components/schemas/customProperties"
+
+    bookingConditions:
+      description: specify required information to complete a booking
+      # requiredFields =>
+      # maxReserveTime =>
+      # requiredEquipment =>
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          required:
+            - requiredFields
+          properties:
+            maxReserveTime:
+              $ref: "#/components/schemas/longInt"
+              description: Maximum time in minutes that an asset can be reserved before a rental begins.
+
+            requiredFields:
+              type: array
+              description: an array containing labels that identify specific fields that are required in the booking process<br>
+                all fields of the bookingRequest can become required, navigating with dots, square brackets and field names.<br>
+                A few examples<br>
+                 from.address.station implies that the station reference is mandatory,<br>
+                 travelers[*].age requires an age for each traveler, <br>
+                 travelers[0].licenseTypes[*].licenseCode should expose the fact that the first traveler has a driver license (f.i. D4, for a car)<br>
+                 or customer.email for the email address of the customer
+              maxItems: 50
+              items:
+                type: string
+
+            requiredEquipment:
+              type: array
+              description: required equipment to operate the asset (like a helmet)
+              maxItems: 25
+              items:
+                $ref: "#/components/schemas/requirement" 
 
     bookingOperation:
       type: string
@@ -966,21 +952,22 @@ components:
         ## customer -> TRIP REQUEST FILTER . TRIP MOBILITY FILTER . ACCESSIBILITY ASSETSSMENT
         # from -> TRIP ORIGIN PLACE
         # to -> TRIP DESTINATION PLACE
-        ## callbackUrl
       properties:
-        customer:
-          $ref: "#/components/schemas/customer"
-          description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
         from:
           $ref: "#/components/schemas/place"
-          description: information about the origin, only to supply when requested in the conditionRequireBookingData
+          description: information about the origin, only to supply when requested in the bookingConditions
         to:
           $ref: "#/components/schemas/place"
-          description: information about the destination, only to supply when requested in the conditionRequireBookingData
-        callbackUrl: 
-          $ref: "#/components/schemas/url"
-          description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /bookings/{id}/legs/{lid}/operations/ and POST /bookings/{id}/operations/. Only to be provided 
-            when this deviates from standard or agreed URL.
+          description: information about the destination, only to supply when requested in the bookingConditions
+        travelers:
+          type: array
+          description: Required (additional) information about the travelers, as requested in the bookingConditions
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/traveler"
+        customer:
+          $ref: "#/components/schemas/customer"
+          description: The user that wants to make this booking, only to supply when requested in the bookingConditions
 
     bookingResponse:
       description: a response containing a booking and the possible operations
@@ -1027,23 +1014,6 @@ components:
         description: CUSTOMER PURCHASE STATUS
       enum: [ NEW, PENDING, REJECTED, RELEASED, EXPIRED, CONFIRMED, CANCELLED, STARTED, FINISHED ]
       example: CONFIRMED
-
-    bookingStep:
-      description: a step in the booking process, where the MP should show something or an action is required from the end user/traveler
-      # action => 
-      allOf:
-      - $ref: "#/components/schemas/information"
-      - type: object
-        properties:
-          action:
-            type: string
-            description: The possible steps are described here<br>
-                  _PENDING_ show whenever the booking is in PENDING state (not confirmed)<br>
-                  _WAITING_ indicate that the TO is processing the booking, optionally after an extension of the expiry time<br>
-                  _WAITING_FOR_PAYMENT_ indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br>
-                  _CANCELLED_ show whenever the booking is cancelled<br>
-                  _EXPIRED_ show whenever the booking is expired (the expiry time has passed)<br>
-            enum: [ PENDING, WAITING, WAITING_FOR_PAYMENT, CONFIRMED, CANCELLED, EXPIRED ]
 
     card:
       description: Any kind of card that isn't a license, only provide the cards that are required
@@ -1094,7 +1064,7 @@ components:
           type: string
           description: The broad category of card<br>
             DISCOUNT - discount card, can be applied in the booking process to get rebate<br>
-            TRAVEL - external travel card, possibly paid for in other context<br>
+            TRAVEL - (external) travel card, possibly paid for in other context, but also monthly, weekly or day-cards<br>
             BANK - bank card<br>
             CREDIT - credit card<br>
             ID - identification card, like an ID card<br>
@@ -1114,6 +1084,27 @@ components:
             $ref: "#/components/schemas/shortString"
             format: operator-id
 
+    cargoProperties:
+      type: object
+      description: applicable properties to specify cargo space/loads
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
+        description: VEHICLE EQUIPMENT PROFILE
+        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
+        #  description =>
+        #  volumne =>
+        #  weight =>
+      properties:
+        description:
+          $ref: "#/components/schemas/longString"
+          description: describes options to carry cargo, should match Content-Language
+        volume:
+          $ref: "#/components/schemas/normalInt"
+          description: the volume in liters of the cargo
+        weight:
+          $ref: "#/components/schemas/normalInt"
+          description: the weight in kilograms of the cargo
+
     condition:
       type: object
       description: the superclass of all conditions
@@ -1132,229 +1123,27 @@ components:
 
     conditions:
       type: array
-      description: The conditions that apply to this leg, there may be more conditions in a parent booking and planning object (if this is returned as part of those)
-      maxItems: 25
+      description: common conditions for this TO (when supplied by `POST /discovery`), or specific conditions for this leg (when used in the LEG object).
+      maxItems: 5
       items:
         oneOf:
-          - $ref: "#/components/schemas/conditionRequiredSteps"
-          - $ref: "#/components/schemas/conditionPayment"
-          - $ref: "#/components/schemas/conditionBooking"
-          - $ref: "#/components/schemas/conditionStarting"
-          - $ref: "#/components/schemas/conditionTripExecution"
-          - $ref: "#/components/schemas/conditionTime"
-          - $ref: "#/components/schemas/conditionGeography"
-          - $ref: "#/components/schemas/conditionReturning"
+          - $ref: "#/components/schemas/conditionRequiredInteractions"
+          - $ref: "#/components/schemas/paymentConditions"
+          - $ref: "#/components/schemas/bookingConditions"
+          - $ref: "#/components/schemas/tripExecutionConditions"
           - $ref: "#/components/schemas/guarantees"
         discriminator:
           propertyName: conditionType
 
-    conditionBooking:
-      description: specify required information to complete a booking
-      # requiredFields =>
-      # maxReserveTime =>
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: object
-          required:
-            - requiredFields
-          properties:
-            maxReserveTime:
-              $ref: "#/components/schemas/longInt"
-              description: Maximum time in minutes that an asset can be reserved before a rental begins.
-
-            requiredFields:
-              type: array
-              description: an array containing labels that identify specific fields that are required in the booking process<br>
-                 _FROM_ADDRESS_ complete from.**physicalAddress** as much as possible<br>
-                 _TO_ADDRESS_  complete to.**physicalAddress** as much as possible<br>
-                 _FROM_STATION_ complete from.**station**, as derived from external sources (GBFS stations, ..)<br>
-                 _TO_STATION_ complete to.**station**, as derived from external sources (GBFS stations, ..)<br>
-                 _FROM_STOP_REFERENCE_ complete from.**stopReference**, as derived from external sources (NeTEx, ..)<br>
-                 _TO_STOP_REFERENCE_ complete to.**stopReference**, as derived from external sources (NeTEx, ..)<br>
-                 _DATE_OF_BIRTH_ complete customer.**dateOfBirth**<br>
-                 _PLACE_OF_BIRTH_ complete customer.**placeOfBirth**<br>
-                 _COUNTRY_OF_BIRTH_ complete customer.**countryOfBirth**<br>
-                 _EMAIL_ complete customer.**email**<br>
-                 _PERSONAL_ADDRESS_  complete customer.**address**<br>
-                 _PHONE_NUMBERS_ add at least one customer.**phones**<br>
-                 _LICENSES_ add applicable licensed to customer.**licenses**<br>
-                 _BANK_CARDS_ add bank card to use to customer.**cards**<br>
-                 _DISCOUNT_CARDS_ add discount card(s) to use to customer.**cards**, if any availabe<br>
-                 _TRAVEL_CARDS_ add required travel card to use to customer.**cards**<br>
-                 _ID_CARDS_ add ID card to use to customer.**cards**<br>
-                 _CREDIT_CARDS_ add credit card to use to customer.**cards**<br>
-                 _NAME_ complete name detail to at least customer.**firstName**, **lastName**<br>
-                 _FIRST_NAME_ complete first name in customer.**firstName**<br>
-                 _LAST_NAME_ complete last name in customer.**lastName**<br>
-                 _AGE_ add age at date of travel in customer.**extraInfo**['age']<br>
-              maxItems: 25
-              items:
-                type: string
-                enum: [
-                  FROM_ADDRESS,
-                  TO_ADDRESS,
-                  FROM_STATION,
-                  TO_STATION,
-                  FROM_STOP_REFERENCE,
-                  TO_STOP_REFERENCE,
-                  DATE_OF_BIRTH,
-                  PLACE_OF_BIRTH,
-                  COUNTRY_OF_BIRTH,
-                  EMAIL,
-                  PERSONAL_ADDRESS,
-                  PHONE_NUMBERS,
-                  LICENSES,
-                  BANK_CARDS,
-                  DISCOUNT_CARDS,
-                  TRAVEL_CARDS,
-                  ID_CARDS,
-                  CREDIT_CARDS,
-                  NAME,
-                  FIRST_NAME,
-                  LAST_NAME,
-                  AGE
-                ]
-
-    conditionGeography:
-      description: describes where it is allowed to travel (area, trajectory)
-      # maxBounds => 
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: object
-          properties:
-            maxBounds: 
-              $ref: "#/components/schemas/geojsonGeometry"
-              description: the maximum bounds of movement, can be an (multi)polygon (for bike sharing) or a line (for conventional public transport)
-
-    conditionPayment:
-      description: conditions regarding payment<br>
-        _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /bookings/{id}/leg/{id}/operations/FINANCIAL_TRANSATION endpoint. The requests are initiated by the TO (calling the MP)<br>
-        _PAY_WHEN_FINISHED_ - in case the TO demands a direct payment after usage, automatically done by the MP<br>
-        _UPFRONT_ - in case the TO demands a upfront payment before usage. The payment should be made in the booking phase. Additional costs could be relevant, e.g. when using the _TIME_EXTEND_ operation is executed. 
-          The MP must settle the payment before the trip can be started (using SET_IN_USE).
-      # financialAction => 
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - $ref: "#/components/schemas/amountOfMoney"
-        - type: object
-          properties:
-            financialAction:
-              type: string
-              enum: [ DEPOSIT, PAY_WHEN_FINISHED, UPFRONT ]
-
-    conditionRequiredSteps:
+    conditionRequiredInteractions:
       description: required sequence of steps to take in a specified phase of the leg. Use this condition only when the steps are different as specified in the `POST /discovery` endpoint.
       allOf:
         - $ref: "#/components/schemas/condition"
-        - $ref: "#/components/schemas/serviceSteps"
-
-    conditionReturning:
-      description: specify return conditions.
-      # stations =>
-      # returnAreas =>
-      # coordinates =>
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: object
-          properties:
-            stations:
-              type: array
-              description: to one of these stations the asset must be returned
-              maxItems: 10
-              items:
-                $ref: "#/components/schemas/stationId"              
-            returnAreas:
-              type: array
-              description: in one of these areas the asset must be returned
-              maxItems: 10
-              items:
-                $ref: "#/components/schemas/geojsonPolygon"
-            coordinates:
-              $ref: "#/components/schemas/coordinates"
-
-    conditionStarting:
-      description: it is required to use one of the enlisted ancillaries, like bike helmets or snow chains
-      # requiredAncillaries =>
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: object
-          properties:
-            requiredAncillaries:
-              $ref: "#/components/schemas/requirements"
-
-    conditionTime:
-      description: describes when it is not allowed (or with a reduction) to travel during the booked period (peak hours etc).
-      # maxDuration =>
-      # timeLimits =>
-      # returnBefore =>
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: object
-          properties:
-            maxDuration:
-              $ref: "#/components/schemas/shortInt"
-              description: the maximum duration of usage, in minutes
-            timeLimits:
-              type: array
-              items:
-                allOf:
-                  - $ref: "#/components/schemas/timeWindow"
-                  - type: object
-                    properties:
-                      limitType:
-                        type: string
-                        enum: [ NOT_ALLOWED, REDUCTION ]
-                      reductionPercentage:
-                        $ref: "#/components/schemas/shortInt"
-            returnBefore:
-              $ref: "#/components/schemas/dateTime"
-              description: the ultimate return time.
-
-    conditionTripExecution:
-      description: code of conduct items during traveling<br>
-        _NO_PETS_ - no pets are allowed in the asset<br>
-        _NO_SMOKING_ - smoking is not allowed in the asset<br>
-        _NO_TRAVEL_ABROAD_ - it is not allowed to enter another country with this asset<br>
-        _NO_UNDERGROUND_PARKING_ - it is not allowed to park the asset underground
-      # notAllowed =>
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: object
-          properties:
-            notAllowed: 
-              type: array
-              maxItems: 5
-              items:
-                type: string
-                enum: [ NO_PETS, NO_SMOKING, NO_TRAVEL_ABROAD, NO_UNDERGROUND_PARKING ]
-
-    connectedLegInfo:
-      type: object
-      description: this object describes the previous leg. It can contain f.x. a flight number, a used parking to get a discount, etc.
-      additionalProperties: false
-      # provider => TRANSPORT ORGANISATION.Id
-      # assetId => see asset
-      # assetType => TRANSPORT TYPE
-      # url => 
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2962.htm
-        description: LEG
-      properties:
-        provider:
-          description: the provider of the previous leg (usually a Transport Operator reference)
-          $ref: "#/components/schemas/uuid"
-          externalDocs:
-            url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA2/EA3552.htm
-            description: TRANSPORT ORGANISATION
-        assetId:
-          $ref: "#/components/schemas/shortString"
-          description: the identification of the previous asset (id or visualId), like a flight number. This field (in case of a specific asset) or assetType must be filled. See asset.
-        assetType:
-          $ref: "#/components/schemas/assetTypeId"
-        url:
-          $ref: "#/components/schemas/url"
-          description: the TOMP URL where the details of the previous leg can be found (if authorized), using a GET http method
-          example: https://penr.nl/tomp/bookings/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
+        - type: array
+          description: When used in the `POST /discovery`, show the default set of interactions you require. When applied in the leg, you can overrule the default interactions.
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/interaction"
 
     customer:
       description: A MaaS user that wishes to make a booking, only use the fields required by booking conditions
@@ -1622,6 +1411,36 @@ components:
           { "method": "GET", "externalType": "NeTEx", "path": "https://data.ndovloket.nl/netex/wsf/NeTEx_WSF_WSF_20231206_20231206.xml.gz", 
             "useAssetTypes": ["Route.id", "RouteLink.id"], "status": "IMPLEMENTED" }        
 
+    environmentalProperties:
+      type: object
+      description: applicable properties to specify ecological/environmental aspects. Derived from GBFS.
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
+        description: VEHICLE EQUIPMENT PROFILE
+        # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
+        #  energyLabel =>
+        #  ecoLabel =>
+        #  co2PerKm =>
+      properties:
+        energyLabel:
+          type: string
+          description: Energy efficiency label
+          enum: [ A, B, C, D, E ]
+        ecoLabel:
+          type: array
+          description: see https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
+          maxItems: 3
+          items: 
+            type: object
+            properties:
+              ecoSticker:
+                type: string
+              countryCode:
+                $ref: "#/components/schemas/country"
+        co2PerKm:
+          $ref: "#/components/schemas/float"
+          description: the emission of CO2 per km
+
     error:
       type: object
       additionalProperties: false
@@ -1656,33 +1475,6 @@ components:
         instance:
           $ref: "#/components/schemas/url"
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
-
-    extraCosts:
-      description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
-      # category
-      # description =>
-      # number =>
-      # units =>
-      allOf:
-        - $ref: "#/components/schemas/amountOfMoney"
-        - type: object
-          required:
-            - category
-            - description
-          properties:
-            category:
-              $ref: "#/components/schemas/journalCategory"
-            description:
-              $ref: "#/components/schemas/longString"
-              description: free text to describe the extra costs. Mandatory in case of 'OTHER', matches Content-Language
-            number:
-              $ref: "#/components/schemas/float"
-              description: e.g. number of litres, number of kilowatthour, etc
-            units:
-              type: string
-              enum: [ LITER, KILOWATTHOUR, CO2_COMPENSATION, OTHER ]
-            extraInfo:
-              $ref: "#/components/schemas/customProperties"
 
     fare:
       allOf:
@@ -1887,23 +1679,98 @@ components:
                  _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded
                 enum: [ ARRIVAL_TIME, REPLACEMENT_WHEN_CONNECTION_MISSED, REFUND_WHEN_CONNECTION_MISSED, REFUND_UNUSED_ANCILLARIES ]
 
-    information:
+    interaction:
       type: object
-      description: Information provided to end users
-      # source
-      # url
-      # type
-      additionalProperties: true
+      # phase =>
+      # sequenceNumber =>
+      # action =>
+      # contentType =>
+      # url =>
+      # text =>
+      required:
+        - phase
+        - sequenceNumber
+        - action
       properties:
-        type:
+        phase: 
           type: string
-          description: the purpose of the information<br>
-            _INSTRUCTIONS_ these must be shown to the traveler, e.g. to operate the asset<br>
-            _SALES_ these must be shown to the traveler
-          enum: [ INSTRUCTIONS, SALES ]
-        source:
+          enum: [ PLANNING, BOOKING, ONBOARDING, OFFBOARDING, RESUMING, PAUSING ]
+        sequenceNumber:
+          $ref: "#/components/schemas/tinyInt"
+          description: the order number of this step in a phase. Starts with 0
+        action:
           type: string
-          description: the type of the information provided<br>
+          description: "allowed actions:<br>
+            <h3>Planning</h3>
+            _RESULT_SHOWN_ action requires the MP to display some information to the customer when it is viewing the proposed legs.
+            <h3>Booking</h3>
+            _PENDING_ show whenever the booking is in PENDING state (not confirmed)<br>
+            _WAITING_ indicate that the TO is processing the booking, optionally after an extension of the expiry time<br>
+            _WAITING_FOR_PAYMENT_ indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br>
+            _CANCELLED_ show whenever the booking is cancelled<br>
+            _EXPIRED_ show whenever the booking is expired (the expiry time has passed)<br>
+            <h3>Onboarding</h3>
+            _SEND_PREPARE_ - indicate the leg is going to start <br>
+            _UNLOCK_LOCKER_ - user action - optionally triggered by the PREPARE operation<br> 
+            _DISCONNECT_CHARGER_ - requested user action <br> 
+            _SHOW_DAMAGES_ - show known damages to end user <br> 
+            _UNLOCK_ASSET_ - requested user action or triggered by SET_IN_USE operation <br> 
+            _START_ASSET_ - requested user action <br> 
+            _SEND_OPEN_TRUNK_ - request TO to open trunk/helmet case remotely<br> 
+            _UNLOCK_TRUNK_ - requested user action <br> 
+            _TAKE_HELMET_ - requested user action <br> 
+            _SEND_SET_IN_USE_ - request to start leg <br> 
+            _SEND_ASSIGN_ASSET_ - request to assign the specified asset to the leg <br> 
+            _LOCK_LOCKER_ - requested user action <br>
+            <h3>Pausing</h3>
+            _SEND_PAUSE_ - send leg operations PAUSE to inform the TO<br>
+            _PARK_ASSIST_ - user action, the end user can be informed how and where to park<br>
+            _LOCK_ASSET_ - user action, can be triggered by the PAUSE operations<br>
+            _SEND_OPEN_TRUNK_ - request TO to open the trunk remotely<br>
+            _UNLOCK_TRUNK_ - user action<br>
+            _STOW_HELMET_ - user action<br>
+            _LOCK_TRUNK_ - user action<br>
+            <h3>Resuming</h3>
+            _UNLOCK_ASSET_ - user action, could be triggered by SET_IN_USE operations<br>
+            _SEND_OPEN_TRUNK_ - request TO to open trunk remotely<br>
+            _UNLOCK_TRUNK_ - user action<br>
+            _TAKE_HELMET_ - user action<br>
+            _LOCK_TRUNK_ - user action<br>
+            _START_ASSET_ - user action<br>
+            _SEND_SET_IN_USE_ - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the asset
+            <h3>Offboarding</h3>
+            _SEND_START_FINISHING_ - the TO needs to be informed the leg is about to finish<br>
+            _PARK_ASSIST_ - user action to park (stop) using the asset<br>
+            _UNLOCK_LOCKER_ - user action, could be triggered by the START_FINISH operation<br>
+            _CONNECT_CHARGER_ - user action<br>
+            _LOCK_ASSET_ - user action, could be triggered by the FINISH operation<br>
+            _SEND_OPEN_TRUNK_ - the TO opens the trunk remotely <br>
+            _UNLOCK_TRUNK_ - user action <br>
+            _STOW_HELMET_ - user action <br>
+            _LOCK_TRUNK_ - user action <br>
+            _LOCK_LOCKER_ - user action <br>
+            _SEND_FINISH_ - the TO wants to be informed about the end of the leg<br>
+            _SEND_EVIDENCE_PARKED_ - the TO requires parking evidence<br>
+            _SEND_EVIDENCE_HELMET_ - the TO requires evidence of storing the helmet<br>
+            _SEND_EVIDENCE_CHARGER_ - the TO requires evidence of correct usage of the charger"
+          enum: [
+            RESULT_SHOWN, # planning, actor: MP, show INFO
+            PENDING, WAITING, WAITING_FOR_PAYMENT, CONFIRMED, CANCELLED, EXPIRED, # booking, actor: MP, show INFO 
+            SEND_PREPARE, SEND_OPEN_TRUNK, SEND_SET_IN_USE, SEND_ASSIGN_ASSET, # operations, actor: MP, call operations endpoint & show INFO
+            UNLOCK_LOCKER, LOCK_LOCKER, # locker, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
+            CONNECT_CHARGER, DISCONNECT_CHARGER, # charger, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
+            SHOW_DAMAGES, # actor: MP, show INFO damages
+            UNLOCK_ASSET, START_ASSET, LOCK_ASSET, # asset, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
+            UNLOCK_TRUNK, LOCK_TRUNK, # trunk, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
+            TAKE_HELMET, STOW_HELMET, # helmet, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
+            SEND_PAUSE, # pausing, actor: MP, calls operation endpoint & show INFO
+            PARK_ASSIST, # parking, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
+            SEND_START_FINISHING, SEND_FINISH, # offboarding, actor: MP, calls operation endpoint & shows INFO
+            SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER # actor: MP request end user action to make pictures, end user: follow INSTRUCTIONS & MP, calls operation endpoint
+          ]
+        contentType:
+          type: string
+          description: the type of the information/instructions<br>
            _URL_ the **url** contains a HTML page to be displayed<br>
            _IMAGE_ the **url** contains an image in a well-known format<br>
            _PLAIN_TEXT_ the **text** contains the text<br>
@@ -1911,7 +1778,7 @@ components:
           enum: [ URL, IMAGE, PLAIN_TEXT, HTML ]
         url:
           $ref: "#/components/schemas/url"
-          description: the internet location of the information, used in case or type `URL` or `IMAGE`
+          description: the internet location of the information/instructions, used in case or type `URL` or `IMAGE`
         text:
           $ref: "#/components/schemas/longString"
           description: free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE` 
@@ -1936,7 +1803,7 @@ components:
       - $ref: "#/components/schemas/fare"
       - type: object
         description: each leg will result in at least one journal entry, containing a small summary of the leg (distance, duration).
-          The **amount** must be derivable from the **parts** and **extraCosts**.
+          The **amount** must be derivable from the **parts** and **additionalCosts**.
         additionalProperties: true
         properties:
           id:
@@ -1984,7 +1851,7 @@ components:
           additionalCosts:
             type: array
             items:
-              $ref: "#/components/schemas/extraCosts"
+              $ref: "#/components/schemas/additionalCosts"
 
     journalState:
       type: string
@@ -2006,13 +1873,14 @@ components:
         _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br>
         _DEPOSIT_ - a deposit, to be refunded using _REFUND_<br>
         _OTHER_ - unspecified<br>
-        _FARE_ - the costs of the booked leg(s)<br>
+        _FARE_ - the normal costs of the booked and executed leg(s)<br>
       enum: [ ALL, DAMAGE, LOSS, STOLEN, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, CREDIT, VOUCHER, DEPOSIT, OTHER, FARE ]
 
     leg:
       type: object
       description: A planned (segment of) a booked trip using one asset type
       required:
+        - id
         - from
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2962.htm
@@ -2021,7 +1889,7 @@ components:
         # OR https://www.transmodel-cen.eu/model/EARoot/EA2/EA2/EA5/EA645.htm (PATH LINK IN SEQUENCE)
       # id
       # sequenceNumber
-      # travelerReferenceNumber
+      # travelerReference
       # from
       # to
       # startTime
@@ -2031,30 +1899,31 @@ components:
       # conditions
       # assetType
       # asset
-      # suboperator
+      # operator
       # fulfilment
       # userCommunication
       # memo
       properties:
         id:
           $ref: "#/components/schemas/uuid"
-          description: The unique identifier (TO) of this leg
+          description: The unique identifier (TO) of this leg. Must always the same as applied in the request URL. And when there are not additional legs in the booking, the same **id** as the booking id.
+        from:
+          $ref: "#/components/schemas/place"
+          description: The departure location of this leg, using this asset type. Mandatory.
+        to:
+          $ref: "#/components/schemas/place"
+          description: The destination of this leg, using this asset type.
+
         sequenceNumber:
           $ref: "#/components/schemas/shortInt"
-          description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
-        travelerReferenceNumbers:
+          description: The order of the leg in the booking. Mandatory, if there are multiple legs in the booking. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one booking.
+
+        travelerReference:
           type: array
-          description: reference to the travelers field of the request. If missing, it is refering to the first (if any). it is an array to facilitate multiple users on one leg (e.g. using a car). If multiple access informations are needed, please create a leg per used asset.
+          description: reference to the travelers field of the trip request. Mandatory when multiple travelers are used.
           maxItems: 10
           items:
             $ref: "#/components/schemas/shortInt"
-
-        from:
-          $ref: "#/components/schemas/place"
-          description: The departure location of this leg, using this asset type
-        to:
-          $ref: "#/components/schemas/place"
-          description: The destination of this leg, using this asset type
 
         startTime:
           $ref: "#/components/schemas/dateTime"
@@ -2068,38 +1937,32 @@ components:
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2958.htm
             description: TRIP PATTERN.EndTime
+
         legState:
           $ref: "#/components/schemas/legState"
 
         price:
           $ref: "#/components/schemas/fare"
-          description: The leg-specific price information, all fares are additive, if the booking does not have price set all legs should
+          description: The leg-specific price information. The price can be calculated using all parts.
 
         conditions:
           $ref: "#/components/schemas/conditions"
-          description: additional/different conditions as the general conditions in the `POST /discovery` endpoint
+          description: additional/different conditions compared with the general conditions in the `POST /discovery` endpoint
 
         assetType:
-          $ref: "#/components/schemas/assetTypeId"
+          $ref: "#/components/schemas/assetTypeReference"
           description: The asset type used in this leg as determined during booking
         asset:
           $ref: "#/components/schemas/asset"
           description: The concrete asset used for the execution of the leg
 
-        suboperator:
-          $ref: "#/components/schemas/suboperator"
+        operator:
+          $ref: "#/components/schemas/operator"
 
         fulfillment:
           $ref: "#/components/schemas/fulfilment"
           description: The MaaS users proof of their right to travel on this leg (visual representable) OR
             data to open an asset
-
-        userCommunication:
-          type: array
-          maxItems: 100
-          items: 
-            $ref: "#/components/schemas/information" 
-          description: Additional information a TO can send to a customer (instructions, sales info, ...)
 
         memo:
           $ref: "#/components/schemas/longString"
@@ -2191,6 +2054,35 @@ components:
        _CANCELLED_ the leg has been cancelled (so there must be other legs)
       enum: [ NOT_STARTED, PREPARING, IN_USE, PAUSED, FINISHING, FINISHED, ISSUE_REPORTED, CANCELLED ]
 
+    legSummary:
+      type: object
+      description: this object describes the leg. It can contain f.x. a flight number, a used parking to get a discount, etc.
+      additionalProperties: false
+      # operator => TRANSPORT ORGANISATION.Id
+      # assetId => see asset
+      # assetType => TRANSPORT TYPE
+      # url => 
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2962.htm
+        description: LEG
+      properties:
+        operator:
+          description: the operator of the leg (usually a Transport Operator reference)
+          $ref: "#/components/schemas/uuid"
+          externalDocs:
+            url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA2/EA3552.htm
+            description: TRANSPORT ORGANISATION
+        assetId:
+          $ref: "#/components/schemas/shortString"
+          description: the identification of the asset (id or visualId), like a flight number. This field (in case of a specific asset) or assetType must be filled. See asset.
+        assetType:
+          $ref: "#/components/schemas/assetTypeReference"
+
+        url:
+          $ref: "#/components/schemas/url"
+          description: the TOMP URL where the details of the previous leg can be found (if authorized), using a GET http method
+          example: https://penr.nl/tomp/bookings/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
+
     license:
       description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
       # number
@@ -2203,10 +2095,6 @@ components:
             number:
               $ref: "#/components/schemas/shortString"
               example: "1287948792"
-            licenseCode:
-              $ref: "#/components/schemas/shortString"
-              description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
-              example: D4
             endValidity:
               $ref: "#/components/schemas/date"
 
@@ -2221,6 +2109,10 @@ components:
       properties:
         mode:
           $ref: "#/components/schemas/mode"
+        licenseCode:
+          $ref: "#/components/schemas/shortString"
+          description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
+          example: D4
         issuingCountry:
           $ref: "#/components/schemas/country"
 
@@ -2259,82 +2151,38 @@ components:
         detail:
           $ref: "#/components/schemas/operationRequest"
 
-    offBoardingStep:
-      # action
-      allOf:
-        - $ref: "#/components/schemas/information"
-        - type: object
-          properties:
-            action:
-              type: string
-              description: these actions are available<br>
-                _SEND_START_FINISHING_ - the TO needs to be informed the leg is about to finish<br>
-                _PARK_ASSIST_ - user action to park (stop) using the asset<br>
-                _UNLOCK_LOCKER_ - user action, could be triggered by the START_FINISH operation<br>
-                _CONNECT_CHARGER_ - user action<br>
-                _LOCK_ASSET_ - user action, could be triggered by the FINISH operation<br>
-                _SEND_OPEN_TRUNK_ - the TO opens the trunk remotely <br>
-                _UNLOCK_TRUNK_ - user action <br>
-                _STOW_HELMET_ - user action <br>
-                _LOCK_TRUNK_ - user action <br>
-                _LOCK_LOCKER_ - user action <br>
-                _SEND_FINISH_ - the TO wants to be informed about the end of the leg<br>
-                _SEND_EVIDENCE_PARKED_ - the TO requires parking evidence<br>
-                _SEND_EVIDENCE_HELMET_ - the TO requires evidence of storing the helmet<br>
-                _SEND_EVIDENCE_CHARGER_ - the TO requires evidence of correct usage of the charger 
-              enum: [
-                SEND_START_FINISHING, 
-                PARK_ASSIST, 
-                UNLOCK_LOCKER,
-                CONNECT_CHARGER, 
-                LOCK_ASSET,
-                SEND_OPEN_TRUNK, 
-                UNLOCK_TRUNK,
-                STOW_HELMET, 
-                LOCK_TRUNK, 
-                LOCK_LOCKER,
-                SEND_FINISH, 
-                SEND_EVIDENCE_PARKED, 
-                SEND_EVIDENCE_HELMET, 
-                SEND_EVIDENCE_CHARGER
-              ]
-
-    onBoardingStep:
-      # action
-      allOf:
-        - $ref: "#/components/schemas/information"
-        - type: object
-          properties:
-            action:
-              type: string
-              description:
-                The possible steps are described here<br>
-                _SEND_PREPARE_ - indicate the leg is going to start <br>
-                _UNLOCK_LOCKER_ - user action - optionally triggered by the PREPARE operation<br> 
-                _DISCONNECT_CHARGER_ - requested user action <br> 
-                _SHOW_DAMAGES_ - show known damages to end user <br> 
-                _UNLOCK_ASSET_ - requested user action or triggered by SET_IN_USE operation <br> 
-                _START_ASSET_ - requested user action <br> 
-                _SEND_OPEN_TRUNK_ - request TO to open trunk/helmet case remotely<br> 
-                _UNLOCK_TRUNK_ - requested user action <br> 
-                _TAKE_HELMET_ - requested user action <br> 
-                _SEND_SET_IN_USE_ - request to start leg <br> 
-                _SEND_ASSIGN_ASSET_ - request to assign the specified asset to the leg <br> 
-                _LOCK_LOCKER_ - requested user action 
-              enum: [
-                SEND_PREPARE,
-                UNLOCK_LOCKER,
-                DISCONNECT_CHARGER, 
-                SHOW_DAMAGES,
-                UNLOCK_ASSET, 
-                START_ASSET,
-                SEND_OPEN_TRUNK, 
-                UNLOCK_TRUNK, 
-                TAKE_HELMET, 
-                SEND_SET_IN_USE, 
-                SEND_ASSIGN_ASSET,
-                LOCK_LOCKER
-              ]
+    mode:
+      type: string
+      description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA1/EA284.htm
+        description: MODE
+      enum: [ 
+        AIR,
+        BUS,
+        TROLLEYBUS,
+        TRAM,
+        COACH,
+        RAIL,
+        INTERCITYRAIL,
+        URBANRAIL,
+        METRO,
+        WATER,
+        CABLEWAY,
+        FUNICULAR,
+        TAXI,
+        SELFDRIVE,
+        FOOT,
+        BICYCLE,
+        MOTORCYCLE,
+        CAR,
+        SHUTTLE,
+        OTHER,
+        PARKING,
+        MOPED,
+        STEP,
+        FERRY
+      ]
 
     oneStopBookingRequest:
       externalDocs:
@@ -2347,10 +2195,7 @@ components:
         properties:
           customer:
             $ref: "#/components/schemas/customer"
-            description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
-          callbackUrl: 
-            $ref: "#/components/schemas/url"
-            description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /bookings/{id}/legs/{lid}/operations and POST /bookings/{id}/operations. Only to be provided when this deviates from standard or agreed URL.
+            description: The user that wants to make this booking
 
     operationRequest:
       type: object
@@ -2370,7 +2215,7 @@ components:
       # notificationType => PI REQUEST FILTER
       # ancillaryCategory => PI REQUEST FILTER
       # ancillaryNumber => PI REQUEST FILTER
-      # transaction => PI REQUEST FILTER
+      # additionalCosts => PI REQUEST FILTER
       additionalProperties: false
       required:
         - timestamp
@@ -2395,18 +2240,18 @@ components:
 
         source:
           type: string
-          description: This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this booking for me); to override the default source. 
+          description: This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this booking for me); to override the default source.<br>
             In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
             _TO_ the TO requests this operation<br>
             _MP_ the MP (not triggered by the travelers NOR customer)<br>
             _TRAVELER_ the TRAVELER triggered this request<br>
-            _CUSTOMER_ the CUSTOMER triggered this request. In case the traveler and customer are the same, take _CUSTOMER_.
+            _CUSTOMER_ the CUSTOMER triggered this request. In case the traveler and customer are the same, take _CUSTOMER_.<br>
             _OTHER_ unknown source
           enum: [ TO, MP, TRAVELER, CUSTOMER, OTHER ]
 
         # for CONFIRMATION purposes
         assetType:
-          $ref: "#/components/schemas/assetTypeId"
+          $ref: "#/components/schemas/assetTypeReference"
           description: the asset type reference of the replacing asset
 
         # EXTEND_EXPIRY_TIME
@@ -2443,8 +2288,35 @@ components:
           pattern: "[0-9]{2}"
 
         # FINANCIAL_TRANSACTION
-        transaction:
-          $ref: "#/components/schemas/extraCosts"
+        additionalCosts:
+          $ref: "#/components/schemas/additionalCosts"
+    
+    operator:
+      type: object
+      description: The operator of a leg or asset, in case this is not the TO itself but should be shown to the user
+      additionalProperties: false
+      # name
+      # operatorId
+      # description
+      # contact
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/shortString"
+          description: Name of the operator, could match Content-Language
+        operatorId:
+          $ref: "#/components/schemas/shortString"
+          description: the ID from the operator
+          externalDocs:
+            url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA2/EA3552.htm
+            description: TRANSPORT ORGANISATION
+        description:
+          $ref: "#/components/schemas/longString"
+          description: short description of the operator, should match Content-Language
+        contact:
+          $ref: "#/components/schemas/normalString"
+          description: contact information, should match Content-Language
 
     otherAccess:
       description: Generic fulfilment, non-standardized (yet)
@@ -2452,35 +2324,29 @@ components:
         - $ref: "#/components/schemas/fulfilmentBase"
         - $ref: "#/components/schemas/customProperties"
 
-    pausingStep:
-      # action =>
+    paymentConditions:
+      description: conditions regarding payment<br>
+        _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /bookings/{id}/leg/{id}/operations/FINANCIAL_TRANSATION endpoint. The requests are initiated by the TO (calling the MP)<br>
+        _PAY_WHEN_FINISHED_ - in case the TO demands a direct payment after usage, automatically done by the MP<br>
+        _UPFRONT_ - in case the TO demands a upfront payment before usage. The payment should be made in the booking phase. Additional costs could be relevant, e.g. when using the _TIME_EXTEND_ operation is executed. 
+          The MP must settle the payment before the trip can be started (using SET_IN_USE).
+      # momentOfPayment => 
+      required:
+        - momentOfPayment
       allOf:
-      - $ref: "#/components/schemas/information"
-      - type: object
-        properties:
-          action:
-            type: string
-            description: allowed actions<br>
-              _SEND_PAUSE_ - send leg operations PAUSE to inform the TO<br>
-              _PARK_ASSIST_ - user action, the end user can be informed how and where to park<br>
-              _LOCK_ASSET_ - user action, can be triggered by the PAUSE operations<br>
-              _SEND_OPEN_TRUNK_ - request TO to open the trunk remotely<br>
-              _UNLOCK_TRUNK_ - user action<br>
-              _STOW_HELMET_ - user action<br>
-              _LOCK_TRUNK_ - user action
-            enum: [
-              SEND_PAUSE,
-              PARK_ASSIST, 
-              LOCK_ASSET,
-              SEND_OPEN_TRUNK,
-              UNLOCK_TRUNK,
-              STOW_HELMET, 
-              LOCK_TRUNK 
-            ]
+        - $ref: "#/components/schemas/condition"
+        - $ref: "#/components/schemas/amountOfMoney"
+        - type: object
+          properties:
+            momentOfPayment:
+              type: string
+              enum: [ DEPOSIT, PAY_WHEN_FINISHED, UPFRONT ]
 
     phone:
       type: object
       additionalProperties: false
+      required:
+        - number
       properties:
         preferred:
           type: boolean
@@ -2522,24 +2388,12 @@ components:
         stopReference:
           $ref: "#/components/schemas/stopReference"
         station:
-          $ref: "#/components/schemas/stationId"
+          $ref: "#/components/schemas/stationReference"
           description: reference to a station
         physicalAddress:
           $ref: "#/components/schemas/address"
         extraInfo:
           $ref: "#/components/schemas/customProperties"
-
-    planningStep:
-      description: this action allows to publish advertisements together with the proposed leg.
-      # action =>
-      allOf:
-      - $ref: "#/components/schemas/information"
-      - type: object
-        properties:
-          action:
-            type: string
-            description: the _RESULT_SHOWN_ action requires the MP to display some information to the customer when it is viewing the proposed legs.
-            enum: [ RESULT_SHOWN ]
 
     processIdentifiers:
       type: object
@@ -2588,7 +2442,7 @@ components:
 
     requirement:
       type: object
-      description: describes an (dis)ability or ancillary.
+      description: describes an (dis)ability or ancillary/equipment item.
       # source
       # category
       # number
@@ -2626,51 +2480,7 @@ components:
         extraInfo:
           $ref: "#/components/schemas/customProperties"
           # possible items: variableNumber (referencing to [variable number] in the traveler's dictionary)
-          #          type: conditionally extra information, referencing to the 3th column
-
-    requirements:
-      description: Requirements from the end user side.
-      # abilities
-      # travelersBelonings
-      additionalProperties: false
-      type: object
-      properties:
-        abilities: 
-          type: array
-          maxItems: 25
-          items:
-            $ref: "#/components/schemas/requirement" 
-        travelersBelonings:
-          type: array
-          maxItems: 25
-          items:
-            $ref: "#/components/schemas/requirement" 
-
-    resumingStep:
-      # action
-      allOf:
-      - $ref: "#/components/schemas/information"
-      - type: object
-        properties:
-          action:
-            type: string
-            description: possible values<br>
-              _UNLOCK_VEHICLE_ - user action, could be triggered by SET_IN_USE operations<br>
-              _SEND_OPEN_TRUNK_ - request TO to open trunk remotely<br>
-              _UNLOCK_TRUNK_ - user action<br>
-              _TAKE_HELMET_ - user action<br>
-              _LOCK_TRUNK_ - user action<br>
-              _START_VEHICLE_ - user action<br>
-              _SEND_SET_IN_USE_ - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the asset
-            enum: [
-              UNLOCK_VEHICLE,
-              SEND_OPEN_TRUNK,
-              UNLOCK_TRUNK, 
-              TAKE_HELMET,
-              LOCK_TRUNK,
-              START_VEHICLE,
-              SEND_SET_IN_USE
-            ]
+          #                 type: conditionally extra information, referencing to the 3th column
 
     serviceDescription:
       type: object
@@ -2691,49 +2501,6 @@ components:
           $ref: "#/components/schemas/processIdentifiers"
         conditions:
           $ref: "#/components/schemas/conditions"
-
-    serviceSteps:
-      type: object
-      description: The steps can be specified here, when they are uniform over all assets. If some assets should be handled differently, it can be specified as a condition in the booking for that specific asset(type).
-        The arrays should be considered as sequences.
-      # planning
-      # booking
-      # onBoarding
-      # offBoarding
-      # pausing
-      # resuming
-      additionalProperties: false
-      properties:
-        planning:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/planningStep"
-        booking:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/bookingStep"
-        onBoarding:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/onBoardingStep"
-        offBoarding:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/offBoardingStep"
-        pausing:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/pausingStep"
-        resuming:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/resumingStep"
 
     stopReference:
       type: object
@@ -2763,38 +2530,11 @@ components:
         id:
           $ref: "#/components/schemas/shortString"
           description: this field should contain the complete ID. E.g. NL:S:13121110 or BE:S:79640040
+        country:
+          $ref: "#/components/schemas/country"
         definition:
           $ref: "#/components/schemas/url"
           description: a URL where the definition of these stopReferences can be found
-        country:
-          $ref: "#/components/schemas/country"
-
-    suboperator:
-      type: object
-      description: The operator of a leg or asset, in case this is not the TO itself but should be shown to the user
-      additionalProperties: false
-      # name
-      # operatorId
-      # description
-      # contact
-      required:
-        - name
-      properties:
-        name:
-          $ref: "#/components/schemas/shortString"
-          description: Name of the operator, could match Content-Language
-        operatorId:
-          $ref: "#/components/schemas/shortString"
-          description: the ID from the operator
-          externalDocs:
-            url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA2/EA3552.htm
-            description: TRANSPORT ORGANISATION
-        description:
-          $ref: "#/components/schemas/longString"
-          description: short description of the operator, should match Content-Language
-        contact:
-          $ref: "#/components/schemas/normalString"
-          description: contact information, should match Content-Language
 
     supportRequest:
       type: object
@@ -2811,6 +2551,10 @@ components:
       # requestedResponseTime
       # urls
       additionalProperties: true
+      required:
+      - supportType
+      - location
+      - timestamp
       properties:
         supportType:
           type: string
@@ -2871,10 +2615,13 @@ components:
         description: PI DELIVERY
       # status
       # timeToResolution
-      # order
+      # order      
       allOf:
         - $ref: '#/components/schemas/supportRequest'
         - type: object
+          required:
+          - status
+          - order
           properties:
             status:
               type: string
@@ -2904,7 +2651,8 @@ components:
       # referenceNumber
       # cardTypes
       # licenseTypes
-      # requirements
+      # travelersNeeds
+      # travelersBelongings
       additionalProperties: true
       properties:
         isValidated:
@@ -2928,8 +2676,16 @@ components:
           items:
             $ref: "#/components/schemas/licenseType"
           description: The kind of licenses this traveler possesses
-        requirements:
-          $ref: "#/components/schemas/requirements"
+        travelersNeeds: 
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/requirement" 
+        travelersBelonings:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/requirement" 
 
     tripRequest:
       type: object
@@ -2963,7 +2719,7 @@ components:
             If only the arrival time is specified, this is an implicit request for a guaranteed arrival at that time.
         endTime:
           $ref: "#/components/schemas/dateTime"
-          description: The intended arrival time, at the `to place`. If not set, the time the user intends to stop using the asset (implicit request for arrival guarantee).
+          description: The intended arrival time, at the `to place`. When the **startTime** is not set, and **endTime** is set, it is an implicit request for an arrival time guarantee.
         useAssets:
           type: array
           maxItems: 10
@@ -2974,7 +2730,7 @@ components:
           type: array
           maxItems: 10
           items:
-            $ref: "#/components/schemas/assetTypeId"
+            $ref: "#/components/schemas/assetTypeReference"
           description: The specific asset type(s) the user wishes to receive trip options for. See also endpoint.useAssetTypes specification
           
         nrOfTravelers:
@@ -2982,19 +2738,21 @@ components:
           description: The number of people that intend to travel. Do not use when *travelers* is used.
           minimum: 1
           default: 1
-        radius:
+        maximumDistance:
           $ref: "#/components/schemas/normalInt"
           description: Maximum distance in meters a user wants to travel to reach the travel option
+        
         previousLegs:
           type: array
+          description: the (booked) legs preceding this leg, can be used to determine a discount or right to book this leg.
           maxItems: 10
           items:
-            $ref: "#/components/schemas/connectedLegInfo"
+            $ref: "#/components/schemas/legSummary"
             
         estimatedDistance:
           $ref: "#/components/schemas/longInt"
-          description: instead of using the from/to construct, it is also possible to give an indication of the distance to travel. 
-            The process identifier 'USE_ESTIMATED_DISTANCE' is used to indicate this scenario. Also in meters
+          description: instead of using the from/to construct to estimate the distance to travel, it is possible to indicate it directly. 
+            The process identifier 'USE_ESTIMATED_DISTANCE' is used to make it mandatory. In meters.
 
         travelers:
           type: array
@@ -3004,13 +2762,73 @@ components:
             $ref: "#/components/schemas/traveler"
         userGroups:
           type: array
-          description: Id(s) of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. Id's are agreed upon by TO and MP.
+          description: Id(s) of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. The IDs are agreed upon by TO and MP.
           maxItems: 10
           items:
             type: string
             format: a usergroup id for this operator
         extraInfo:
           $ref: "#/components/schemas/customProperties"
+
+    tripExecutionConditions:
+      description: conditions during the trip
+      # codeOfConduct =>
+      # returnBefore =>
+      # returnStations =>
+      # returnAreas =>
+      # returnBefore =>
+      # maxBounds =>
+      # timeLimits =>
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          properties:
+            codeOfConduct: 
+              type: array
+              description: code of conduct items during traveling<br>
+                _NO_PETS_ - no pets are allowed in the asset<br>
+                _NO_SMOKING_ - smoking is not allowed in the asset<br>
+                _NO_TRAVEL_ABROAD_ - it is not allowed to enter another country with this asset<br>
+                _NO_UNDERGROUND_PARKING_ - it is not allowed to park the asset underground
+              maxItems: 5
+              items:
+                type: string
+                enum: [ NO_PETS, NO_SMOKING, NO_TRAVEL_ABROAD, NO_UNDERGROUND_PARKING ]
+
+            # return conditions
+            returnBefore:
+              $ref: "#/components/schemas/dateTime"
+              description: the ultimate return time.
+
+            returnStations:
+              type: array
+              description: to one of these stations the asset must be returned
+              maxItems: 10
+              items:
+                $ref: "#/components/schemas/stationReference"              
+            returnAreas:
+              type: array
+              description: in one of these areas the asset must be returned
+              maxItems: 10
+              items:
+                $ref: "#/components/schemas/geojsonPolygon"
+
+            # movement limitations
+            maxBounds: 
+              $ref: "#/components/schemas/geojsonGeometry"
+              description: the maximum bounds of movement, can be an (multi)polygon (for bike sharing) or a line, a trajectory (for conventional public transport)
+            timeLimits:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/components/schemas/timeWindow"
+                  - type: object
+                    properties:
+                      limitType:
+                        type: string
+                        enum: [ NOT_ALLOWED, REDUCTION ]
+                      reductionPercentage:
+                        $ref: "#/components/schemas/shortInt"
 
     tripOptionsResponse:
       type: object
@@ -3035,7 +2853,7 @@ components:
             $ref: "#/components/schemas/bookingResponse"
 
   # external references
-    assetTypeId:
+    assetTypeReference:
       type: string
       description: an URI/UUID/ID referencing an asset type. Look at endpoint.useAssetTypes for possibilities.
       externalDocs:
@@ -3044,9 +2862,9 @@ components:
       # or https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3581.htm (VEHICLE TYPE)
       maxLength: 50
 
-    stationId:
+    stationReference:
       type: string
-      description: an ID of station, from an external source (NeTEx, GBFS)
+      description: a reference to an ID of station, from an external source (NeTEx, GBFS)
       maxLength: 50
 
   # GeoJSON specs
@@ -3343,6 +3161,14 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/uuid"
+    callbackUrl: 
+      in: header
+      name: callback-url
+      description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /bookings/{id}/legs/{lid}/operations/ and POST /bookings/{id}/operations/. Only to be provided 
+        when this deviates from standard or agreed URL.
+      required: false
+      schema:
+        $ref: "#/components/schemas/url"
 
   headers:
     contentLanguage:
