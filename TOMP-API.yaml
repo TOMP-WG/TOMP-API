@@ -4,7 +4,7 @@ info:
   description:
     "<h3>Context</h3>
     It allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
-    It provides functions for Booking, Trip Execution, Support, Payment and Operation Information.<br><br>
+    It provides functions for Planning & Booking, Trip Execution, Support, Payment and Operation Information.<br><br>
 
     For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>.<br><br>
 
@@ -28,8 +28,11 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
+  - name: planning
+    description: The <u>PLANNING MODULE</u> contains functionality to request offers.
+
   - name: booking
-    description: The <u>BOOKING MODULE</u> contains functionality to request offers, book them or create bookings directly based on external information. Allows also to cancel or commit a non-final booking.
+    description: The <u>BOOKING MODULE</u> contains functionality to book offers or create bookings directly based on external information. Allows also to cancel or commit a non-final booking.
 
   - name: trip execution
     description: The <u>TRIP EXECUTION MODULE</u> contains functionality to execute the booked leg(s). Operations like starting, pausing and ending, but also functions like adding/removing ancillaries.
@@ -69,7 +72,7 @@ paths:
       summary: "[MP->TO] get trip offers to get from A to B"
       description: Returns offers (bookable trips) based on user requirements
       tags:
-        - booking
+        - planning
       requestBody:
         description: the initial request, containing locations, timestamps, CARD TYPEs and LICENSE TYPEs, and personal preferences/(dis)abilities. Can also contain a direct reference to an ASSET or ASSET TYPE.
         content:
@@ -826,7 +829,7 @@ components:
           $ref: "#/components/schemas/shortString"
           description: bank identification, like BIC code
 
-    binaryAccess:
+    binaryAccessInfo:
       description: Binary information, like a image or certificate
       # base64 =>
       # version =>
@@ -1127,23 +1130,13 @@ components:
       maxItems: 5
       items:
         oneOf:
-          - $ref: "#/components/schemas/conditionRequiredInteractions"
+          - $ref: "#/components/schemas/requiredInteractionsCondition"
           - $ref: "#/components/schemas/paymentConditions"
           - $ref: "#/components/schemas/bookingConditions"
           - $ref: "#/components/schemas/tripExecutionConditions"
           - $ref: "#/components/schemas/guarantees"
         discriminator:
           propertyName: conditionType
-
-    conditionRequiredInteractions:
-      description: required sequence of steps to take in a specified phase of the leg. Use this condition only when the steps are different as specified in the `POST /discovery` endpoint.
-      allOf:
-        - $ref: "#/components/schemas/condition"
-        - type: array
-          description: When used in the `POST /discovery`, show the default set of interactions you require. When applied in the leg, you can overrule the default interactions.
-          maxItems: 50
-          items:
-            $ref: "#/components/schemas/interaction"
 
     customer:
       description: A MaaS user that wishes to make a booking, only use the fields required by booking conditions
@@ -1267,7 +1260,7 @@ components:
           items:
             $ref: "#/components/schemas/url"
 
-    deeplinkAccess:
+    deeplink:
       description: deeplink info
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2421.htm
@@ -1309,7 +1302,7 @@ components:
               $ref: "#/components/schemas/url"
               description: download url for html/pdf
 
-    eKeyAccess:      
+    eKey:
       description: Axa EKey information
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2421.htm
@@ -1608,10 +1601,10 @@ components:
         description: TRAVEL DOCUMENT
       oneOf:
       - $ref: "#/components/schemas/digitalTicket"
-      - $ref: "#/components/schemas/deeplinkAccess"
-      - $ref: "#/components/schemas/eKeyAccess"
-      - $ref: "#/components/schemas/binaryAccess"
-      - $ref: "#/components/schemas/otherAccess"
+      - $ref: "#/components/schemas/deeplink"
+      - $ref: "#/components/schemas/eKey"
+      - $ref: "#/components/schemas/binaryAccessInfo"
+      - $ref: "#/components/schemas/otherAccessInfo"
       discriminator:
         propertyName: fulfilmentType
 
@@ -1634,7 +1627,7 @@ components:
         fulfilmentType:
           type: string
           description: The type of data held in this fulfilment, used as discriminator field
-          enum: [ "digitalTicket", "deeplinkAccess", "eKeyAccess", "binaryAccess", "otherAccess" ]
+          enum: [ "digitalTicket", "deeplink", "eKey", "binaryAccessInfo", "otherAccessInfo" ]
         fulfilmentSubType: 
           type: string
           description: how this type is implemented?<br>
@@ -1650,14 +1643,14 @@ components:
             _TOMP_API_ The 'SET_IN_USE' operation will open the asset<br>
             _NONE_ unspecified
           enum:  [ 
-            # DIGITAL_TICKET
+            # digitalTicket
             PDF, HTML, 
-            # DEEPLINK_ACCESS
+            # deeplink
             DEEPLINK, 
-            # EKEY
+            # eKey
             AXA_EKEY_OTP, 
-            # BINARY_ACCESS
-            QR, AZTEC, BARCODE, 
+            # binaryAccessInfo
+            QR, AZTEC, BARCODE, CERTIFICATE,
             # OTHER
             TOMP_API, PHYSICAL_KEY, EXTERNAL_CARD, NONE
           ]
@@ -2318,7 +2311,7 @@ components:
           $ref: "#/components/schemas/normalString"
           description: contact information, should match Content-Language
 
-    otherAccess:
+    otherAccessInfo:
       description: Generic fulfilment, non-standardized (yet)
       allOf:
         - $ref: "#/components/schemas/fulfilmentBase"
@@ -2396,49 +2389,33 @@ components:
           $ref: "#/components/schemas/customProperties"
 
     processIdentifiers:
-      type: object
-      description: a 'washing label', indiacting how this implementation wants to be treated.
-      # operatorInformation
-      # booking
-      # tripExecution
-      # support
-      # payment      
-      additionalProperties: false
+      type: array
+      description: an array with 'washing label', indiacting how this implementation wants to be treated.
+      maxItems: 50
       externalDocs:
         url: https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
         description: overview of all existing process identifiers, clarifying how this implementation of the API should be used.
-      required:
-        - operatorInformation
-        - booking
-        - tripExecution
-        - support
-        - payment
-      properties:
-        operatorInformation:
-          type: array
-          maxItems: 25
+      items:
+        type: object
+        properties:
+          module: 
+            type: string
+            enum: [ INTEROPERABILITY, PLANNING, BOOKING, TRIP_EXECUTION, SUPPORT, PAYMENT ]
+          identifiers:
+            type: array
+            items:
+              $ref: "#/components/schemas/shortString"
+      example: [ { "module": "BOOKING", "identifiers": [ "ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT" ] } ]
+
+    requiredInteractionsCondition:
+      description: required sequence of steps to take in a specified phase of the leg. Use this condition only when the steps are different as specified in the `POST /discovery` endpoint.
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: array
+          description: When used in the `POST /discovery`, show the default set of interactions you require. When applied in the leg, you can overrule the default interactions.
+          maxItems: 50
           items:
-            $ref: "#/components/schemas/shortString"
-        booking:
-          type: array
-          maxItems: 25
-          items:
-            $ref: "#/components/schemas/shortString"
-        tripExecution:
-          type: array
-          maxItems: 25
-          items:
-            $ref: "#/components/schemas/shortString"
-        support:
-          type: array
-          maxItems: 25
-          items:
-            $ref: "#/components/schemas/shortString"
-        payment:
-          type: array
-          maxItems: 25
-          items:
-            $ref: "#/components/schemas/shortString"
+            $ref: "#/components/schemas/interaction"
 
     requirement:
       type: object
