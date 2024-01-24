@@ -1030,7 +1030,7 @@ components:
       - type: object
         required:
           - number
-          - validUntil
+          - endValidity
         properties:
           number:
             $ref: "#/components/schemas/shortString"
@@ -1041,7 +1041,7 @@ components:
           additionalNumber:
             $ref: "#/components/schemas/shortString"
             description: additional number, like CVC code or IBAN code
-          validUntil:
+          endValidity:
             $ref: "#/components/schemas/date"
             description: this card is valid until this date
           country:
@@ -1616,8 +1616,8 @@ components:
       # fulfilmentType
       # fulfilmentSubType
       required:
-        - validFrom
-        - validUntil
+        - startValidity
+        - endValidity
         - fulfilmentType
       properties:
         startValidity:
@@ -2814,14 +2814,14 @@ components:
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3156.htm
         description: TRIP DELIVERY
-      # validUntil
+      # endValidity
       # options
       required:
         - validUntil
         - options
       properties:
-        validUntil:
-          description: The time until which the presented options are (likely) available
+        endValidity:
+          description: The date-time until which the presented options are (likely) available
           $ref: "#/components/schemas/dateTime"
         options:
           type: array
