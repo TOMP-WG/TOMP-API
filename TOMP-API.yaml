@@ -677,7 +677,6 @@ components:
 
       required:
         - id
-        - appSupport
         - assetType
         - mode
       properties:
