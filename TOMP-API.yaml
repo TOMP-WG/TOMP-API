@@ -698,6 +698,9 @@ components:
 
         state:
           $ref: "#/components/schemas/assetState"
+
+        location:
+          $ref: "#/components/schemas/place"
         eco:
           $ref: "#/components/schemas/environmentalProperties"
         cargo:
@@ -716,7 +719,8 @@ components:
           $ref: "#/components/schemas/customProperties"
 
         # extraInfo can contain:
-        ## generic attributes:
+
+        ## (v1.x attributes) generic attributes:
           # name => VEHICLE MODEL.Name
           # brand => VEHILCE MODEL.Manufacturer
           # model => VEHICLE MODEL.Description?
@@ -724,10 +728,10 @@ components:
           # colour => EQUIPMENT
           # maxSpeed (integer) => EQUIPMENT
 
-        ## bike attributes:
+        ## (v1.x attributes) bike attributes:
           # nrOfHelmets (integer) => CYCLE EQUIPMENT PROFILE.Helmet
 
-        ## car attributes:
+        ## (v1.x attributes) car attributes:
           # wheelCount (integer) => EQUIPMENT
           # propulsion (string enum: [ ELECTRIC, GASOLINE, DIESEL, HYBRID, LPG, HYDROGEN ])
           #   externalDocs https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3577.htm (TYPE OF FUEL)
@@ -745,24 +749,30 @@ components:
           # nrOfPassengers (integer) => TRANSPORT TYPE.SeatingCapacity + TRANSPORT TYPE.StandingCapacity
 
         ## GBFS attributes
-           # all attributes described at https://github.com/MobilityData/gbfs/blob/master/gbfs.md#vehicle_typesjson can be used in the **extraInfo** field, case sensitive.
+          # all attributes described at https://github.com/MobilityData/gbfs/blob/master/gbfs.md#vehicle_typesjson can be used in the **extraInfo** field, case sensitive.
 
-        ## NeTEx attributes
-           # all attributes described at https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3580.htm (TRANSPORT TYPE)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3581.htm (VEHICLE TYPE)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3576.htm (PASSENGER CARRYING EQUIPMENT)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3575.htm (MANOEUVRING REQUIREMENT)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA7/EA332.htm (WHEELCHAIR VEHICLE EQUIPMENT)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA1/EA6/EA7/EA331.htm (VEHICLE ACCESS EQUIPMENT)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA10/EA5/EA2/EA3715.htm (PARKING)
-           #                             https://www.transmodel-cen.eu/model/EARoot/EA10/EA5/EA3/EA2/EA3742.htm (VEHICLE CHARGING EQUIPMENT) can be used in the **extraInfo** field, case sensitive.
+        ## NeTEx attributes [TO DO] can be used in the **extraInfo** field, case sensitive.
 
         ## GTFS attributes (schedule)
-           # all attributes descriped at https://gtfs.org/schedule/reference/#routestxt
-           #                             https://gtfs.org/schedule/reference/#tripstxt
-           #                             https://gtfs.org/schedule/reference/#fare_attributestxt
-           #                             https://gtfs.org/schedule/reference/#fare_mediatxt
-           #                             https://gtfs.org/schedule/reference/#attributionstxt can be used in the **extraInfo** field, case sensitive.
+          # all attributes described at https://gtfs.org/schedule/reference/#routestxt
+          #                             https://gtfs.org/schedule/reference/#tripstxt
+          #                             https://gtfs.org/schedule/reference/#fare_attributestxt
+          #                             https://gtfs.org/schedule/reference/#fare_mediatxt
+          #                             https://gtfs.org/schedule/reference/#attributionstxt can be used in the **extraInfo** field, case sensitive.
+        
+        ## CDS attributes
+          # all attributes described at https://github.com/openmobilityfoundation/curb-data-specification/tree/main/curbs#curb-space can be used in the **extraInfo** field, case sensitive.
+
+        ## OCPI attributes
+          # all attributes described at https://github.com/ocpi/ocpi/blob/master/mod_locations.asciidoc#132-evse-object can be used in the **extraInfo** field, case sensitive.
+
+        ## ODSM
+          # all attributes described at https://raw.githubusercontent.com/UnionInternationalCheminsdeFer/OSDM/master/specification/v2.0.0/OSDM-online-api-v2.0.7.yml 
+          # the objects 'Coach' and 'Seat' can be used in the **extraInfo** field, case sensitive, like 'Coach.number' and 'Seat.id'
+
+        ## Amadeus attributes 
+          # all attributes described at https://developers.amadeus.com/self-service/category/flights/api-doc/seatmap-display/api-reference 
+          # the objects 'Deck' and 'Seat' can be used in the **extraInfo** field, case sensitive, like 'Deck.deckType'
 
     assetState:
       type: object
@@ -772,14 +782,11 @@ components:
         url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm
         description: VEHICLE EQUIPMENT PROFILE
         # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA6/EA3603.htm (EQUIPMENT)
-        #  location => 
         #  milage =>
         #  stateOfCharge =>
         #  maxRange => TRANSPORT TYPE.Range
         #  damages =>
       properties:
-        location:
-          $ref: "#/components/schemas/place"
         mileage:
           $ref: "#/components/schemas/float"
           description: the current mileage of the asset, in km
@@ -1371,7 +1378,7 @@ components:
         externalType:
           type: string
           description: this field must be used when addressing other standards for exchanging 'static' data (Level 1 MaaS)
-          enum: [ GBFS, GTFS, NeTEx, OSDM, IXSI5, APDS, OCPI ]
+          enum: [ GBFS, GTFS, NeTEx, OSDM, OCPI, Amadeus, CDS, APDS, IXSI5 ]
         useAssetTypes:
           type: array
           maxItems: 10
@@ -1381,7 +1388,12 @@ components:
               specified to book a bike from the particular vehicle type in the field 'useAssetTypes' in the trip offer request.
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
-
+          example:
+          [ "vehicle_types.vehicle_type_id", # GBFS
+            "Route.id", "RouteLink.id", # NeTEx
+            "routes.route_id", # GTFS
+            "FlightAvailability.id" # Amadeus
+          ]
         useAssets:
           type: array
           maxItems: 10
@@ -1391,6 +1403,13 @@ components:
               specified to book a bike from the particular vehicle type in the field 'useAssets' in the trip offer request.
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
+          example:
+          [ "vehicle_status.vehicle_id", #GBFS
+            "EVSE.evse_id", # OCPI
+            "Coach.number::PlacePosition.number", # OSDM
+            "Deck.deckType::Seat.id", # Amadeus
+            "CurbSpace.curb_space_id" # CDS
+          ]
 
       example:
         warning: "Don't copy this example. There are multiple examples in this section. Each object is an example on itself."
