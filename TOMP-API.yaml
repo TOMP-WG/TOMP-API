@@ -765,7 +765,7 @@ components:
         ## OCPI attributes
           # all attributes described at https://github.com/ocpi/ocpi/blob/master/mod_locations.asciidoc#132-evse-object can be used in the **extraInfo** field, case sensitive.
 
-        ## ODSM
+        ## OSDM
           # all attributes described at https://raw.githubusercontent.com/UnionInternationalCheminsdeFer/OSDM/master/specification/v2.0.0/OSDM-online-api-v2.0.7.yml 
           # the objects 'Coach' and 'Seat' can be used in the **extraInfo** field, case sensitive, like 'Coach.number' and 'Seat.id'
 
@@ -881,9 +881,6 @@ components:
               maxItems: 25
               items:
                 $ref: "#/components/schemas/leg"
-
-            extraInfo:
-              $ref: "#/components/schemas/customProperties"
 
     bookingConditions:
       description: specify required information to complete a booking
@@ -1025,33 +1022,31 @@ components:
       example: CONFIRMED
 
     card:
+      type: object
       description: Any kind of card that isn't a license, only provide the cards that are required
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA3/EA2368.htm
         description: CUSTOMER PAYMENT MEANS
         # MISSING: Identification/Passport
         # OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA4/EA2300.htm (MEDIUM ACCESS DEVICE)
-      allOf:
-      - $ref: "#/components/schemas/cardType"
-      - type: object
-        required:
-          - number
-          - endValidity
-        properties:
-          number:
-            $ref: "#/components/schemas/shortString"
-            description: number of the card, like ID number, credit card or bank account number
-          description:
-            $ref: "#/components/schemas/shortString"
-            description: description of the card
-          additionalNumber:
-            $ref: "#/components/schemas/shortString"
-            description: additional number, like CVC code or IBAN code
-          endValidity:
-            $ref: "#/components/schemas/date"
-            description: this card is valid until this date
-          country:
-            $ref: "#/components/schemas/country"
+      required:
+        - number
+        - endValidity
+      properties:
+        number:
+          $ref: "#/components/schemas/shortString"
+          description: number of the card, like ID number, credit card or bank account number
+        description:
+          $ref: "#/components/schemas/shortString"
+          description: description of the card
+        additionalNumber:
+          $ref: "#/components/schemas/shortString"
+          description: additional number, like CVC code or IBAN code
+        endValidity:
+          $ref: "#/components/schemas/date"
+          description: this card is valid until this date
+        country:
+          $ref: "#/components/schemas/country"
 
     cardType:
       type: object
@@ -1083,8 +1078,11 @@ components:
         subType:
           $ref: "#/components/schemas/shortString"
           description: For use in case of OTHER. Can be used in bilateral agreements.
-        mode:
-          $ref: "#/components/schemas/mode"
+        cards:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/card"
         acceptors:
           type: array
           maxItems: 3
@@ -1217,16 +1215,6 @@ components:
               $ref: "#/components/schemas/longString"
               description: base64 encoded
               format: byte-array
-            cards:
-              type: array
-              maxItems: 25
-              items:
-                $ref: "#/components/schemas/card"
-            licenses:
-              type: array
-              maxItems: 25
-              items:
-                $ref: "#/components/schemas/license"
             extraInfo:
               $ref: "#/components/schemas/customProperties"
 
@@ -1388,11 +1376,11 @@ components:
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
           example:
-          [ "vehicle_types.vehicle_type_id", # GBFS
-            "Route.id", "RouteLink.id", # NeTEx
-            "routes.route_id", # GTFS
-            "FlightAvailability.id" # Amadeus
-          ]
+            [ "vehicle_types.vehicle_type_id", # GBFS
+              "Route.id", "RouteLink.id", # NeTEx
+              "routes.route_id", # GTFS
+              "FlightAvailability.id" # Amadeus
+            ]
         useAssets:
           type: array
           maxItems: 10
@@ -1403,12 +1391,12 @@ components:
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
           example:
-          [ "vehicle_status.vehicle_id", #GBFS
-            "EVSE.evse_id", # OCPI
-            "Coach.number::PlacePosition.number", # OSDM
-            "Deck.deckType::Seat.id", # Amadeus
-            "CurbSpace.curb_space_id" # CDS
-          ]
+            [ "vehicle_status.vehicle_id", #GBFS
+              "EVSE.evse_id", # OCPI
+              "Coach.number::PlacePosition.number", # OSDM
+              "Deck.deckType::Seat.id", # Amadeus
+              "CurbSpace.curb_space_id" # CDS
+            ]
 
       example:
         warning: "Don't copy this example. There are multiple examples in this section. Each object is an example on itself."
@@ -1543,7 +1531,7 @@ components:
                 _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX parts, cap it using this rule. Max 1 per fare object.
               enum: [ FIXED, FLEX, MAX ]
               # MAX -> https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1664.htm
-            priceChange:
+            priceLevel:
               type: string
               description: is this the default price or is this an additional part (discount, price surge). <br>
                _DEFAULT_ the default price for this price part<br>
@@ -1929,7 +1917,7 @@ components:
           $ref: "#/components/schemas/shortInt"
           description: The order of the leg in the booking. Mandatory, if there are multiple legs in the booking. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one booking.
 
-        travelerReference:
+        travelerReferences:
           type: array
           description: reference to the travelers field of the trip request. Mandatory when multiple travelers are used.
           maxItems: 10
@@ -1970,13 +1958,18 @@ components:
         operator:
           $ref: "#/components/schemas/operator"
 
-        fulfillment:
-          $ref: "#/components/schemas/fulfilment"
+        fulfillments:
+          type: array
+          items:
+            $ref: "#/components/schemas/fulfilment"
           description: The MaaS users proof of their right to travel on this leg (visual representable) OR
             data to open an asset
 
         memo:
           $ref: "#/components/schemas/longString"
+          
+        extraInfo:
+          $ref: "#/components/schemas/customProperties"
 
     legOperation:
       type: string
@@ -2095,19 +2088,16 @@ components:
           example: https://penr.nl/tomp/bookings/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
 
     license:
+      type: object
       description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
       # number
-      # licenseCode
       # endValidity
-      allOf:
-        - $ref: "#/components/schemas/licenseType"
-        - type: object
-          properties:
-            number:
-              $ref: "#/components/schemas/shortString"
-              example: "1287948792"
-            endValidity:
-              $ref: "#/components/schemas/date"
+      properties:
+        number:
+          $ref: "#/components/schemas/shortString"
+          example: "1287948792"
+        endValidity:
+          $ref: "#/components/schemas/date"
 
     licenseType:
       type: object
@@ -2118,14 +2108,21 @@ components:
       required:
         - mode
       properties:
-        mode:
-          $ref: "#/components/schemas/mode"
+        modes:
+          type: array
+          items:
+            $ref: "#/components/schemas/mode"
         licenseCode:
           $ref: "#/components/schemas/shortString"
           description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
           example: D4
         issuingCountry:
           $ref: "#/components/schemas/country"
+        licenses:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/license"
 
     logEntry:
       type: object
@@ -2735,7 +2732,7 @@ components:
           default: 1
         maximumDistance:
           $ref: "#/components/schemas/normalInt"
-          description: Maximum distance in meters a user wants to travel to reach the travel option
+          description: Maximum distance in meters a user wants to walk to reach the travel option
         
         previousLegs:
           type: array
