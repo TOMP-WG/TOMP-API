@@ -164,7 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/bookingReport"
+                $ref: "#/components/schemas/bookingDetailsResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -709,7 +709,7 @@ components:
 
         equipment:
           type: array
-          description: (optional) equipment belonging to the asset, like a child seat
+          description: (optional) equipment belonging to the asset, like a child seat (TYPE=ASSET_EQUIPMENT)
           maxItems: 100
           items:
             $ref: "#/components/schemas/requirement"
@@ -904,15 +904,21 @@ components:
                 A few examples<br>
                  from.address.station implies that the station reference is mandatory,<br>
                  travelers[*].age requires an age for each traveler, <br>
-                 travelers[0].licenseTypes[*].licenseCode should expose the fact that the first traveler has a driver license (f.i. D4, for a car)<br>
                  or customer.email for the email address of the customer
               maxItems: 50
               items:
                 type: string
 
-            requiredEquipment:
+            requiredLicenseTypes:
               type: array
-              description: required equipment to operate the asset (like a helmet)
+              description: ONE of these licenses is required to operate the asset
+              maxItems: 5
+              items: 
+                $ref: "#/components/schemas/licenseType"
+
+            requiredAncillaries:
+              type: array
+              description: required ancillaries to operate the asset (like a helmet, TYPE=ANCILLARY)
               maxItems: 25
               items:
                 $ref: "#/components/schemas/requirement" 
@@ -930,7 +936,7 @@ components:
         _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
       enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, FINANCIAL_TRANSACTION ]
 
-    bookingReport:
+    bookingDetailsResponse:
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3038.htm
         description: PI DELIVERY (unspecified)
@@ -1022,31 +1028,33 @@ components:
       example: CONFIRMED
 
     card:
-      type: object
-      description: Any kind of card that isn't a license, only provide the cards that are required
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA3/EA2368.htm
-        description: CUSTOMER PAYMENT MEANS
-        # MISSING: Identification/Passport
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA4/EA2300.htm (MEDIUM ACCESS DEVICE)
-      required:
-        - number
-        - endValidity
-      properties:
-        number:
-          $ref: "#/components/schemas/shortString"
-          description: number of the card, like ID number, credit card or bank account number
-        description:
-          $ref: "#/components/schemas/shortString"
-          description: description of the card
-        additionalNumber:
-          $ref: "#/components/schemas/shortString"
-          description: additional number, like CVC code or IBAN code
-        endValidity:
-          $ref: "#/components/schemas/date"
-          description: this card is valid until this date
-        country:
-          $ref: "#/components/schemas/country"
+      allOf:
+        - $ref: "#/components/schemas/cardType"
+        - type: object
+          description: Any kind of card that isn't a license, only provide the cards that are required
+          externalDocs:
+            url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA3/EA2368.htm
+            description: CUSTOMER PAYMENT MEANS
+            # MISSING: Identification/Passport
+            # OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA4/EA2300.htm (MEDIUM ACCESS DEVICE)
+          required:
+            - number
+            - endValidity
+          properties:
+            number:
+              $ref: "#/components/schemas/shortString"
+              description: number of the card, like ID number, credit card or bank account number
+            description:
+              $ref: "#/components/schemas/shortString"
+              description: description of the card
+            additionalNumber:
+              $ref: "#/components/schemas/shortString"
+              description: additional number, like CVC code or IBAN code
+            endValidity:
+              $ref: "#/components/schemas/date"
+              description: this card is valid until this date
+            country:
+              $ref: "#/components/schemas/country"
 
     cardType:
       type: object
@@ -2088,16 +2096,18 @@ components:
           example: https://penr.nl/tomp/bookings/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
 
     license:
-      type: object
-      description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
-      # number
-      # endValidity
-      properties:
-        number:
-          $ref: "#/components/schemas/shortString"
-          example: "1287948792"
-        endValidity:
-          $ref: "#/components/schemas/date"
+      allOf:
+      - $ref: "#/components/schemas/licenseType"
+      - type: object
+        description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
+        # number
+        # endValidity
+        properties:
+          number:
+            $ref: "#/components/schemas/shortString"
+            example: "1287948792"
+          endValidity:
+            $ref: "#/components/schemas/date"
 
     licenseType:
       type: object
@@ -2449,6 +2459,14 @@ components:
         - category
         - number
       properties:
+        type:
+          type: string
+          description: _DISABILITY_ specifies what the traveler needs to cope with its disabilities, like a wheelchair, or a guide dog. It is possible that the traveler brings it 
+            along, but it can also be a requirement to the TO, like a ramp.<br>
+            _ANCILLARY_ are things that are not part of the asset, but can be used (or, sometimes even are mandatory) to complete the trip, like a helmet or a child seat<br>
+            _ASSET_EQUIPMENT_ things that are options on an asset that cannot be removed easily, like a route planner, or cruise control<br>
+            _TRAVELER_EQUIPMENT_ things the traveler brings along during the trip, like a bike, luggage, or a pet.
+          enum: [ DISABILITY, ANCILLARY, ASSET_EQUIPMENT, TRAVELER_EQUIPMENT ]
         source:
           $ref: "#/components/schemas/url"
           description: if obsolete, it is referencing the travelers' dictionary (https://github.com/TOMP-WG/TOMP-API/blob/master/documents/CROW%20passenger%20characteristics.xlsx)
@@ -2641,8 +2659,8 @@ components:
       # isValidated
       # age
       # referenceNumber
-      # cardTypes
-      # licenseTypes
+      # cards
+      # licenses
       # travelersNeeds
       # travelersBelongings
       additionalProperties: true
@@ -2656,25 +2674,27 @@ components:
         referenceNumber:
           $ref: "#/components/schemas/shortString"
           description: reference number of the traveler. This number could be used to refer to in the planning result.
-        cardTypes:
+        cards:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/card"
+          description: The cards this traveler possesses
+        licenses:
           type: array
           maxItems: 10
           items:
-            $ref: "#/components/schemas/cardType"
-          description: The kind of cards this traveler possesses
-        licenseTypes:
-          type: array
-          maxItems: 10
-          items:
-            $ref: "#/components/schemas/licenseType"
-          description: The kind of licenses this traveler possesses
+            $ref: "#/components/schemas/license"
+          description: The licenses this traveler possesses
         travelersNeeds: 
           type: array
+          description: user requirements, for instance to cope with disabilities
           maxItems: 25
           items:
             $ref: "#/components/schemas/requirement" 
         travelersBelonings:
           type: array
+          description: things the travelers brings along (TRAVELER_EQUIPMENT)
           maxItems: 25
           items:
             $ref: "#/components/schemas/requirement" 
@@ -2842,7 +2862,18 @@ components:
           type: array
           maxItems: 100
           items: 
-            $ref: "#/components/schemas/bookingResponse"
+            $ref: "#/components/schemas/tripOptionWithPaymentMeans"
+
+    tripOptionWithPaymentMeans:
+      allOf:
+        - $ref: "#/components/schemas/bookingResponse"
+        - type: object
+          properties:
+            paymentMeans: 
+              type: array
+              maxItems: 10
+              items:
+                $ref: "#/components/schemas/cardType"
 
   # external references
     assetTypeReference:
