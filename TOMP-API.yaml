@@ -451,15 +451,10 @@ paths:
             application/json:
               schema:
                 allOf:
-                - type: object
-                  properties:
-                    data:
-                      type: array
-                      maxItems: 100
-                      items:
-                        allOf:
-                          - $ref: "#/components/schemas/amountOfMoney"
-                          - $ref: "#/components/schemas/journalEntry"
+                - type: array
+                  maxItems: 500
+                  items:
+                    $ref: "#/components/schemas/journalEntry"
                 - $ref: "#/components/schemas/halLinks"
                   example:
                       "_links": { "self": { "rel": "GET", "href": "/journal-entries&offset=100&limit=100", "type": "application/hal+json" },
@@ -540,7 +535,7 @@ components:
             description:
               $ref: "#/components/schemas/longString"
               description: free text to describe the extra costs. Mandatory in case of 'OTHER', matches Content-Language
-            number:
+            amountOfUnits:
               $ref: "#/components/schemas/float"
               description: e.g. number of litres, number of kilowatthour, etc
             units:
@@ -854,7 +849,6 @@ components:
     booking:
       description: a booking is a recording of an agreement between end user and TO, to execute a trip (=set of legs) according a specification, including all conditions
       #externalDocs:
-        # url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2957.htm
         # https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA1/EA2242.htm (SALES OFFER PACKAGE)
           # bookingState =>
           # customer =>
@@ -2413,24 +2407,20 @@ components:
         extraInfo:
           $ref: "#/components/schemas/customProperties"
 
-    processIdentifiers:
-      type: array
-      description: an array with 'washing label', indiacting how this implementation wants to be treated.
-      maxItems: 50
-      externalDocs:
-        url: https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
-        description: overview of all existing process identifiers, clarifying how this implementation of the API should be used.
-      items:
-        type: object
-        properties:
-          module: 
-            type: string
-            enum: [ INTEROPERABILITY, PLANNING, BOOKING, TRIP_EXECUTION, SUPPORT, PAYMENT ]
-          identifiers:
-            type: array
-            items:
-              $ref: "#/components/schemas/shortString"
-      example: [ { "module": "BOOKING", "identifiers": [ "ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT" ] } ]
+    processIdentifier:
+      type: object
+      required:
+      - module
+      - identifiers
+      properties:
+        module: 
+          type: string
+          enum: [ INTEROPERABILITY, PLANNING, BOOKING, TRIP_EXECUTION, SUPPORT, PAYMENT ]
+        identifiers:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/shortString"
 
     requiredInteractionsCondition:
       description: required sequence of steps to take in a specified phase of the leg. Use this condition only when the steps are different as specified in the `POST /discovery` endpoint.
@@ -2508,7 +2498,15 @@ components:
           items:
             $ref: "#/components/schemas/endpoint"
         processIdentifiers:
-          $ref: "#/components/schemas/processIdentifiers"
+          type: array
+          description: an array with 'care labels', indiacting how this implementation wants to be treated.
+          maxItems: 10
+          externalDocs:
+            url: https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
+            description: overview of all existing process identifiers, clarifying how this implementation of the API should be used.
+          items:
+            $ref: "#/components/schemas/processIdentifier"
+          example: [ { "module": "BOOKING", "identifiers": [ "ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT" ] } ]
         conditions:
           $ref: "#/components/schemas/conditions"
 
