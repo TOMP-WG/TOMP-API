@@ -437,7 +437,7 @@ paths:
             $ref: "#/components/schemas/normalInt"
         - name: limit
           in: query
-          description: count of the selection
+          description: max length of the selection
           required: false
           schema:
             $ref: "#/components/schemas/normalInt"
@@ -484,19 +484,19 @@ paths:
               $ref: "#/components/schemas/supportRequest"
       responses:
         "200":
-          description: support request acknowledged
+          description: support request acknowledged, the response contains a support ticket with a unique ID. Multiple support tickets can be created on one single leg.
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/supportTicket"
+                $ref: "#/components/schemas/supportResponse"
         default:
           $ref: "#/components/responses/errorResponse"
     get:
       summary: "[MP->TO] request for support ticket details"
-      description: Gets the status report of this BOOKING id. Last status (highest order number) is the current status
+      description: returns the statusses of the support tickets of this leg. Each status change will result in a new supportResponse. To find the log of the ticket, group them on ID.
       tags:
         - support        
       responses:
@@ -508,10 +508,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                maxItems: 100
-                items:
-                  $ref: "#/components/schemas/supportTicket"
+                $ref: "#/components/schemas/supportStatusResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -2616,7 +2613,7 @@ components:
           items:
             $ref: "#/components/schemas/url"
 
-    supportTicket:
+    supportResponse:
       description: the current status of support
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3038.htm
@@ -2628,9 +2625,13 @@ components:
         - $ref: '#/components/schemas/supportRequest'
         - type: object
           required:
+          - id
           - status
           - order
           properties:
+            id:
+              $ref: "#/components/schemas/uuid"
+              description: ticketID
             status:
               type: string
               description:
@@ -2647,6 +2648,12 @@ components:
             order:
               $ref: "#/components/schemas/tinyInt"
               description: the sequence number of status of the support issue
+
+    supportStatusResponse:
+      type: array
+      maxItems: 100
+      items:
+        $ref: "#/components/schemas/supportResponse"
 
     traveler:
       type: object
