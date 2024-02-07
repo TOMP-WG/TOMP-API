@@ -450,17 +450,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                - type: array
-                  maxItems: 500
-                  items:
-                    $ref: "#/components/schemas/journalEntry"
-                - $ref: "#/components/schemas/halLinks"
-                  example:
-                      "_links": { "self": { "rel": "GET", "href": "/journal-entries&offset=100&limit=100", "type": "application/hal+json" },
-                        "next": { "rel": "GET", "href": "/journal-entries&offset=200&limit=100", "type": "application/hal+json" },
-                        "previous": { "rel": "GET", "href": "/journal-entries&limit=100", "type": "application/hal+json" }
-                      }
+                $ref: "#/components/schemas/journalResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -942,8 +932,8 @@ components:
             items:
               $ref: "#/components/schemas/logEntry"
           progress:
-            description: A list of COORDINATEs describing the progress so far as GEOJSONLINE
-            $ref: "#/components/schemas/geojsonLine"
+            description: A list of COORDINATEs describing the progress so far as LINESTRING (GeoJSON)
+            $ref: "#/components/schemas/LineString"
 
     bookingRequest:
       type: object
@@ -1781,6 +1771,24 @@ components:
           $ref: "#/components/schemas/longString"
           description: free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE` 
 
+    journalCategory:
+      type: string
+      description: The category of the journalled item <br>
+        _ALL_ - for filtering purposes only<br>
+        _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br>
+        _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br>
+        _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br>
+        _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br>
+        _REFUND_ - refund of the deposit<br>
+        _FINE_ - a fine that arrived later on<br>
+        _OTHER_ASSET_USED_ - additional costs for a replaced asset<br>
+        _CREDIT_ - generic CREDIT <br>
+        _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br>
+        _DEPOSIT_ - a deposit, to be refunded using _REFUND_<br>
+        _OTHER_ - unspecified<br>
+        _FARE_ - the normal costs of the booked and executed leg(s)<br>
+      enum: [ ALL, DAMAGE, LOSS, STOLEN, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, CREDIT, VOUCHER, DEPOSIT, OTHER, FARE ]
+
     journalEntry:
       # id
       # category
@@ -1856,23 +1864,18 @@ components:
       description: the state of the journal
       enum: [ TO_INVOICE, INVOICED ]
 
-    journalCategory:
-      type: string
-      description: The category of the journalled item <br>
-        _ALL_ - for filtering purposes only<br>
-        _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br>
-        _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br>
-        _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br>
-        _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br>
-        _REFUND_ - refund of the deposit<br>
-        _FINE_ - a fine that arrived later on<br>
-        _OTHER_ASSET_USED_ - additional costs for a replaced asset<br>
-        _CREDIT_ - generic CREDIT <br>
-        _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br>
-        _DEPOSIT_ - a deposit, to be refunded using _REFUND_<br>
-        _OTHER_ - unspecified<br>
-        _FARE_ - the normal costs of the booked and executed leg(s)<br>
-      enum: [ ALL, DAMAGE, LOSS, STOLEN, EXTRA_USAGE, REFUND, FINE, OTHER_ASSET_USED, CREDIT, VOUCHER, DEPOSIT, OTHER, FARE ]
+    journalResponse:
+      allOf:
+      - type: array
+        maxItems: 500
+        items:
+          $ref: "#/components/schemas/journalEntry"
+      - $ref: "#/components/schemas/halLinks"
+        example:
+            "_links": { "self": { "rel": "GET", "href": "/journal-entries&offset=100&limit=100", "type": "application/hal+json" },
+              "next": { "rel": "GET", "href": "/journal-entries&offset=200&limit=100", "type": "application/hal+json" },
+              "previous": { "rel": "GET", "href": "/journal-entries&limit=100", "type": "application/hal+json" }
+            }
 
     leg:
       type: object
@@ -2138,10 +2141,11 @@ components:
       - operation
       properties:
         operation:
-          oneOf:
-            - $ref: "#/components/schemas/legOperation"
-            - $ref: "#/components/schemas/bookingOperation"
-            - type: string
+          type: string
+          description: "should be one of these operations
+            /components/schemas/legOperation
+            /components/schemas/bookingOperation
+            type: string
               description: additional operations, not directly related to the booking or trip execution<br>
                 _OFFER_ The offer has been published<br>
                 _CREATE_BOOKING_ The offer is converted into a _PENDING_ booking <br>
@@ -2153,7 +2157,7 @@ components:
                 OFFER, CREATE_BOOKING, 
                 # support
                 REQUEST_SUPPORT, SUPPORT_ISSUE_SOLVED, SUPPORT_ISSUE_REMOVED,
-                ]
+                ]"
         legId:
           $ref: "#/components/schemas/uuid"
           description: in case it is a leg operation, specify the legId
@@ -2828,7 +2832,7 @@ components:
               description: in one of these areas the asset must be returned
               maxItems: 10
               items:
-                $ref: "#/components/schemas/geojsonPolygon"
+                $ref: "#/components/schemas/Polygon"
 
             # movement limitations
             maxBounds: 
@@ -2895,40 +2899,40 @@ components:
       description: a reference to an ID of station, from an external source (NeTEx, GBFS)
       maxLength: 50
 
-  # GeoJSON specs
-    geojsonLine:
+  # GeoJSON specs, in contradiction to the convention starting with a capital. Reason: compatibility with GeoJSON specification (types are named this way)
+    LineString:
       type: array
       items:
-        $ref: "#/components/schemas/geojsonPoint"
+        $ref: "#/components/schemas/Point"
       description: An array  of WGS84 coordinate pairs
       externalDocs:
         url: https://geojson.org/geojson-spec.html#line
       example: [[6.169639, 52.253279], [6.05623, 52.63473]]
 
-    geojsonPoint:
+    Point:
       type: array
       minItems: 2
       maxItems: 2
       items:
         $ref: "#/components/schemas/float"
-      description: Geojson Coordinate
+      description: Geojson Coordinate [longitude, latitude]
       externalDocs:
         url: https://geojson.org/geojson-spec.html#point
       example: [4.53432, 55.324523]
 
-    geojsonPolygon:
+    Polygon:
       type: array
       items:
-        $ref: "#/components/schemas/geojsonLine"
+        $ref: "#/components/schemas/LineString"
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
       externalDocs:
         url: https://geojson.org/geojson-spec.html#polygon
       example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
 
-    geojsonMultiPolygon:
+    MultiPolygon:
       type: array
       items:
-        $ref: "#/components/schemas/geojsonPolygon"
+        $ref: "#/components/schemas/Polygon"
       description: geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon
       externalDocs:
         url: https://geojson.org/geojson-spec.html#multipolygon
@@ -2945,10 +2949,10 @@ components:
           enum: [ Point, LineString, Polygon, MultiPolygon ]
         coordinates:
           oneOf: 
-            - $ref: "#/components/schemas/geojsonPoint"
-            - $ref: "#/components/schemas/geojsonLine"
-            - $ref: "#/components/schemas/geojsonPolygon"
-            - $ref: "#/components/schemas/geojsonMultiPolygon"
+            - $ref: "#/components/schemas/Point"
+            - $ref: "#/components/schemas/LineString"
+            - $ref: "#/components/schemas/Polygon"
+            - $ref: "#/components/schemas/MultiPolygon"
       discriminator:
         propertyName: type
   
