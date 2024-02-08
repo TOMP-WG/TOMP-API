@@ -874,9 +874,12 @@ components:
           required:
             - requiredFields
           properties:
-            maxReserveTime:
+            maximumPeriodBeforeDeparture:
               $ref: "#/components/schemas/longInt"
               description: Maximum time in minutes that an asset can be reserved before a rental begins.
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
+                description: PURCHASE WINDOW.MaximumPeriodBeforeDeparture
 
             requiredFields:
               type: array
@@ -886,6 +889,9 @@ components:
                  from.address.station implies that the station reference is mandatory,<br>
                  travelers[*].age requires an age for each traveler, <br>
                  or customer.email for the email address of the customer
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA6/EA2136.htm
+                description: USER PROFILE
               maxItems: 50
               items:
                 type: string
@@ -893,6 +899,9 @@ components:
             requiredLicenseTypes:
               type: array
               description: ONE of these licenses is required to operate the asset
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA7/EA2152.htm
+                description: ENTITLEMENT REQUIRED
               maxItems: 5
               items: 
                 $ref: "#/components/schemas/licenseType"
@@ -1008,6 +1017,27 @@ components:
       enum: [ NEW, PENDING, REJECTED, RELEASED, EXPIRED, CONFIRMED, CANCELLED, STARTED, FINISHED ]
       example: CONFIRMED
 
+    cancellationCondition:
+      description: conditions regarding cancellation of a booking
+      allOf:
+        - $ref: "#/components/schemas/condition"
+        - type: object
+          properties:
+            cancellationAllowed:
+              type: boolean
+              description: is it possible to cancel this booking?
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
+                description: PURCHASE WINDOW.cancellationAllowed
+
+            cancellationFee:
+              $ref: "#/components/schemas/amountOfMoney"
+              description: amount of money you have to pay when you cancel this booking
+
+            cancellationFeePercentage:
+              $ref: "#/components/schemas/amountOfMoney"
+              description: percentage of the offered price you have to pay when you cancel this booking    
+
     card:
       allOf:
         - $ref: "#/components/schemas/cardType"
@@ -1106,6 +1136,9 @@ components:
       description: the superclass of all conditions
       # conditionType =>
       # id =>
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA4/EA2103.htm
+        description: USAGE PARAMETER
       required:
         - conditionType
       properties:
@@ -1125,6 +1158,7 @@ components:
         oneOf:
           - $ref: "#/components/schemas/requiredInteractionsCondition"
           - $ref: "#/components/schemas/paymentConditions"
+          - $ref: "#/components/schemas/cancellationCondition"
           - $ref: "#/components/schemas/bookingConditions"
           - $ref: "#/components/schemas/tripExecutionConditions"
           - $ref: "#/components/schemas/guarantees"
@@ -1665,6 +1699,7 @@ components:
                  _REPLACEMENT_WHEN_CONNECTION_MISSED_ - the TO will arrange an alternative for the missed connection
                  _REFUND_WHEN_CONNECTION_MISSED_ - the TO will refund the missed connection
                  _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded
+                 _REFUND_WHEN_CANCELLED_ - when cancelled, no costs will be charged when trip not started.
                 enum: [ ARRIVAL_TIME, REPLACEMENT_WHEN_CONNECTION_MISSED, REFUND_WHEN_CONNECTION_MISSED, REFUND_UNUSED_ANCILLARIES ]
 
     interaction:
@@ -2348,12 +2383,14 @@ components:
         - momentOfPayment
       allOf:
         - $ref: "#/components/schemas/condition"
-        - $ref: "#/components/schemas/amountOfMoney"
         - type: object
           properties:
             momentOfPayment:
               type: string
               enum: [ DEPOSIT, PAY_WHEN_FINISHED, UPFRONT ]
+            deposit:
+              $ref: "#/components/schemas/amountOfMoney"
+              description: the amnount of money to pay as a deposit.
 
     phone:
       type: object
@@ -2820,13 +2857,17 @@ components:
             returnBefore:
               $ref: "#/components/schemas/dateTime"
               description: the ultimate return time.
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2121.htm
+                description: USAGE VALIDITY PERIOD.EndDate & EndTime
 
             returnStations:
               type: array
               description: to one of these stations the asset must be returned
               maxItems: 10
               items:
-                $ref: "#/components/schemas/stationReference"              
+                $ref: "#/components/schemas/stationReference"             
+
             returnAreas:
               type: array
               description: in one of these areas the asset must be returned
@@ -2838,8 +2879,15 @@ components:
             maxBounds: 
               $ref: "#/components/schemas/geojsonGeometry"
               description: the maximum bounds of movement, can be an (multi)polygon (for bike sharing) or a line, a trajectory (for conventional public transport)
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2119.htm
+                description: ROUTING.CrossBorder possible, TOMP allowing more use cases.
+
             timeLimits:
               type: array
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2121.htm
+                description: USAGE VALIDITY PERIOD, except TM tells when it is allowed, TOMP tells when it is not allowed or when there is a reduction.
               items:
                 allOf:
                   - $ref: "#/components/schemas/timeWindow"
