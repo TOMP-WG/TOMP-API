@@ -1163,9 +1163,81 @@ paths:
           required: false
           schema: 
             type: string
+        - name: boundingBox
+          in: query
+          description: "optional bounding-box to limit the results (min Longitude , min Latitude , max Longitude , max Latitude) example: -0.489,51.28,0.236,51.686 for Greater London"
+          required: false
+          schema: 
+            type: string
+        - name: assetTypeId
+          in: query
+          description: optional asset type id, retrieved from /operator/asset-types
+          required: false
+          schema: 
+            type: string
       responses:
         "200":
-          description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
+          description: Available assets
+          headers:
+            Content-Language:
+              description: The language/localization of user-facing content
+              example: nl
+              schema:
+                type: string
+                format: One IETF BCP 47 (RFC 5646) language tag
+              required: true
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/asset"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+
+  /operator/asset-types:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/api"
+      - $ref: "#/components/parameters/apiVersion"
+      - $ref: "#/components/parameters/maasId"
+      - $ref: "#/components/parameters/addressedTo"
+    get:
+      description: Returns a list of available assets for the given leg. These assets can be used to POST to /legs/{id}/asset if no specific asset is assigned by the TO. If picking an asset is not allowed for this booking, or one already has been, 403 should be returned. If the booking is unknown, 404 should be returned. See (4.7) in the process flow. - trip execution
+      tags:
+        - operator information
+        - TO
+      parameters:
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          description: count of the selection
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: id
+          in: query
+          description: asset type ID
+          required: false
+          schema:
+            type: string      
+      responses:
+        "200":
+          description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
           headers:
             Content-Language:
               description: The language/localization of user-facing content
@@ -1767,6 +1839,10 @@ components:
         id:
           type: string
           description: Identifier of an asset. Whenever used in Operator Information changed after every trip (GDPR).
+
+        assetType:
+          type: string
+          description: reference to the asset type, can be found in /operator/asset-types
         
         isReserved:
           type: boolean
@@ -1882,13 +1958,6 @@ components:
         stationId:
           type: string
           description: If stationId is present, the nrAvailable is expected to find the availability at that particular station
-        nrAvailable:
-          type: integer
-        assets:
-          type: array
-          description: use this field only in the map-oriented scenario or in the committed bookings. Don't use it in public data (to prevent GDPR issues).
-          items:
-            $ref: "#/components/schemas/asset"
         assetClass:
           $ref: "#/components/schemas/assetClass"
         assetSubClass:
@@ -3585,7 +3654,7 @@ components:
           type: array
           items:
             type: string
-            format: an asset type id for this operator (from /operator/available-assets)
+            format: an asset type id for this operator (from /operator/asset-types)
         extraInfo:
           description: dictionary for extra fields (bilatural agreements)
           type: object
