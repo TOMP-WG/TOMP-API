@@ -1263,10 +1263,6 @@ components:
       type: object
       description: dictionary for extra fields (bilatural agreements)
       additionalProperties:
-        oneOf:
-        - type: string
-        - type: integer
-        - type: boolean
         maxLength: 1000
         maxProperties: 20
 
@@ -1622,6 +1618,8 @@ components:
                   type: string
                   description: the units is normally the same as the **scale.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.
                   enum: [ KM, MILE, HOUR, MINUTE ]
+            validity: 
+              $ref: "#/components/schemas/timeWindow"
             name:
               $ref: "#/components/schemas/normalString"
               description: an optional description of this fare part.
@@ -3207,6 +3205,9 @@ components:
 
     timeWindow:
       type: object
+      required:
+        - startTime
+        - endTime
       properties:
         day:  
           $ref: "#/components/schemas/day"
