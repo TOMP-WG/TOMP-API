@@ -140,7 +140,7 @@ paths:
       summary: "[MP->TO] give booking details"
       description: Retrieves BOOKING, including the log of this booking (all LEGs)
       tags:
-        - trip execution
+        - booking
       parameters:
       - in: query
         name: selection
@@ -348,7 +348,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/availableVehicleResponse"
+                $ref: "#/components/schemas/availableAssetsResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -471,7 +471,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/supportRequest"
+              $ref: "#/components/schemas/supportOperationRequest"
       responses:
         "200":
           description: support request acknowledged, the response contains a support ticket with a unique ID. Multiple support tickets can be created on one single leg.
@@ -619,6 +619,14 @@ components:
         vatCountryCode:
           $ref: "#/components/schemas/country"
 
+    ancillary:
+      allOf:
+      - $ref: "#/components/schemas/requirement"
+      description: requirement, type = ANCILLARY
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm 
+        description: VEHICLE EQUIPMENT PROFILE when applied on a vehicle. Not covering!
+
     appSupportProperties:
       type: object
       properties:
@@ -694,7 +702,7 @@ components:
           description: (optional) equipment belonging to the asset, like a child seat (TYPE=ASSET_EQUIPMENT)
           maxItems: 100
           items:
-            $ref: "#/components/schemas/requirement"
+            $ref: "#/components/schemas/assetEquipment"
 
         extraInfo:
           $ref: "#/components/schemas/customProperties"
@@ -730,7 +738,8 @@ components:
           # nrOfPassengers (integer) => TRANSPORT TYPE.SeatingCapacity + TRANSPORT TYPE.StandingCapacity
 
         ## GBFS attributes
-          # all attributes described at https://github.com/MobilityData/gbfs/blob/master/gbfs.md#vehicle_typesjson can be used in the **extraInfo** field, case sensitive.
+          # all attributes described at https://github.com/MobilityData/gbfs/blob/master/gbfs.md#vehicle_typesjson 
+          #                             https://github.com/MobilityData/gbfs/blob/master/gbfs.md#vehicle_statusjson can be used in the **extraInfo** field, case sensitive.
 
         ## NeTEx attributes [TO DO] can be used in the **extraInfo** field, case sensitive.
 
@@ -742,7 +751,8 @@ components:
           #                             https://gtfs.org/schedule/reference/#attributionstxt can be used in the **extraInfo** field, case sensitive.
         
         ## CDS attributes
-          # all attributes described at https://github.com/openmobilityfoundation/curb-data-specification/tree/main/curbs#curb-space can be used in the **extraInfo** field, case sensitive.
+          # all attributes described at https://github.com/openmobilityfoundation/curb-data-specification/tree/main/curbs#curb-space 
+          #                             https://github.com/openmobilityfoundation/curb-data-specification/tree/main/curbs#curb-area can be used in the **extraInfo** field, case sensitive.
 
         ## OCPI attributes
           # all attributes described at https://github.com/ocpi/ocpi/blob/master/mod_locations.asciidoc#132-evse-object can be used in the **extraInfo** field, case sensitive.
@@ -754,6 +764,14 @@ components:
         ## Amadeus attributes 
           # all attributes described at https://developers.amadeus.com/self-service/category/flights/api-doc/seatmap-display/api-reference 
           # the objects 'Deck' and 'Seat' can be used in the **extraInfo** field, case sensitive, like 'Deck.deckType'
+
+    assetEquipment:
+      allOf:
+      - $ref: "#/components/schemas/requirement"
+      description: requirement, type = ASSET_EQUIPMENT
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm 
+        description: VEHICLE EQUIPMENT PROFILE when applied on a vehicle
 
     assetState:
       type: object
@@ -784,7 +802,7 @@ components:
           items: 
             $ref: "#/components/schemas/damage"
 
-    availableVehicleResponse:
+    availableAssetsResponse:
       type: array
       description: container to return assets, including their possible operations (assign asset)
       externalDocs:
@@ -911,7 +929,7 @@ components:
               description: required ancillaries to operate the asset (like a helmet, TYPE=ANCILLARY)
               maxItems: 25
               items:
-                $ref: "#/components/schemas/requirement" 
+                $ref: "#/components/schemas/ancillary" 
 
     bookingOperation:
       type: string
@@ -1318,6 +1336,16 @@ components:
             url:
               $ref: "#/components/schemas/url"
               description: download url for html/pdf
+
+    disability:
+      allOf:
+      - $ref: "#/components/schemas/requirement"
+      description: requirement, type = DISABILITY
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA249.htm 
+        description: MOBILITY NEED
+        # OR https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA251.htm (PSYCHOSENSORY NEED)
+        # OR https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA248.htm (MEDICAL NEED)
 
     eKey:
       description: Axa EKey information
@@ -2482,10 +2510,12 @@ components:
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA254.htm
         description: TYPE OF USER NEED
-      # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm (VEHICLE EQUIPMENT PROFILE), when applied on a vehicle
+      # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm (VEHICLE EQUIPMENT PROFILE), when applied on a vehicle, type=ANCILLARY/ASSET_EQUIPMENT
       required:
         - category
         - number
+      discriminator:
+        propertyName: type
       properties:
         type:
           type: string
@@ -2582,7 +2612,7 @@ components:
           $ref: "#/components/schemas/url"
           description: a URL where the definition of these stopReferences can be found
 
-    supportRequest:
+    supportOperationRequest:
       type: object
       description: request for support
       externalDocs:
@@ -2663,7 +2693,7 @@ components:
       # timeToResolution
       # order      
       allOf:
-        - $ref: '#/components/schemas/supportRequest'
+        - $ref: '#/components/schemas/supportOperationRequest'
         - type: object
           required:
           - id
@@ -2732,18 +2762,26 @@ components:
           items:
             $ref: "#/components/schemas/license"
           description: The licenses this traveler possesses
-        travelersNeeds: 
+        disabilities: 
           type: array
           description: user requirements, for instance to cope with disabilities
           maxItems: 25
           items:
-            $ref: "#/components/schemas/requirement" 
-        travelersBelonings:
+            $ref: "#/components/schemas/disability"
+        travelerEquipment:
           type: array
           description: things the travelers brings along (TRAVELER_EQUIPMENT)
           maxItems: 25
           items:
-            $ref: "#/components/schemas/requirement" 
+            $ref: "#/components/schemas/travelerEquipment"
+
+    travelerEquipment:
+      allOf:
+      - $ref: "#/components/schemas/requirement"
+      description: requirement, type = TRAVELER_EQUIPMENT
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA247.htm 
+        description: ENCUMBRANCE NEED
 
     tripRequest:
       type: object
