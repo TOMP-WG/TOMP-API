@@ -1426,7 +1426,8 @@ components:
             [ "vehicle_types.vehicle_type_id", # GBFS
               "Route.id", "RouteLink.id", # NeTEx
               "routes.route_id", # GTFS
-              "FlightAvailability.id" # Amadeus
+              "FlightAvailability.id", # Amadeus
+              "CurbZone.curb_zone_id", "CurbArea.curb_area_id" # CDS
             ]
         useAssets:
           type: array
