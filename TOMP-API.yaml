@@ -2320,7 +2320,6 @@ components:
         - type: object
           required:
             - cardNumber
-            - validUntil
           properties:
             cardDescription:
               description: description of the card
@@ -2333,6 +2332,7 @@ components:
               type: string
             validUntil:
               type: string
+              description: the enddate of the card. Mandatory in case of a credit card or ID card.
               format: date
             country:
               $ref: "#/components/schemas/country"
