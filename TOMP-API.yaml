@@ -1412,7 +1412,7 @@ components:
         externalType:
           type: string
           description: this field must be used when addressing other standards for exchanging 'static' data (Level 1 MaaS)
-          enum: [ GBFS, GTFS, NeTEx, OSDM, OCPI, Amadeus, CDS, APDS, IXSI5 ]
+          enum: [ GBFS, GTFS, NeTEx, OSDM, OCPI, AMADEUS, CDS, APDS, IXSI5 ]
         useAssetTypes:
           type: array
           maxItems: 10
@@ -1629,7 +1629,7 @@ components:
                _FARE_ this farePart is related to the distance or time of usage.<br>
                _ANCILLARY_ this farePart is related to the rental of one or more ancillaries.
               default: "FARE"
-              enum: [ "FARE", "ANCILLARY" ]
+              enum: [ FARE, ANCILLARY ]
             minimumAmount:
               $ref: "#/components/schemas/float"
               description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
@@ -1645,8 +1645,8 @@ components:
             assetState:
               type: string
               description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
-              enum: [ "IN_USE", "PAUSED" ]
-              default: "IN_USE"
+              enum: [ IN_USE, PAUSED ]
+              default: IN_USE
             extraInfo:
               $ref: "#/components/schemas/customProperties"
 
@@ -1681,8 +1681,8 @@ components:
           $ref: "#/components/schemas/dateTime"
         fulfilmentType:
           type: string
-          description: The type of data held in this fulfilment, used as discriminator field
-          enum: [ "digitalTicket", "deeplink", "eKey", "binaryAccessInfo", "otherAccessInfo" ]
+          description: The type of data held in this fulfilment, used as discriminator field (therefore not in capitals)
+          enum: [ digitalTicket, deeplink, eKey, binaryAccessInfo, otherAccessInfo ]
         fulfilmentSubType: 
           type: string
           description: how this type is implemented?<br>
@@ -3030,6 +3030,7 @@ components:
       properties:
         type:
           type: string
+          description: type used as discriminator. Therefore not in capitals.
           enum: [ Point, LineString, Polygon, MultiPolygon ]
         coordinates:
           oneOf: 
