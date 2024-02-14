@@ -93,7 +93,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripOptionsResponse"
+                $ref: "#/components/schemas/tripResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -371,7 +371,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/serviceDescription"
+                $ref: "#/components/schemas/discoveryResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -2548,7 +2548,7 @@ components:
           # possible items: variableNumber (referencing to [variable number] in the traveler's dictionary)
           #                 type: conditionally extra information, referencing to the 3th column
 
-    serviceDescription:
+    discoveryResponse:
       type: object
       description: a complete endpoint description, containing all endpoints, their status, but also the served scenarios and implemented process flows. The identifiers for the process flows can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers<br>
       # endpoints
@@ -2935,7 +2935,7 @@ components:
                       reductionPercentage:
                         $ref: "#/components/schemas/shortInt"
 
-    tripOptionsResponse:
+    tripResponse:
       type: object
       description: Bookable trip options that fulfil the constraints of the request
       additionalProperties: false
