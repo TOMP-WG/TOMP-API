@@ -3969,6 +3969,9 @@ components:
           items:
             type: string
             format: url
+        assetId:
+          type: string
+          description: the (visual) ID on the asset, to report damage on an asset that hasn't been booked.
 
     supportStatus:
       description: the current status of support
