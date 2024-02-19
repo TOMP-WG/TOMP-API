@@ -238,6 +238,9 @@ paths:
             Expires:
               $ref: "#/components/headers/expires"
               description: Mandatory whenever the _EXTEND_EXPIRY_TIME_ is used. It must contain the updated expiry time
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
+                description: PURCHASE WINDOW
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -840,7 +843,7 @@ components:
       # base64 =>
       # version =>
       allOf:
-        - $ref: "#/components/schemas/fulfilmentBase"
+        - $ref: "#/components/schemas/travelDocumentBase"
         - type: object
           required:
             - base64
@@ -1037,6 +1040,9 @@ components:
 
     cancellationCondition:
       description: conditions regarding cancellation of a booking
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2179.htm 
+        description: (CANCELLING)
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -1053,7 +1059,7 @@ components:
               description: amount of money you have to pay when you cancel this booking
 
             cancellationFeePercentage:
-              $ref: "#/components/schemas/amountOfMoney"
+              $ref: "#/components/schemas/float"
               description: percentage of the offered price you have to pay when you cancel this booking    
 
     card:
@@ -1120,7 +1126,7 @@ components:
           maxItems: 25
           items:
             $ref: "#/components/schemas/card"
-        acceptors:
+        transportOrganisations:
           type: array
           maxItems: 3
           description: references to accepting parties, only if applicable
@@ -1299,7 +1305,7 @@ components:
       # url =>
       # knownParameters =>
       allOf:
-        - $ref: "#/components/schemas/fulfilmentBase"
+        - $ref: "#/components/schemas/travelDocumentBase"
         - type: object
           properties:
             url:
@@ -1322,11 +1328,9 @@ components:
       description: Arbitrary data the TO may pass along the ticket to the client
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2421.htm
-        description: TRAVEL DOCUMENT (?)
-        # OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA7/EA5/EA2/EA2620.htm (FULFILMENT ENTRY) when downloading?
-      # url =>      
+        description: TRAVEL DOCUMENT
       allOf:
-        - $ref: "#/components/schemas/fulfilmentBase"
+        - $ref: "#/components/schemas/travelDocumentBase"
         - type: object
           properties:
             url:
@@ -1351,7 +1355,7 @@ components:
       # ekey =>
       # lock =>
       allOf:
-        - $ref: "#/components/schemas/fulfilmentBase"
+        - $ref: "#/components/schemas/travelDocumentBase"
         - type: object
           required:
             - ekey
@@ -1523,18 +1527,21 @@ components:
           $ref: "#/components/schemas/url"
           description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
 
-    fare:
+    fareStructure:
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA6/EA1889.htm
+        description: TARIFF
       allOf:
       - $ref: "#/components/schemas/amountOfMoney"
       - type: object
-        description: the total fare is the sum of all parts, except for the 'MAX' farePart. This one descripes the maximum price for the complete leg.
+        description: the total fare is the sum of all parts, except for the 'MAX' fareStructureElement. This one descripes the maximum price for the complete leg.
         additionalProperties: true
         # estimated =>
         # description =>
-        # parts =>
+        # elements =>
         required:
           - estimated
-          - parts
+          - elements
         properties:
           estimated:
             type: boolean
@@ -1542,23 +1549,30 @@ components:
           description:
             $ref: "#/components/schemas/normalString"
             description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
-          parts:
+          elements:
             type: array
             maxItems: 25
             items:
-              $ref: "#/components/schemas/farePart"
+              $ref: "#/components/schemas/fareStructureElement"
 
-    farePart:
+    fareStructureElement:
       description: this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) 
        or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are 
        negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts. 
        The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay 
        EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer).
-       # type =>
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA4/EA1844.htm
+        description: "TIME INTERVAL PRICE - type: FLEX scaled: yes unit: time-based
+          OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA4/EA1847.htm (TIME UNIT PRICE)  - type: FIXED unit: time-based
+          OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA2/EA1805.htm (GEOGRAPHICAL UNIT PRICE) - type: FIXED unit: distance-based
+          OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA2/EA1802.htm (GEOGRAPHICAL INTERVAL PRICE) - type: FLEX scaled: yes unit: distance-based
+          "
+       # type => FLEX = INTERVAL PRICE, FIXED = UNIT PRICE
        # kind =>
-       # units => 
-       # amountOfUnits =>
-       # scale =>
+       # units =>
+       # amountOfUnits
+       # interval => In case of TIME, GEOGRAPHICAL or DISTANCE MATRIX elements
        # name =>
        # class => 
        # minimumAmount =>
@@ -1572,11 +1586,11 @@ components:
           properties:
             type:
               type: string
-              description: type of fare part. If there is only one farepart and this field is missing, it should
+              description: type of fare structure element. If there is only one fare structure elements and this field is missing, it should
                 be assumed it is 'FIXED'. In all other situations this field is mandatory.<br>
-                _FIXED_ fixed price part, independend on the duration or distance traveled.
-                _FLEX_ flex price part, dependend on the duration or distance of the trip. Can be tiered.
-                _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX parts, cap it using this rule. Max 1 per fare object.
+                _FIXED_ fixed element, independend on the duration or distance traveled.
+                _FLEX_ flex element, dependend on the duration or distance of the trip. Can be tiered.
+                _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX elements, cap it using this rule. Max 1 per fare structure.
               enum: [ FIXED, FLEX, MAX ]
               # MAX -> https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1664.htm
             priceLevel:
@@ -1585,7 +1599,7 @@ components:
                _DEFAULT_ the default price for this price part<br>
                _DISCOUNT_ the amount must always be negative <br>
                _SURGE_ the amount must always be positive <br>
-               This also means, that when you're working with discounts or surges, you have to deliver 2 fareparts, one for the default price and one for the discount/surge. This can be used in combination with as
+               This also means, that when you're working with discounts or surges, you have to deliver 2 fare structure elements, one for the default price and one for the discount/surge. This can be used in combination with as
                well the fixed price parts as with the flex price parts.
               enum: [ DEFAULT, DISCOUNT, SURGE ]
               # DISCOUNT, SURGE -> https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA1/EA1665.htm
@@ -1594,41 +1608,36 @@ components:
               description: in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR
               enum: [ KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE ]
               # in case of FLEX using KM, MILE:
-              externalDocs:
-                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA2/EA1801.htm
-                # in case of FIXED using KM, MILE: https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA2/EA1804.htm
-                # in case of FLEX using SECOND, MINUTE, HOUR: https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA4/EA1843.htm
-                # in case of FIXED using SECOND, MINUTE, HOUR: https://www.transmodel-cen.eu/model/EARoot/EA6/EA2/EA2/EA4/EA1846.htm
             amountOfUnits:
               $ref: "#/components/schemas/float"
               description: the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise
                 not allowed. In case of 0.5 EUR per 15 MINUTES, the amount is 0.5, the `amountOfUnits` must contain 15 and `units` MINUTES.
-            scale:
+            interval:
               type: object
               properties:
                 from:
                   $ref: "#/components/schemas/float"
-                  description: in case of scaling, this is the bottom value (f.x. in the first hour 3 CAD, the `scale.from` should
-                    contain 0 and the `scale.units` HOUR). When `scaleTo` is used, but this field is missing, it should be assumed
+                  description: in case of scaling, this is the bottom value (f.x. in the first hour 3 CAD, the `interval.from` should
+                    contain 0 and the `interval.units` HOUR). When `to` is used, but this field is missing, it should be assumed
                     it is a 0.
                 to:
                   $ref: "#/components/schemas/float"
                   description: the upper value of the scale (f.x. 3 CAD in the first hour, this field should contain 1, 
-                    `scaleFrom` 0 and `scale.units` HOUR)
+                    `interval.from` 0 and `interval.units` HOUR)
                 units:
                   type: string
-                  description: the units is normally the same as the **scale.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.
+                  description: the units is normally the same as the **interval.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.
                   enum: [ KM, MILE, HOUR, MINUTE ]
             validity: 
               $ref: "#/components/schemas/timeWindow"
             name:
               $ref: "#/components/schemas/normalString"
-              description: an optional description of this fare part.
+              description: an optional description of this fare structure element.
             class:
               type: string
-              description: class of this fare part. Could be FARE or ANCILLARY<br>
-               _FARE_ this farePart is related to the distance or time of usage.<br>
-               _ANCILLARY_ this farePart is related to the rental of one or more ancillaries.
+              description: class of this fare structure element. Could be FARE or ANCILLARY<br>
+               _FARE_ this fare structure element is related to the distance or time of usage.<br>
+               _ANCILLARY_ this fare structure element is related to the rental of one or more ancillaries.
               default: "FARE"
               enum: [ FARE, ANCILLARY ]
             minimumAmount:
@@ -1651,7 +1660,7 @@ components:
             extraInfo:
               $ref: "#/components/schemas/customProperties"
 
-    fulfilment:
+    travelDocument:
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2421.htm
         description: TRAVEL DOCUMENT
@@ -1662,29 +1671,29 @@ components:
       - $ref: "#/components/schemas/binaryAccessInfo"
       - $ref: "#/components/schemas/otherAccessInfo"
       discriminator:
-        propertyName: fulfilmentType
+        propertyName: travelDocumentType
 
-    fulfilmentBase:
+    travelDocumentBase:
       type: object
-      description: The fulfilment (e.g. travel ticket) that MaaS clients will display to show their right to travel, or use to access an asset
+      description: The travelDocument (e.g. travel ticket) that MaaS clients will display to show their right to travel, or use to access an asset
       # startValidity
       # endValidity
-      # fulfilmentType
-      # fulfilmentSubType
+      # travelDocumentType
+      # travelDocumentSubType
       required:
         - startValidity
         - endValidity
-        - fulfilmentType
+        - travelDocumentType
       properties:
         startValidity:
           $ref: "#/components/schemas/dateTime"
         endValidity:
           $ref: "#/components/schemas/dateTime"
-        fulfilmentType:
+        travelDocumentType:
           type: string
-          description: The type of data held in this fulfilment, used as discriminator field (therefore not in capitals)
+          description: The type of data held in this travelDocument, used as discriminator field (therefore not in capitals)
           enum: [ digitalTicket, deeplink, eKey, binaryAccessInfo, otherAccessInfo ]
-        fulfilmentSubType: 
+        travelDocumentSubType: 
           type: string
           description: how this type is implemented?<br>
             _PDF_ The PDF is available at the supplied URL<br>
@@ -1868,10 +1877,10 @@ components:
       # bankAccount
       # additionalCosts
       allOf:
-      - $ref: "#/components/schemas/fare"
+      - $ref: "#/components/schemas/fareStructure"
       - type: object
         description: each leg will result in at least one journal entry, containing a small summary of the leg (distance, duration).
-          The **amount** must be derivable from the **parts** and **additionalCosts**.
+          The **amount** must be derivable from the fare structure **elements** and **additionalCosts**.
         additionalProperties: true
         properties:
           id:
@@ -1958,12 +1967,13 @@ components:
       # startTime
       # endTime
       # legState
+      # fareStructure
       # price
       # conditions
       # assetType
       # asset
       # operator
-      # fulfilment
+      # travelDocuments
       # userCommunication
       # memo
       properties:
@@ -2004,9 +2014,14 @@ components:
         legState:
           $ref: "#/components/schemas/legState"
 
+        fareStructure:
+          $ref: "#/components/schemas/fareStructure"
+          description: The leg-specific fare structure. The price can be calculated using all elements.
+
         price:
-          $ref: "#/components/schemas/fare"
-          description: The leg-specific price information. The price can be calculated using all parts.
+          $ref: "#/components/schemas/amountOfMoney"
+          externalDocs:
+            url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2419.htm - (CUSTOMER PURCHASE PACKAGE PRICE) final price
 
         conditions:
           $ref: "#/components/schemas/conditions"
@@ -2022,10 +2037,10 @@ components:
         operator:
           $ref: "#/components/schemas/operator"
 
-        fulfillments:
+        travelDocuments:
           type: array
           items:
-            $ref: "#/components/schemas/fulfilment"
+            $ref: "#/components/schemas/travelDocument"
           description: The MaaS users proof of their right to travel on this leg (visual representable) OR
             data to open an asset
 
@@ -2274,7 +2289,7 @@ components:
 
     operationRequest:
       type: object
-      description: operation request during the trip execution phase
+      description: operation request during the booking or trip execution phase
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3037.htm
         description: PI REQUEST
@@ -2394,9 +2409,9 @@ components:
           description: contact information, should match Content-Language
 
     otherAccessInfo:
-      description: Generic fulfilment, non-standardized (yet)
+      description: Generic travelDocument, non-standardized (yet)
       allOf:
-        - $ref: "#/components/schemas/fulfilmentBase"
+        - $ref: "#/components/schemas/travelDocumentBase"
         - $ref: "#/components/schemas/customProperties"
 
     paymentConditions:
@@ -2445,8 +2460,8 @@ components:
       description: a origin or destination of a leg, 3D. lon/lat in WGS84.
       additionalProperties: false
       externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA3/EA184.htm
-        description: POINT
+        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA9/EA263.htm
+        description: PLACE
       # OR via PLACE https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA9/EA263.htm (.described by ZONE .represented by POINT)
       # coordinates.lat -> located by POINT.locating.Latitude / Coordinates
       # coordinates.lng -> located by POINT.locating.Longitude / Coordinates
@@ -2736,8 +2751,8 @@ components:
       # referenceNumber
       # cards
       # licenses
-      # travelersNeeds
-      # travelersBelongings
+      # disabilities
+      # travelerEquipment
       additionalProperties: true
       properties:
         isValidated:
