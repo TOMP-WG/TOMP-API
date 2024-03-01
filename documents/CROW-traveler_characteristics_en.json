@@ -1,48 +1,48 @@
 {
-  "categories": {
-    "HR": {
+  "categories": [
+    {
       "code": "HR",
       "type": "Category",
       "categorie": "Passenger aids"
     },
-    "HV": {
+    {
       "code": "HV",
       "type": "Category",
       "categorie": "Vehicle aids"
     },
-    "AV": {
+    {
       "code": "AV",
       "type": "Category",
       "categorie": "Secondary demands – transportation"
     },
-    "AB": {
+    {
       "code": "AB",
       "type": "Category",
       "categorie": "Secondary demands – supervision"
     },
-    "AER": {
+    {
       "code": "AER",
       "type": "Category",
       "categorie": "Secondary demands – Extra passenger"
     },
-    "K": {
+    {
       "code": "K",
       "type": "Category",
       "categorie": "Characteristics"
     },
-    "ZR": {
+    {
       "code": "ZR",
       "type": "Category",
       "categorie": "(accompanied) Independant travel"
     },
-    "RR": {
+    {
       "code": "RR",
       "type": "Category",
       "categorie": "Travel rights"
     }
-  },
-  "codes": {
-    "HR-01": {
+  ],
+  "codes": [
+    {
       "code": "HR-01",
       "name": "Wheelchair - standard",
       "feature": "Wheelchair in which the passenger remains seated during transport.\n– Type 'non-electrical' and 'responsibly lockable'.\n– Complies with VVR code.\n– Maximum width of 90 cm.",
@@ -50,7 +50,7 @@
       "remarks": "",
       "link": "http://www.r82.nl/media/660247/code_vvr.pdf"
     },
-    "HR-02": {
+    {
       "code": "HR-02",
       "name": "Wheelchair - electric",
       "feature": "Wheelchair in which the passenger remains seated during transport.\n– Type 'electrical' and 'responsibly lockable'.\n– Complies with VVR code.\n– Maximum 90 cm wide.\n– Maximum weight requirement according to the vehicle.",
@@ -58,7 +58,7 @@
       "remarks": "",
       "link": "http://www.r82.nl/media/660247/code_vvr.pdf"
     },
-    "HR-03": {
+    {
       "code": "HR-03",
       "name": "Wheelchair - foldable",
       "feature": "Wheelchair passenger that can transfer into the car him/herself.\n– Passenger can be transported by bus or passenger car; unless also the attribute AV-02 'must be in' (wheelchair) bus' is given.\n– Passenger can be transported in a vehicle without lowered access.",
@@ -66,7 +66,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-04": {
+    {
       "code": "HR-04",
       "name": "Wheelchair - not secure with person in it",
       "feature": "Wheelchair where the passenger him/herself makes a transfer to a car seat.\n– Passenger takes place in a car seat.\n– Wheelchair cannot be 'responsibly secured' and is often not foldable.",
@@ -74,7 +74,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-05": {
+    {
       "code": "HR-05",
       "name": "Wheelchair - self balancing two-wheeler",
       "feature": "Wheelchair (two-wheeler) where the passenger him/herself makes a transfer to a car seat.\n– Type 'not responsible lockable'.\n– Applies as baggage.\n– In connection with weight (Arbo) not liftable.",
@@ -82,7 +82,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-06": {
+    {
       "code": "HR-06",
       "name": "Wheelchair - divergent",
       "feature": "Wheelchair where the passenger during the transport remains seated.\n– Type 'deviant'.\n– May not meet VVR code.\n– At least 91 cm wide and/or with excellent parts.\n– Memo field explanation needed for carrier, such as 'leg forward' or passenger will/will not remain in a wheelchair.\n– Maximum weight that is allowed for the ramp and vehicle; if this wheelchair exceeds the values, then the driver must refuse the passenger.",
@@ -90,7 +90,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-07": {
+    {
       "code": "HR-07",
       "name": "Rollator - or walker",
       "feature": "passenger is dependent on rollator/walker.\n– the aid must be transported securely.",
@@ -98,7 +98,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-08": {
+    {
       "code": "HR-08",
       "name": "Rollator - divergent",
       "feature": "Rollator with attachments that can influence the required means of transport.\n– Memo field explanation needed for carrier with description of the fittings.",
@@ -106,7 +106,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-09": {
+    {
       "code": "HR-09",
       "name": "Scooter - standard",
       "feature": "Mobility scooter in which the passenger him/herself makes the transfer to a car seat.\n– Structural aid (note: if the scooter is occasionally taken, apply H11 'variable aid' characteristic).\n– Maximum 90 cm wide and 150 cm long.\n– Passenger seat and space for scooter required in vehicle.",
@@ -114,7 +114,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-10": {
+    {
       "code": "HR-10",
       "name": "Scooter - divergent",
       "feature": "Mobility scooter in which the passenger him/herself makes the transfer to a car seat.\n– Structural aid (note: if the scooter is occasionally included, then H-11 'variable aid' attribute).\n– At least 90 cm wide and/or longer than 150 cm.\n– Passenger seat and space for scooter required in vehicle.\n– Memo field explanation needed for carrier.",
@@ -122,7 +122,7 @@
       "remarks": "",
       "link": "http://www.r82.nl/media/660247/code_vvr.pdf"
     },
-    "HR-11": {
+    {
       "code": "HR-11",
       "name": "variable aid",
       "feature": "Passenger travels with an aid.\n– Assign attribute as not always the same tool is included.\n– The person who takes the ride order always asks which aid is included in that ride.",
@@ -130,7 +130,7 @@
       "remarks": "",
       "link": ""
     },
-    "HR-12": {
+    {
       "code": "HR-12",
       "name": "Support dog",
       "feature": "Passenger travels with a guide or assistance dog.\n– Passenger and dog seat required in vehicle.",
@@ -139,8 +139,7 @@
       "link": ""
 
     },
-
-    "HV-01": {
+    {
       "code": "HV-01",
       "name": "Seatbelt - exemption",
       "feature": "Passenger is not required to wear a seat belt.\n– Required: exemption from CBR (see www.cbr.nl).",
@@ -148,7 +147,7 @@
       "remarks": "",
       "link": "www.cbr.nl"
     },
-    "HV-02": {
+    {
       "code": "HV-02",
       "name": "Seatbelt - extension",
       "feature": "Due to his posture, the passenger needs a seat belt extension.\n– The passenger himself provides an extra long belt or 'extension'.",
@@ -156,7 +155,7 @@
       "remarks": "",
       "link": ""
     },
-    "HV-03": {
+    {
       "code": "HV-03",
       "name": "Seat - raised chair",
       "feature": "Passenger requires a booster seat.\n– The carrier provides the booster seat.",
@@ -164,7 +163,7 @@
       "remarks": "",
       "link": ""
     },
-    "HV-04": {
+    {
       "code": "HV-04",
       "name": "Seat - child seat category 1",
       "feature": "Passenger uses category 1 child seat (9 to 18 kg).\n– The child seat has a 5-point belt.\n– The carrier provides the child seat.",
@@ -172,7 +171,7 @@
       "remarks": "",
       "link": ""
     },
-    "HV-05": {
+    {
       "code": "HV-05",
       "name": "Transfer wheelchair",
       "feature": "Passenger must use a transfer wheelchair. Passenger cannot make the transfer. A 'seated entry' will have to be used.\n– The carrier provides the transfer wheelchair.",
@@ -180,8 +179,7 @@
       "remarks": "",
       "link": ""
     },
-
-    "AV-01": {
+    {
       "code": "AV-01",
       "name": "Transportation - Individual",
       "feature": "Passenger is not capable of traveling with others.\n– Carrier may not combine the passenger with other passengers.",
@@ -189,7 +187,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-02": {
+    {
       "code": "AV-02",
       "name": "Transportation - in (wheelchair) bus",
       "feature": "Passenger cannot be transported in a passenger car.\n– Must be transported in a (wheelchair) bus.",
@@ -197,7 +195,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-03": {
+    {
       "code": "AV-03",
       "name": "Transportation - last in / first out",
       "feature": "Passenger is 'limited taxable' in time. Or the passenger must be removed from care/supervision for as short a time as possible.",
@@ -205,7 +203,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-04": {
+    {
       "code": "AV-04",
       "name": "Transportation - when private car, front seat",
       "feature": "Passenger can be transported in both a bus and a passenger car.\n– Is a passenger car used? Then this person should sit in the front.",
@@ -213,7 +211,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-05": {
+    {
       "code": "AV-05",
       "name": "Transportation - in private car",
       "feature": "Passenger cannot be transported in a (wheelchair) bus, but can be transported in a passenger car.",
@@ -221,7 +219,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-06": {
+    {
       "code": "AV-06",
       "name": "Transportation - front seat and in private car",
       "feature": "Passenger must be in the front and cannot be transported in a bus.",
@@ -229,7 +227,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-07": {
+    {
       "code": "AV-07",
       "name": "Transportation - front seat, regardless of vehicle",
       "feature": "Passenger must be transported in the front.",
@@ -237,7 +235,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-08": {
+    {
       "code": "AV-08",
       "name": "Transportation - low access",
       "feature": "Passenger has a limitation that requires a low entry.\n– Please note: boarding via the lift (whether or not on the driver's arm) is not allowed.",
@@ -245,7 +243,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-09": {
+    {
       "code": "AV-09",
       "name": "Transportation - combination with other, except...",
       "feature": "Passenger can be combined with others, but not with a number of specific persons.\n– Memo field explanation required for carrier (names with whom may not be combined).",
@@ -253,7 +251,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-10": {
+    {
       "code": "AV-10",
       "name": "Transportation - cannot come with other Targetgroup",
       "feature": "Passenger cannot be combined with other transport flows. It can therefore be combined with other passengers within its own transport flow.\n– Memo field explanation required for carrier with transport flows that may not be combined.",
@@ -261,7 +259,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-11": {
+    {
       "code": "AV-11",
       "name": "Transportation - short travel time",
       "feature": "Maximum travel time applies to passengers.\n– The maximum travel time is determined by the indication counter, on the advice of an advisor.\n– This travel time deviates from contract agreements.",
@@ -269,7 +267,7 @@
       "remarks": "",
       "link": ""
     },
-    "AV-12": {
+    {
       "code": "AV-12",
       "name": "separate seat",
       "feature": "Passenger may not sit directly next to other passenger; there must be space in between. If 2 chairs with a walkway space between them are next to each other, this is possible. Together on a bench or 2 chairs and shoulder to shoulder is not possible.",
@@ -277,7 +275,7 @@
       "remarks": "",
       "link": ""
     },
-    "AB-01": {
+    {
       "code": "AB-01",
       "name": "Supervision - room to room",
       "feature": "Passenger is collected by the driver from the front door of his/her room/apartment. And the driver accompanies him/her to the front door of the room/apartment. Unless transfer is possible and agreed upon.",
@@ -285,7 +283,7 @@
       "remarks": "",
       "link": ""
     },
-    "AB-02": {
+    {
       "code": "AB-02",
       "name": "Supervision -  door to door",
       "feature": "Passenger is picked up by the driver at the front door of the building. And the driver escorts to the front door of destination. This can be the central hall.",
@@ -293,7 +291,7 @@
       "remarks": "",
       "link": ""
     },
-    "AB-03": {
+    {
       "code": "AB-03",
       "name": "Supervision -  necessary / medical support",
       "feature": "The passenger cannot and may not travel independently in a taxi and needs an escort. Travelling without an attendant is not permitted with this feature!",
@@ -301,7 +299,7 @@
       "remarks": "",
       "link": ""
     },
-    "AB-04": {
+    {
       "code": "AB-04",
       "name": "Supervision - variable supporter",
       "feature": "Under certain circumstances, the passenger 'can and may' travel by him/herself in a taxi. Under certain circumstances, the passenger will need an escort. A memo field describes to the carrier when the passenger may or may not travel without an attendant.",
@@ -309,7 +307,7 @@
       "remarks": "",
       "link": ""
     },
-    "AER-01": {
+    {
       "code": "AER-01",
       "name": "Travelalong - free",
       "feature": "Passenger is allowed to be accompanied when traveling. This companion travels free of charge.",
@@ -317,7 +315,7 @@
       "remarks": "",
       "link": ""
     },
-    "AER-02": {
+    {
       "code": "AER-02",
       "name": "Travelalong - discount",
       "feature": "Passenger is allowed to be accompanied when traveling. \n- This companion travels at a reduced rate (with or without own WMO-pass)",
@@ -325,7 +323,7 @@
       "remarks": "",
       "link": ""
     },
-    "AER-03": {
+    {
       "code": "AER-03",
       "name": "Household member",
       "feature": "Passenger is a household member of someone with an WMO-pass.\n- This passenger is not allowed to travel independently with the WMO-pass (of the other person).\n- The memo field contains the card number of the WMO-pass holder.",
@@ -333,7 +331,7 @@
       "remarks": "",
       "link": ""
     },
-    "K-01": {
+    {
       "code": "K-01",
       "name": "Characteristic - Blind / Partially sighted",
       "feature": "Passenger is blind/partially sighted.\nInformation for driver\n– The characteristic may be attributed with (documented) permisson from the passenger or his/her/... legal representative.",
@@ -341,7 +339,7 @@
       "remarks": "",
       "link": ""
     },
-    "K-02": {
+    {
       "code": "K-02",
       "name": "Characteristic - deaf / hearing impaired",
       "feature": "Passenger is deaf / hearing impaired.\nInformation for driver\n– The characteristic may be attributed with (documented) permisson from the passenger or his/her/... legal representative.",
@@ -349,7 +347,7 @@
       "remarks": "",
       "link": ""
     },
-    "K-03": {
+    {
       "code": "K-03",
       "name": "Characteristic - cognitively impaired",
       "feature": "Passenger is cognitively impaired.\nInformation for driver\n– The characteristic may be attributed with (documented) permisson from the passenger or his/her/... legal representative.",
@@ -357,7 +355,7 @@
       "remarks": "",
       "link": ""
     },
-    "K-04": {
+    {
       "code": "K-04",
       "name": "Characteristic - cannot talk",
       "feature": "Passenger can not talk.\nInformation for driver\n– The characteristic may be attributed with (documented) permisson from the passenger or his/her/... legal representative.",
@@ -365,7 +363,7 @@
       "remarks": "",
       "link": ""
     },
-    "K-05": {
+    {
       "code": "K-05",
       "name": "Characteristic - No (nose) mouth protection",
       "feature": "Passenger cannot wear (nose) mouth protection.",
@@ -373,7 +371,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-01": {
+    {
       "code": "ZR-01",
       "name": "PT - advice | mobilityadvice",
       "feature": "Telephone operator/planner is obliged to provide passenger with public transport alternatives.\r\n- If this characteristic is issued by the municipality, at least one other characteristic from the ZR series must be indicated.\r\n- If other modes of transport are offered besides public transport, mobility advice is used with ZR-01.",
@@ -381,7 +379,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-02": {
+    {
       "code": "ZR-02",
       "name": "PT-stop max 100 meter",
       "feature": "Passenger can independently move to and from an accessible public transport stop if the distance is maximum 100 metres.\r\n- Public transport stop: bus train metro.\r\n- Accessible stop: www.haltescan.nl.",
@@ -389,7 +387,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-03": {
+    {
       "code": "ZR-03",
       "name": "PT-stop max 250 meter",
       "feature": "Passenger can independently move to and from an accessible public transport stop if the distance is maximum 250 metres.\n- Public transport stop: bus train metro.\n- Accessible stop: www.haltescan.nl .",
@@ -397,7 +395,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-04": {
+    {
       "code": "ZR-04",
       "name": "PT-stop max 500 meter",
       "feature": "Passenger can independently move to and from an accessible public transport stop if the distance is maximum 500 metres.\n- Public transport stop: bus train metro.\n- Accessible stop: www.haltescan.nl.",
@@ -405,7 +403,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-05": {
+    {
       "code": "ZR-05",
       "name": "PT-stop max 1000 meter",
       "feature": "Passenger can independently move to and from an accessible public transport stop if the distance is maximum 1000 metres.\n- Public transport stop: bus train metro.\n- Accessible stop: www.haltescan.nl.",
@@ -413,7 +411,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-06": {
+    {
       "code": "ZR-06",
       "name": "PT-stop (variable) distance",
       "feature": "Passenger can go independently to and from an accessible PT stop, however, this depends on the condition at the time.\n- PT stop: bus train metro.\n- Accessible stop: www.haltescan.nl",
@@ -421,7 +419,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-07": {
+    {
       "code": "ZR-07",
       "name": "PT-stop: required - motorably accessible",
       "feature": "Passenger can independently move to and from an accessible PT stop that is also 'motorable'.\n- PT stop: bus train metro.\n- Accessible stop - motorized: www.haltescan.nl.",
@@ -429,7 +427,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-08 ": {
+    {
       "code": "ZR-08",
       "name": "PT-stop: required  - non visual",
       "feature": "Passenger can independently move to and from an accessible PT stop that is also non-visually accessible.\n- PT stop: bus train metro.\n- Accessible stop : www.haltescan.nl.",
@@ -437,7 +435,7 @@
       "remarks": "",
       "link": "www.haltescan.nl"
     },
-    "ZR-09": {
+    {
       "code": "ZR-09",
       "name": "Changeover: max 0",
       "feature": "Public transport is a 'suitable alternative' if there is no need for transfers.",
@@ -445,7 +443,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-10": {
+    {
       "code": "ZR-10",
       "name": "Changeover: max 1 time",
       "feature": "Public transport is a 'suitable alternative' if there is need for only one transfer.",
@@ -453,7 +451,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-11": {
+    {
       "code": "ZR-11",
       "name": "Changeover: max 2 times",
       "feature": "Public transport is a 'suitable alternative' if there is need for maximum two transfers.",
@@ -461,7 +459,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-12": {
+    {
       "code": "ZR-12",
       "name": "Changeover: max 3 times",
       "feature": "Public transport is a 'suitable alternative' if there is need for maximum three transfers.",
@@ -469,7 +467,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-13": {
+    {
       "code": "ZR-13",
       "name": "Multimodal",
       "feature": "Passenger is able to use multiple modalities : Taxi(bus), bus, train, tram & local carrier initiaves,....",
@@ -477,7 +475,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-14": {
+    {
       "code": "ZR-14",
       "name": "Night blind",
       "feature": "Passenger can only travel with Public transportation during daylight.",
@@ -485,7 +483,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-15": {
+    {
       "code": "ZR-15",
       "name": "Bicycle usage - partly",
       "feature": "Passenger uses bicycle as means of transport on some days (accompanied).\n- In case of pupils, indicate in memo field on which days the bicycle is used.",
@@ -493,7 +491,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-16": {
+    {
       "code": "ZR-16",
       "name": "Bicycle usage - full",
       "feature": "Passenger uses bicycle (accompanied) as a means of transport.\r\n- The municipality reimburses (part of) the bicycle / accompaniment or otherwise.",
@@ -501,7 +499,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-17 ": {
+    {
       "code": "ZR-17",
       "name": "Train usage - partly",
       "feature": "Passenger uses (accompanied) train as a means of transport on some days.\r\n- In case of pupils, indicate in memo field on which days the train is used.",
@@ -509,7 +507,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-18": {
+    {
       "code": "ZR-18",
       "name": "Train usage - fully",
       "feature": "Passenger uses (accompanied) train as a means of transport.\r\n- The municipality reimburses the train/accompaniment or otherwise.",
@@ -517,7 +515,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-19": {
+    {
       "code": "ZR-19",
       "name": "Bus usage - partly",
       "feature": "Passenger uses (accompanied) bus as means of transport on some days.\r\n- In case of pupils, indicate in memo field on which days the bus is used.",
@@ -525,7 +523,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-20": {
+    {
       "code": "ZR-20",
       "name": "Bus usage - fully",
       "feature": "Passenger uses (accompanied) the bus as a means of transport.\r\n- The municipality reimburses the bus/accompaniment or otherwise.",
@@ -533,7 +531,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-21": {
+    {
       "code": "ZR-21",
       "name": "Own transportation - partly",
       "feature": "Passenger uses (accompanied) private transport on some days 'as a means of transport'.\r\n- In the case of pupils, indicate in the memo field on which days private transport is used.",
@@ -541,7 +539,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-22": {
+    {
       "code": "ZR-22",
       "name": "Own transportation - fully",
       "feature": "Passenger uses 'own transport' as a means of transport.\n- The municipality reimburses (part of) own transport or otherwise.",
@@ -549,7 +547,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-23": {
+    {
       "code": "ZR-23",
       "name": "Pick-up point usage",
       "feature": "Passenger can use a pick-up point.",
@@ -557,7 +555,7 @@
       "remarks": "",
       "link": ""
     },
-    "ZR-24": {
+    {
       "code": "ZR-24",
       "name": "Extra transfertime",
       "feature": "Passenger will require the double amount of time for a transfer (as supposed to the travelplanner).",
@@ -565,7 +563,7 @@
       "remarks": "",
       "link": ""
     },
-    "RR-01": {
+    {
       "code": "RR-01",
       "name": "Kilometre budget",
       "feature": "Passenger receives a kilometres quote from the municipality. Per traveled kilometre the passenger needs to pay the set WMO-tarif.\n– Yearly, or a part of the year.\n– Note the traveled distance in the memo-field",
@@ -573,7 +571,7 @@
       "remarks": "",
       "link": ""
     },
-    "RR-02": {
+    {
       "code": "RR-02",
       "name": "Mobility budget",
       "feature": "Passenger receives a yearly mobility budget from the municipality.\n– Yearly, or a part of the year.\r\n– Note the used budget in the memo-field",
@@ -581,7 +579,7 @@
       "remarks": "",
       "link": ""
     },
-    "RR-03": {
+    {
       "code": "RR-03",
       "name": "Extraregional travel - Valys",
       "feature": "Passenger has a Valys-card.",
@@ -589,13 +587,14 @@
       "remarks": "",
       "link": ""
     }
-  },
-  "credits": [{
-    "version": "dutch version",
-    "name": "Jeroen van Neer",
-    "organisation": "Publiek Vervoer",
-    "uri": ""
-  },
+  ],
+  "credits": [
+    {
+      "version": "dutch version",
+      "name": "Jeroen van Neer",
+      "organisation": "Publiek Vervoer",
+      "uri": ""
+    },
     {
       "version": "dutch version",
       "name": "Martin Boerjan",
@@ -686,6 +685,5 @@
       "organisation": "TOMP working group",
       "uri": "https://www.tomp-wg.org"
     }
-
   ]
 }
