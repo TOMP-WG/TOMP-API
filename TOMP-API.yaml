@@ -795,6 +795,9 @@ components:
         # TRAVELER MODIFICATION
         traveler:
           $ref: "#/components/schemas/traveler"
+        # CUSTOMER MODIFICATION
+        customer:
+          $ref: "#/components/schemas/customer"
         # FINANCIAL_TRANSACTION
         additionalCosts:
           $ref: "#/components/schemas/additionalCosts"
@@ -1275,7 +1278,7 @@ components:
         _MODIFY_TRAVELER_ - [MP->TO] request a change one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _MODIFY_CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested<br>
         _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
-      enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, FINANCIAL_TRANSACTION ]
+      enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, MODIFY_TRAVELER, MODIFY_CUSTOMER, FINANCIAL_TRANSACTION ]
 
     tripState:
       type: string
