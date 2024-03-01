@@ -1275,7 +1275,6 @@ components:
         _MODIFY_TRAVELER_ - [MP->TO] request a change one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _MODIFY_CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested<br>
         _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
-        _UPDATE_TRAVELER_ = [MP->TO] request to update a traveler. Might have financial or contractual impact.
       enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, FINANCIAL_TRANSACTION ]
 
     tripState:
