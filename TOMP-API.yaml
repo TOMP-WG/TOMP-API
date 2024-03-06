@@ -78,13 +78,13 @@ paths:
         - offer & purchase
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP OFFER REQUEST used TRIP OFFER FILTER (request body) to produce TRIP OFFER DELIVERY (response)
+        description: TRIP OFFER REQUEST used TRIP OFFER PARAMETERS (request body) to produce TRIP OFFER DELIVERY (response)
       requestBody:
         description: the initial request, containing locations, timestamps, CARD TYPEs and LICENSE TYPEs, and personal preferences/(dis)abilities. Can also contain a direct reference to an ASSET or ASSET TYPE.
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/tripOfferFilter"
+              $ref: "#/components/schemas/tripOfferParameters"
       responses:
         "201":
           description: a list of trips, if there is no option, it will return an empty list. Each offered trip has a unique identifier, that can be used to purchase it.
@@ -118,14 +118,14 @@ paths:
         - offer & purchase
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP PURCHASE REQUEST uses the TRIP PURCHASE FILTER (request body) to produce a TRIP [PURCHASE] DELIVERY (response)
+        description: TRIP PURCHASE REQUEST uses the TRIP PURCHASE PARAMETERS (request body) to produce a TRIP [PURCHASE] DELIVERY (response)
       requestBody:
         description: additional information required to create a purchased TRIP. This information can be retrieved from the the LEGs' **conditions**.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/tripPurchaseFilter"
+              $ref: "#/components/schemas/tripPurchaseParameters"
 
       responses:
         "201":
@@ -168,7 +168,7 @@ paths:
           default: DETAILS
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP DETAIL REQUEST uses the TRIP DETAIL FILTER (that's the trip ID in URL) to produce TRIP [DETAIL] DELIVERY (response)
+        description: TRIP DETAIL REQUEST uses the TRIP DETAIL (that's the trip ID in URL) to produce TRIP [DETAIL] DELIVERY (response)
       responses:
         "200":
           description: the details of this TRIP, including the customer, progress and the log containing all logged OPERATIONs.
@@ -203,7 +203,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/oneStopPurchaseFilter"
+              $ref: "#/components/schemas/oneStopPurchaseParameters"
       responses:
         "201":
           description: a purchased trip, or when it's not possible, return a 406.
@@ -240,12 +240,12 @@ paths:
         - after sales
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP OPERATION REQUEST, uses the OPERATION FILTER (the request body) to produce a TRIP [OPERATION] DELIVERY (response)
+        description: TRIP OPERATION REQUEST, uses the OPERATION PARAMETER (the request body) to produce a TRIP [OPERATION] DELIVERY (response)
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/operationFilter"
+              $ref: "#/components/schemas/operationParameter"
       responses:
         "200":
           description: The modified trip
@@ -280,7 +280,7 @@ paths:
         the LEG describes the journey part as it occured.
       externalDocs:
         url: https://not-yet-available/
-        description: LEG DETAIL REQUEST uses the TRIP DETAIL FILTER (=trip ID and leg ID in URL) to produce a LEG DETAIL DELIVERY (response)
+        description: LEG DETAIL REQUEST uses the TRIP DETAIL PARAMETER (=trip ID and leg ID in URL) to produce a LEG DETAIL DELIVERY (response)
       tags:
         - trip execution        
       responses:
@@ -319,12 +319,12 @@ paths:
         - after sales
       externalDocs:
         url: https://not-yet-available/
-        description: LEG OPERATION REQUEST uses the OPERATION FILTER (request body) to produce a LEG DETAIL DELIVERY (response)
+        description: LEG OPERATION REQUEST uses the OPERATION PARAMETER (request body) to produce a LEG DETAIL DELIVERY (response)
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/operationFilter"
+              $ref: "#/components/schemas/operationParameter"
       responses:
         "200":
           description: OPERATION successful, the leg is returned in the new state.
@@ -371,7 +371,7 @@ paths:
       description: Returns a list of available ASSETs for the given LEG. These results can be used to call `POST /trips/{id}/legs/{lid}/operations/ASSIGN_ASSET`. 
       externalDocs:
         url: https://not-yet-available/
-        description: LEG AVAILABLE ASSETS REQUEST, uses the LEG AVAILABLE ASSET FILTER (=trip ID and leg ID in the URL) to produce the AVAILABLE ASSETS DELIVERY (response)
+        description: LEG AVAILABLE ASSETS REQUEST, uses the LEG AVAILABLE ASSET PARAMETER (=trip ID and leg ID in the URL) to produce the AVAILABLE ASSETS DELIVERY (response)
       tags:
         - trip execution        
       responses:
@@ -402,12 +402,12 @@ paths:
         - support        
       externalDocs:
         url: https://not-yet-available/
-        description: SUPPORT REQUEST uses the SUPPORT FILTER (request body) to produce a SUPPORT DELIVERY (response)
+        description: SUPPORT REQUEST uses the SUPPORT PARAMETER (request body) to produce a SUPPORT DELIVERY (response)
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/supportFilter"
+              $ref: "#/components/schemas/supportParameter"
       responses:
         "200":
           description: support request acknowledged, the response contains a support ticket with a unique ID. Multiple support tickets can be created on one single leg.
@@ -427,7 +427,7 @@ paths:
         - support
       externalDocs:
         url: https://not-yet-available/
-        description: SUPPORT DETAIL REQUEST, uses TRIP DETAIL FILTER (trip ID and leg ID in the URL) to produce a SUPPORT DETAIL DELIVERY (response)
+        description: SUPPORT DETAIL REQUEST, uses TRIP DETAIL PARAMETER (trip ID and leg ID in the URL) to produce a SUPPORT DETAIL DELIVERY (response)
       responses:
         "200":
           description: support status delivered
@@ -454,7 +454,7 @@ paths:
       description: Returns all the JOURNAL ENTRIES that should be paid (per LEG)
       externalDocs:
         url: https://not-yet-available/
-        description: PAYMENT DETAIL REQUEST uses the PAYMENT DETAIL FILTER (parameters) to produce PAYMENT DETAIL DELIVERY (response)
+        description: PAYMENT DETAIL REQUEST uses the PAYMENT DETAIL PARAMETER (parameters) to produce PAYMENT DETAIL DELIVERY (response)
       parameters:
         - name: startTime
           in: query
@@ -547,26 +547,26 @@ paths:
           $ref: "#/components/responses/errorResponse"
 components:
   schemas:
-  # filters & responses
-    oneStopPurchaseFilter:
+  # parameters & responses
+    oneStopPurchaseParameters:
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP PURCHASE FILTER
+        description: TRIP PURCHASE PARAMETERS
       allOf:
-      - $ref: "#/components/schemas/tripOfferFilter"
+      - $ref: "#/components/schemas/tripOfferParameters"
       - type: object
         properties:
           customer:
             $ref: "#/components/schemas/customer"
             description: The user that wants to purchase this TRIP
 
-    tripOfferFilter:
+    tripOfferParameters:
       type: object
       description: A trip planning request, resulting in trip options
       additionalProperties: false
       externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3147.htm
-        description: TRIP OFFER REQUEST
+        url: https://not-yet-available/
+        description: TRIP OFFER PARAMETERS
       required:
         - from
       properties:
@@ -586,7 +586,7 @@ components:
           type: array
           maxItems: 10
           items:
-            $ref: "#/components/schemas/shortString"
+            $ref: "#/components/schemas/assetReference"
           description: The specific asset(s) the user wishes to receive trip options for. See also endpoint.useAssets specification
         useAssetTypes:
           type: array
@@ -624,7 +624,7 @@ components:
           maxItems: 10
           items:
             type: string
-            format: a usergroup id for this operator
+            format: an id of an user group
         extraInfo:
           $ref: "#/components/schemas/customProperties"
 
@@ -648,13 +648,13 @@ components:
           items: 
             $ref: "#/components/schemas/tripResponse"
 
-    tripPurchaseFilter:
+    tripPurchaseParameters:
       type: object
       description: A request to purchase a trip, to be performed by the MP
       additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3147.htm
-        description: TRIP PURCHASE FILTER used to create a TRIP [PURCHASE] DELIVERY (tripResponse)
+        description: TRIP PURCHASE PARAMETER used to create a TRIP [PURCHASE] DELIVERY (tripResponse)
       properties:
         from:
           $ref: "#/components/schemas/place"
@@ -676,7 +676,7 @@ components:
       externalDocs:
         url: https://not-yet-available/
         description: TRIP PURCHASE DELIVERY, TRIP OPERATION DELIVERY, TRIP DETAIL DELIVERY. Corresponds with
-          tripPurchaseFilter, operationFilter and tripDetailRequest (= GET /trips/{id}/)
+          tripPurchaseParameters, operationParameters and tripDetailParameters (= GET /trips/{id}/)
       properties:
         trip:
           allOf:
@@ -712,12 +712,12 @@ components:
           description: A list of COORDINATEs describing the progress so far as LINESTRING (GeoJSON)
 
     ## trip modification
-    operationFilter:
+    operationParameter:
       type: object
-      description: operation filter for the purchase or trip execution phase
+      description: operation parameter for the purchase or trip execution phase
       externalDocs:
         url: https://not-yet-available/
-        description: OPERATION FILTER. Delivers TRIP DETAIL DELIVERY (tripResponse) or LEG DETAIL RESPONSE (legDetailResponse)
+        description: OPERATION PARAMETER. Delivers TRIP DETAIL DELIVERY (tripResponse) or LEG DETAIL RESPONSE (legDetailResponse)
       additionalProperties: false
       required:
         - timestamp
@@ -734,7 +734,7 @@ components:
           maxItems: 10
           items:
             $ref: "#/components/schemas/url"
-        requestProposal:
+        requestOffer:
           type: boolean
           description: if this field contains a 'true', the operation shouldn't be executed, but the expected result of the operation should be returned. For instance, 
             if you're cancelling a purchased TRIP, you'll return a CANCELLED TRIP, the price will contain the price that has to be paid for this cancelled TRIP.
@@ -785,8 +785,17 @@ components:
             _MESSAGE_TO_DRIVER_ [MP->TO] text messages to the driver, provided by the MP or traveler(s). Text is in **comment**<br>
             _MESSAGE_TO_END_USER_ [TO->MP] text message to show to the traveler(s). Text is in **comment**<br>
             _USER_OUT_OF_LIMITS_ [TO->MP] indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**<br>
-            _OTHER_ [TO<->MP] unspecified. Text is in **comment**<br>
-          enum: [ VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, USER_OUT_OF_LIMITS, OTHER ]
+            _OTHER_ [TO->MP] unspecified. Text is in **comment**<br>
+            _LOCKED_ [TO->MP] asset is locked<br>
+            _UNLOCKED_ [TO->MP] asset is unlocked<br>
+            `TO CONTROLLED (Process Identifier)`<br>
+            _PREPARING_ [TO->MP] the leg is in preparation<br>
+            _IN_USE_ [TO->MP] leg has started<br>
+            _PAUSED_ [TO->MP] leg is paused<br>
+            _RESUMED_ [TO->MP] leg is resumed<br>
+            _FINISHING_ [TO->MP] leg is in finishing state<br> 
+            _FINISHED_ [TO->MP] leg has ended<br>
+          enum: [ VEHICLE_NOT_AVAILABLE, USER_NO_SHOW, ETA, MESSAGE_TO_DRIVER, MESSAGE_TO_END_USER, USER_OUT_OF_LIMITS, OTHER, LOCKED, UNLOCKED, PREPARING, IN_USE, PAUSED, RESUMED, FINISHING, FINISHED ]
           example: VEHICLE_NOT_AVAILABLE
         # ADD/REMOVE ANCILLARIES
         ancillary:
@@ -842,12 +851,12 @@ components:
             }
 
     ## support
-    supportFilter:
+    supportParameter:
       type: object
       description: required data for support ticket
       externalDocs:
         url: https://not-yet-available/
-        description: SUPPORT FILTER
+        description: SUPPORT REQUEST PARAMETER
       additionalProperties: true
       required:
       - supportType
@@ -1091,7 +1100,7 @@ components:
           type: string
           description: the external ID, published by the operator.
         asset:
-          $ref: "#/components/schemas/shortString"
+          $ref: "#/components/schemas/assetReference"
           description: the identification of the asset (id or visualId), like a flight number. This field (in case of a specific asset) or assetType must be filled.
             whenever possible, details of this asset could be found using the URL in /discovery.externalDataSources [type=ASSET]
         assetType:
@@ -1137,7 +1146,7 @@ components:
           $ref: "#/components/schemas/uuid"
           description: in case it is a leg operation, specify the legId
         detail:
-          $ref: "#/components/schemas/operationFilter"
+          $ref: "#/components/schemas/operationParameter"
 
     operator:
       type: object
@@ -1167,8 +1176,9 @@ components:
       description: a origin or destination of a leg, 3D. lon/lat in WGS84.
       additionalProperties: false
       externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA9/EA263.htm
-        description: PLACE
+        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3149.htm
+        description: TRIP REQUEST PLACE
+      # OR https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA9/EA263.htm (PLACE)
       required:
         - coordinates
       properties:
@@ -2662,6 +2672,11 @@ components:
       allOf: 
       - $ref: "#/components/schemas/externalReference"
       description: a reference to an externally described equipment of a traveler (like a bike). The URL of the descriptions can be found in the /discovery endpoint.
+
+    userGroupReference:
+      allOf: 
+      - $ref: "#/components/schemas/externalReference"
+      description: Id of user groups that the user belongs to. This provides access to exclusive assets that are hidden to the public. The IDs are agreed upon by TO and MP.
 
     zoneReference:
       allOf: 
