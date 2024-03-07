@@ -775,6 +775,10 @@ components:
            _PAYMENT_PENDING_ - The customer is in the payment process<br>
            _OTHER_ - unspecified
           enum: [ PURCHASE_PENDING, PAYMENT_PENDING, OTHER ]
+        # CANCELLATION
+        cancellationOptionId:
+          type: string
+          description: Identifier of the cancellation option in case the MP cancels a leg
         # NOTIFICATIONS
         notificationType:
           type: string
@@ -1011,6 +1015,11 @@ components:
             $ref: "#/components/schemas/travelDocument"
           description: The MaaS users proof of their right to travel on this leg (visual representable) OR
             data to open an asset
+        cancellationOptions:
+          type: array
+          description: List of cancellation options at the time point when this booking was returned. If this list is empty there are cancellation options available right now. If one or more options are available the id of the option needs to be specified when cancelling this leg.
+          items:
+            $ref: "#/components/schemas/cancellationOption"
         memo:
           $ref: "#/components/schemas/longString"
         extraInfo:
@@ -1329,6 +1338,30 @@ components:
             cancellationFeePercentage:
               $ref: "#/components/schemas/float"
               description: percentage of the offered price you have to pay when you cancel this purchased TRIP  
+
+    cancellationOption:
+      description: Currently available option for cancellation of a leg. Cancellation options might differ depending e.g. of the status of the leg, the time until the leg starts, etc. The id given for a specific cancellation option should not be reused for a different option with different conditions at some later time point.
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2179.htm 
+        description: (CANCELLING)
+      required:
+        - id
+        - description
+        - charges
+      properties:
+        id:
+          description: An identifier for this cancellation option. This identifier will be used in the cancellation operation by the MP.
+          allOf:
+            - $ref: "#/components/schemas/shortString"
+        description:
+          description: Verbal description of this cancellation option that can be provided to the user.
+          example: "The booked trip starts in less then 10 minutes. Free cancellation is no longer possible. Additional charges apply."
+          allOf:
+            - $ref: "#/components/schemas/longString"
+        charges:
+          description: Total charges that are applied. This might include any usage charges if already incurred.
+          allOf:
+            - $ref: "#/components/schemas/amountOfMoney"
 
     conditionBase:
       type: object
