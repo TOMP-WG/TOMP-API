@@ -252,16 +252,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripResponse"
+                $ref: "#/components/schemas/tripOperationResponse"
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
             Expires:
               $ref: "#/components/headers/expires"
               description: Mandatory whenever the _EXTEND_EXPIRY_TIME_ is used. It must contain the updated expiry time
-              externalDocs:
-                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
-                description: PURCHASE WINDOW
+            # externalDocs:
+            #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
+            #    description: PURCHASE WINDOW
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -334,7 +334,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/legDetailResponse"
+                $ref: "#/components/schemas/legOperationResponse"
         "202":
           description: When a confirmation request has to return positive, this code has to be used
           headers:
@@ -343,7 +343,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/legDetailResponse"
+                $ref: "#/components/schemas/legOperationResponse"
         "400":
           description: When a confirmation request results in a denial, this code has to be used
           $ref: "#/components/responses/errorResponse"
@@ -563,7 +563,6 @@ components:
     tripOfferParameters:
       type: object
       description: A trip planning request, resulting in trip options
-      additionalProperties: false
       externalDocs:
         url: https://not-yet-available/
         description: TRIP OFFER PARAMETERS
@@ -636,7 +635,7 @@ components:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3156.htm
         description: TRIP OFFER DELIVERY
       required:
-        - validUntil
+        - endValidity
         - options
       properties:
         endValidity:
@@ -672,11 +671,29 @@ components:
           $ref: "#/components/schemas/customer"
           description: The user that wants to purchase this trip, only to supply when requested in the purchaseConditions
 
+    tripOperationResponse:
+      type: object
+      description: TRIP OPERATION DELIVERY, contains the offered or modified trip and the financial consequences, or in case of an offer, options. These could contain fees, vouchers, reimbursements, and so on.
+      additionalProperties: false
+      properties:
+        trip:
+          allOf:
+          - $ref: "#/components/schemas/trip"
+          - $ref: "#/components/schemas/halLinks"
+        consequences:
+          type: array
+          description: an array of consequences, in case of an offer request (see operationParameter.requestOffer). When requestOffer = false (or not present), the TO is free to choose one and apply it directly.
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/paymentDetail"
+
     tripResponse:
+      type: object
       externalDocs:
         url: https://not-yet-available/
         description: TRIP PURCHASE DELIVERY, TRIP OPERATION DELIVERY, TRIP DETAIL DELIVERY. Corresponds with
           tripPurchaseParameters, operationParameters and tripDetailParameters (= GET /trips/{id}/)
+      additionalProperties: false
       properties:
         trip:
           allOf:
@@ -717,7 +734,7 @@ components:
       description: operation parameter for the purchase or trip execution phase
       externalDocs:
         url: https://not-yet-available/
-        description: OPERATION PARAMETER. Delivers TRIP DETAIL DELIVERY (tripResponse) or LEG DETAIL RESPONSE (legDetailResponse)
+        description: OPERATION PARAMETER. Delivers TRIP DETAIL DELIVERY (tripResponse) or LEG DETAIL DELIVERY (legDetailResponse)
       additionalProperties: false
       required:
         - timestamp
@@ -734,11 +751,6 @@ components:
           maxItems: 10
           items:
             $ref: "#/components/schemas/url"
-        requestOffer:
-          type: boolean
-          description: if this field contains a 'true', the operation shouldn't be executed, but the expected result of the operation should be returned. For instance, 
-            if you're cancelling a purchased TRIP, you'll return a CANCELLED TRIP, the price will contain the price that has to be paid for this cancelled TRIP.
-          default: false
         source:
           type: string
           description: This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this TRIP for me); to override the default source.<br>
@@ -749,6 +761,32 @@ components:
             _CUSTOMER_ the CUSTOMER triggered this request. In case the traveler and customer are the same, take _CUSTOMER_.<br>
             _OTHER_ unknown source
           enum: [ TO, MP, TRAVELER, CUSTOMER, OTHER ]
+
+        # Handling offers
+        requestOffer:
+          type: boolean
+          description: "if this field contains a 'true', the operation shouldn't be executed, but the expected result of the operation should be returned. For instance, 
+            if you're cancelling a purchased TRIP, you'll return a CANCELLED TRIP, the price will contain the price that has to be paid for this cancelled TRIP.
+            If there are multiple options, but this field contains 'false', the TO is free to choose one.
+            Allowed operations on a trip to request offers (they might be different financial options):
+              - _CANCEL_
+              - _MODIFY_TRAVELER_
+              - _MODIFY_CUSTOMER_
+              - _EXCHANGE_
+            Allowed operations on a leg to request offers:
+              - _CHANGE_END_TIME_
+              - _CHANGE_START_TIME_
+              - _POSTPONE_
+              - _ADD_ANCILLARY_
+              - _REMOVE_ANCILLARY_
+              "
+          default: false
+        offerId:
+          $ref: "#/components/schemas/uuid"
+          description: "the ID of the offer that is used in this operation (cancelling, modifying, exchanging). 
+            Option 1: the offer ID is the paymentDetail.id concatenated with the sequenceID, separated with a single dot, delivered in the OperationResponse.offers (when finalising e.g. a CANCEL with multiple options) OR
+            Option 2: the offer ID is the trip-id delivered in a new /offers request, allowing to exchange the current trip against a new one (e.g. second class trip against a first class trip)" 
+
         # REPORT_PROGRESS (or NOTIFY)
         location:
           $ref: "#/components/schemas/coordinates"
@@ -849,6 +887,22 @@ components:
             , "start_finishing": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/START_FINISHING", "templated": true, "type": "application/hal+json" }
             , "finish": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/FINISH", "templated": true, "type": "application/hal+json" }
             }
+    
+    legOperationResponse:
+      type: object
+      description: response to a leg operation. Contains the new leg, and the financial consequences.
+      additionalProperties: false
+      properties:
+        leg: 
+          allOf:
+          - $ref: "#/components/schemas/leg"
+          - $ref: "#/components/schemas/halLinks"
+        consequences:
+          type: array
+          description: an array of consequences, in case of an offer request (see operationParameter.requestOffer). When requestOffer = false (or not present), the TO is free to choose one and apply it directly.
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/paymentDetail"
 
     ## support
     supportParameter:
@@ -858,13 +912,9 @@ components:
         url: https://not-yet-available/
         description: SUPPORT REQUEST PARAMETER
       additionalProperties: true
-      required:
-      - supportType
-      - location
-      - timestamp
       properties:
         ticket:
-          $ref: "#/components/schemas/supportTicketStatus"
+          $ref: "#/components/schemas/supportTicket"
 
     supportResponse:
       description: the current status of support
@@ -904,6 +954,7 @@ components:
         externalDataSources:
           type: array
           description: array of external datasources
+          maxItems: 20
           items:
             $ref: "#/components/schemas/externalDataSource"
         processIdentifiers:
@@ -1007,6 +1058,7 @@ components:
           $ref: "#/components/schemas/operator"
         travelDocuments:
           type: array
+          maxItems: 3
           items:
             $ref: "#/components/schemas/travelDocument"
           description: The MaaS users proof of their right to travel on this leg (visual representable) OR
@@ -1030,6 +1082,7 @@ components:
         _SET_IN_USE_ [MP<-TO, process identifier TO-controlled] - the driver indicates the LEG is started<br>
         _CHANGE_END_TIME_ [MP->TO] will be used to request a changed end time; the TRAVELER wants to use the ASSET longer (or shorter), the **time** field contains the proposed end time, the end time of the trip doesn't change<br>
         _CHANGE_START_TIME_ [MP->TO] will be used to request a changed start time, e.g. the TRAVELER wants to depart later, the **time** field contains the estimated start time, the start time of the trip doesn't change<br>
+        _POSTPONE_ [MP->TO] the complete leg is moved in time, both the start and end time are equally moved. The **time** field contains the estimated start time. The end time should be derived.
         _PAUSE_ [MP->TO] will pause the LEG [PAUSING STEP]<br>
         _OPEN_TRUNK_ [MP->TO] request the TO to open up the trunk (of the scooter), e.g. to store the helmet [ONBOARDING STEP, OFFBOARDING STEP, PAUSING STEP, RESUMING STEP]<br>
         _START_FINISHING_ [MP->TO] will start the end-of-leg process [OFFBOARDING STEP]<br>
@@ -1047,10 +1100,11 @@ components:
         _SEND_EVIDENCE_PARKED_ [MP->TO] sends pictures (in url field) to prove that the ASSET is parked correctly<br>
         _SEND_EVIDENCE_HELMET_ [MP->TO] sends pictures (in url field) to prove that the helmet is stowed correctly<br>
         _SEND_EVIDENCE_CHARGER_ [MP->TO] sends pictures (in url field) to prove that the ASSET connected correctly to the charger<br>
+        _REVOKE_TRAVEL_DOCUMENT_ [MP->TO] the traveler has lost his travel document, and wants to revoke it. The result of the operation (the leg) contains a new travel document.
       enum: [
         # state operation requests
         PREPARE, ASSIGN_ASSET, SET_IN_USE, PAUSE, START_FINISHING, FINISH, CANCEL,
-        # asset operation requests
+        # physical asset operation requests
         OPEN_TRUNK,
         # end user request requests
         CHANGE_START_TIME, CHANGE_END_TIME, 
@@ -1063,7 +1117,9 @@ components:
         # financial requests
         FINANCIAL_TRANSACTION,
         # evidence requests
-        SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER
+        SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER,
+        # after sales
+        REVOKE_TRAVEL_DOCUMENT
       ]
 
     legState:
@@ -1288,7 +1344,8 @@ components:
         _MODIFY_TRAVELER_ - [MP->TO] request a change one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _MODIFY_CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested<br>
         _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
-      enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, MODIFY_TRAVELER, MODIFY_CUSTOMER, FINANCIAL_TRANSACTION ]
+        _EXCHANGE_ [MP->TO] the end-user wants to exchange the referred trip with another, requested from the /offers endpoint. The delivery contains also the financial consequences.
+      enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, MODIFY_TRAVELER, MODIFY_CUSTOMER, FINANCIAL_TRANSACTION, EXCHANGE ]
 
     tripState:
       type: string
@@ -1498,6 +1555,7 @@ components:
                 description: ROUTING.CrossBorder possible, TOMP allowing more use cases.
             timeLimits:
               type: array
+              maxItems: 100
               externalDocs:
                 url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2121.htm
                 description: USAGE VALIDITY PERIOD, except TM tells when it is allowed, TOMP tells when it is not allowed or when there is a reduction.
@@ -1851,10 +1909,11 @@ components:
       description: A category of license to use a certain asset class
       additionalProperties: true
       required:
-        - mode
+        - modes
       properties:
         modes:
           type: array
+          maxItems: 10
           items:
             $ref: "#/components/schemas/mode"
         licenseCode:
@@ -1938,6 +1997,10 @@ components:
   # support concepts
     supportTicket:
       type: object
+      required:
+      - supportType
+      - location
+      - timestamp
       properties:
         id:
           $ref: "#/components/schemas/uuid"
@@ -2715,6 +2778,7 @@ components:
   # GeoJSON specs, in contradiction to the convention starting with a capital. Reason: compatibility with GeoJSON specification (types are named this way)
     LineString:
       type: array
+      maxItems: 1000
       items:
         $ref: "#/components/schemas/Point"
       description: An array  of WGS84 coordinate pairs
@@ -2735,6 +2799,7 @@ components:
 
     Polygon:
       type: array
+      maxItems: 1000
       items:
         $ref: "#/components/schemas/LineString"
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
@@ -2970,14 +3035,13 @@ components:
     requirement:
       type: object
       description: base concept for an (dis)ability or ancillary/equipment item.
-      additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA8/EA254.htm
         description: TYPE OF USER NEED
       # OR https://www.transmodel-cen.eu/model/EARoot/EA10/EA3/EA4/EA3583.htm (VEHICLE EQUIPMENT PROFILE), when applied on a vehicle, type=ANCILLARY/ASSET_EQUIPMENT
       required:
-        - category
-        - number
+        - identifier
+        - type
       discriminator:
         propertyName: type
       properties:

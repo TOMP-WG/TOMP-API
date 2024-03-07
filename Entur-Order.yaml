@@ -1,0 +1,2616 @@
+openapi: 3.0.1
+info:
+  title: Order API
+  description: This is a short description of the Order API
+  version: '1'
+servers:
+  - url: https://order-production.entur.io/
+tags:
+  - name: Order Public API
+    description: Order Public API
+  - name: Order Internal API
+    description: Order Internal API
+paths:
+  /v1/orders:
+    get:
+      tags:
+        - Order Public API
+      summary: Get Orders
+      description: |-
+        Get Orders by specifying multiple filter query parameters.
+
+        Each value(s) must be prefixed with a valid search operator [eq, ne, gt, gte, lt, lte, in, nin]. See examples in some query parameters.
+      operationId: getOrders
+      parameters:
+        - name: balance
+          in: query
+          description: Filter by balance
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: contact
+          in: query
+          description: Filter by contact infos contact
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: createdAt
+          in: query
+          description: Filter by created at
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: createdBy
+          in: query
+          description: Filter by contact infos created by
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+          example: in:1234567,7654321
+        - name: currency
+          in: query
+          description: Filter by currency
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: datedServiceJourneyId
+          in: query
+          description: Filter by Leg with Dated Service Journey ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: distributionChannelId
+          in: query
+          description: Filter by Distribution Channel used when Order was created
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: endTime
+          in: query
+          description: Filter by the endTime of one of the Legs on the Order
+          style: form
+          example: lte:2019-01-11T-00:00:00Z
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: externalReference
+          in: query
+          description: Filter by external reference
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: fromStopPlaceId
+          in: query
+          description: Filter by Leg with from Stop Place ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: id
+          in: query
+          description: Filter by order ID
+          schema:
+            type: array
+            items:
+              type: string
+          example: eq:3N7URR0X
+        - name: lastConfirmedAt
+          in: query
+          description: Filter by when an Order was last confirmed
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: orderBy
+          in: query
+          description: Sorts the result based on a field in the Order objects
+          schema:
+            type: string
+          example: totalAmount
+        - name: orderLineExternalReference
+          in: query
+          description: Filter by order lines external reference
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: orderLineId
+          in: query
+          description: Filter by OrderLine ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: organisationId
+          in: query
+          description: Filter by Organisation ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: originalDatedServiceJourneyId
+          in: query
+          description: Filter by Leg with Original Dated Service Journey ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - $ref: '#/components/parameters/paginationPageParam'
+        - $ref: '#/components/parameters/paginationPerPageParam'
+        - name: pos
+          in: query
+          description: Filter by POS header used when Order was created
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: reservationId
+          in: query
+          description: Filter by Reservation ID on OrderLines
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: salesPackageId
+          in: query
+          description: Filter by Sales Package ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: salesPackageVersion
+          in: query
+          description: Filter by Sales Package version
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: serviceJourneyId
+          in: query
+          description: Filter by Leg with Service Journey ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: sortBy
+          in: query
+          description: Sorts the result ascending or descending
+          schema:
+            type: string
+            default: ASC
+            enum:
+              - ASC
+              - DESC
+          example: DESC
+        - name: startTime
+          in: query
+          description: Filter by the startTime of one of the Legs on the Order
+          style: form
+          example: gt:2019-01-091T00:00:00Z
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: status
+          in: query
+          description: Filter by Workflow Status
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: toStopPlaceId
+          in: query
+          description: Filter by Leg with to Stop Place ID
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: totalAmount
+          in: query
+          description: Filter by total amount
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: totalTaxAmount
+          in: query
+          description: Filter by total tax amount
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: version
+          in: query
+          description: Optional version query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfOrder'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    post:
+      tags:
+        - Order Public API
+      summary: Create an empty Order, and return the Order object
+      description: By calling this endpoint, a new, empty Order will be created. The Order ID can then be used to modify the Order to add journeys, etc.
+      operationId: createOrder
+      parameters:
+        - $ref: '#/components/parameters/dciHeader'
+        - $ref: '#/components/parameters/posHeader'
+      requestBody:
+        description: Order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+        required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}:
+    parameters:
+      - $ref: '#/components/parameters/orderIdPathParam'
+    get:
+      tags:
+        - Order Public API
+      summary: Get Order with ID in latest version
+      description: Get the latest versioned Order. Earlier versions with status CONFIRMED can be retrieved by specifying version=<desired version, minimum 1>.
+      operationId: getOrder
+      parameters:
+        - name: version
+          in: query
+          description: Optional version query
+          schema:
+            type: integer
+            minimum: 1
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    put:
+      tags:
+        - Order Public API
+      summary: Update an Order.
+      description: Update one or multiple values on an Order.
+      operationId: updateOrder
+      parameters:
+        - $ref: '#/components/parameters/dciHeader'
+        - $ref: '#/components/parameters/posHeader'
+      requestBody:
+        description: Order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Unlock Order
+      description: Unlock order if it is locked.
+      operationId: unlockOrder
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/confirm:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Confirm Order
+      description: Manually confirm Orders where the balance is equal to 0.00
+      operationId: confirmOrder
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/fees:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Add Fee to Order
+      description: Add Fee to specified Order
+      operationId: addFeeToOrder
+      requestBody:
+        description: Fee
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeeRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fee'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /v1/orders/{orderId}/fees/{feeId}:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+      - name: feeId
+        in: path
+        description: Fee ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags:
+        - Order Public API
+      summary: Delete Fee from Order
+      description: Delete Fee with specified ID from Order with specified ID
+      operationId: deleteFeeFromOrder
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /v1/orders/{orderId}/orderlines:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Add OrderLines to Order
+      description: This endpoint adds a list of OrderLines to the specified Order, and returns a List<OrderLine> of the OrderLines added. If the Order does not exist it will throw an exception.
+      operationId: addOrderLines
+      requestBody:
+        description: orderLines
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderLineRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderLine'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      tags:
+        - Order Public API
+      summary: Delete OrderLines from Order
+      description: This endpoint removes a list of OrderLines from the specified Order. This is equivalent of running multiple DELETE /v1/orders/{orderId}/orderlines/{orderLineId}
+      operationId: deleteOrderLines
+      parameters:
+        - name: orderLineIds
+          in: query
+          description: Use request body
+          deprecated: true
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    put:
+      tags:
+        - Order Public API
+      summary: Update OrderLines on an Order
+      description: This endpoint updates OrderLines on the specified Order, and returns the updated representations
+      operationId: updateOrderLines
+      requestBody:
+        description: OrderLines
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderLineRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderLine'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/orderlines/cancel:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      operationId: cancelOrderLines
+      summary: Cancel OrderLines in an Order
+      description: 'The cost of the OrderLine will be removed from the Order total, and the field `cancellation` will be set to `CANCELLED`. Only to be used for CONFIRMED OrderLines. Typical usage: refunding.'
+      tags:
+        - Order Public API
+      parameters:
+        - name: orderLineIds
+          in: query
+          description: Use request body
+          required: false
+          deprecated: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: effectiveCancellationDate
+          in: query
+          description: This parameter is used to override cancellation date from current timestamp. This will be applied to every order line in the request. Separate requests are required per cancellation date.
+          schema:
+            type: string
+            format: date-time
+            example: '2018-09-02T07:36:00.000Z'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              title: orderLineIds
+              description: Cancel all included order lines
+              type: array
+              items:
+                type: string
+                format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The cancelled OrderLines
+                items:
+                  $ref: '#/components/schemas/OrderLine'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/orderlines/{orderLineId}:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+      - $ref: '#/components/parameters/orderLineIdPathParam'
+    put:
+      tags:
+        - Order Public API
+      summary: Deprecated. Please use PUT `/v1/orders/{orderId}/orderlines`
+      deprecated: true
+      description: This endpoint updates a OrderLine on the specified Order, and returns an updated representation
+      operationId: updateOrderLine
+      requestBody:
+        description: orderLine
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderLineRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderLine'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      tags:
+        - Order Public API
+      summary: Deprecated. Please use DELETE `/v1/orders/{orderId}/orderlines?orderLineIds={orderLineId}`
+      deprecated: true
+      description: 'This endpoint removes an OrderLine from the specified Order. Note that this should only be used for non-confirmed OrderLines. If the OrderLine has been confirmed, it needs to be cancelled instead. Typical usage: customer has decided not to purchase the OrderLine.'
+      operationId: removeOrderLine
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/orderlines/{orderLineId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+      - $ref: '#/components/parameters/orderLineIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Deprecated. Please use POST `/v1/orders/{orderId}/orderlines/cancel?orderLineIds={orderLineId}`
+      deprecated: true
+      description: 'The cost of the OrderLine will be removed from the Order total, and the field `cancellation` will be set to `CANCELLED`. Only to be used for CONFIRMED OrderLines. Typical usage: refunding.'
+      operationId: cancelOrderLine
+      parameters:
+        - name: effectiveCancellationDate
+          in: query
+          description: This parameter is used to override cancellation date from current timestamp.
+          schema:
+            type: string
+            format: date-time
+            example: '2018-09-02T07:36:00.000Z'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderLine'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/reservations:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Add seat Reservation references
+      description: Add seat Reservation references to the specified Order. Reservation ID is an UUID
+      operationId: addReservationToOrder
+      requestBody:
+        description: purchasedReservations
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PurchasedReservation'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PurchasedReservation'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /v1/orders/{orderId}/reservations/{reservationId}:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+      - name: reservationId
+        in: path
+        description: Reservation ID associated with Order
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - Order Public API
+      summary: Update seat Reservation reference
+      description: Update seat Reservation reference
+      operationId: updateReservationOnOrder
+      requestBody:
+        description: purchasedReservation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchasedReservation'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchasedReservation'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - Order Public API
+      summary: Remove seat Reservation reference
+      description: Remove seat Reservation reference
+      operationId: removeReservationFromOrder
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /v1/orders/{orderId}/reset:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Reset Order to the latest confirmed version, or initial state if it has never been confirmed
+      description: This can be used when customers spend too much time placing an Order with a seat Reservation. By using reset, the application will free up space so that the seats can be reserved by others.
+      operationId: resetOrder
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '423':
+          $ref: '#/components/responses/locked'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/travellers:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+    post:
+      tags:
+        - Order Public API
+      summary: Add Traveller to Order
+      description: This endpoint adds a Traveller to the specified Order, and returns the Traveller that was added. If the Order does not exist, it will throw an exception.
+      operationId: addTravellerToOrder
+      requestBody:
+        description: traveller
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravellerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Traveller'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/orders/{orderId}/travellers/{travellerId}:
+    parameters:
+      - $ref: '#/components/parameters/dciHeader'
+      - $ref: '#/components/parameters/posHeader'
+      - $ref: '#/components/parameters/orderIdPathParam'
+      - name: travellerId
+        in: path
+        description: Traveller ID associated with Order
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - Order Public API
+      summary: Update Traveller
+      description: This endpoint updates a Traveller for the specified Order, and returns the Traveller that was updated. If either the Order or the Traveller does not exist, it will throw an exception.
+      operationId: updateTravellerOnOrder
+      requestBody:
+        description: traveller
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravellerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Traveller'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      tags:
+        - Order Public API
+      summary: Remove Traveller from Order
+      description: This endpoint removes a Traveller from the specified Order. If either the Order or the Traveller does not exist, it will throw an exception.
+      operationId: removeTravellerFromOrder
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+components:
+  parameters:
+    dciHeader:
+      name: Entur-Distribution-Channel
+      in: header
+      description: A header containing the distribution channel ID.
+      required: false
+      schema:
+        type: string
+    posHeader:
+      name: Entur-POS
+      in: header
+      description: Point-of-sale identifier.
+      required: true
+      schema:
+        type: string
+    orderIdPathParam:
+      name: orderId
+      in: path
+      description: Order ID
+      required: true
+      schema:
+        type: string
+    orderLineIdPathParam:
+      name: orderLineId
+      in: path
+      description: OrderLine ID to given Order
+      required: true
+      schema:
+        type: string
+        format: uuid
+    paginationPageParam:
+      name: page
+      in: query
+      description: Selects a specific page in the collection
+      schema:
+        default: 1
+        type: integer
+        format: int32
+    paginationPerPageParam:
+      name: perPage
+      in: query
+      description: Selects the number of elements per page
+      schema:
+        default: 30
+        type: integer
+        format: int32
+  securitySchemes:
+    authHeader:
+      type: http
+      scheme: bearer
+      bearerFormat: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: Authorization header
+  responses:
+    noContent:
+      description: No Content
+    badRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    notFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    locked:
+      description: Order is locked and cannot be edited.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    internalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    serviceUnavailable:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+  schemas:
+    ActivationMeans:
+      title: ActivationMeans
+      type: string
+      enum:
+        - AUTOMATIC_BY_TIME
+        - CHECK_IN
+        - NONE_REQUIRED
+        - OTHER
+        - USE_OF_MOBILE_DEVICE
+        - USE_OF_VALIDATOR
+    ApiError:
+      title: ApiError
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - exception
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        exception:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+    CancellationReason:
+      title: CancellationReason
+      type: string
+      description: Cancellation reason for an OrderLine. OrderLines with REPLACED have been replaced with a newer version.
+      enum:
+        - CANCELLED
+        - REPLACED
+    ContactInfo:
+      title: ContactInfo
+      type: object
+      properties:
+        createdBy:
+          description: Reference to the Customer who created this entity
+          $ref: '#/components/schemas/CustomerRef'
+        contact:
+          description: Reference to the Customer listed as contact for this entity
+          $ref: '#/components/schemas/CustomerRef'
+      description: Contact information related to different aspects in the lifecycle of an Order.
+    CustomerRef:
+      title: CustomerRef
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID for Customer
+          example: '12345'
+      description: Customer reference.
+    DynamicUsageValidityPeriod:
+      title: DynamicUsageValidityPeriod
+      description: A dynamic UsageValidtyPeriod that is generated on the fly. Thus lacking id and version as it can not be referenced
+      type: object
+      properties:
+        standardDuration:
+          type: string
+          description: Standard duration. Represented as a string formatted according to ISO-8601
+          format: duration
+          example: PT1H
+        startDateTime:
+          type: string
+          description: StartDateTime
+          format: date-time
+          example: '2020-05-13T07:19:30.389Z'
+        usageTrigger:
+          $ref: '#/components/schemas/UsageTrigger'
+        endDateTime:
+          type: string
+          description: EndDate
+          format: date-time
+          example: '2020-05-13T07:19:30.389Z'
+        usageEnd:
+          $ref: '#/components/schemas/UsageEnd'
+        activationMeans:
+          type: array
+          description: Activation Means. Describes how a product can be activated.
+          default: []
+          items:
+            $ref: '#/components/schemas/ActivationMeans'
+    DistributionDetails:
+      title: DistributionDetails
+      type: object
+      properties:
+        fulfillmentMethodRef:
+          description: Reference to the FulfillmentMethod used to fulfill the Order, ie via conductor using MT receipt, TVM via NOD QR or TravelCard, mobile phone via NOD QR code or ID-based - etc
+          $ref: '#/components/schemas/RefType'
+        typeOfTravelDocumentToIssueRef:
+          description: Reference to the type of TravelDocument that will be issued
+          $ref: '#/components/schemas/RefType'
+        customerAccountRef:
+          description: Reference to an id based customer account
+          $ref: '#/components/schemas/RefType'
+        existingTravelDocumentDetails:
+          description: ''
+          $ref: '#/components/schemas/TravelDocumentDetails'
+      description: Wrapper for references connected to distribution of travel rights and/or tickets
+    DynamicDistanceMatrixElement:
+      title: DynamicDistanceMatrixElement
+      description: ''
+      type: object
+      properties:
+        startStopPointRef:
+          $ref: '#/components/schemas/RefType'
+          description: Reference to the staring stop point
+        endStopPointRef:
+          $ref: '#/components/schemas/RefType'
+          description: Reference to the  ending stop point
+        startTariffZoneRef:
+          $ref: '#/components/schemas/RefType'
+          description: Reference to the start tariff zone
+        endTariffZoneRef:
+          $ref: '#/components/schemas/RefType'
+          description: Reference to the ending tariff zone
+    Entitlement:
+      title: Entitlement
+      required:
+        - entitlementProductRef
+      type: object
+      properties:
+        contractId:
+          type: string
+          description: ID of contract used by Traveller for OrderLine
+        entitlementProductRef:
+          description: Reference to the EntitlementProduct used when calculating the price
+          $ref: '#/components/schemas/RefType'
+        externalEntitlementRef:
+          description: External reference to this Entitlement in third party systems
+          $ref: '#/components/schemas/RefType'
+      description: Information about the product and contract used when generating offer
+    FeeRequest:
+      title: FeeRequest
+      required:
+        - orderLineIds
+        - price
+        - type
+        - reason
+      type: object
+      properties:
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        type:
+          type: string
+          description: 'Type of Fee. Valid types: MANUAL, REFUNDING, ONBOARD, CHANGE, INVOICE, CHANGE_NON_REFUNDABLE, PENALTY, BOOKING, REDUCTION'
+          example: REFUND
+        externalRef:
+          description: External reference to this Fee in external systems
+          $ref: '#/components/schemas/RefType'
+        reason:
+          type: string
+          default: ''
+          description: Explanatory text describing the reason for the Fee, if applicable
+          example: VYB:Refunding:HalfRefunded
+        orderLineIds:
+          type: array
+          description: References to the OrderLines this Fee refers to, if applicable. If empty, the fee refers to all order lines
+          default: []
+          items:
+            format: uuid
+            type: string
+        orderVersion:
+          type: integer
+          description: The version of the Order this Fee is added to
+          format: int32
+          example: 2
+        linkedByExtRef:
+          description: Used to identify fees originated from external systems
+          $ref: '#/components/schemas/RefType'
+      description: Fee related to one or more OrderLines
+    Fee:
+      title: Fee
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: ID used to uniquely identify Fee if deletion is necessary
+              example: dd3e1d71-1c96-4b88-a683-538a8724ee0d
+        - $ref: '#/components/schemas/FeeRequest'
+      description: Fee related to one or more OrderLines
+    InterchangeTo:
+      title: InterchangeTo
+      required:
+        - fromServiceJourneyRef
+        - staySeated
+        - toServiceJourneyRef
+      type: object
+      properties:
+        staySeated:
+          type: boolean
+          description: Passengers should remain seated when travelling from and to ServiceJourneys referenced in this object
+        fromServiceJourneyRef:
+          description: Reference to the ServiceJourney the passengers are changing from
+          $ref: '#/components/schemas/RefType'
+        toServiceJourneyRef:
+          description: Reference to the ServiceJourney the passengers are changing to
+          $ref: '#/components/schemas/RefType'
+      description: Connected ServiceJourneys without changing material
+    Limitation:
+      title: Limitation
+      type: object
+      properties:
+        dynamicUsageValidityPeriod:
+          $ref: '#/components/schemas/DynamicUsageValidityPeriod'
+        usageValidityPeriodRef:
+          $ref: '#/components/schemas/RefType'
+        userProfileRef:
+          $ref: '#/components/schemas/RefType'
+        groupTicketRef:
+          $ref: '#/components/schemas/RefType'
+        groupTicket:
+          $ref: '#/components/schemas/GroupTicket'
+    GroupTicket:
+      title: GroupTicket
+      type: object
+      required:
+        - companionProfiles
+      properties:
+        companionProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanionProfile'
+        derivedFromObjectRef:
+          type: string
+          description: Identity of object from which this object of ENTITY was derived. Normally the same.
+        derivedFromVersionRef:
+          description: Version of this object from which this version of ENTITY was derived.
+          type: string
+    CompanionProfile:
+      title: CompanionProfile
+      type: object
+      required:
+        - minimumNumberOfPersons
+        - maximumNumberOfPersons
+      properties:
+        minimumNumberOfPersons:
+          type: integer
+        maximumNumberOfPersons:
+          type: integer
+        userProfileRef:
+          $ref: '#/components/schemas/RefType'
+    LogicalOperator:
+      title: LogicalOperator
+      type: string
+      description: Logical operator
+      enum:
+        - AND
+        - OR
+        - XOR
+        - NOT
+        - NAND
+        - XNOR
+        - NOR
+    Mode:
+      title: Mode
+      type: string
+      description: Travel mode for Leg.
+      enum:
+        - AIR
+        - BICYCLE
+        - BUS
+        - CABLEWAY
+        - CAR
+        - WATER
+        - FUNICULAR
+        - LIFT
+        - LINKSWITCH
+        - RAIL
+        - METRO
+        - TRAM
+        - TRANSIT
+        - FOOT
+        - COACH
+    SubMode:
+      type: string
+      description: The transport sub mode (e.g., localBus or expressBus) used when traversing this leg. Null if leg is not a ride
+      example: LOCAL
+      default: UNDEFINED
+      enum:
+        - UNKNOWN
+        - UNDEFINED
+        - INTERNATIONAL_FLIGHT
+        - DOMESTIC_FLIGHT
+        - INTERCONTINENTAL_FLIGHT
+        - DOMESTIC_SCHEDULED_FLIGHT
+        - SHUTTLE_FLIGHT
+        - INTERCONTINENTAL_CHARTER_FLIGHT
+        - INTERNATIONAL_CHARTER_FLIGHT
+        - ROUND_TRIP_CHARTER_FLIGHT
+        - SIGHTSEEING_FLIGHT
+        - HELICOPTER_SERVICE
+        - DOMESTIC_CHARTER_FLIGHT
+        - SCHENGEN_AREA_FLIGHT
+        - AIRSHIP_SERVICE
+        - SHORT_HAUL_INTERNATIONAL_FLIGHT
+        - CANAL_BARGE
+        - LOCAL_BUS
+        - REGIONAL_BUS
+        - EXPRESS_BUS
+        - NIGHT_BUS
+        - POST_BUS
+        - SPECIAL_NEEDS_BUS
+        - MOBILITY_BUS
+        - MOBILITY_BUS_FOR_REGISTERED_DISABLED
+        - SIGHTSEEING_BUS
+        - SHUTTLE_BUS
+        - HIGH_FREQUENCY_BUS
+        - DEDICATED_LANE_BUS
+        - SCHOOL_BUS
+        - SCHOOL_AND_PUBLIC_SERVICE_BUS
+        - RAIL_REPLACEMENT_BUS
+        - DEMAND_AND_RESPONSE_BUS
+        - AIRPORT_LINK_BUS
+        - INTERNATIONAL_COACH
+        - NATIONAL_COACH
+        - SHUTTLE_COACH
+        - REGIONAL_COACH
+        - SPECIAL_COACH
+        - SCHOOL_COACH
+        - SIGHTSEEING_COACH
+        - TOURIST_COACH
+        - COMMUTER_COACH
+        - FUNICULAR
+        - STREET_CABLE_CAR
+        - ALL_FUNICULAR_SERVICES
+        - UNDEFINED_FUNICULAR
+        - METRO
+        - TUBE
+        - URBAN_RAILWAY
+        - CITY_TRAM
+        - LOCAL_TRAM
+        - REGIONAL_TRAM
+        - SIGHTSEEING_TRAM
+        - SHUTTLE_TRAM
+        - TRAIN_TRAM
+        - TELECABIN
+        - CABLE_CAR
+        - LIFT
+        - CHAIR_LIFT
+        - DRAG_LIFT
+        - TELECABIN_LINK
+        - LOCAL
+        - HIGH_SPEED_RAIL
+        - SUBURBAN_RAILWAY
+        - REGIONAL_RAIL
+        - INTERREGIONAL_RAIL
+        - LONG_DISTANCE
+        - INTERNATIONAL
+        - SLEEPER_RAIL_SERVICE
+        - NIGHT_RAIL
+        - CAR_TRANSPORT_RAIL_SERVICE
+        - TOURIST_RAILWAY
+        - AIRPORT_LINK_RAIL
+        - RAIL_SHUTTLE
+        - REPLACEMENT_RAIL_SERVICE
+        - SPECIAL_TRAIN
+        - CROSS_COUNTRY_RAIL
+        - RACK_AND_PINION_RAILWAY
+        - INTERNATIONAL_CAR_FERRY
+        - NATIONAL_CAR_FERRY
+        - REGIONAL_CAR_FERRY
+        - LOCAL_CAR_FERRY
+        - INTERNATIONAL_PASSENGER_FERRY
+        - NATIONAL_PASSENGER_FERRY
+        - REGIONAL_PASSENGER_FERRY
+        - LOCAL_PASSENGER_FERRY
+        - POST_BOAT
+        - TRAIN_FERRY
+        - ROAD_FERRY_LINK
+        - AIRPORT_BOAT_LINK
+        - HIGH_SPEED_VEHICLE_SERVICE
+        - HIGH_SPEED_PASSENGER_SERVICE
+        - SIGHTSEEING_SERVICE
+        - SCHOOL_BOAT
+        - CABLE_FERRY
+        - RIVER_BUS
+        - SCHEDULED_FERRY
+        - SHUTTLE_FERRY_SERVICE
+        - COMMUNAL_TAXI
+        - CHARTER_TAXI
+        - WATER_TAXI
+        - RAIL_TAXI
+        - BIKE_TAXI
+        - BLACK_CAB
+        - MINI_CAB
+        - ALL_TAXI_SERVICES
+        - HIRE_CAR
+        - HIRE_VAN
+        - HIRE_MOTORBIKE
+        - HIRE_CYCLE
+        - ALL_HIRE_VEHICLES
+    Order:
+      title: Order
+      type: object
+      allOf:
+        - type: object
+          required:
+            - id
+            - version
+            - status
+            - createdAt
+            - totalAmount
+            - totalTaxAmount
+            - balance
+            - paymentRefs
+            - travellers
+            - orderLines
+            - reservations
+            - fees
+            - organisationId
+            - currency
+          properties:
+            id:
+              type: string
+              description: ID of Order.
+              example: 3N7URR0X
+            version:
+              type: integer
+              description: |-
+                The system increments an Order’s version number whenever some change occurs that causes the Order’s status to go from CONFIRMED to DRAFT.
+                The user has to perform an action that causes the status to go from DRAFT to CONFIRMED (such as paying for the Order) before the time given in expireAt. If the Order is not confirmed within this time, the system will scrap all changes (including the incremented version) and return the Order to its last confirmed version.
+              format: int32
+              example: 2
+              default: 1
+            status:
+              $ref: '#/components/schemas/WorkflowStatus'
+            totalAmount:
+              type: string
+              description: The total amount due for this Order.
+              default: '0.00'
+            balance:
+              type: string
+              description: The balance amount for this Order.
+              default: '0.00'
+            totalTaxAmount:
+              type: string
+              description: The total tax amount for this Order.
+              default: '0.00'
+            currency:
+              type: string
+              description: The currency for this Order.
+              default: NOK
+            orderLines:
+              type: array
+              default: []
+              description: OrderLines in the given Order.
+              items:
+                $ref: '#/components/schemas/OrderLine'
+            paymentRefs:
+              type: array
+              default: []
+              description: Payment references used on this Order.
+              items:
+                $ref: '#/components/schemas/PaymentRef'
+            reservations:
+              type: array
+              default: []
+              description: Seating Reservations connected to this Order.
+              items:
+                $ref: '#/components/schemas/PurchasedReservation'
+            travellers:
+              type: array
+              default: []
+              description: Unique Travellers in this Order.
+              items:
+                $ref: '#/components/schemas/Traveller'
+            organisationId:
+              type: integer
+              description: ID of the organisation which created/sold this Order.
+              format: int64
+            createdAt:
+              type: string
+              description: Timestamp for when Order was created.
+              format: date-time
+            lastConfirmedAt:
+              type: string
+              description: Timestamp for when Order was last confirmed.
+              format: date-time
+            fees:
+              type: array
+              default: []
+              description: Fees contained in the Order.
+              items:
+                $ref: '#/components/schemas/Fee'
+            pos:
+              type: string
+              description: Point-of-sale reference of request used when when Order was created
+            distributionChannelId:
+              type: string
+              description: Distribution channel ID of request used when when Order was created
+        - $ref: '#/components/schemas/OrderRequest'
+      description: A purchase Order for one or more Travellers
+    OrderCreateRequest:
+      title: OrderCreateRequest
+      description: Optional configuration to use when creating an Order
+      type: object
+      properties:
+        contactInfo:
+          $ref: '#/components/schemas/ContactInfo'
+        currency:
+          type: string
+          description: The currency for this Order.
+          default: NOK
+        externalReference:
+          type: string
+          description: External reference for Orders
+        expireAt:
+          type: string
+          description: Any changes not confirmed before this point in time will be discarded. Default is 20 minutes from the last operation. Cannot be in the past, or further into the future than six months.
+          format: date-time
+    OrderRequest:
+      title: OrderRequest
+      type: object
+      properties:
+        contactInfo:
+          $ref: '#/components/schemas/ContactInfo'
+        externalReference:
+          type: string
+          description: External reference for Orders
+        expireAt:
+          type: string
+          description: Any changes not confirmed before this point in time will be discarded. Default is 20 minutes from the last operation. Cannot be in the past, or further into the future than six months.
+          format: date-time
+        specialOrderCause:
+          $ref: '#/components/schemas/SpecialOrderCause'
+      description: A purchase Order for one or more Travellers
+    OrderLine:
+      title: OrderLine
+      allOf:
+        - type: object
+          required:
+            - id
+            - version
+            - status
+            - createdAt
+          properties:
+            id:
+              type: string
+              description: ID of OrderLine
+              example: dd3e1d71-1c96-4b88-a683-538a8724ee0d
+              format: uuid
+            version:
+              type: integer
+              description: Version of this OrderLine. This is iterated when the OrderLine is updated, but not when it is replaced.
+              format: int32
+              example: 1
+              default: 1
+            status:
+              $ref: '#/components/schemas/WorkflowStatus'
+            cancellation:
+              $ref: '#/components/schemas/CancellationReason'
+            createdAt:
+              type: string
+              description: Timestamp for when the OrderLine was created.
+              format: date-time
+            lastConfirmedAt:
+              type: string
+              description: Timestamp for when the OrderLine was last confirmed.
+              format: date-time
+            refunded:
+              type: boolean
+              description: If true = refunded, false = cancelled, null = active
+            parameterSpecifications:
+              type: array
+              items:
+                $ref: '#/components/schemas/PurchasedParameterSpecification'
+        - $ref: '#/components/schemas/OrderLineRequest'
+    OrderLineRequest:
+      title: OrderLineRequest
+      required:
+        - description
+        - fareProducts
+        - price
+        - priceContribution
+        - travellers
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id for an OrderLine, required when updating orderLines
+          format: uuid
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        salesPackageRef:
+          description: Reference to a Sales Package
+          $ref: '#/components/schemas/RefType'
+        parameters:
+          $ref: '#/components/schemas/PurchasedParameters'
+        fareProducts:
+          type: array
+          description: The underlying FareProducts which make up this SalesPackage.
+          default: []
+          items:
+            $ref: '#/components/schemas/PurchasedFareProduct'
+        description:
+          type: array
+          description: Description.
+          default: []
+          items:
+            $ref: '#/components/schemas/TextInLanguage'
+        privateCode:
+          type: string
+          description: Private code.
+        travelSpecification:
+          $ref: '#/components/schemas/TravelSpecification'
+        travellers:
+          type: array
+          description: The Travellers that are to travel on this OrderLine.
+          default: []
+          items:
+            $ref: '#/components/schemas/PurchasedTraveller'
+        externalReference:
+          type: string
+          description: External reference to another system supplied by the client.
+        distributionDetails:
+          $ref: '#/components/schemas/DistributionDetails'
+        purchasedProperties:
+          $ref: '#/components/schemas/PurchasedProperties'
+        effectiveCancellationDate:
+          type: string
+          description: If set, the effective date for cancellation. Overrides timestamp.
+          format: date-time
+        clientProvidedData:
+          type: object
+          additionalProperties:
+            type: string
+          description: A map of client provided data. No validation is performed, and no guarantee can be made about its contents.
+        parameterSpecifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchasedParameterSpecification'
+    OrganisationRef:
+      title: OrganisationRef
+      required:
+        - id
+        - privateCode
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID for an Organisation
+        privateCode:
+          type: integer
+          description: Private code used to reference an Organisation
+          format: int64
+      description: The Organisation that owns the FareProduct
+    PageOfOrder:
+      title: PageOfOrder
+      required:
+        - items
+        - totalItems
+        - totalPages
+      type: object
+      properties:
+        items:
+          type: array
+          default: []
+          description: Items on a specific page
+          items:
+            $ref: '#/components/schemas/Order'
+        totalItems:
+          type: integer
+          description: Total number of items
+          format: int64
+          example: 72
+        totalPages:
+          type: integer
+          description: Total number of pages available to browse
+          format: int64
+          example: 9
+      description: Page displays a subset of a list of entities
+    PaymentRef:
+      title: PaymentRef
+      required:
+        - amount
+        - completedAt
+        - currency
+        - orderVersion
+      type: object
+      properties:
+        orderVersion:
+          type: integer
+          description: Order version number this Payment confirmed.
+          format: int32
+          example: 2
+        paymentId:
+          type: integer
+          description: Reference to the Payment.
+          format: int64
+          example: 12352
+        creditId:
+          type: integer
+          description: Reference to the Credit.
+          format: int64
+          example: 2321
+        amount:
+          type: string
+          description: 'The Payment amount. Maximum (totalDigits: 18, fractionDigits: 5) according to ISO 20022.'
+          example: '129.5'
+        currency:
+          type: string
+          example: NOK
+          default: NOK
+        completedAt:
+          type: string
+          description: Timestamp for when Payment was completed
+          format: date-time
+          example: '2018-09-02T07:36:00.000Z'
+        settlementId:
+          type: integer
+          description: Supplied to the client by an external system for handling settlements. For Internal Entur Clients this is Entur’s Electronic Journal.
+          format: int64
+          example: 18332
+      description: References to Payments
+    PointToPointValidity:
+      title: PointToPointValidity
+      required:
+        - fromPlace
+        - toPlace
+      type: object
+      properties:
+        fromPlace:
+          type: string
+          description: Valid from StopPlace
+        toPlace:
+          type: string
+          description: Valid to StopPlace
+      description: Start and StopPlaces where the entity is valid
+    PriceWithTax:
+      title: PriceWithTax
+      required:
+        - amount
+        - currency
+        - taxAmount
+      type: object
+      properties:
+        amount:
+          type: string
+          description: Amount including tax amount.
+          example: '399'
+        taxAmount:
+          type: string
+          description: Tax amount
+          example: '36.27'
+        taxRate:
+          type: string
+          description: Tax rate
+          example: '12'
+        taxCode:
+          type: string
+          description: Tax code for this tax rate
+          example: '12'
+        currency:
+          type: string
+          description: Currency
+          example: NOK
+          default: NOK
+      description: Price with included tax amounts and an optional rate.
+    PurchasedAccommodation:
+      title: PurchasedAccommodation
+      description: Type of accommodation chosen by customer
+      type: string
+      enum:
+        - SLEEPER
+        - SEATING
+        - DOUBLE_SLEEPER
+        - SINGLE_SLEEPER
+        - SPECIAL_SLEEPER
+        - COUCHETTE
+        - SINGLE_COUCHETTE
+        - DOUBLE_COUCHETTE
+        - RECLINING_SEAT
+        - BABY_COMPARTMENT
+        - FAMILY_COMPARTMENT
+        - PANORAMA_COACH
+        - PULLMAN_COACH
+        - STANDING
+        - ANY_FACILITY_SET
+    PurchasedDiscountUsageParameters:
+      title: PurchasedDiscountUsageParameters
+      type: object
+      required:
+        - reserving
+        - entitlementGiven
+      properties:
+        reserving:
+          type: array
+          default: []
+          description: Reference to reserving parameters with price information.
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+        entitlementGiven:
+          type: array
+          default: []
+          description: Reference to entitlement products used when calculating price
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+      description: Possible additional parameters for the configurations
+    PurchasedFareClass:
+      title: PurchasedFareClass
+      description: Type of FareClass chosen by customer
+      type: string
+      enum:
+        - FIRST_CLASS
+        - SECOND_CLASS
+        - THIRD_CLASS
+        - ECONOMY_CLASS
+        - BUSINESS_CLASS
+        - TURISTA
+        - PREFERENTE
+        - STANDARD_CLASS
+        - PREMIUM_CLASS
+        - ANY
+        - UNKNOWN
+    PurchasedFareProduct:
+      title: PurchasedFareProduct
+      required:
+        - fareProductRef
+        - price
+        - priceContribution
+        - validableElements
+        - legIds
+      type: object
+      properties:
+        fareProductRef:
+          $ref: '#/components/schemas/RefType'
+          description: Reference to the FareProduct described here
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        legIds:
+          type: array
+          default: []
+          description: The IDs of the Legs that are connected to this FareProduct.
+          items:
+            type: string
+        parameters:
+          $ref: '#/components/schemas/PurchasedParameters'
+        validableElements:
+          type: array
+          description: The ValidableElement configurations which makes up this FareProduct.
+          items:
+            $ref: '#/components/schemas/PurchasedValidableElement'
+        organisationRef:
+          description: The organisation owning the FareProduct
+          $ref: '#/components/schemas/OrganisationRef'
+        discountRight:
+          $ref: '#/components/schemas/PurchasedFareProduct'
+        originatingFromProductId:
+          type: string
+          description: The ID of the entitlement product that allowed the sale discount right to be used
+        elementId:
+          type: string
+          description: Unique ID for this specific PurchasedFareProduct. Note that this ID is only for distinguishing parts of an orderLine. It has no use outside of the orderLine, and can't be found in any other service.
+        saleDiscountRight:
+          $ref: '#/components/schemas/PurchasedSaleDiscountRight'
+        purchasedProperties:
+          $ref: '#/components/schemas/PurchasedProperties'
+        validityId:
+          type: string
+          description: Unique identifier for a purchased FareProduct with validity
+        amount:
+          type: integer
+          description: Amount of priced unit
+          format: int32
+        purchasedProductType:
+          $ref: '#/components/schemas/PurchasedProductType'
+        parameterSpecifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchasedParameterSpecification'
+      description: Configuration for a purchased Fare Product
+    PurchasedFareProductValidity:
+      title: PurchasedFareProductValidity
+      required:
+        - validityId
+      type: object
+      properties:
+        validityId:
+          type: string
+          description: Unique identifier for a purchased FareProduct with validity
+        pointToPointValidity:
+          $ref: '#/components/schemas/PointToPointValidity'
+        zonalValidity:
+          $ref: '#/components/schemas/ZonalValidity'
+      description: The PointToPontValidity or ZonalValidity this FareProduct contains.
+    PurchasedFareStructureElement:
+      title: PurchasedFareStructureElement
+      required:
+        - fareStructureElementRef
+        - price
+        - priceContribution
+        - legIds
+      type: object
+      properties:
+        fareStructureElementRef:
+          description: Reference to the FareStructureElement described here
+          $ref: '#/components/schemas/RefType'
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        legIds:
+          type: array
+          description: The Leg IDs that are connected to this FareStructureElement
+          default: []
+          items:
+            type: string
+        parameters:
+          $ref: '#/components/schemas/PurchasedParameters'
+        interval:
+          $ref: '#/components/schemas/PurchasedGeographicalInterval'
+        qualityStructureFactorRef:
+          description: Reference to the QualityStructureFactor for this FareStructureElement
+          $ref: '#/components/schemas/RefType'
+        elementId:
+          type: string
+          description: Unique ID for this specific PurchasedFareStructureElement. Note that this ID is only for distinguishing parts of an orderLine. It has no use outside of the orderLine, and can't be found in any other service.
+        purchasedProperties:
+          $ref: '#/components/schemas/PurchasedProperties'
+        parameterSpecifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchasedParameterSpecification'
+      description: Configuration for a FareStructureElement
+    PurchasedGeographicalInterval:
+      title: PurchasedGeographicalInterval
+      required:
+        - geographicalIntervalRef
+        - zones
+      type: object
+      properties:
+        geographicalIntervalRef:
+          description: Reference to the GeographicInterval
+          $ref: '#/components/schemas/RefType'
+        distance:
+          type: number
+          description: The distance in the geographical interval.
+          format: double
+        zoneCount:
+          type: integer
+          description: Number of zones counted for the journey.
+          format: int32
+        zones:
+          type: array
+          description: The Zones for which the journey passes through.
+          default: []
+          items:
+            type: string
+      description: The Geographical Interval with distance and zone data.
+    PurchasedGroup:
+      title: PurchasedGroup
+      required:
+        - groupTicketRef
+        - price
+        - priceContribution
+        - userProfileRefs
+        - groupSummary
+      type: object
+      properties:
+        groupTicketRef:
+          description: Reference to the GroupTicket
+          $ref: '#/components/schemas/RefType'
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        userProfileRefs:
+          type: array
+          description: The UserProfile IDs that are given rights to travel with this GroupTicket.
+          default: []
+          items:
+            $ref: '#/components/schemas/RefType'
+        groupSummary:
+          type: array
+          description: A collection of all the different user profiles with price and tax in the group.
+          default: []
+          items:
+            $ref: '#/components/schemas/PurchasedUserProfileSummary'
+      description: A representation of group product
+    PurchasedLeg:
+      title: PurchasedLeg
+      required:
+        - authorityRef
+        - endTime
+        - fromStopPlaceRef
+        - id
+        - mode
+        - operatorRef
+        - serviceJourneyRef
+        - startTime
+        - subMode
+        - toStopPlaceRef
+      type: object
+      properties:
+        id:
+          type: string
+        datedServiceJourneyRef:
+          description: Reference to the DatedServiceJourney
+          $ref: '#/components/schemas/RefType'
+        originalDatedServiceJourneyRef:
+          description: Reference to the Original DatedServiceJourney (see https://developer.entur.org/pages-dated-service-journey-intro)
+          $ref: '#/components/schemas/RefType'
+        startTime:
+          type: string
+          description: The date and time this Leg begins.
+          format: date-time
+        fromStopPlaceRef:
+          description: Reference to the StopPlace the Leg starts at
+          $ref: '#/components/schemas/RefType'
+        endTime:
+          type: string
+          description: The date and time this Leg ends.
+          format: date-time
+        toStopPlaceRef:
+          description: Reference to the StopPlace the Leg ends at
+          $ref: '#/components/schemas/RefType'
+        authorityRef:
+          description: Reference to the Authority owning the material the ServiceJourney uses
+          $ref: '#/components/schemas/RefType'
+        operatorRef:
+          description: Reference to the Organisation that operates the Line the Leg belongs to
+          $ref: '#/components/schemas/RefType'
+        serviceJourneyRef:
+          description: Reference to the undated ServiceJourney
+          $ref: '#/components/schemas/RefType'
+        mode:
+          description: Travel mode for Leg
+          $ref: '#/components/schemas/Mode'
+        subMode:
+          $ref: '#/components/schemas/SubMode'
+        interchangeTo:
+          description: Information about whether this Leg is connected to another Leg without changing material
+          $ref: '#/components/schemas/InterchangeTo'
+        lineId:
+          type: string
+          description: Line ID
+        serviceJourneyPrivateCode:
+          type: string
+          description: Private code of the ServiceJourney
+      description: Part of a trip between two places.
+    PurchasedParameterSpecification:
+      type: object
+      properties:
+        specificationOf:
+          type: string
+          description: Specification of parameter id
+        specificParameterAssignment:
+          $ref: '#/components/schemas/SpecificParameterAssignment'
+    PurchasedParameters:
+      title: PurchasedParameters
+      type: object
+      required:
+        - luggageAllowance
+        - exchanging
+        - reserving
+        - replacing
+        - roundTrip
+        - entitlementGiven
+      properties:
+        userProfile:
+          $ref: '#/components/schemas/PurchasedUserProfile'
+        luggageAllowance:
+          type: array
+          default: []
+          description: Reference to luggage allowance parameters with price information.
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+        exchanging:
+          type: array
+          default: []
+          description: Reference to exchanging parameters with price information.
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+        reserving:
+          type: array
+          default: []
+          description: Reference to reserving parameters with price information.
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+        replacing:
+          type: array
+          default: []
+          description: Reference to replacing parameters with price information.
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+        usageValidityPeriod:
+          $ref: '#/components/schemas/PurchasedUsageParameter'
+        group:
+          $ref: '#/components/schemas/PurchasedGroup'
+        roundTrip:
+          type: array
+          default: []
+          description: Reference to round trip parameters with price information.
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+        entitlementGiven:
+          type: array
+          default: []
+          description: Reference to entitlement products used when calculating price
+          items:
+            $ref: '#/components/schemas/PurchasedUsageParameter'
+      description: Possible additional parameters for the configurations
+    PurchasedProductType:
+      title: PurchasedProductType
+      type: string
+      description: Type of priced unit
+      enum:
+        - TRIP_CARNET
+        - PASS_CARNET
+        - UNIT_COUPONS
+        - STORED_VALUE
+        - OTHER
+    PurchasedProperties:
+      title: PurchasedProperties
+      type: object
+      required:
+        - purchasedFareClasses
+        - purchasedAccommodations
+      properties:
+        purchasedFareClasses:
+          type: array
+          default: []
+          description: Type of FareClass chosen by customer
+          items:
+            $ref: '#/components/schemas/PurchasedFareClass'
+        purchasedAccommodations:
+          type: array
+          default: []
+          description: Type of accommodation chosen by customer
+          items:
+            $ref: '#/components/schemas/PurchasedAccommodation'
+      description: Classification of the products chosen.
+    PurchasedReservation:
+      title: PurchasedReservation
+      required:
+        - datedServiceJourneyRef
+        - reservationId
+      type: object
+      properties:
+        reservationId:
+          type: string
+          description: ID and version of the Reservation.
+          format: uuid
+        datedServiceJourneyRef:
+          description: Reference to the DatedServiceJourney the Reservation belongs to
+          $ref: '#/components/schemas/RefType'
+    PurchasedSaleDiscountRight:
+      title: PurchasedSaleDiscountRight
+      required:
+        - discountRightRef
+        - price
+        - priceContribution
+      type: object
+      properties:
+        discountRightRef:
+          description: Reference to the SaleDiscountRight used when calculating the price
+          $ref: '#/components/schemas/RefType'
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        discountParameters:
+          description: Reference to the DiscountUsageParameters used when calculating the price
+          $ref: '#/components/schemas/PurchasedDiscountUsageParameters'
+        originatingFromProductId:
+          type: string
+          description: The ID of the EntitlementProduct that allowed the SaleDiscountRight to be used.
+      description: Configuration for a Discount Right
+    PurchasedTraveller:
+      title: PurchasedTraveller
+      required:
+        - travellerId
+        - entitlements
+      type: object
+      properties:
+        travellerId:
+          type: string
+          description: ID for Traveller
+          format: uuid
+        givenConsentId:
+          type: string
+        entitlements:
+          type: array
+          description: Entitlement information for the customer and the OrderLine
+          default: []
+          items:
+            $ref: '#/components/schemas/Entitlement'
+      description: Traveller for OrderLine
+    PurchasedUsageParameter:
+      title: PurchasedUsageParameter
+      required:
+        - price
+        - priceContribution
+        - usageParameterRef
+      type: object
+      properties:
+        usageParameterRef:
+          $ref: '#/components/schemas/RefType'
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+      description: A simple representation of a UsageParameter
+    PurchasedUserProfile:
+      title: PurchasedUserProfile
+      required:
+        - price
+        - priceContribution
+        - userProfileRef
+      type: object
+      properties:
+        userProfileRef:
+          description: Reference to the UserProfile
+          $ref: '#/components/schemas/RefType'
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        typeOfConcession:
+          type: string
+          description: The type of concession for this UserProfile
+      description: A representation of a user profile
+    PurchasedUserProfileSummary:
+      title: PurchasedUserProfileSummary
+      description: A representation of a user profile to summarize parts of a purchased group. Multiply `count` with `priceContribution` to get sum of all user profiles of same type.
+      type: object
+      properties:
+        userProfileRef:
+          $ref: '#/components/schemas/RefType'
+        count:
+          type: integer
+          description: The number of travellers with given user profile.
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+      required:
+        - userProfileRef
+        - count
+        - price
+        - priceContribution
+    PurchasedValidableElement:
+      title: PurchasedValidableElement
+      required:
+        - fareStructureElements
+        - price
+        - priceContribution
+        - validableElementRef
+        - legIds
+      type: object
+      properties:
+        validableElementRef:
+          description: Reference to the ValidableElement
+          $ref: '#/components/schemas/RefType'
+        price:
+          $ref: '#/components/schemas/PriceWithTax'
+        priceContribution:
+          $ref: '#/components/schemas/PriceWithTax'
+        legIds:
+          type: array
+          default: []
+          description: The Leg IDs that are connected to this ValidableElement.
+          items:
+            type: string
+        parameters:
+          $ref: '#/components/schemas/PurchasedParameters'
+        fareStructureElements:
+          type: array
+          description: The underlying FareStructureElement configurations which makes up this ValidableElement
+          items:
+            $ref: '#/components/schemas/PurchasedFareStructureElement'
+        elementId:
+          type: string
+          description: Unique ID for this specific PurchasedValidableElement. Note that this ID is only for distinguishing parts of an orderLine. It has no use outside of the orderLine, and can't be found in any other service.
+        purchasedProperties:
+          $ref: '#/components/schemas/PurchasedProperties'
+        occurs:
+          type: integer
+          description: The number of instances of this particular type of ValidableElement that is collected in this FareProduct
+          format: int32
+        parameterSpecifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchasedParameterSpecification'
+      description: Configuration for a ValidableElement
+    RefType:
+      title: RefType
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the resources
+        version:
+          type: string
+          description: A specific version of the resource if applicable
+      description: Reference to a resource available in a different APIs
+    SpecialOrderCause:
+      title: SpecialOrderCause
+      required:
+        - causeCode
+      type: object
+      properties:
+        causeCode:
+          type: string
+          description: The cause code for issuing the Order.
+        organisationId:
+          type: string
+          description: The organisation responsible for the cause. Eg. the Operator responsible for the delay causing a zero ticket to be issued. Should not be confused with the organisationId of the Order, as this has no correlation.
+      description: Holder for fields used to explain why an Order has been issued. Used for zero tickets.
+    SpecificParameterAssignment:
+      type: object
+      properties:
+        distanceMatrixElementRef:
+          $ref: '#/components/schemas/RefType'
+        dynamicDistanceMatrixElement:
+          $ref: '#/components/schemas/DynamicDistanceMatrixElement'
+        includesGroupingType:
+          $ref: '#/components/schemas/LogicalOperator'
+        validityParameters:
+          type: array
+          description: Validity parameters
+          items:
+            $ref: '#/components/schemas/ValidityParameter'
+        typeOfAccessRightAssignmentRef:
+          $ref: '#/components/schemas/RefType'
+        validityParameterGroupingType:
+          $ref: '#/components/schemas/LogicalOperator'
+        limitationGroupingType:
+          $ref: '#/components/schemas/LogicalOperator'
+        includes:
+          type: array
+          description: Included SpecificParameterAssignments
+          items:
+            $ref: '#/components/schemas/SpecificParameterAssignment'
+        limitations:
+          type: array
+          description: Limitations
+          items:
+            $ref: '#/components/schemas/Limitation'
+    TextInLanguage:
+      title: TextInLanguage
+      required:
+        - lang
+        - value
+      type: object
+      properties:
+        lang:
+          type: string
+          description: Language code according to ISO 639-3
+          example: nob
+        value:
+          type: string
+          description: A text to describe the contents of this OrderLine
+          example: Tekstlige detaljer om ordrelinjen
+    TravelDocumentDetails:
+      title: TravelDocumentDetails
+      type: object
+      required:
+        - travelDocumentRef
+        - distributionAction
+      properties:
+        travelDocumentRef:
+          $ref: '#/components/schemas/RefType'
+          description: A reference to a type of TravelDocument
+          example: ''
+        distributionAction:
+          description: Depicts an action to be taken for the TravelDocument
+          $ref: '#/components/schemas/TravelDocumentDistributionAction'
+          example: ATTACH_FARE_CONTRACT_AND_ACTIVATE
+    TravelDocumentDistributionAction:
+      title: TravelDocumentDistributionAction
+      type: string
+      enum:
+        - ATTACH_FARE_CONTRACT_AND_ACTIVATE
+    TravelSpecification:
+      title: TravelSpecification
+      type: object
+      required:
+        - validities
+      properties:
+        legs:
+          type: array
+          description: The Legs of a planned travel route. Only Legs which are rides are expected to be added.
+          items:
+            $ref: '#/components/schemas/PurchasedLeg'
+        placesInJourney:
+          type: array
+          description: The StopPlaces the product is valid between. The first element in this array will be the StopPlace the Traveller is travelling from, and the second element will be the StopPlace the Traveller is travelling to. There will never be more than two elements in this array.
+          items:
+            $ref: '#/components/schemas/RefType'
+        validities:
+          type: array
+          default: []
+          description: The FareProductValidities for a product.
+          items:
+            $ref: '#/components/schemas/PurchasedFareProductValidity'
+        aimedStartTime:
+          type: string
+          description: Timestamp used when determining the beginning of the ticket's validity. Taken from the offer used by the end user when ordering the ticket. Note that the fallback timestamp is the timestamp at which the orderLine was added to the Order.
+          format: date-time
+        aimedEndTime:
+          type: string
+          description: Timestamp used when determining the end of the ticket's validity. Taken from the offer used by the end user when ordering the ticket. No fallback, null if not available on offer.
+          format: date-time
+    TravellerRequest:
+      title: TravellerRequest
+      type: object
+      properties:
+        ref:
+          description: Reference to the Customer
+          $ref: '#/components/schemas/CustomerRef'
+      description: A Traveller object which might hold a reference to a Customer
+    Traveller:
+      title: Traveller
+      type: object
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+        - $ref: '#/components/schemas/TravellerRequest'
+      description: A Traveller object which might hold a reference to a Customer
+    UsageEnd:
+      title: UsageEnd
+      type: string
+      enum:
+        - STANDARD_DURATION
+        - END_OF_CALENDAR_PERIOD
+        - END_OF_RIDE
+        - END_OF_TRIP
+        - END_OF_FARE_DAY
+        - END_OF_FARE_PERIOD
+        - PRODUCT_EXPIRY
+        - PROFILE_EXPIRY
+        - DEREGISTRATION
+        - OTHER
+        - NO_TEMPORAL_VALIDITY
+    UsageTrigger:
+      title: UsageTrigger
+      type: string
+      enum:
+        - ENROLMENT
+        - RESERVATION
+        - PURCHASE
+        - FULFILMENT
+        - ACTIVATION
+        - SPECIFIED_START_DATE
+        - START_OUTBOUND_RIDE
+        - END_OUTBOUND_RIDE
+        - START_RETURN_RIDE
+        - START_OF_PERIOD
+        - DAY_OFFSET_BEFORE_CALENDAR_PERIOD
+    ValidityParameter:
+      type: object
+      description: ValidityParameter object.
+      properties:
+        serviceJourneyRef:
+          $ref: '#/components/schemas/RefType'
+        tariffZoneRef:
+          $ref: '#/components/schemas/RefType'
+        passengerSeatRef:
+          $ref: '#/components/schemas/RefType'
+    WorkflowStatus:
+      title: WorkflowStatus
+      description: Status of this Order or OrderLine. Every Order starts out with the status DRAFT, and can only be changed to CONFIRMED when it is balanced - when balance is '0.00'. All OrderLines that are have the status DRAFT at that point in time can also be changed to CONFIRMED.
+      type: string
+      example: CONFIRMED
+      default: DRAFT
+      enum:
+        - DRAFT
+        - CONFIRMED
+    ZonalValidity:
+      title: ZonalValidity
+      type: object
+      required:
+        - zones
+      properties:
+        zones:
+          type: array
+          description: Valid in zones
+          default: []
+          items:
+            type: string
+      description: Zones where the product is valid
+security:
+  - authHeader: []
