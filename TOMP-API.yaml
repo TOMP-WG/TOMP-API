@@ -34,7 +34,7 @@ tags:
   - name: direct purchase 
     description: Functionality (part of the <u>PURCHASE MODULE</u>) that allows to purchase trips based on trip/journey planners' results or external information.
 
-  - name: trip modificiation
+  - name: trip modification
     description: The rest of the <u>PURCHASE MODULE</u> contains functionality to purchase offers (aka 'book') or purchase trips directly based on external information. Allows also to cancel or commit a non-final TRIP.
 
   - name: trip execution
@@ -46,8 +46,8 @@ tags:
   - name: after sales
     description: the <u>PAYMENT MODULE</u> allows to request a financial transaction and report costs
 
-  - name: interoperability
-    description: the <u>INTEROPERABILITY MODULE</u> contains the technical specification of the implementation, how it works together with other standards and an endpoint to check the uptime.
+  - name: service description
+    description: the <u>SERVICE DESCRIPTION MODULE</u> contains the technical specification of the implementation, how it works together with other standards and an endpoint to check the uptime.
 
 # security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
@@ -149,7 +149,7 @@ paths:
       summary: "[MP->TO] request trip details"
       description: Retrieves trip details
       tags:
-        - trip modificiation
+        - trip modification
         - trip execution
       parameters:
       - in: query
@@ -236,7 +236,7 @@ paths:
       summary: "[MP<->TO] request {operation} on an offered or purchased TRIP"
       description: This endpoint **must** be used to alter the state of a purchased TRIP
       tags:
-        - trip modificiation
+        - trip modification
         - after sales
       externalDocs:
         url: https://not-yet-available/
@@ -314,7 +314,7 @@ paths:
       summary: "[MP<->TO] request {operation} on this leg"
       description: This endpoint must be used to alter the STATE of a LEG, using OPERATION requests.
       tags:
-        - trip modificiation
+        - trip modification
         - trip execution 
         - after sales
       externalDocs:
@@ -516,7 +516,7 @@ paths:
       - $ref: "#/components/parameters/receiverId"
     get:
       tags:
-        - interoperability
+        - service description
       summary: "[TO<->MP] discover the API"
       description: "All implemented endpoints are described, including the list of PROCESS IDENTIFIERs."
       responses:
@@ -537,7 +537,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
     get:
       tags:
-        - interoperability
+        - service description
       summary: "[TO<->MP] is the API available?"
       description: "[MP|TO] This is a healthcheck ENDPOINT to see if the TO is up and running perfectly."
       responses:
@@ -771,6 +771,8 @@ components:
             Allowed operations on a trip to request offers (they might be different financial options):
               - _CANCEL_
               - _MODIFY_TRAVELER_
+              - _ADD_TRAVELER_
+              - _REMOVE_TRAVELER_
               - _MODIFY_CUSTOMER_
               - _EXCHANGE_
             Allowed operations on a leg to request offers:
@@ -1341,11 +1343,13 @@ components:
         _EXTEND_EXPIRY_TIME_ - [MP->TO] the MP request to extend the expiry time. Only available when the Process Identifier <i>ALLOW_EXTEND_PURCHASE_EXPIRY_TIME</i> is used. Whenever the extension is not granted, 410 should be returned.<br> 
         _COMMIT_ - [MP->TO] Turns the purchased TRIP in a _CONFIRMED_ state, the previous state should be _PENDING_. If the TRIP is in state _CONFIRMED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR> 
         _NOTIFY_ - [MP<->TO] Notification to MP, traveler or TO<br>
-        _MODIFY_TRAVELER_ - [MP->TO] request a change one of the travelers. Can be refused if contractual or financial changes are requested<br>
-        _MODIFY_CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested<br>
+        _MODIFY_TRAVELER_ - [MP->TO] request to change one of the travelers. Can be refused if contractual or financial changes are requested<br>
+        _MODIFY_CUSTOMER_ - [MP->TO] request to change of the customer. Can be refused if contractual or financial changes are requested<br>
+        _ADD_TRAVELER_ - [MP->TO] request to add a traveler. Can be refused if contractual or financial changes are requested<br>
+        _REMOVE_TRAVELER_ - [MP->TO] request remove one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
         _EXCHANGE_ [MP->TO] the end-user wants to exchange the referred trip with another, requested from the /offers endpoint. The delivery contains also the financial consequences.
-      enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, MODIFY_TRAVELER, MODIFY_CUSTOMER, FINANCIAL_TRANSACTION, EXCHANGE ]
+      enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, MODIFY_TRAVELER, ADD_TRAVELER, REMOVE_TRAVELER, MODIFY_CUSTOMER, FINANCIAL_TRANSACTION, EXCHANGE ]
 
     tripState:
       type: string
