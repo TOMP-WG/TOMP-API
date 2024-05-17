@@ -736,8 +736,7 @@ components:
             $ref: "#/components/schemas/url"
         requestOffer:
           type: boolean
-          description: if this field contains a 'true', the operation shouldn't be executed, but the expected result of the operation should be returned. For instance, 
-            if you're cancelling a purchased TRIP, you'll return a CANCELLED TRIP, the price will contain the price that has to be paid for this cancelled TRIP.
+          description: if this field contains a 'true', the operation shouldn't be executed, but the expected result of the operation should be returned. For instance, if you're cancelling a purchased TRIP, cancellation options will be returned which include e.g. the price that has to be paid for the cancelled TRIP.
           default: false
         source:
           type: string
@@ -778,7 +777,7 @@ components:
         # CANCELLATION
         cancellationOptionId:
           type: string
-          description: Identifier of the cancellation option in case the MP cancels a leg
+          description: Identifier of the cancellation option the TO should use in case the MP cancels this leg
         # NOTIFICATIONS
         notificationType:
           type: string
@@ -1017,7 +1016,7 @@ components:
             data to open an asset
         cancellationOptions:
           type: array
-          description: List of cancellation options at the time point when this booking was returned. If this list is empty there are cancellation options available right now. If one or more options are available the id of the option needs to be specified when cancelling this leg.
+          description: List of cancellation options at the time point when the cancellation options were requested. If this list is empty there are no cancellation options available right now. If one or more options are available the id of the option could be specified when cancelling this leg.
           items:
             $ref: "#/components/schemas/cancellationOption"
         memo:
@@ -1290,7 +1289,7 @@ components:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
         description: TYPE OF REQUEST (unspecified)
       description: allowed trip operations<br>
-        _CANCEL_ - [MP->TO] Cancels a purchased TRIP, it returns a TRIP in a _CANCEL_led state.<br> 
+        _CANCEL_ - [MP->TO] Cancels a purchased TRIP, it returns a TRIP in a _CANCEL_led state. When requestOffer is set to 'true' only option(s) for cancellation will be returned and the TRIP is not cancelled. When requestOffer is set to 'false' the trip will be cancelled either using the cancellation option specified by the MP using cancellationOptionId or the TO decides which option to choose.<br> 
         _EXTEND_EXPIRY_TIME_ - [MP->TO] the MP request to extend the expiry time. Only available when the Process Identifier <i>ALLOW_EXTEND_PURCHASE_EXPIRY_TIME</i> is used. Whenever the extension is not granted, 410 should be returned.<br> 
         _COMMIT_ - [MP->TO] Turns the purchased TRIP in a _CONFIRMED_ state, the previous state should be _PENDING_. If the TRIP is in state _CONFIRMED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR> 
         _NOTIFY_ - [MP<->TO] Notification to MP, traveler or TO<br>
@@ -1332,12 +1331,6 @@ components:
               externalDocs:
                 url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
                 description: PURCHASE WINDOW.cancellationAllowed
-            cancellationFee:
-              $ref: "#/components/schemas/amountOfMoney"
-              description: amount of money you have to pay when you cancel this purchased TRIP
-            cancellationFeePercentage:
-              $ref: "#/components/schemas/float"
-              description: percentage of the offered price you have to pay when you cancel this purchased TRIP  
 
     cancellationOption:
       description: Currently available option for cancellation of a leg. Cancellation options might differ depending e.g. of the status of the leg, the time until the leg starts, etc. The id given for a specific cancellation option should not be reused for a different option with different conditions at some later time point.
