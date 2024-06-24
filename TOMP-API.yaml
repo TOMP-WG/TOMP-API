@@ -40,6 +40,9 @@ tags:
   - name: trip execution
     description: The <u>TRIP EXECUTION MODULE</u> contains functionality to execute the leg(s) of purchased TRIPs. Operations like starting, pausing and ending, but also functions like adding/removing ancillaries.
 
+  - name: customer management
+    description: the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly manage the customer account on the TO side .
+
   - name: support
     description: the <u>SUPPORT MODULE</u> facilitates handling support requests
 
@@ -276,8 +279,7 @@ paths:
     get:
       summary: "[MP->TO] request leg details"
       description: Retrieves the latest summary of the LEG, being the execution of a part of a journey traveled using one ASSET (TYPE). 
-        Every LEG belongs to one TRIP, every TRIP has at least one LEG. Where the TRIP describes the agreement between user/MP and TO, 
-        the LEG describes the journey part as it occured.
+        Every LEG belongs to one TRIP, every TRIP has at least one LEG. Where the TRIP describes the agreement between customer/MP and TO, the LEG describes the journey part as it occured.
       externalDocs:
         url: https://not-yet-available/
         description: LEG DETAIL REQUEST uses the TRIP DETAIL PARAMETER (=trip ID and leg ID in URL) to produce a LEG DETAIL DELIVERY (response)
@@ -545,9 +547,148 @@ paths:
           description: successful operation
         default:
           $ref: "#/components/responses/errorResponse"
+
+
+  /customers:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/callbackUrl"
+    post:
+      summary: "[MP->TO] create a TO CUSTOMER ACCOUNT for the customer"
+      description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
+      tags:
+        - customer management
+      externalDocs:
+        url: https://not-yet-available/
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createCustomerAccountParameters"
+      responses:
+        "200":
+          description: created CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+  /customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/callbackUrl"
+      - $ref: "#/components/parameters/customerId"
+    patch:
+      summary: "[MP->TO] update the CUSTOMER ACCOUNT on the TO system"
+      description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
+        When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
+        can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
+      tags:
+        - customer management
+      externalDocs:
+        url: https://not-yet-available/
+      requestBody:
+        content:
+          application/merge-patch+json:
+            schema:
+              description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
+              type: object
+              properties: {}
+            example: { "email": "new-email@example.com", "extraFields": { "otp": "12345" } }
+      responses:
+        "200":
+          description: updated CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+    get:
+      summary: "[MP->TO] get the customer account on the TO system"
+      tags:
+        - customer management
+      externalDocs:
+        url: https://not-yet-available/
+      responses:
+        "200":
+          description: Customer Account
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+    delete:
+      summary: "[MP->TO] delete the CUSTOMER ACCOUNT on the TO system."
+      description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      tags:
+        - customer management
+      externalDocs:
+        url: https://not-yet-available/
+      responses:
+        "200":
+          description:  CUSTOMER ACCOUNT deleted successfully
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+
+
+
+
 components:
   schemas:
   # parameters & responses
+
+    # Create CUSTOMER ACCOUNT
+    createCustomerAccountParameters:
+      description: A CUSTOMER ACCOUNT request, resulting in a new or linked TO CUSTOMER ACCOUNT
+      externalDocs:
+        url: https://not-yet-available/
+        description: CREATE CUSTOMER ACCOUNT PARAMETERS
+      $ref: "#/components/schemas/customer"
+    
+    customerAccount:
+      description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA1/EA2335.htm
+        description: CUSTOMER ACCOUNT
+      allOf:
+        - $ref: "#/components/schemas/customer"
+        - type: object
+          required:
+            - id
+          properties:
+            creationDate:
+              $ref: "#/components/schemas/dateTime"
+              description: The date in which the CUSTOMER ACCOUNT has been created
+            modificationDate:
+              $ref: "#/components/schemas/dateTime"
+              description: Last modification date of CUSTOMER ACCOUNT.
+            status:
+              $ref: "#/components/schemas/customerAccountStatus"
+              description: The status of the CUSTOMER ACCOUNT
+
+    customerAccountStatus:
+      type: string
+      description: status of a CUSTOMER ACCOUNT<br>
+        _CREATED_ the customer account has been created but is not ready to create a purchase yet<br>
+        _TO_PENDING_VALIDATION_ the customer account is pending a verification of identity and properties by the TO. No purchases can be made in this step<br>
+        _OTP_REQUIRED_ the TO has sent an OTP to the customer's phone or email address and is expecting it to activate the account. No purchases can be made in this step<br>
+        _ACTIVE_ the customer account is active and can continue to purchase offers<br>
+        _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
+      enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]
+
     oneStopPurchaseParameters:
       externalDocs:
         url: https://not-yet-available/
@@ -558,7 +699,7 @@ components:
         properties:
           customer:
             $ref: "#/components/schemas/customer"
-            description: The user that wants to purchase this TRIP
+            description: The customer that wants to purchase this TRIP
 
     tripOfferParameters:
       type: object
@@ -908,14 +1049,16 @@ components:
             $ref: "#/components/schemas/externalDataSource"
         processIdentifiers:
           type: array
-          description: an array with 'care labels', indiacting how this implementation wants to be treated.
+          description: an array with 'care labels', indicating how this implementation wants to be treated.
           maxItems: 10
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers
             description: overview of all existing process identifiers, clarifying how this implementation of the API should be used.
           items:
             $ref: "#/components/schemas/processIdentifier"
-          example: [ { "module": "PURCHASE", "identifiers": [ "ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT" ] } ]
+          example: [ { "module": "PURCHASE", "identifiers": [ "ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT" ] },
+                     { "module": "CUSTOMER_MANAGEMENT", "identifiers": [ "CUSTOMER_ACCOUNT_EXPLICIT_REGISTRATION", "CUSTOMER_ACCOUNT_IMPLICIT_REGISTRATION" ] }
+          ]
         conditions:
           type: array
           description: common conditions for this TO
@@ -1354,6 +1497,7 @@ components:
         - $ref: "#/components/schemas/cancellationCondition"
         - $ref: "#/components/schemas/purchaseConditions"
         - $ref: "#/components/schemas/tripExecutionConditions"
+        - $ref: "#/components/schemas/createCustomerAccountConditions"
         - $ref: "#/components/schemas/guarantees"
       discriminator:
         propertyName: conditionType
@@ -1417,6 +1561,28 @@ components:
                  from.address.station implies that the station reference is mandatory,<br>
                  travelers[*].age requires an age for each traveler, <br>
                  or customer.email for the email address of the customer
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA6/EA2136.htm
+                description: USER PROFILE
+              maxItems: 50
+              items:
+                type: string
+
+    createCustomerAccountConditions:
+      description: specify required information to create a user account in the TO side
+      allOf:
+        - $ref: "#/components/schemas/conditionBase"
+        - type: object
+          required:
+            - requiredFields
+          properties:
+            requiredFields:
+              type: array
+              description: an array containing labels that identify specific fields that are required in the explicit customer account registration<br>
+                all fields of the CUSTOMER ACCOUNT creation request can become required, navigating with dots, square brackets and field names.<br>
+                For example:<br>
+                phones[*].number requires the phone number of the customer <br>
+                or mail for the email address of the customer
               externalDocs:
                 url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA6/EA2136.htm
                 description: USER PROFILE
@@ -1765,7 +1931,7 @@ components:
             format: operator-id
 
     customer:
-      description: A MaaS user that wishes to purchase a trip, only use the fields required by purchase conditions
+      description: A MaaS customer that wishes to purchase a trip, only use the fields required by purchase conditions
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA1/EA2333.htm
         description: TRANSPORT CUSTOMER
@@ -1777,8 +1943,8 @@ components:
             - id
           properties:
             id:
-              $ref: "#/components/schemas/shortString"
-              description: The identifier the MP uses to identify the customer
+              $ref: "#/components/parameters/customerId"
+              description: MaaS customer id. The identifier the MP uses to identify the customer.
               example: "A0-123456"
             initials:
               $ref: "#/components/schemas/tinyString"
@@ -2206,6 +2372,9 @@ components:
           id:
             $ref: "#/components/schemas/uuid"
             description: id of the JOURNAL ENTRY, the LEG id should be used
+          customerId:
+            $ref: "#/components/parameters/customerId"
+            description: MaaS customer id
           category:
             $ref: "#/components/schemas/paymentCategory"
           sequenceId:
@@ -3108,6 +3277,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/uuid"
+    customerId:
+      in: path
+      name: id
+      description: MaaS customer id
+      required: true
+      schema:
+        $ref: "#/components/schemas/shortString"
     legId:
       in: path
       name: lid
