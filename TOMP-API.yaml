@@ -1946,6 +1946,9 @@ components:
               $ref: "#/components/parameters/customerId"
               description: MaaS customer id. The identifier the MP uses to identify the customer.
               example: "A0-123456"
+            externalCustomerId:
+              $ref: "#/components/schemas/shortString"
+              description: The customer id used by the TO system.
             initials:
               $ref: "#/components/schemas/tinyString"
               description: Initials of the customer
