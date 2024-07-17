@@ -4,7 +4,7 @@ info:
   description:
     "<h3>Context</h3>
     It allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
-    It provides functions for Planning & Purchase, Trip Execution, Support, Payment and Operation Information.<br><br>
+    It provides functions for Planning & Purchase, trip execution, Support, Payment and Operation Information.<br><br>
 
     For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>.<br><br>
 
@@ -28,17 +28,17 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-  - name: offer & purchase 
-    description: Functionality to request trip offers (<u>PLANNING MODULE</u>) & purchase (part of the <u>PURCHASE MODULE</u>) them
+  - name: search & (2-phase) purchase 
+    description: Functionality to request offers (<u>PLANNING MODULE</u>) & purchase (part of the <u>PURCHASE MODULE</u>) them
 
   - name: direct purchase 
-    description: Functionality (part of the <u>PURCHASE MODULE</u>) that allows to purchase trips based on trip/journey planners' results or external information.
+    description: This function allows to instantly purchase packages based on package/journey planners' results or external information.
 
-  - name: trip modificiation
-    description: The rest of the <u>PURCHASE MODULE</u> contains functionality to purchase offers (aka 'book') or purchase trips directly based on external information. Allows also to cancel or commit a non-final TRIP.
+  - name: pre-purchase
+    description: The rest of the <u>PURCHASE MODULE</u> contains functionality to purchase offers (aka 'book') or purchase packages directly based on external information. Allows also to cancel or commit a non-final PACKAGE.
 
   - name: trip execution
-    description: The <u>TRIP EXECUTION MODULE</u> contains functionality to execute the leg(s) of purchased TRIPs. Operations like starting, pausing and ending, but also functions like adding/removing ancillaries.
+    description: The <u>trip execution MODULE</u> contains functionality to execute the leg(s) of purchased packages. Operations like starting, pausing and ending, but also functions like adding/removing ancillaries.
 
   - name: support
     description: the <u>SUPPORT MODULE</u> facilitates handling support requests
@@ -72,68 +72,75 @@ paths:
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/callbackUrl"
     post:
-      summary: "[MP->TO] get trip offers to get from A to B"
-      description: Returns offers (purchaseable trips) based on user requirements
+      summary: "[MP->TO] request offers"
+      description: Returns offers (purchaseable packages) based on user requirements
       tags:
-        - offer & purchase
+        - search & (2-phase) purchase
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP OFFER REQUEST used TRIP OFFER PARAMETERS (request body) to produce TRIP OFFER DELIVERY (response)
+        description: OFFER REQUEST using OFFER PARAMETERS (request body) to produce OFFER DELIVERY (response)
       requestBody:
         description: the initial request, containing locations, timestamps, CARD TYPEs and LICENSE TYPEs, and personal preferences/(dis)abilities. Can also contain a direct reference to an ASSET or ASSET TYPE.
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/tripOfferParameters"
+              $ref: "#/components/schemas/offerParameters"
       responses:
         "201":
-          description: a list of trips, if there is no option, it will return an empty list. Each offered trip has a unique identifier, that can be used to purchase it.
+          description: a list of packages, if there is no option, it will return an empty list. Each offered package has a unique identifier, that can be used to purchase it.
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
             Expires:
-              description: The result is valid until this timestamp. The _PENDING_ trip purchase is expired after this timestamp. 
+              description: The result is valid until this timestamp. The _PENDING_ package expires after this timestamp. 
               schema:
                 $ref: "#/components/schemas/httpDate"
               required: false
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripOfferResponse"
+                $ref: "#/components/schemas/offerResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /trips/{id}:
+  /offers/{id}/{purchaseMethod}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - $ref: "#/components/parameters/tripId"
+      - $ref: "#/components/parameters/packageId"
       - $ref: "#/components/parameters/callbackUrl"
+      - name: purchaseMethod
+        in: path
+        description: method to purchase
+        required: true
+        schema:
+          type: string
+          enum: [purchase, pre-purchase]
     post:
-      summary: "[MP->TO] purchase an offered trip"
-      description: The offered trip is transformed into a purchased one. Dependend of the process identifiers (<i>AUTO_COMMIT</i> or <i>ATOMIC_PURCHASE_SET_IN_USE</i>) the TRIP is _PENDING_ 
-        (to be committed using the `POST /trips/{id}/operations/COMMIT`) or _CONFIRMED_.
+      summary: "[MP->TO] purchase an offered package"
+      description: The offered package is transformed into a (pre-)purchased one. If it is a pre-purchased package, it must be confirmed using the 
+        `POST /packages/{id}/operations/COMMIT`).
       tags:
-        - offer & purchase
+        - search & (2-phase) purchase
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP PURCHASE REQUEST uses the TRIP PURCHASE PARAMETERS (request body) to produce a TRIP [PURCHASE] DELIVERY (response)
+        description: PURCHASE REQUEST uses the PURCHASE PARAMETERS (request body) to produce a PACKAGE DELIVERY (response)
       requestBody:
-        description: additional information required to create a purchased TRIP. This information can be retrieved from the the LEGs' **conditions**.
+        description: additional information required to create a purchased package. This information can be retrieved from the the LEGs' **conditions**.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/tripPurchaseParameters"
+              $ref: "#/components/schemas/purchaseParameters"
 
       responses:
         "201":
-          description: A trip was succesfully purchased (CONFIRMED) or initiated the purchase process (PENDING).
+          description: A package was succesfully purchased (CONFIRMED) or initiated the purchase process (PENDING).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripResponse"
+                $ref: "#/components/schemas/packageResponse"
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
@@ -145,22 +152,29 @@ paths:
           $ref: "#/components/responses/409Conflict"
         "410":
           $ref: "#/components/responses/410Gone"
+
+  /packages/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/senderId"
+      - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/packageId"
+      - $ref: "#/components/parameters/callbackUrl"
     get:
-      summary: "[MP->TO] request trip details"
-      description: Retrieves trip details
+      summary: "[MP->TO] request package details"
+      description: Retrieves package details
       tags:
-        - trip modificiation
         - trip execution
       parameters:
       - in: query
         name: selection
-        description: "_DETAILS_ - trip specification only<br>
-          _WITH_LOGS_ - trip & event log<br>
+        description: "_DETAILS_ - package specification only<br>
+          _WITH_LOGS_ - package & event log<br>
           _ONLY_LOGS_ - event log only<br>
-          _WITH_PROGRESS_ - trip & progress<br>
+          _WITH_PROGRESS_ - package & progress<br>
           _ONLY_PROGRESS_ - progress only<br>
-          _WITH_CUSTOMER - trip & customer<br>
-          _ALL_ - trip, logs, customer & progress<br>"
+          _WITH_CUSTOMER - package & customer<br>
+          _ALL_ - package, logs, customer & progress<br>"
         required: false
         schema:
           type: string
@@ -168,37 +182,35 @@ paths:
           default: DETAILS
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP DETAIL REQUEST uses the TRIP DETAIL (that's the trip ID in URL) to produce TRIP [DETAIL] DELIVERY (response)
+        description: PACKAGE DETAIL REQUEST uses the PACKAGE DETAIL (that's the package ID in URL) to produce PACKAGE DELIVERY (response)
       responses:
         "200":
-          description: the details of this TRIP, including the customer, progress and the log containing all logged OPERATIONs.
+          description: the details of this PACKAGE, including the customer, progress and the log containing all logged OPERATIONs.
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripResponse"
+                $ref: "#/components/schemas/packageResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /trips/one-stop:
+  /packages/one-stop:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
       - $ref: "#/components/parameters/callbackUrl"
     post:
-      summary: "[MP->TO] directly purchase a trip, without offer"
+      summary: "[MP->TO] directly purchase a package, without offer"
       description:
-        Purchases a TRIP. This endpoint executes `POST /offers` and `POST /trips/{id}` in one blow, the information provided by the first one should lead 
-        to only one possible trip option, that is purchased directly. The returned purchased TRIP is in a _PENDING_ state, you have to commit it (using `POST /trips/{id}/operations/COMMMIT`), 
-        unless one of the PROCESS IDENTIFIERs is applied that indicates that another TRIP STATE is used.
+        Purchases a package directly, based on the parameters.
       tags:
         - direct purchase      
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP PURCHASE REQUEST, uses the ONE STOP TRIP PURCHASE REQUEST (request body) to produce a TRIP [PURCHASE] DELIVERY (response)
+        description: PURCHASE REQUEST, uses the ONE STOP PURCHASE REQUEST (request body) to produce a PACKAGE DELIVERY (response)
       requestBody:
         content:
           application/json:
@@ -206,11 +218,11 @@ paths:
               $ref: "#/components/schemas/oneStopPurchaseParameters"
       responses:
         "201":
-          description: a purchased trip, or when it's not possible, return a 406.
+          description: a purchased package, or when it's not possible, return a 406.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripResponse"
+                $ref: "#/components/schemas/packageResponse"
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
@@ -219,28 +231,27 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /trips/{id}/operations/{operation}:
+  /packages/{id}/operations/{prePurchaseOperation}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - $ref: "#/components/parameters/tripId"
+      - $ref: "#/components/parameters/packageId"
       - $ref: "#/components/parameters/callbackUrl"
-      - name: operation
+      - name: prePurchaseOperation
         in: path
         description: OPERATION to execute
         required: true
         schema:
-          $ref: "#/components/schemas/tripOperation"
+          $ref: "#/components/schemas/prePurchaseOperation"
     post:
-      summary: "[MP<->TO] request {operation} on an offered or purchased TRIP"
-      description: This endpoint **must** be used to alter the state of a purchased TRIP
+      summary: "[MP<->TO] request a modification on an offered package"
+      description: This endpoint **must** be used to alter the package
       tags:
-        - trip modificiation
-        - after sales
+        - pre-purchase
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP OPERATION REQUEST, uses the OPERATION PARAMETER (the request body) to produce a TRIP [OPERATION] DELIVERY (response)
+        description: PACKAGE OPERATION REQUEST, uses the OPERATION PARAMETER (the request body) to produce a PACKAGE DELIVERY (response)
       requestBody:
         content:
           application/json:
@@ -248,11 +259,11 @@ paths:
               $ref: "#/components/schemas/operationParameter"
       responses:
         "200":
-          description: The modified trip
+          description: The modified package
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/tripResponse"
+                $ref: "#/components/schemas/packageResponse"
           headers:
             Content-Language:
               $ref: "#/components/headers/contentLanguage"
@@ -265,22 +276,67 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /trips/{id}/legs/{lid}:
+  /packages/{id}/operations/{operation}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - $ref: "#/components/parameters/tripId"
+      - $ref: "#/components/parameters/packageId"
+      - $ref: "#/components/parameters/callbackUrl"
+      - name: operation
+        in: path
+        description: OPERATION to execute
+        required: true
+        schema:
+          $ref: "#/components/schemas/packageOperation"
+    post:
+      summary: "[MP<->TO] request an operation on a purchased package"
+      description: This endpoint **must** be used to alter the state of a purchased package
+      tags:
+        - after sales
+      externalDocs:
+        url: https://not-yet-available/
+        description: PACKAGE OPERATION REQUEST, uses the OPERATION PARAMETER (the request body) to produce a PACKAGE DELIVERY (response)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/operationParameter"
+      responses:
+        "200":
+          description: The modified package
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/packageResponse"
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+            Expires:
+              $ref: "#/components/headers/expires"
+              description: Mandatory whenever the _EXTEND_EXPIRY_TIME_ is used. It must contain the updated expiry time
+              externalDocs:
+                url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
+                description: PURCHASE WINDOW
+        default:
+          $ref: "#/components/responses/errorResponse"          
+
+  /packages/{id}/legs/{lid}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/senderId"
+      - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/packageId"
       - $ref: "#/components/parameters/legId"
       - $ref: "#/components/parameters/callbackUrl"
     get:
       summary: "[MP->TO] request leg details"
       description: Retrieves the latest summary of the LEG, being the execution of a part of a journey traveled using one ASSET (TYPE). 
-        Every LEG belongs to one TRIP, every TRIP has at least one LEG. Where the TRIP describes the agreement between user/MP and TO, 
+        Every LEG belongs to one PACKAGE ELEMENT, every PACKAGE has at least one LEG. Where the PACKAGE describes the agreement between user/MP and TO, 
         the LEG describes the journey part as it occured.
       externalDocs:
         url: https://not-yet-available/
-        description: LEG DETAIL REQUEST uses the TRIP DETAIL PARAMETER (=trip ID and leg ID in URL) to produce a LEG DETAIL DELIVERY (response)
+        description: LEG DETAIL REQUEST uses the PACKAGE DETAIL PARAMETER (=package ID and leg ID in URL) to produce a LEG DETAIL DELIVERY (response)
       tags:
         - trip execution        
       responses:
@@ -296,26 +352,24 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
           
-  /trips/{id}/legs/{lid}/operations/{operation}:
+  /packages/{id}/legs/{lid}/operations/{afterSalesOperation}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - $ref: "#/components/parameters/tripId"
+      - $ref: "#/components/parameters/packageId"
       - $ref: "#/components/parameters/legId"
       - $ref: "#/components/parameters/callbackUrl"
-      - name: operation
+      - name: afterSalesOperation
         in: path
         description: OPERATION on the LEG
         required: true
         schema:
-          $ref: "#/components/schemas/legOperation"
+          $ref: "#/components/schemas/legAfterSalesOperation"
     post:
       summary: "[MP<->TO] request {operation} on this leg"
       description: This endpoint must be used to alter the STATE of a LEG, using OPERATION requests.
       tags:
-        - trip modificiation
-        - trip execution 
         - after sales
       externalDocs:
         url: https://not-yet-available/
@@ -358,20 +412,140 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /trips/{id}/legs/{lid}/available-assets:
+  /packages/{id}/legs/{lid}/operations/{legPrePurchaseOperation}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - $ref: "#/components/parameters/tripId"
+      - $ref: "#/components/parameters/packageId"
+      - $ref: "#/components/parameters/legId"
+      - $ref: "#/components/parameters/callbackUrl"
+      - name: prePurchaseOperation
+        in: path
+        description: OPERATION on the LEG
+        required: true
+        schema:
+          $ref: "#/components/schemas/legPrePurchaseOperation"
+    post:
+      summary: "[MP<->TO] request {operation} on this leg"
+      description: This endpoint must be used to alter the STATE of a LEG, using OPERATION requests.
+      tags:
+        - pre-purchase
+      externalDocs:
+        url: https://not-yet-available/
+        description: LEG OPERATION REQUEST uses the OPERATION PARAMETER (request body) to produce a LEG DETAIL DELIVERY (response)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/operationParameter"
+      responses:
+        "200":
+          description: OPERATION successful, the leg is returned in the new state.
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/legDetailResponse"
+        "202":
+          description: When a confirmation request has to return positive, this code has to be used
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/legDetailResponse"
+        "400":
+          description: When a confirmation request results in a denial, this code has to be used
+          $ref: "#/components/responses/errorResponse"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          headers:
+            Retry-After:
+              description: A date after which to retry. See the Date header for more details on the HTTP date format.
+              schema:
+                $ref: "#/components/schemas/httpDate"
+          $ref: "#/components/responses/errorResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /packages/{id}/legs/{lid}/operations/{tripOperation}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/senderId"
+      - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/packageId"
+      - $ref: "#/components/parameters/legId"
+      - $ref: "#/components/parameters/callbackUrl"
+      - name: tripOperation
+        in: path
+        description: OPERATION on the LEG
+        required: true
+        schema:
+          $ref: "#/components/schemas/legTripOperation"
+    post:
+      summary: "[MP<->TO] request {operation} on this leg"
+      description: This endpoint must be used to alter the STATE of a LEG, using OPERATION requests.
+      tags:
+        - trip execution 
+      externalDocs:
+        url: https://not-yet-available/
+        description: LEG OPERATION REQUEST uses the OPERATION PARAMETER (request body) to produce a LEG DETAIL DELIVERY (response)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/operationParameter"
+      responses:
+        "200":
+          description: OPERATION successful, the leg is returned in the new state.
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/legDetailResponse"
+        "202":
+          description: When a confirmation request has to return positive, this code has to be used
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/legDetailResponse"
+        "400":
+          description: When a confirmation request results in a denial, this code has to be used
+          $ref: "#/components/responses/errorResponse"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          headers:
+            Retry-After:
+              description: A date after which to retry. See the Date header for more details on the HTTP date format.
+              schema:
+                $ref: "#/components/schemas/httpDate"
+          $ref: "#/components/responses/errorResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /packages/{id}/legs/{lid}/available-assets:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/senderId"
+      - $ref: "#/components/parameters/receiverId"
+      - $ref: "#/components/parameters/packageId"
       - $ref: "#/components/parameters/legId"
       - $ref: "#/components/parameters/callbackUrl"
     get:
       summary: "[MP->TO] request available assets to assign to this leg"
-      description: Returns a list of available ASSETs for the given LEG. These results can be used to call `POST /trips/{id}/legs/{lid}/operations/ASSIGN_ASSET`. 
+      description: Returns a list of available ASSETs for the given LEG. These results can be used to call `POST /packages/{id}/legs/{lid}/operations/ASSIGN_ASSET`. 
       externalDocs:
         url: https://not-yet-available/
-        description: LEG AVAILABLE ASSETS REQUEST, uses the LEG AVAILABLE ASSET PARAMETER (=trip ID and leg ID in the URL) to produce the AVAILABLE ASSETS DELIVERY (response)
+        description: LEG AVAILABLE ASSETS REQUEST, uses the LEG AVAILABLE ASSET PARAMETER (=package ID and leg ID in the URL) to produce the AVAILABLE ASSETS DELIVERY (response)
       tags:
         - trip execution        
       responses:
@@ -387,12 +561,12 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /trips/{id}/legs/{lid}/support/:
+  /packages/{id}/legs/{lid}/support/:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/receiverId"
-      - $ref: "#/components/parameters/tripId"
+      - $ref: "#/components/parameters/packageId"
       - $ref: "#/components/parameters/legId"
       - $ref: "#/components/parameters/callbackUrl"
     post:
@@ -427,7 +601,7 @@ paths:
         - support
       externalDocs:
         url: https://not-yet-available/
-        description: SUPPORT DETAIL REQUEST, uses TRIP DETAIL PARAMETER (trip ID and leg ID in the URL) to produce a SUPPORT DETAIL DELIVERY (response)
+        description: SUPPORT DETAIL REQUEST, uses package DETAIL PARAMETER (package ID and leg ID in the URL) to produce a SUPPORT DETAIL DELIVERY (response)
       responses:
         "200":
           description: support status delivered
@@ -551,22 +725,22 @@ components:
     oneStopPurchaseParameters:
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP PURCHASE PARAMETERS
+        description: package PURCHASE PARAMETERS
       allOf:
-      - $ref: "#/components/schemas/tripOfferParameters"
+      - $ref: "#/components/schemas/offerParameters"
       - type: object
         properties:
           customer:
             $ref: "#/components/schemas/customer"
-            description: The user that wants to purchase this TRIP
+            description: The user that wants to purchase this package
 
-    tripOfferParameters:
+    offerParameters:
       type: object
-      description: A trip planning request, resulting in trip options
+      description: A package planning request, resulting in package options
       additionalProperties: false
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP OFFER PARAMETERS
+        description: package OFFER PARAMETERS
       required:
         - from
       properties:
@@ -587,13 +761,13 @@ components:
           maxItems: 10
           items:
             $ref: "#/components/schemas/assetReference"
-          description: The specific asset(s) the user wishes to receive trip options for. See also endpoint.useAssets specification
+          description: The specific asset(s) the user wishes to receive package options for. See also endpoint.useAssets specification
         useAssetTypes:
           type: array
           maxItems: 10
           items:
             $ref: "#/components/schemas/assetTypeReference"
-          description: The specific asset type(s) the user wishes to receive trip options for. See also endpoint.useAssetTypes specification
+          description: The specific asset type(s) the user wishes to receive package options for. See also endpoint.useAssetTypes specification
         nrOfTravelers:
           $ref: "#/components/schemas/tinyInt"
           description: The number of people that intend to travel. Do not use when *travelers* is used.
@@ -628,13 +802,13 @@ components:
         extraInfo:
           $ref: "#/components/schemas/customProperties"
 
-    tripOfferResponse:
+    offerResponse:
       type: object
-      description: Offers, purchaseable trip options that fulfil the constraints of the request
+      description: Offers, purchaseable package options that fulfil the constraints of the request
       additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3156.htm
-        description: TRIP OFFER DELIVERY
+        description: package OFFER DELIVERY
       required:
         - validUntil
         - options
@@ -646,15 +820,15 @@ components:
           type: array
           maxItems: 100
           items: 
-            $ref: "#/components/schemas/tripResponse"
+            $ref: "#/components/schemas/packageResponse"
 
-    tripPurchaseParameters:
+    purchaseParameters:
       type: object
-      description: A request to purchase a trip, to be performed by the MP
+      description: A request to purchase a package, to be performed by the MP
       additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3147.htm
-        description: TRIP PURCHASE PARAMETER used to create a TRIP [PURCHASE] DELIVERY (tripResponse)
+        description: package PURCHASE PARAMETER used to create a package [PURCHASE] DELIVERY (packageResponse)
       properties:
         from:
           $ref: "#/components/schemas/place"
@@ -670,34 +844,34 @@ components:
             $ref: "#/components/schemas/traveler"
         customer:
           $ref: "#/components/schemas/customer"
-          description: The user that wants to purchase this trip, only to supply when requested in the purchaseConditions
+          description: The user that wants to purchase this package, only to supply when requested in the purchaseConditions
 
-    tripResponse:
+    packageResponse:
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP PURCHASE DELIVERY, TRIP OPERATION DELIVERY, TRIP DETAIL DELIVERY. Corresponds with
-          tripPurchaseParameters, operationParameters and tripDetailParameters (= GET /trips/{id}/)
+        description: package PURCHASE DELIVERY, package OPERATION DELIVERY, package DETAIL DELIVERY. Corresponds with
+          purchaseParameters, operationParameters and packageDetailParameters (= GET /packages/{id}/)
       properties:
-        trip:
+        package:
           allOf:
-          - $ref: "#/components/schemas/trip"
+          - $ref: "#/components/schemas/package"
           - $ref: "#/components/schemas/halLinks"
             example: {
-            # planning: purchase this trip, only when tripStatus = NEW
-                "purchase": { "rel": "POST", "href": "/trips/{id}", "type": "application/hal+json", "templated": true }
+            # planning: purchase this package, only when packagestatus = NEW
+                "purchase": { "rel": "POST", "href": "/packages/{id}", "type": "application/hal+json", "templated": true }
             # purchase
-              # only when tripStatus = PENDING
-              , "commit": { "rel": "POST", "href": "/trips/{id}/operations/COMMIT", "type": "application/hal+json", "templated": true } 
-              , "cancel": { "rel": "POST", "href": "/trips/{id}/operations/CANCEL", "type": "application/hal+json", "templated": true }
-              , "extend_expiry_time": { "rel": "EXTEND_EXPIRY_TIME", "href": "/trips/{id}/operations/EXTEND_EXPIRY_TIME", "type": "application/hal+json", "templated": true }
+              # only when packagestatus = PENDING
+              , "commit": { "rel": "POST", "href": "/packages/{id}/operations/COMMIT", "type": "application/hal+json", "templated": true } 
+              , "cancel": { "rel": "POST", "href": "/packages/{id}/operations/CANCEL", "type": "application/hal+json", "templated": true }
+              , "extend_expiry_time": { "rel": "EXTEND_EXPIRY_TIME", "href": "/packages/{id}/operations/EXTEND_EXPIRY_TIME", "type": "application/hal+json", "templated": true }
             # trip execution
-              , "leg": { "rel": "GET", "href": "/trips/{id}/legs/{lid}", "type": "application/hal+json", "templated": true } 
-              # only when tripStatus = CONFIRMED
-              , "prepare": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/PREPARE", "type": "application/hal+json", "templated": true }
-              , "set_in_use": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/SET_IN_USE", "type": "application/hal+json", "templated": true }
-              , "change_start_time": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/CHANGE_START_TIME", "type": "application/hal+json", "templated": true }
-              , "open_trunk": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/OPEN_TRUNK", "type": "application/hal+json", "templated": true }
-              , "add_ancillary": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/ADD_ANCILLARY", "type": "application/hal+json", "templated": true }
+              , "leg": { "rel": "GET", "href": "/packages/{id}/legs/{lid}", "type": "application/hal+json", "templated": true } 
+              # only when packagestatus = CONFIRMED
+              , "prepare": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/PREPARE", "type": "application/hal+json", "templated": true }
+              , "set_in_use": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/SET_IN_USE", "type": "application/hal+json", "templated": true }
+              , "change_start_time": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/CHANGE_START_TIME", "type": "application/hal+json", "templated": true }
+              , "open_trunk": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/OPEN_TRUNK", "type": "application/hal+json", "templated": true }
+              , "add_ancillary": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/ADD_ANCILLARY", "type": "application/hal+json", "templated": true }
             }
         log:
           type: array
@@ -706,18 +880,18 @@ components:
             $ref: "#/components/schemas/logEntry"
         customer:
           $ref: "#/components/schemas/customer"
-          description: the customer purchasing this trip
+          description: the customer purchasing this package
         progress:
           $ref: "#/components/schemas/LineString"
           description: A list of COORDINATEs describing the progress so far as LINESTRING (GeoJSON)
 
-    ## trip modification
+    ## pre-purchase
     operationParameter:
       type: object
       description: operation parameter for the purchase or trip execution phase
       externalDocs:
         url: https://not-yet-available/
-        description: OPERATION PARAMETER. Delivers TRIP DETAIL DELIVERY (tripResponse) or LEG DETAIL RESPONSE (legDetailResponse)
+        description: OPERATION PARAMETER. Delivers package DETAIL DELIVERY (packageResponse) or LEG DETAIL RESPONSE (legDetailResponse)
       additionalProperties: false
       required:
         - timestamp
@@ -737,11 +911,11 @@ components:
         requestOffer:
           type: boolean
           description: if this field contains a 'true', the operation shouldn't be executed, but the expected result of the operation should be returned. For instance, 
-            if you're cancelling a purchased TRIP, you'll return a CANCELLED TRIP, the price will contain the price that has to be paid for this cancelled TRIP.
+            if you're cancelling a purchased package, you'll return a CANCELLED package, the price will contain the price that has to be paid for this cancelled package.
           default: false
         source:
           type: string
-          description: This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this TRIP for me); to override the default source.<br>
+          description: This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this package for me); to override the default source.<br>
             In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
             _TO_ the TO requests this operation<br>
             _MP_ the MP (not triggered by the travelers NOR customer)<br>
@@ -817,7 +991,7 @@ components:
       description: container to return assets, including their possible operations (assign asset). 
       externalDocs:
         url: https://not-yet-available/
-        description: TRIP AVAILABLE ASSETS DELIVERY, corresponding with the TRIP AVAILABLE ASSETS REQUEST (= POST /trips/{id}/legs/{lid}/available-assets)
+        description: package AVAILABLE ASSETS DELIVERY, corresponding with the package AVAILABLE ASSETS REQUEST (= POST /packages/{id}/legs/{lid}/available-assets)
       maxItems: 100
       items:
         allOf:
@@ -832,22 +1006,22 @@ components:
         - $ref: "#/components/schemas/leg"
         - $ref: "#/components/schemas/halLinks"
           example:
-            { "leg": { "rel": "GET", "href": "/trips/{id}/legs/{lid}", "templated": true, "type": "application/hal+json" }
+            { "leg": { "rel": "GET", "href": "/packages/{id}/legs/{lid}", "templated": true, "type": "application/hal+json" }
             # only when legState = NOT_STARTED
-            , "cancel": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/CANCEL", "templated": true, "type": "application/hal+json" }
-            , "prepare": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/PREPARE", "templated": true, "type": "application/hal+json" }
-            , "assign_asset": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/ASSIGN_ASSET", "templated": true, "type": "application/hal+json" }
-            , "change_start_time": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/CHANGE_START_TIME", "templated": true, "type": "application/hal+json" }
+            , "cancel": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/CANCEL", "templated": true, "type": "application/hal+json" }
+            , "prepare": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/PREPARE", "templated": true, "type": "application/hal+json" }
+            , "assign_asset": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/ASSIGN_ASSET", "templated": true, "type": "application/hal+json" }
+            , "change_start_time": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/CHANGE_START_TIME", "templated": true, "type": "application/hal+json" }
             # only when legState = NOT_STARTED OR PREPARING
-            , "add_ancillaries": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/ADD_ANCILLARY", "templated": true, "type": "application/hal+json" }
-            , "remove_ancillaries": { "rel": "DELETE", "href": "/trips/{id}/legs/{lid}/operations/REMOVE_ANCILLARY", "templated": true, "type": "application/hal+json" }
-            , "set_in_use": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/SET_IN_USE", "templated": true, "type": "application/hal+json" }
+            , "add_ancillaries": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/ADD_ANCILLARY", "templated": true, "type": "application/hal+json" }
+            , "remove_ancillaries": { "rel": "DELETE", "href": "/packages/{id}/legs/{lid}/operations/REMOVE_ANCILLARY", "templated": true, "type": "application/hal+json" }
+            , "set_in_use": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/SET_IN_USE", "templated": true, "type": "application/hal+json" }
             # only when legState = IN_USE
-            , "change_end_time": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/CHANGE_END_TIME", "templated": true, "type": "application/hal+json" }
-            , "pause": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/PAUSE", "templated": true, "type": "application/hal+json" }
-            , "open_trunk": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/OPEN_TRUNK", "type": "application/hal+json" }
-            , "start_finishing": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/START_FINISHING", "templated": true, "type": "application/hal+json" }
-            , "finish": { "rel": "POST", "href": "/trips/{id}/legs/{lid}/operations/FINISH", "templated": true, "type": "application/hal+json" }
+            , "change_end_time": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/CHANGE_END_TIME", "templated": true, "type": "application/hal+json" }
+            , "pause": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/PAUSE", "templated": true, "type": "application/hal+json" }
+            , "open_trunk": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/OPEN_TRUNK", "type": "application/hal+json" }
+            , "start_finishing": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/START_FINISHING", "templated": true, "type": "application/hal+json" }
+            , "finish": { "rel": "POST", "href": "/packages/{id}/legs/{lid}/operations/FINISH", "templated": true, "type": "application/hal+json" }
             }
 
     ## support
@@ -880,7 +1054,7 @@ components:
       description: containing log entries of the issue
       externalDocs:
         url: https://not-yet-available/
-        description: SUPPORT DETAIL DELIVERY, corresponds with SUPPORT DETAIL REQUEST (= GET /trips/{id}/legs/{lid}/support)
+        description: SUPPORT DETAIL DELIVERY, corresponds with SUPPORT DETAIL REQUEST (= GET /packages/{id}/legs/{lid}/support)
       maxItems: 100
       items:
         $ref: "#/components/schemas/supportTicketStatus"
@@ -940,10 +1114,10 @@ components:
               "previous": { "rel": "GET", "href": "/payments&limit=100", "type": "application/hal+json" }
             }
 
-  # trip concepts
+  # package concepts
     leg:
       type: object
-      description: A planned (segment of) a trip using one asset
+      description: A planned (segment of) a package using one asset
       required:
         - id
         - from
@@ -953,7 +1127,7 @@ components:
       properties:
         id:
           $ref: "#/components/schemas/uuid"
-          description: The unique identifier (TO) of this leg. Must always the same as applied in the request URL. And when there are not additional legs in the offered or purchased TRIP, the same **id** as the trip id.
+          description: The unique identifier (TO) of this leg. Must always the same as applied in the request URL. And when there are not additional legs in the offered or purchased package, the same **id** as the package id.
         from:
           $ref: "#/components/schemas/place"
           description: The departure location of this leg, using this asset type. Mandatory.
@@ -962,10 +1136,10 @@ components:
           description: The destination of this leg, using this asset type.
         sequenceNumber:
           $ref: "#/components/schemas/shortInt"
-          description: The order of the leg within the TRIP. Mandatory, if there are multiple legs in the TRIP. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one trip.
+          description: The order of the leg within the package. Mandatory, if there are multiple legs in the package. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one package.
         travelerReferences:
           type: array
-          description: reference to the travelers field of the trip request. Mandatory when multiple travelers are used.
+          description: reference to the travelers field of the package request. Mandatory when multiple travelers are used.
           maxItems: 50
           items:
             $ref: "#/components/schemas/shortInt"
@@ -974,13 +1148,13 @@ components:
           description: The departure time of this leg. Or, in case of a parking, the start of the usage.
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2958.htm
-            description: TRIP PATTERN.StartTime
+            description: package PATTERN.StartTime
         endTime:
           $ref: "#/components/schemas/dateTime"
           description: The intended arrival time at the to place. Or, in case of a parking, the end of the usage.
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA2/EA1/EA2958.htm
-            description: TRIP PATTERN.EndTime
+            description: package PATTERN.EndTime
         legState:
           $ref: "#/components/schemas/legState"
         fareStructure:
@@ -988,7 +1162,7 @@ components:
           description: The leg-specific fare structure. The price can be calculated using all elements.
         price:
           $ref: "#/components/schemas/amountOfMoney"
-          description: the final price of the leg / trip
+          description: the final price of the leg / package
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2419.htm - (CUSTOMER PURCHASE PACKAGE PRICE) final price
         conditions:
@@ -1016,7 +1190,24 @@ components:
         extraInfo:
           $ref: "#/components/schemas/customProperties"
 
-    legOperation:
+    legAfterSalesOperation:
+      type: string
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA4/EA2/EA4/EA1162.htm
+        description: TYPE OF EVENT
+      description: Operations:<br> 
+        _CANCEL_ [MP<->TO] will cancel this LEG. Only allowed when multiple LEGs are included in the package, otherwise the complete package should be cancelled<br>
+        _NOTIFY_ [MP<->TO] will send a notification to TO, driver, MP or TRAVELER(s)<br>
+        _REPORT_PROGRESS_ [TO->MP] the TO reports the location to the MP<br>
+        _FINANCIAL_TRANSATION_ [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.<br>
+      enum: [
+        # state operation requests
+        CANCEL,
+        NOTIFY, REPORT_PROGRESS,
+        FINANCIAL_TRANSACTION
+      ]
+
+    legTripOperation:
       type: string
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA4/EA2/EA4/EA1162.htm
@@ -1025,18 +1216,68 @@ components:
         _PREPARE_ [MP->TO, non-TO-controlled] - MP request the TO to prepare the LEG (e.g. open the locker) [ONBOARDING STEP, RESUMING STEP]<br>
         _PREPARE_ [MP<-TO, process identifier TO-controlled] - the TO can send a message telling the MP that he is preparing the LEG, e.g. the taxi is heading to the pickup point<br>
         _ASSIGN_ASSET_ [MP->TO] - can assign an ASSET to a LEG. Can be used to replace an ASSET, or as first step in the trip execution process [ONBOARDING STEP]<br>
-          If assigning an ASSET is not allowed for this trip 403 should be returned. If the trip is unknown, 404 should be returned.<br>
+          If assigning an ASSET is not allowed for this package 403 should be returned. If the package is unknown, 404 should be returned.<br>
         _SET_IN_USE_ [MP->TO, non-TO-controlled] - will activate the LEG or resume the LEG [ONBOARDING STEP, RESUMING STEP]<br>
         _SET_IN_USE_ [MP<-TO, process identifier TO-controlled] - the driver indicates the LEG is started<br>
-        _CHANGE_END_TIME_ [MP->TO] will be used to request a changed end time; the TRAVELER wants to use the ASSET longer (or shorter), the **time** field contains the proposed end time, the end time of the trip doesn't change<br>
-        _CHANGE_START_TIME_ [MP->TO] will be used to request a changed start time, e.g. the TRAVELER wants to depart later, the **time** field contains the estimated start time, the start time of the trip doesn't change<br>
+        _CHANGE_END_TIME_ [MP->TO] will be used to request a changed end time; the TRAVELER wants to use the ASSET longer (or shorter), the **time** field contains the proposed end time, the end time of the package doesn't change<br>
+        _CHANGE_START_TIME_ [MP->TO] will be used to request a changed start time, e.g. the TRAVELER wants to depart later, the **time** field contains the estimated start time, the start time of the package doesn't change<br>
         _PAUSE_ [MP->TO] will pause the LEG [PAUSING STEP]<br>
         _OPEN_TRUNK_ [MP->TO] request the TO to open up the trunk (of the scooter), e.g. to store the helmet [ONBOARDING STEP, OFFBOARDING STEP, PAUSING STEP, RESUMING STEP]<br>
         _START_FINISHING_ [MP->TO] will start the end-of-leg process [OFFBOARDING STEP]<br>
         _START_FINISHING_ [MP<-TO, process identifier TO-controlled] TO indicates that the LEG is almost finishing<br>
         _FINISH_ [MP->TO] will end this LEG [OFFBOARDING STEP]<br>
         _FINISH_ [MP<-TO, process identifier TO-controlled] the TO indicates that the LEG is finished, the destination has been reached.<br>
-        _CANCEL_ [MP<->TO] will cancel this LEG. Only allowed when multiple LEGs are included in the trip, otherwise the complete trip should be cancelled<br>
+        _CANCEL_ [MP<->TO] will cancel this LEG. Only allowed when multiple LEGs are included in the package, otherwise the complete package should be cancelled<br>
+        _NOTIFY_ [MP<->TO] will send a notification to TO, driver, MP or TRAVELER(s)<br>
+        _REPORT_PROGRESS_ [TO->MP] the TO reports the location to the MP<br>
+        _ADD_ANCILLARY_ [MP->TO] requests to add the specified ANCILLARY to the LEG<br>
+        _REMOVE_ANCILLARY_ [MP->TO] requests to remove the specified ANCILLARY from the LEG<br>
+        _CONFIRM_REPLACE_VEHICLE_ [MP<-TO] asks confirmation to replace the ASSET, returns a 202 when confirmed, otherwise it will return 400<br>
+        _CONFIRM_START_LEG_ [MP<-TO] asks confirmation to start the LEG, returns a 202 when confirmed, otherwise it will return 400<br>
+        _FINANCIAL_TRANSATION_ [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.<br>
+        _SEND_EVIDENCE_PARKED_ [MP->TO] sends pictures (in url field) to prove that the ASSET is parked correctly<br>
+        _SEND_EVIDENCE_HELMET_ [MP->TO] sends pictures (in url field) to prove that the helmet is stowed correctly<br>
+        _SEND_EVIDENCE_CHARGER_ [MP->TO] sends pictures (in url field) to prove that the ASSET connected correctly to the charger<br>
+      enum: [
+        # state operation requests
+        PREPARE, ASSIGN_ASSET, SET_IN_USE, PAUSE, START_FINISHING, FINISH, CANCEL,
+        # asset operation requests
+        OPEN_TRUNK,
+        # end user request requests
+        CHANGE_START_TIME, CHANGE_END_TIME, 
+        # notify request
+        NOTIFY, REPORT_PROGRESS,
+        # ancillary operation requests
+        ADD_ANCILLARY, REMOVE_ANCILLARY,
+        # confirmation requests
+        CONFIRM_REPLACE_VEHICLE, CONFIRM_START_LEG,
+        # financial requests
+        FINANCIAL_TRANSACTION,
+        # evidence requests
+        SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER
+      ]      
+
+    legPrePurchaseOperation:
+      type: string
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA4/EA2/EA4/EA1162.htm
+        description: TYPE OF EVENT
+      description: Operations:<br> 
+        _PREPARE_ [MP->TO, non-TO-controlled] - MP request the TO to prepare the LEG (e.g. open the locker) [ONBOARDING STEP, RESUMING STEP]<br>
+        _PREPARE_ [MP<-TO, process identifier TO-controlled] - the TO can send a message telling the MP that he is preparing the LEG, e.g. the taxi is heading to the pickup point<br>
+        _ASSIGN_ASSET_ [MP->TO] - can assign an ASSET to a LEG. Can be used to replace an ASSET, or as first step in the trip execution process [ONBOARDING STEP]<br>
+          If assigning an ASSET is not allowed for this package 403 should be returned. If the package is unknown, 404 should be returned.<br>
+        _SET_IN_USE_ [MP->TO, non-TO-controlled] - will activate the LEG or resume the LEG [ONBOARDING STEP, RESUMING STEP]<br>
+        _SET_IN_USE_ [MP<-TO, process identifier TO-controlled] - the driver indicates the LEG is started<br>
+        _CHANGE_END_TIME_ [MP->TO] will be used to request a changed end time; the TRAVELER wants to use the ASSET longer (or shorter), the **time** field contains the proposed end time, the end time of the package doesn't change<br>
+        _CHANGE_START_TIME_ [MP->TO] will be used to request a changed start time, e.g. the TRAVELER wants to depart later, the **time** field contains the estimated start time, the start time of the package doesn't change<br>
+        _PAUSE_ [MP->TO] will pause the LEG [PAUSING STEP]<br>
+        _OPEN_TRUNK_ [MP->TO] request the TO to open up the trunk (of the scooter), e.g. to store the helmet [ONBOARDING STEP, OFFBOARDING STEP, PAUSING STEP, RESUMING STEP]<br>
+        _START_FINISHING_ [MP->TO] will start the end-of-leg process [OFFBOARDING STEP]<br>
+        _START_FINISHING_ [MP<-TO, process identifier TO-controlled] TO indicates that the LEG is almost finishing<br>
+        _FINISH_ [MP->TO] will end this LEG [OFFBOARDING STEP]<br>
+        _FINISH_ [MP<-TO, process identifier TO-controlled] the TO indicates that the LEG is finished, the destination has been reached.<br>
+        _CANCEL_ [MP<->TO] will cancel this LEG. Only allowed when multiple LEGs are included in the package, otherwise the complete package should be cancelled<br>
         _NOTIFY_ [MP<->TO] will send a notification to TO, driver, MP or TRAVELER(s)<br>
         _REPORT_PROGRESS_ [TO->MP] the TO reports the location to the MP<br>
         _ADD_ANCILLARY_ [MP->TO] requests to add the specified ANCILLARY to the LEG<br>
@@ -1113,7 +1354,7 @@ components:
         url:
           $ref: "#/components/schemas/url"
           description: the TOMP URL where the details of the previous leg can be found (if authorized), using a GET http method
-          example: https://penr.nl/tomp/trips/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
+          example: https://penr.nl/tomp/packages/57c652b3-1878-4a59-ba7b-b69ec1267124/legs/4aea3986-55be-48c6-a66a-09b14ebe2fb5
 
     logEntry:
       type: object
@@ -1128,17 +1369,17 @@ components:
           type: string
           description: "should be one of these operations:
             - /components/schemas/legOperation
-            - /components/schemas/tripOperation
+            - /components/schemas/packageOperation
             - type: string
               description: additional operations, not directly related to the purchase or trip execution<br>
                 _OFFER_ The offer has been published<br>
-                _PURCHASE_TRIP_ The offer is converted into a purchased trip (PENDING or CONFIRMED). The tripOperation contains the COMMIT<br>
+                _PURCHASE_package_ The offer is converted into a purchased package (PENDING or CONFIRMED). The packageOperation contains the COMMIT<br>
                 _REQUEST_SUPPORT_ Issue reported <br>
                 _SUPPORT_ISSUE_SOLVED_ Support issue is solved<br>
                 _SUPPORT_ISSUE_REMOVED_ Support issue isn't solvable
               enum: [ 
                 # planning
-                OFFER, PURCHASE_TRIP, 
+                OFFER, PURCHASE_package, 
                 # support
                 REQUEST_SUPPORT, SUPPORT_ISSUE_SOLVED, SUPPORT_ISSUE_REMOVED,
                 ]"
@@ -1177,7 +1418,7 @@ components:
       additionalProperties: false
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA4/EA5/EA3149.htm
-        description: TRIP REQUEST PLACE
+        description: package REQUEST PLACE
       # OR https://www.transmodel-cen.eu/model/EARoot/EA1/EA5/EA9/EA263.htm (PLACE)
       required:
         - coordinates
@@ -1249,8 +1490,8 @@ components:
           $ref: "#/components/schemas/longString"
           description: additional information to find the address (f.x. just around the corner)
 
-    trip:
-      description: a purchased trip is a registration of an agreement between end user and TO, to execute a trip (=set of legs) according a specification, including all conditions
+    package:
+      description: a purchased package is a registration of an agreement between end user and TO, to execute a package (=set of legs) according a specification, including all conditions
       #externalDocs:
         # https://www.transmodel-cen.eu/model/EARoot/EA6/EA4/EA1/EA2242.htm (SALES OFFER PACKAGE)
         # OR https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2417.htm (CUSTOMER PURCHASE PACKAGE)
@@ -1260,47 +1501,59 @@ components:
       allOf:
         - $ref: "#/components/schemas/leg"
         - type: object
-          description: The trip information describing the state and details of an agreed upon trip
+          description: The package information describing the state and details of an agreed upon package
           properties:
-            tripState:
-              $ref: "#/components/schemas/tripState"
+            packagestate:
+              $ref: "#/components/schemas/packagestate"
             additionalLegs:
               type: array
-              description: The additional legs of this trip (a single trip -> all properties are already in this object).
+              description: The additional legs of this package (a single package -> all properties are already in this object).
                 All other legs should be in this collection, using the sequenceNumber to arrange them.
               maxItems: 25
               items:
                 $ref: "#/components/schemas/leg"
             product:
               $ref: "#/components/schemas/productReference"
-              description: this trip does reflect a product. The `additionalLegs` field contains the executed legs using this product.
+              description: this package does reflect a product. The `additionalLegs` field contains the executed legs using this product.
 
-    tripOperation:
+    prePurchaseOperation:
       type: string
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
         description: TYPE OF REQUEST (unspecified)
-      description: allowed trip operations<br>
-        _CANCEL_ - [MP->TO] Cancels a purchased TRIP, it returns a TRIP in a _CANCEL_led state.<br> 
+      description: allowed package operations<br>
+        _CANCEL_ - [MP->TO] Cancels a purchased package, it returns a package in a _CANCEL_led state.<br> 
+        _COMMIT_ - [MP->TO] Turns the purchased package in a _CONFIRMED_ state, the previous state should be _PENDING_. If the package is in state _CONFIRMED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR> 
+        _MODIFY_TRAVELER_ - [MP->TO] request a change one of the travelers. Can be refused if contractual or financial changes are requested<br>
+        _MODIFY_CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested<br>
+      enum: [ COMMIT, CANCEL, MODIFY_TRAVELER, MODIFY_CUSTOMER ]
+
+    packageOperation:
+      type: string
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
+        description: TYPE OF REQUEST (unspecified)
+      description: allowed package operations<br>
+        _CANCEL_ - [MP->TO] Cancels a purchased package, it returns a package in a _CANCEL_led state.<br> 
         _EXTEND_EXPIRY_TIME_ - [MP->TO] the MP request to extend the expiry time. Only available when the Process Identifier <i>ALLOW_EXTEND_PURCHASE_EXPIRY_TIME</i> is used. Whenever the extension is not granted, 410 should be returned.<br> 
-        _COMMIT_ - [MP->TO] Turns the purchased TRIP in a _CONFIRMED_ state, the previous state should be _PENDING_. If the TRIP is in state _CONFIRMED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR> 
+        _COMMIT_ - [MP->TO] Turns the purchased package in a _CONFIRMED_ state, the previous state should be _PENDING_. If the package is in state _CONFIRMED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR> 
         _NOTIFY_ - [MP<->TO] Notification to MP, traveler or TO<br>
         _MODIFY_TRAVELER_ - [MP->TO] request a change one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _MODIFY_CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested<br>
         _FINANCIAL_TRANSATION_ - [MP<->TO] request a (direct) financial transaction. If there is no contract telling otherwise, this money has to be transferred immediately.
       enum: [ EXTEND_EXPIRY_TIME, COMMIT, CANCEL, NOTIFY, MODIFY_TRAVELER, MODIFY_CUSTOMER, FINANCIAL_TRANSACTION ]
 
-    tripState:
+    packagestate:
       type: string
-      description: The life-cycle state of the trip (from NEW to FINISHED)<br>
-        _NEW_ the trip is offered, including all conditions<br>
-        _PENDING_ the trip in the process of purchase, not yet finalized<br>
-        _RELEASED_ for internal archiving. Another trip option is purchased<br>
-        _EXPIRED_ the MP didn't respond on time, the trip offer has been expired<br>
-        _CONFIRMED_ a finalized trip ('purchased'). Both parties agreed to deliver services in return of payment<br>
-        _CANCELLED_ the trip is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br>
-        _STARTED_ the trip is started, the <u>TRIP EXECUTION</u> module is needed now<br>
-        _FINISHED_ the trip has ended<br>
+      description: The life-cycle state of the package (from NEW to FINISHED)<br>
+        _NEW_ the package is offered, including all conditions<br>
+        _PENDING_ the package in the process of purchase, not yet finalized<br>
+        _RELEASED_ for internal archiving. Another package option is purchased<br>
+        _EXPIRED_ the MP didn't respond on time, the package offer has been expired<br>
+        _CONFIRMED_ a finalized package ('purchased'). Both parties agreed to deliver services in return of payment<br>
+        _CANCELLED_ the package is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br>
+        _STARTED_ the package is started, the <u>trip execution</u> module is needed now<br>
+        _FINISHED_ the package has ended<br>
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2420.htm
         description: CUSTOMER PURCHASE STATUS
@@ -1309,7 +1562,7 @@ components:
 
   # terms & conditions
     cancellationCondition:
-      description: conditions regarding cancellation of a purchased TRIP
+      description: conditions regarding cancellation of a purchased package
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2179.htm 
         description: (CANCELLING)
@@ -1319,16 +1572,16 @@ components:
           properties:
             cancellationAllowed:
               type: boolean
-              description: is it possible to cancel this TRIP?
+              description: is it possible to cancel this package?
               externalDocs:
                 url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
                 description: PURCHASE WINDOW.cancellationAllowed
             cancellationFee:
               $ref: "#/components/schemas/amountOfMoney"
-              description: amount of money you have to pay when you cancel this purchased TRIP
+              description: amount of money you have to pay when you cancel this purchased package
             cancellationFeePercentage:
               $ref: "#/components/schemas/float"
-              description: percentage of the offered price you have to pay when you cancel this purchased TRIP  
+              description: percentage of the offered price you have to pay when you cancel this purchased package  
 
     conditionBase:
       type: object
@@ -1353,7 +1606,7 @@ components:
         - $ref: "#/components/schemas/paymentConditions"
         - $ref: "#/components/schemas/cancellationCondition"
         - $ref: "#/components/schemas/purchaseConditions"
-        - $ref: "#/components/schemas/tripExecutionConditions"
+        - $ref: "#/components/schemas/packageExecutionConditions"
         - $ref: "#/components/schemas/guarantees"
       discriminator:
         propertyName: conditionType
@@ -1373,15 +1626,15 @@ components:
                  _REPLACEMENT_WHEN_CONNECTION_MISSED_ - the TO will arrange an alternative for the missed connection
                  _REFUND_WHEN_CONNECTION_MISSED_ - the TO will refund the missed connection
                  _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded
-                 _REFUND_WHEN_CANCELLED_ - when cancelled, no costs will be charged when trip not started.
+                 _REFUND_WHEN_CANCELLED_ - when cancelled, no costs will be charged when package not started.
                 enum: [ ARRIVAL_TIME, REPLACEMENT_WHEN_CONNECTION_MISSED, REFUND_WHEN_CONNECTION_MISSED, REFUND_UNUSED_ANCILLARIES ]
 
     paymentConditions:
       description: conditions regarding payment<br>
-        _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /trips/{id}/leg/{id}/operations/FINANCIAL_TRANSATION endpoint. The requests are initiated by the TO (calling the MP)<br>
+        _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /packages/{id}/leg/{id}/operations/FINANCIAL_TRANSATION endpoint. The requests are initiated by the TO (calling the MP)<br>
         _PAY_WHEN_FINISHED_ - in case the TO demands a direct payment after usage, automatically done by the MP<br>
         _UPFRONT_ - in case the TO demands a upfront payment before usage. The payment should be made in the purchase phase. Additional costs could be relevant, e.g. when using the _TIME_EXTEND_ operation is executed. 
-          The MP must settle the payment before the trip can be started (using SET_IN_USE).
+          The MP must settle the payment before the package can be started (using SET_IN_USE).
       required:
         - momentOfPayment
       allOf:
@@ -1412,7 +1665,7 @@ components:
             requiredFields:
               type: array
               description: an array containing labels that identify specific fields that are required in the purchase process<br>
-                all fields of the trip purchase request can become required, navigating with dots, square brackets and field names.<br>
+                all fields of the package purchase request can become required, navigating with dots, square brackets and field names.<br>
                 A few examples<br>
                  from.address.station implies that the station reference is mandatory,<br>
                  travelers[*].age requires an age for each traveler, <br>
@@ -1434,8 +1687,8 @@ components:
           items:
             $ref: "#/components/schemas/interaction"
 
-    tripExecutionConditions:
-      description: conditions during the trip
+    packageExecutionConditions:
+      description: conditions during the package
       allOf:
         - $ref: "#/components/schemas/conditionBase"
         - type: object
@@ -1765,7 +2018,7 @@ components:
             format: operator-id
 
     customer:
-      description: A MaaS user that wishes to purchase a trip, only use the fields required by purchase conditions
+      description: A MaaS user that wishes to purchase a package, only use the fields required by purchase conditions
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA1/EA2333.htm
         description: TRANSPORT CUSTOMER
@@ -2106,7 +2359,7 @@ components:
               description: type of fare structure element. If there is only one fare structure elements and this field is missing, it should
                 be assumed it is 'FIXED'. In all other situations this field is mandatory.<br>
                 _FIXED_ fixed element, independend on the duration or distance traveled.
-                _FLEX_ flex element, dependend on the duration or distance of the trip. Can be tiered.
+                _FLEX_ flex element, dependend on the duration or distance of the package. Can be tiered.
                 _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX elements, cap it using this rule. Max 1 per fare structure.
               enum: [ FIXED, FLEX, MAX ]
             priceLevel:
@@ -2376,11 +2629,11 @@ components:
             <h3>Planning</h3>
             _RESULT_SHOWN_ action requires the MP to display some information to the customer when it is viewing the proposed legs.
             <h3>Purchase</h3>
-            _PENDING_ show whenever the trip is in PENDING state (not confirmed)<br>
+            _PENDING_ show whenever the package is in PENDING state (not confirmed)<br>
             _WAITING_ indicate that the TO is processing the purchase, optionally after an extension of the expiry time<br>
             _WAITING_FOR_PAYMENT_ indicate that the payment hasn't been settled, after an extension of the expiry time with reason payment<br>
-            _CANCELLED_ show whenever the purchased TRIP is cancelled<br>
-            _EXPIRED_ show whenever the offered TRIP is expired (the expiry time has passed)<br>
+            _CANCELLED_ show whenever the purchased package is cancelled<br>
+            _EXPIRED_ show whenever the offered package is expired (the expiry time has passed)<br>
             <h3>Onboarding</h3>
             _SEND_PREPARE_ - indicate the leg is going to start <br>
             _UNLOCK_LOCKER_ - user action - optionally triggered by the PREPARE operation<br> 
@@ -2556,7 +2809,7 @@ components:
           items:
             type: string
             description: field references in external sources that are used in the purchase process. E.g. when using vehicle types from GBFS, a value of 'vehicle_type_id' should be 
-              specified to purchase a bike trip from the particular vehicle type in the field 'useAssetTypes' in the trip offer request.
+              specified to purchase a bike package from the particular vehicle type in the field 'useAssetTypes' in the package offer request.
               Use this mapped identifier also in 'Asset.assetType'.
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
@@ -2573,7 +2826,7 @@ components:
           items: 
             type: string
             description: field references in external sources that are used in the purchase process. E.g. when using vehicle types from GBFS, a value of 'vehicle_id' should be 
-              specified to purchase a bike trip from the particular vehicle type in the field 'useAssets' in the trip offer request.
+              specified to purchase a bike package from the particular vehicle type in the field 'useAssets' in the package offer request.
               Use this mapped identifier also in 'Asset.externalAssetReference'.
           externalDocs:
             url: https://github.com/TOMP-WG/TOMP-API/wiki/Use-external-IDs
@@ -2605,7 +2858,7 @@ components:
       properties:
         module: 
           type: string
-          enum: [ INTEROPERABILITY, PLANNING, PURCHASE, TRIP_EXECUTION, SUPPORT, PAYMENT ]
+          enum: [ INTEROPERABILITY, PLANNING, PURCHASE, package_EXECUTION, SUPPORT, PAYMENT ]
         identifiers:
           type: array
           maxItems: 25
@@ -2985,9 +3238,9 @@ components:
           type: string
           description: _DISABILITY_ specifies what the traveler needs to cope with its disabilities, like a wheelchair, or a guide dog. It is possible that the traveler brings it 
             along, but it can also be a requirement to the TO, like a ramp.<br>
-            _ANCILLARY_ are things that are not part of the asset, but can be used (or, sometimes even are mandatory) to complete the trip, like a helmet or a child seat<br>
+            _ANCILLARY_ are things that are not part of the asset, but can be used (or, sometimes even are mandatory) to complete the package, like a helmet or a child seat<br>
             _ASSET_EQUIPMENT_ things that are options on an asset that cannot be removed easily, like a route planner, or cruise control<br>
-            _TRAVELER_EQUIPMENT_ things the traveler brings along during the trip, like a bike, luggage, or a pet.
+            _TRAVELER_EQUIPMENT_ things the traveler brings along during the package, like a bike, luggage, or a pet.
           enum: [ DISABILITY, ANCILLARY, ASSET_EQUIPMENT, TRAVELER_EQUIPMENT ]
         identifier:
           $ref: "#/components/schemas/externalReference"
@@ -3101,10 +3354,10 @@ components:
       schema:
         $ref: "#/components/schemas/uuid"
       description: the ID of the intended receiver
-    tripId:
+    packageId:
       in: path
       name: id
-      description: TRIP identifier
+      description: package identifier
       required: true
       schema:
         $ref: "#/components/schemas/uuid"
@@ -3118,7 +3371,7 @@ components:
     callbackUrl: 
       in: header
       name: callback-url
-      description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /trips/{id}/legs/{lid}/operations/ and POST /trips/{id}/operations/. Only to be provided 
+      description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST /packages/{id}/legs/{lid}/operations/ and POST /packages/{id}/operations/. Only to be provided 
         when this deviates from standard or agreed URL.
       required: false
       schema:
@@ -3134,7 +3387,7 @@ components:
         pattern: "^[a-zA-Z]+-[a-zA-Z]+$"
       required: true
     expires:
-      description: The result is valid until this timestamp (and must be committed unless it is already in state _CONFIRMED_). A pending purchased TRIP is expired after this timestamp.
+      description: The result is valid until this timestamp (and must be committed unless it is already in state _CONFIRMED_). A pending purchased package is expired after this timestamp.
       schema:
         description: A HTTP date string
         externalDocs:
