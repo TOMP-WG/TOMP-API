@@ -1,0 +1,330 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Payment extension
+  description: Extension of the TOMP-API for payment information
+  version: "1.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: payments
+    description: This part of the API describes how the financial settlement should be done. All kinds of fares, fees, debits, and credits are described.
+
+# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
+#                           bearer (in header: Authorization: Bearer <token>)
+#                           Api-key (in header: X-API-Key: abcdef12345)
+#                           OAutb and OpenId are also available
+# The exact ways to authenticate will be described in a later version
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+  - ApiKeyAuth: []
+  - OAuth: []
+  - OpenId: []
+
+servers:
+  - url: https://tomp.dat.nl/tomp/v2
+
+paths:
+  /collections/payments/items:
+    get:
+      operationId: getPaymentOverview
+      summary: "Retrieve financial details"
+      description: Returns all the JOURNAL ENTRIES that should be paid (per LEG)
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - name: startTime
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+        - name: endTime
+          in: query
+          description: end of the selection
+          required: false
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+        - name: invoiceState
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/paymentState"
+        - name: id
+          in: query
+          required: false
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/uuid"
+        - name: category
+          in: query
+          description: type of PAYMENT DETAIL (e.g. fare, addition costs, fines, ...)
+          required: false
+          schema:
+            $ref: "#/components/schemas/paymentCategory"
+        - name: offset
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/normalInt"
+        - name: limit
+          in: query
+          description: max length of the selection
+          required: false
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/normalInt"
+      tags:
+        - payments
+      responses:
+        "200":
+          description: journal entries
+          headers:
+            Content-Language:
+              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/paymentResponse"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+    post:
+      operationId: addPaymentEntry
+      summary: "Request financial transaction"
+      description: Payments can be communicated using this endpoint
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/legId"
+      tags:
+        - payments
+      requestBody:
+        description: the initial request, containing a TRAVEL SPECIFICATION and additional parameters per USER PROFILE or USER GROUP
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/financialRequest"
+      responses:
+        "204":
+          description: the payment request is accepted
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+components:
+  schemas:
+    financialRequest:
+      allOf:
+      - $ref: "#/components/schemas/additionalCosts"
+      - type: object
+        properties:
+          timestamp:
+            $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+            description: timestamp of the operation, or in case of notification - ETA, the expected time of arrival.
+        example:
+          {
+            "timestamp": "2019-10-12T07:20:50.52Z",
+            "amount": 39.50,
+            "currencyCode": "NOK",
+            "category": "VOUCHER",
+            "description": "Frequent traveller reward",
+          }
+
+    additionalCosts:
+      description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
+      allOf:
+        - $ref: "#/components/schemas/amountOfMoney"
+        - type: object
+          required:
+            - category
+            - description
+          properties:
+            category:
+              $ref: "#/components/schemas/paymentCategory"
+            description:
+              $ref: "TOMP-API.yaml#/components/schemas/longString"
+              description: free text to describe the extra costs. Mandatory in case of 'OTHER', matches Content-Language
+            amountOfUnits:
+              $ref: "TOMP-API.yaml#/components/schemas/float"
+              description: e.g. number of litres, number of kilowatthour, etc
+            units:
+              type: string
+              enum: [LITER, KILOWATTHOUR, CO2_COMPENSATION, OTHER]
+            account:
+              $ref: "#/components/schemas/bankAccount"
+            extraInfo:
+              $ref: "TOMP-API.yaml#/components/schemas/customProperties"
+
+    paymentCategory:
+      type: string
+      description: The category of the journalled item <br>
+        _ALL_ - for filtering purposes only<br>
+        _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br>
+        _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br>
+        _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br>
+        _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br>
+        _REFUND_ - refund of the deposit<br>
+        _FINE_ - a fine that arrived later on<br>
+        _OTHER_ASSET_USED_ - additional costs for a replaced asset<br>
+        _CREDIT_ - generic CREDIT <br>
+        _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br>
+        _DEPOSIT_ - a deposit, to be refunded using _REFUND_<br>
+        _OTHER_ - unspecified<br>
+        _FARE_ - the normal costs of the purchased and executed leg(s)<br>
+      enum:
+        [
+          ALL,
+          DAMAGE,
+          LOSS,
+          STOLEN,
+          EXTRA_USAGE,
+          REFUND,
+          FINE,
+          OTHER_ASSET_USED,
+          CREDIT,
+          VOUCHER,
+          DEPOSIT,
+          OTHER,
+          FARE,
+        ]
+
+    paymentDetail:
+      allOf:
+        - $ref: "TOMP-API.yaml#/components/schemas/fareStructure"
+        - type: object
+          description:
+            each leg will result in at least one journal entry, containing a small summary of the leg (distance, duration).
+            The **amount** must be derivable from the fare structure **elements** and **additionalCosts**.
+          additionalProperties: true
+          properties:
+            id:
+              $ref: "TOMP-API.yaml#/components/schemas/uuid"
+              description: id of the JOURNAL ENTRY, the LEG id should be used
+            category:
+              $ref: "#/components/schemas/paymentCategory"
+            sequenceId:
+              $ref: "TOMP-API.yaml#/components/schemas/tinyInt"
+              description: sequence id of the JOURNAL ENTRY, in combination with **id** unique from TO perspective.
+            invoiceId:
+              $ref: "TOMP-API.yaml#/components/schemas/shortString"
+              description: the number of the invoice. Should be filled in when invoiced (**state**=_INVOICED_).
+            invoiceDate:
+              $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+            state:
+              $ref: "#/components/schemas/paymentState"
+            expirationDate:
+              $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+            comment:
+              $ref: "TOMP-API.yaml#/components/schemas/longString"
+            distance:
+              $ref: "TOMP-API.yaml#/components/schemas/float"
+              description: the travelled distance, in km. Only if applicable.
+            distanceUnits:
+              type: string
+              enum: [KM, MILE]
+            duration:
+              $ref: "TOMP-API.yaml#/components/schemas/longInt"
+              description: the time in seconds that the assed is used. Only if applicable.
+            rentalStartMileage:
+              $ref: "TOMP-API.yaml#/components/schemas/longInt"
+              description: the mileage at the start of the rental. **duration** field is also applicable here
+            vatNumber:
+              $ref: "TOMP-API.yaml#/components/schemas/shortString"
+              description: VAT identification number.
+
+            bankAccount:
+              $ref: "#/components/schemas/bankAccount"
+              description: this account will be used
+
+            extraInfo:
+              $ref: "TOMP-API.yaml#/components/schemas/customProperties"
+
+    paymentState:
+      type: string
+      description: the state of the payment detail
+      enum: [TO_INVOICE, INVOICING, INVOICED]
+
+    paymentResponse:
+      allOf:
+        - type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/paymentDetail"
+        - $ref: "TOMP-API.yaml#/components/schemas/links"
+      example:
+        [
+            {
+              "id": "...",
+              "links":
+                [
+                  {
+                    "rel": "self",
+                    "method": "GET",
+                    "href": "/collections/payments/items&offset=100&limit=100",
+                    "type": "application/hal+json",
+                  },
+                  {
+                    "rel": "next",
+                    "method": "GET",
+                    "href": "/collections/payments/items&offset=200&limit=100",
+                    "type": "application/hal+json",
+                  },
+                  {
+                    "rel": "previous",
+                    "method": "GET",
+                    "href": "/payments&limit=100",
+                    "type": "application/hal+json",
+                  },
+                ],
+            }
+        ]
+
+    # base types / formats
+    amountOfMoney:
+      type: object
+      description: an amount of money, usable in fares, fare calculations or in extra costs.
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA2/EA1688.htm
+        description: FARE PRICE
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: float
+          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT
+          example: 9.95
+        taxPercentageUsed:
+          $ref: "TOMP-API.yaml#/components/schemas/float"
+          description: value added tax rate (percentage of amount)
+          example: 21.0
+        currencyCode:
+          $ref: "TOMP-API.yaml#/components/schemas/currencyCode"
+        vatCountryCode:
+          $ref: "TOMP-API.yaml#/components/schemas/country"
+
+    bankAccount:
+      type: object
+      description: bank account
+      additionalProperties: false
+      required:
+        - name
+        - number
+      properties:
+        name:
+          $ref: "TOMP-API.yaml#/components/schemas/shortString"
+          description: account name
+        number:
+          $ref: "TOMP-API.yaml#/components/schemas/shortString"
+          description: account number
+        country:
+          $ref: "TOMP-API.yaml#/components/schemas/country"
+        bankIdentification:
+          $ref: "TOMP-API.yaml#/components/schemas/shortString"
+          description: bank identification, like BIC code

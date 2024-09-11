@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Technical extension
+  description: This API extension allows to perform a health check    
+  version: "1.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+  - ApiKeyAuth: []
+  - OAuth: []
+  - OpenId: []
+
+servers:
+  - url: https://tomp.dat.nl/tomp/v2
+
+paths:
+  /health:
+    get:
+      operationId: ping
+      tags:
+        - capabilities
+      summary: "is the API up and running?"
+      description: "This is a healthcheck ENDPOINT"
+      responses:
+        "204":
+          description: successful operation
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true

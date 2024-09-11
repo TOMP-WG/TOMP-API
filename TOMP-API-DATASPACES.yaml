@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Dataspaces extension
+  description: Dataspaces extension of the TOMP-API (iShare satellite (https://dev.ishare.eu/ishare-satellite-role/)
+  version: "1.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+  - ApiKeyAuth: []
+  - OAuth: []
+  - OpenId: []
+
+servers:
+  - url: https://tomp.dat.nl/tomp/v2
+
+paths:
+  /capabilities:
+    get:
+      operationId: requestCapabilities
+      parameters:
+        - $ref: "#/components/parameters/dateTime"
+      summary: data spaces capabilities check
+      description: data space compliancy
+      responses:
+        "200":
+          description: the capabilities of an API, see also https://dev.ishare.eu/ishare-satellite-role/capabilities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/capabilitiesResponse"
+  
+  /connect/token:
+    post:
+      summary: Request an access token      
+      description: request an JWT token to use in a dataspace context
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/accessTokenRequest"
+      responses:
+        "200":
+          description: in case of a valid request, a accessTokenResponse
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/accessTokenResponse"
+
+components:
+  parameters:
+    dateTime:
+      in: query
+      name: date_time
+      description: Date time for which the information is requested. If provided the result becomes final and therefore MUST be cacheable.
+      schema:
+        type: string
+
+  schemas:
+    capabilitiesResponse:
+      type: object
+      properties: 
+        capabilities_token: 
+          type: string
+
+    accessTokenRequest:
+      type: object
+      required:
+      - grant_type
+      - scope
+      - client_id
+      - client_assertion_type
+      - client_assertion
+      properties:
+        grant_type:
+          type: string
+        scope:
+          type: string
+        client_id:
+          type: string
+        client_assertion_type:
+          type: string
+        client_assertion:
+          type: string
+
+    accessTokenResponse:
+      type: object
+      required:
+      - access_token
+      - token_type
+      - expires_in
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: string
