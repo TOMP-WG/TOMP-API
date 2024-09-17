@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Contract extension
+  description: Extension on the TOMP-API to view & create contracts
+  version: "1.0.0"
+  contact:
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
+#                           bearer (in header: Authorization: Bearer <token>)
+#                           Api-key (in header: X-API-Key: abcdef12345)
+#                           OAutb and OpenId are also available
+# The exact ways to authenticate will be described in a later version
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+  - ApiKeyAuth: []
+  - OAuth: []
+  - OpenId: []
+
+servers:
+  - url: https://tomp.dat.nl/
+
+paths:
+  /collections/contracts/items:
+    get:
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API.yaml#/components/parameters/bbox"
+      summary: return all contract formats, unsigned
+      description: this endpoint returns all pre-formatted contracts, ready to be completed and signed
+      responses:
+        "200":
+          description: a list of all pre-formatted contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/contract"
+                    - $ref: "TOMP-API.yaml#/components/schemas/links"
+                  example:
+                  - {"body": { "contractors": [ {"id": "1", "name": "me", "publicKey": "33"}
+                                    , {"id": "2", "name": "", "publicKey": ""} ] 
+                             , "parts": [ { "reference": "OpenWheels.1A", "parameters": { "contractorB": "" } } ] },
+                    "hash": "", # to prove the body hasn't changed, can be validated
+                    "hashMethod": "MD5",
+                    "signatures": { "1": "", "2": "" },
+                    "links": [
+                      { "rel": "sign", "method": "POST", "href": "/collections/contracts/items", "body":
+                        { .. repeat the body .. },
+                        "required": 
+                          [ "$.body.contractors[1].name"
+                          , "$.body.contractors[1].publicKey"
+                          , "$.body.parts[?(@.reference=='OpenWheels.1A')].parameters.contractorB"
+                          , "$.hash"
+                          , "$.signatures.2"
+                          ]
+                      } ]
+                    }
+    post:
+      summary: "A request to sign a completed contract"
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/contract"
+      responses:
+        "200":
+          description: contract signed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/contract"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+components:
+  schemas:
+    contract:
+      type: object
+      properties:
+        body:
+          $ref: "#/components/schemas/contractBody"
+        hash:
+          description: the hash value of the body, starting at the begin brace of the body (included).
+            and ending at the end brace (also included).
+          type: string
+        hashMethod:
+          description: the method to hash
+          type: string
+          enum: ["MD5", "SHA1", "AES"]
+        signatures:
+          type: array
+          items:
+            $ref: "#/components/schemas/contractSignature"
+      example:
+        - {"body": { "contractors": [ {"id": "1", "name": "me", "publicKey": "33"}
+                                    , {"id": "2", "name": "you", "publicKey": "77"} ] 
+                   , "parts": [ { "reference": "OpenWheels.1A", "parameters": { "contractorA": "me" } } ]
+                   },
+           "hash": "0eaca9862e33d4038cc6174527e4bf89", # to prove the body hasn't changed, can be validated
+           "hashMethod": "MD5",
+           "signatures": { "1": "54hehkewrsdzyfvy34", "2": "835thgevifjdzhr4" }
+          }
+        - { }
+
+    contractBody:
+      type: object
+      properties:
+        contractors:
+          type: array
+          items:
+            $ref: "#/components/schemas/contractor"
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/contractPart"
+
+    contractPart:
+      type: object
+      properties:
+        reference: 
+          type: string
+          description: a reference (url or namespaced) to an external described contract part
+        referenceHash:
+          type: string
+          description: the hash (MD5) of the text of the referenced contract part
+        text:
+          type: string
+          description: the contract part, in case there is no referenced contract
+        parameters:
+          type: object
+          description: for each parameter in the text or referenced text, a value must be provided
+          additionalProperties: 
+            type: string
+          example:
+            { "contractor1": "my company"
+            , "contractor2": "reseller" }
+        
+    contractor:
+      type: object
+      required:
+        - id
+        - name
+        - publicKey
+      properties:
+        id:
+          type: string
+        externalId:
+          type: string
+        name:
+          type: string
+        publicKey:
+          type: string
+
+    contractSignature:
+      type: object
+      description: per contractor the id and the signed hash is enlisted
+      additionalProperties: 
+        type: string

@@ -39,6 +39,9 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/senderId"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API.yaml#/components/parameters/bbox"
         - name: startTime
           in: query
           description: start of the selection
@@ -67,18 +70,6 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/paymentCategory"
-        - name: offset
-          in: query
-          description: start of the selection
-          required: false
-          schema:
-            $ref: "TOMP-API.yaml#/components/schemas/normalInt"
-        - name: limit
-          in: query
-          description: max length of the selection
-          required: false
-          schema:
-            $ref: "TOMP-API.yaml#/components/schemas/normalInt"
       tags:
         - payments
       responses:
