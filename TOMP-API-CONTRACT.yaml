@@ -48,21 +48,28 @@ paths:
                     - $ref: "#/components/schemas/contract"
                     - $ref: "TOMP-API.yaml#/components/schemas/links"
                   example:
-                  - {"body": { "contractors": [ {"id": "1", "name": "me", "publicKey": "33"}
-                                    , {"id": "2", "name": "", "publicKey": ""} ] 
-                             , "parts": [ { "reference": "OpenWheels.1A", "parameters": { "contractorB": "" } } ] },
-                    "hash": "", # to prove the body hasn't changed, can be validated
-                    "hashMethod": "MD5",
-                    "signatures": { "1": "", "2": "" },
-                    "links": [
-                      { "rel": "sign", "method": "POST", "href": "/collections/contracts/items", "body":
-                        { .. repeat the body .. },
+                    {"links": [
+                      { "rel": "sign", "method": "POST", "href": "/collections/contracts/items", 
+                        "body":
+                          { "contractBody": 
+                                  { "contractors": { "contractor1": { 
+                                                      "name": "Bike Operator X", 
+                                                      "publicKey": "7935d555-cdab-4932-99f4-a8674e52dc7d" }
+                                                   , "contractor2": {"name": "", "publicKey": "" } 
+                                                   }
+                                  , "parts": [ { "id": "OpenWheels.1A", "parameters": { "contractorB": "" } } ] },
+                            "hash": "[Contractor2 has to hash the contractBody after completing it
+                                     , encrypt the hash & put it in the signature]", # to prove the body hasn't changed, can be validated
+                            "hashMethod": "MD5",
+                            "signatures": { "contractor1": "[will be filled in when posting the contract]", 
+                                            "contractor2": "[]" }
+                          },
                         "required": 
-                          [ "$.body.contractors[1].name"
-                          , "$.body.contractors[1].publicKey"
-                          , "$.body.parts[?(@.reference=='OpenWheels.1A')].parameters.contractorB"
+                          [ "$.contractBody.contractor2.name"
+                          , "$.contractBody.contractor2.publicKey"
+                          , "$.contractBody.parts[?(@.id=='OpenWheels.1A')].parameters.contractorB"
                           , "$.hash"
-                          , "$.signatures.2"
+                          , "$.signatures.contractor2"
                           ]
                       } ]
                     }
@@ -72,17 +79,24 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/senderId"
       requestBody:
+        description: the completed contract, including all parameters. The only field that isn't filled, is the signature of the contractor1.
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/contract"
       responses:
         "200":
-          description: contract signed
+          description: contract signed, the contractor1 has agreed and signed it, placing the encrypted hash in signatures.contractor1
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/contract"
+        "202":
+          description: the contract has to be reviewed before a conformed and signed contract is posted at the callback url
+          content:
+            text/html:
+              schema:
+                type: string
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
@@ -90,8 +104,14 @@ components:
   schemas:
     contract:
       type: object
+      required:
+      - id
+      - body
+      - pattern
       properties:
-        body:
+        id:
+          type: string
+        contractBody:
           $ref: "#/components/schemas/contractBody"
         hash:
           description: the hash value of the body, starting at the begin brace of the body (included).
@@ -106,31 +126,99 @@ components:
           items:
             $ref: "#/components/schemas/contractSignature"
       example:
-        - {"body": { "contractors": [ {"id": "1", "name": "me", "publicKey": "33"}
-                                    , {"id": "2", "name": "you", "publicKey": "77"} ] 
-                   , "parts": [ { "reference": "OpenWheels.1A", "parameters": { "contractorA": "me" } } ]
+        - {"contractBody": 
+                   { "contractors": { "contractor1": {"name": "me", "publicKey": "33"},
+                                      "contractor2": {"name": "you", "publicKey": "77"} }
+                   , "parts": [ { "id": "OpenWheels:1A", "parameters": { "contractorA": "me" } } ]
                    },
            "hash": "0eaca9862e33d4038cc6174527e4bf89", # to prove the body hasn't changed, can be validated
            "hashMethod": "MD5",
-           "signatures": { "1": "54hehkewrsdzyfvy34", "2": "835thgevifjdzhr4" }
+           "signatures": { "contractor1": "54hehkewrsdzyfvy34", # signed hash using the private key of contractor 1
+                           "contractor2": "835thgevifjdzhr4" # signed hash using the private key of contractor 2
+                         }
           }
-        - { }
+
+    profile:
+      type: object
+      description: the profile of a contract, describing what's the structure, and what's allowed or mandatory. This part is not
+        mandatory, but gives external standard contracts a helpful structure to formalize.
+      properties:
+        id:
+          type: string
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/profilePart"
+        pattern:
+          type: string
+          description: a regex-kind of pattern, describing the possible structures.
+            It is a list of part-identifiers (e.g. 'x', space seperated), followed by a * (= 0-n times) or a + (= 1-n times)
+            It is allowed to make optional parts, using the |, so 'x'|'y' means x OR y. Grouping of parts is done with normal brackets ()
+            To make it an exclusive XOR, use the 'illegalCombination' arrays.
+          example:
+            - "'OpenWheels:A1' ('OpenWheels:2A'|'OpenWheels:2B'|'OpenWheels:2C') 'OpenWheels:3'+ 'OpenWheels:4'*"
+      example:
+      - {
+          "id": "OpenWheels:v2"
+        , "parts": [ 
+            {"id": "OpenWheels:1"},
+            {"id": "OpenWheels:2A", "illegalCombinations": ["OpenWheels:2B", "OpenWheels:2C"] },
+            {"id": "OpenWheels:2B", "illegalCombinations": ["OpenWheels:2A", "OpenWheels:2C"] },
+            {"id": "OpenWheels:2C", "illegalCombinations": ["OpenWheels:2A", "OpenWheels:2B"] },
+            {"id": "OpenWheels:3" },
+            {"id": "OpenWheels:4", "mandatoryParts": [ "OpenWheels:2B" ] },
+            ]
+        , "pattern": "'OpenWheels:A1' ('OpenWheels:2A'|'OpenWheels:2B'|'OpenWheels:2C') 'OpenWheels:3'+ 'OpenWheels:4'*"
+        }
+
+    profilePart:
+      allOf:
+        - $ref: "#/components/schemas/contractPart"
+        - type: object
+          properties:
+            illegalCombinations:
+              type: array
+              items:
+                type: string
+            mandatoryParts:
+              type: array
+              items:
+                type: string
 
     contractBody:
       type: object
+      required:
+        - contractors
+        - parts
       properties:
         contractors:
-          type: array
-          items:
+          type: object
+          required:
+            - contractor1
+            - contractor2
+          properties:
+            contractor1:
+              $ref: "#/components/schemas/contractor"
+            contractor2:
+              $ref: "#/components/schemas/contractor"
+          additionalProperties: 
             $ref: "#/components/schemas/contractor"
         parts:
           type: array
           items:
             $ref: "#/components/schemas/contractPart"
+        compliesTo:
+          $ref: "#/components/schemas/profile"
+        compliesToReference:
+          $ref: "TOMP-API.yaml#/components/schemas/url"
 
     contractPart:
       type: object
+      required: 
+      - id
       properties:
+        id:
+          type: string
         reference: 
           type: string
           description: a reference (url or namespaced) to an external described contract part
@@ -146,18 +234,15 @@ components:
           additionalProperties: 
             type: string
           example:
-            { "contractor1": "my company"
-            , "contractor2": "reseller" }
+            { "party 1": "my company"
+            , "party 2": "reseller" }
         
     contractor:
       type: object
       required:
-        - id
         - name
         - publicKey
       properties:
-        id:
-          type: string
         externalId:
           type: string
         name:
@@ -168,5 +253,13 @@ components:
     contractSignature:
       type: object
       description: per contractor the id and the signed hash is enlisted
+      required:
+        - contractor1
+        - contractor2
+      properties:
+        contractor1: 
+          type: string
+        contractor2:
+          type: string
       additionalProperties: 
-        type: string
+        type: string        
