@@ -2173,7 +2173,8 @@ components:
                 $ref: "#/components/schemas/leg"
             pricing:
               description: The pricing information of the overall booking, in addition to any leg pricing, if not all legs have pricing the booking should have the fare
-              $ref: "#/components/schemas/fare"
+              allOf:
+                - $ref: "#/components/schemas/fare"
             departureTime:
               description: The initial departure time (over all legs)
               type: string
@@ -2192,7 +2193,8 @@ components:
               format: date-time
             mainAssetType:
               description: the asset type that is used mainly in the complete trip.
-              $ref: "#/components/schemas/assetType"
+              allOf:
+                - $ref: "#/components/schemas/assetType"
             userCommunication:
               description: Additional information a TO can send to a customer (instructions, sales info, ...)
               type: array
@@ -2253,7 +2255,8 @@ components:
           type: string
         from:
           description: information about the origin, only to supply when requested in the conditionRequireBookingData
-          $ref: "#/components/schemas/place"
+          allOf:
+            - $ref: "#/components/schemas/place"
         callbackUrl: 
           description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
             when this deviates from standard or agreed URL.
@@ -2261,10 +2264,12 @@ components:
           format: URL
         to:
           description: information about the destination, only to supply when requested in the conditionRequireBookingData
-          $ref: "#/components/schemas/place"
+          allOf:
+            - $ref: "#/components/schemas/place"
         customer:
           description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
-          $ref: "#/components/schemas/customer"
+          allOf:
+            - $ref: "#/components/schemas/customer"
         extraInfo:
           description: dictionary for extra fields (bilatural agreements)
           type: object
@@ -2518,7 +2523,8 @@ components:
               type: string
             returnArea:
               description: area in which the asset should be returned as GeoJSON Polygon coordinates
-              $ref: "#/components/schemas/geojsonPolygon"
+              allOf:
+                - $ref: "#/components/schemas/geojsonPolygon"
             coordinates:
               $ref: "#/components/schemas/coordinates"
             returnHours:
@@ -3154,10 +3160,12 @@ components:
           type: string
         from:
           description: The departure location of this leg, using this asset type
-          $ref: "#/components/schemas/place"
+          allOf:
+            - $ref: "#/components/schemas/place"
         to:
           description: The destination of this leg, using this asset type
-          $ref: "#/components/schemas/place"
+          allOf:
+            - $ref: "#/components/schemas/place"
         departureTime:
           description: The departure time of this leg. Or, in case of a parking, the start of the usage.
           type: string
@@ -3181,16 +3189,19 @@ components:
             type: string
         assetType: 
           description: The asset type used in this leg as determined during booking
-          $ref: "#/components/schemas/assetType"
+          allOf:
+            - $ref: "#/components/schemas/assetType"
         legSequenceNumber:
           description: The order of the leg in the booking. There can be multiple legs with the same sequence (different user or parallel usage (eg. parking lot and a bike)).
           type: integer
         asset:
           description: The concrete asset used for the execution of the leg
-          $ref: "#/components/schemas/asset"
+          allOf:
+            - $ref: "#/components/schemas/asset"
         pricing:
           description: The leg-specific pricing information, all fares are additive, if the booking does not have pricing set all legs should
-          $ref: "#/components/schemas/fare"
+          allOf:
+            - $ref: "#/components/schemas/fare"
         suboperator:
           $ref: "#/components/schemas/suboperator"
         conditions:
@@ -3221,16 +3232,20 @@ components:
           $ref: "#/components/schemas/distance"
         progressGeometry:
           description: A list of coordinates describing the progress so far along the leg, as GeoJSON LineString coordinates
-          $ref: "#/components/schemas/geojsonLine"
+          allOf:
+            - $ref: "#/components/schemas/geojsonLine"
         ticket:
           description: The MaaS user's proof of their right to travel on this leg
-          $ref: "#/components/schemas/token"
+          allOf:
+            - $ref: "#/components/schemas/token"
         assetAccessData:
           description: Data to open a specific asset (e.g. QR code, image base64)
-          $ref: "#/components/schemas/token"
+          allOf:
+            - $ref: "#/components/schemas/token"
         allAssetAccessData:
           description: Array of data to open a specific asset (e.g. QR code, image base64)
-          $ref: "#/components/schemas/tokenArray"  
+          allOf:
+            - $ref: "#/components/schemas/tokenArray"  
         userCommunication:
           description: Additional information a TO can send to a customer (instructions, sales info, ...)
           type: array
@@ -3453,7 +3468,8 @@ components:
         properties:
           customer:
             description: The user that wants to make this booking, only to supply when requested in the conditionRequireBookingData
-            $ref: "#/components/schemas/customer"
+            allOf:
+              - $ref: "#/components/schemas/customer"
           callbackUrl: 
             description: The callback URL of the Maas Provider, to use as base url for callback, f.x. the POST legs/{id}/events and POST /bookings/{id}/events. Only to be provided 
               when this deviates from standard or agreed URL.
@@ -4301,7 +4317,8 @@ components:
           format: date-time
         serviceArea:
           description: The area served by the region (i.e. where one may travel using the service's assets) as GeoJSON Polygon coordinates
-          $ref: "#/components/schemas/geojsonPolygon"
+          allOf:
+            - $ref: "#/components/schemas/geojsonPolygon"
 
     token:
       description: The validity token (such as booking ID, travel ticket etc.) that MaaS clients will display to show their right to travel, or use to access an asset
