@@ -444,12 +444,6 @@ components:
                   ["ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT"],
               },
             ]
-        conditions:
-          type: array
-          description: common conditions for this TO
-          maxItems: 5
-          items:
-            $ref: "#/components/schemas/condition"
 
     processIdentifier:
       type: object
@@ -1491,6 +1485,11 @@ components:
           maxItems: 5
           items:
             $ref: "#/components/schemas/condition"
+        guarantees:
+          type: array
+          description: references to the guarantees
+          items:
+            type: string
         assetType:
           $ref: "#/components/schemas/externalReference"
           description: The asset type used to execute this leg
@@ -1698,7 +1697,7 @@ components:
         guarantees:
           type: array
           items:
-            $ref: "#/components/schemas/guarantees"
+            $ref: "#/components/schemas/guarantee"
       example:
         {
           "properties":
@@ -1904,28 +1903,36 @@ components:
           description: An identifier for this condition that can be used to refer to this condition
           example: deposit50eu
 
-    guarantees:
-      description: guarantees from the TO side.
+    guarantee:
       type: object
       properties:
-        guarantees:
+        id:
+          type: string
+        organisation:
+          type: string
+        type:
+          type: string
+          description:
+            _ARRIVAL_TIME_ - the TO guarantees that you will - under normal circumstances - will arrive at the destination of the leg  <br>
+            _GUARANTEED_CONNECTION_ - the TO will arrange an alternative for the missed connection
+            _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded
+            _REFUND_WHEN_CANCELLED_ - when cancelled, no costs will be charged when package not started.
+            _OTHER_ - textual, free format
+          enum:
+            [
+              ARRIVAL_TIME,
+              GUARANTEED_CONNECTION,
+              REFUND_UNUSED_ANCILLARIES,
+              REFUND_WHEN_CANCELLED,
+              OTHER
+            ]
+        other:
+          type: string
+        redresses:
           type: array
-          maxItems: 10
+          description: these redresses can also contain the subclass 'paymentDetail' (from the Payment extension)
           items:
-            type: string
-            description:
-              _ARRIVAL_TIME_ - the TO guarantees that you will - under normal circumstances - will arrive at the destination of the leg  <br>
-              _REPLACEMENT_WHEN_CONNECTION_MISSED_ - the TO will arrange an alternative for the missed connection
-              _REFUND_WHEN_CONNECTION_MISSED_ - the TO will refund the missed connection
-              _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded
-              _REFUND_WHEN_CANCELLED_ - when cancelled, no costs will be charged when package not started.
-            enum:
-              [
-                ARRIVAL_TIME,
-                REPLACEMENT_WHEN_CONNECTION_MISSED,
-                REFUND_WHEN_CONNECTION_MISSED,
-                REFUND_UNUSED_ANCILLARIES,
-              ]
+            $ref: "#/components/schemas/fareStructure"
 
     paymentCondition:
       description: conditions regarding payment<br>

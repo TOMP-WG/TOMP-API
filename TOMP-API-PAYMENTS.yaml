@@ -167,6 +167,7 @@ components:
         _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br>
         _DEPOSIT_ - a deposit, to be refunded using _REFUND_<br>
         _OTHER_ - unspecified<br>
+        _REPLACEMENT_ - replacement of an asset or leg<br>
         _FARE_ - the normal costs of the purchased and executed leg(s)<br>
       enum:
         [
@@ -182,6 +183,7 @@ components:
           VOUCHER,
           DEPOSIT,
           OTHER,
+          REPLACEMENT,
           FARE,
         ]
 
