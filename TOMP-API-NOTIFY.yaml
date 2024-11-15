@@ -37,10 +37,10 @@ paths:
       description: "Notification endpoint. Communication from TO to MP will be done mainly using this endpoint"
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API.yaml#/components/parameters/legId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageElementId"
       tags:
         - notifications
       requestBody:

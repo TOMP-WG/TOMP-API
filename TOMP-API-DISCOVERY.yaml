@@ -10,11 +10,6 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-tags:
-  - name: capabilities
-    description: This part of the API delivers a technical and human readable interface, allowing to read how this API should be used. Complies to OGC standard (OGC Features Core)
-      (https://ogcapi.ogc.org/features/) and Data spaces working as iShare satellite (https://dev.ishare.eu/ishare-satellite-role/)
-
 # security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
 #                           Api-key (in header: X-API-Key: abcdef12345)
@@ -27,6 +22,12 @@ security:
   - OAuth: []
   - OpenId: []
 
+tags:
+  - name: capabilities
+    description:
+      This part of the API delivers a technical and human readable interface, allowing to read how this API should be used. Complies to OGC standard (OGC Features Core)
+      (https://ogcapi.ogc.org/features/)
+
 servers:
   - url: https://tomp.dat.nl/tomp/v2
 
@@ -35,7 +36,7 @@ paths:
     get:
       description: This document
       parameters:
-        - $ref: '#/components/parameters/f'
+        - $ref: 'TOMP-API.yaml#/components/parameters/f'
       responses:
         '200':
           description: General Success response.
@@ -43,12 +44,12 @@ paths:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
       summary: This document
       tags:
-        - server
+        - capabilities
 
   /collections:
     get:
       tags:
-        - capabilities
+        - "capabilities"
       summary: the feature collections in the dataset
       description: returns a collection of available collection (like offers, packages, legs, support-requests and payments)
       operationId: getCollections
@@ -110,23 +111,6 @@ paths:
 
 components:
   parameters:
-    f:
-      description: >-
-        The optional f parameter indicates the output format that the server
-        shall provide as part of the response document.  The default format is
-        JSON.
-      explode: false
-      in: query
-      name: f
-      required: false
-      schema:
-        default: json
-        enum:
-          - json
-          - html
-        type: string
-      style: form  
-
     collectionId:
       name: collectionId
       in: path

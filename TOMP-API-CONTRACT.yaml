@@ -21,6 +21,10 @@ security:
   - OAuth: []
   - OpenId: []
 
+tags:
+  - name: contract
+    description: contract endpoints, to publish, complete, and sign contracts
+
 servers:
   - url: https://tomp.dat.nl/
 
@@ -29,12 +33,14 @@ paths:
     get:
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/offset"
         - $ref: "TOMP-API.yaml#/components/parameters/limit"
         - $ref: "TOMP-API.yaml#/components/parameters/bbox"
       summary: return all contract formats, unsigned
+      tags:
+        - contract
       description: this endpoint returns all pre-formatted contracts, ready to be completed and signed
       responses:
         "200":
@@ -77,7 +83,9 @@ paths:
       summary: "A request to sign a completed contract"
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+      tags:
+        - contract
       requestBody:
         description: the completed contract, including all parameters. The only field that isn't filled, is the signature of the contractor1.
         content:

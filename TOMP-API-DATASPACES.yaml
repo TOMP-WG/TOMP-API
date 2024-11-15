@@ -17,6 +17,10 @@ security:
   - OAuth: []
   - OpenId: []
 
+tags:
+  - name: dataspaces
+    description: required functions to act in dataspaces
+
 servers:
   - url: https://tomp.dat.nl/tomp/v2
 
@@ -26,6 +30,8 @@ paths:
       operationId: requestCapabilities
       parameters:
         - $ref: "#/components/parameters/dateTime"
+      tags:
+        - dataspaces
       summary: data spaces capabilities check
       description: data space compliancy
       responses:
@@ -40,6 +46,8 @@ paths:
     post:
       summary: Request an access token      
       description: request an JWT token to use in a dataspace context
+      tags:
+        - dataspaces
       requestBody:
         content:
           application/json:

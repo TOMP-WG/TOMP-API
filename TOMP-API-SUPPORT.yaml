@@ -37,10 +37,10 @@ paths:
       description: creates a request for SUPPORT from end user via MP
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API.yaml#/components/parameters/senderId"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
-        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API.yaml#/components/parameters/legId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageElementId"
       tags:
         - support-tickets
       requestBody:

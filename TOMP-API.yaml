@@ -13,19 +13,17 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-  - name: capabilities
-    description:
-      This part of the API delivers a technical and human readable interface, allowing to read how this API should be used. Complies to OGC standard (OGC Features Core)
-      (https://ogcapi.ogc.org/features/)
+  - name: landing page
+    description: landing page, to describe the interface
 
   - name: offers
-    description: This part of the API facilitates in supplying offers, that can be purchased.
+    description: This part of the API facilitates in supplying offers, and reserve or purchase them.
 
   - name: packages
     description: This part of the API facilitates to make a booking (aka purchase an offer), or to modify the travelling party, customer or cancel the package.
 
-  - name: legs
-    description: This part of the API facilitates changing operational parts of the trip, like starting, stopping or even cancel a part.
+  - name: package elements
+    description: This part of the API facilitates changing operational parts of the trip, like starting, stopping or even cancel a package element (leg or fare product).
 
 # security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
@@ -46,18 +44,22 @@ paths:
   /:
     get:
       tags:
-        - capabilities
+        - landing page
       operationId: landingPage
       summary: "Landing page"
       description: "Gives a (technical & human readable) output describing how this API must be used."
       externalDocs:
         url: https://app.swaggerhub.com/apis/OGC/ogcapi-features-1-example-1/1.0.1
+      parameters:
+        - $ref: "#/components/parameters/f"
       responses:
         "200":
           description: successful operation
           headers:
             Content-Language:
-              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+              $ref: "#/components/headers/contentLanguage"
+            Version:
+              $ref: "#/components/headers/version"
           content:
             application/json:
               schema:
@@ -66,16 +68,101 @@ paths:
               schema:
                 type: string
         default:
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+          $ref: "#/components/responses/errorResponse"
 
   /collections/offers/items:
+    get:
+      operationId: getRequestOffers
+      summary: "Request offers (simple)"
+      description: Returns offers (purchaseable packages) based a (list of) user(s), and optional start/end (and via) locations and a start time or end time. this
+        is a simplified offer request. If you want to publish more advanced offers, use the 'PUT' method, and you can configure more parameters
+      parameters:
+        - name: usage
+          in: query
+          description: a single usage
+          required: true
+          schema:
+            $ref: "#/components/schemas/usage"
+          example:
+            { "type":"INDIVIDUAL_TRAVELER", "id": "34924-3A334B-C342D" }
+        - name: parameter
+          in: query
+          description: a single validity parameter
+          schema: 
+            $ref: "#/components/schemas/validityParameter"
+          example:
+            { "type": "SERVICE", "class": "FIRST" }
+        - name: start
+          in: query
+          description: the origin of the trip (gps, or external specified location).
+          required: true
+          style: form
+          explode: false
+          x-example:
+          - "gps:6.234,34.2394"
+          - "CHB:NL:S:sptz"
+          schema:
+            $ref: "#/components/schemas/externalReference"
+        - name: end
+          in: query
+          description: the destination of the trip (gps, or external specified location).
+          required: false
+          style: form
+          explode: false
+          x-example:
+          - "gps:6.234,34.2394"
+          - "CHB:NL:S:sptz"
+          schema:
+            $ref: "#/components/schemas/externalReference"
+        - name: via
+          in: query
+          description: the via points of the trip (gps, or external specified location), comma-separated
+          required: false
+          style: form
+          explode: true
+          example:
+          - "gps:6.234,34.2394"
+          - "CHB:NL:S:sptz"
+          schema:
+            $ref: "#/components/schemas/externalReference"
+        - name: start-time
+          in: query
+          description: the preferred start-time of the trip. start-time OR end-time (exclusive) must be used
+          required: false
+          style: form
+          explode: false
+          schema:
+            $ref: "#/components/schemas/dateTime"            
+        - name: end-time
+          in: query
+          description: the preferred end-time of the trip. start-time OR end-time (exclusive) must be used
+          required: false
+          style: form
+          explode: false
+          schema:
+            $ref: "#/components/schemas/dateTime" 
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/bbox"                   
+      tags:
+        - offers
+      responses:
+        "200":
+          $ref: "#/components/responses/offerResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
     put:
       operationId: requestOffers
-      summary: "Request offers"
-      description: Returns offers (purchaseable packages) based on user requirements
+      summary: "Request offers (advanced)"
+      description: Returns offers (purchaseable packages) based on user requirements. This is the advanced version of the GET. Implement this only
+        when you support more advanced queries.
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
@@ -89,13 +176,14 @@ paths:
           $ref: "#/components/responses/offerResponse"
         default:
           $ref: "#/components/responses/errorResponse"
+
     post:
       operationId: purchaseRequest
       summary: "Purchase an (offered) package"
-      description: The offered package is transformed into a pre-purchased one. The purchase must be confirmed using the `POST /collections/packages/items/?packageId={id}&operation=commit`.
+      description: The offered package is transformed into a pre-purchased one. The purchase must be confirmed using the `POST /collections/packages/items/?packageId={id}&operation=confirm`.
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/optionalPackageId"
         - $ref: "#/components/parameters/callbackUrl"
@@ -118,14 +206,14 @@ paths:
     get:
       operationId: getPackage
       summary: "Request package details"
-      description: Retrieves package details, if the legId is not provided, the complete package is returned, otherwise, 
-        only the leg is returned within a 'package shell'.
+      description: Retrieves package details, if the packageElementId is not provided, the complete package is returned, otherwise, 
+        only the package element is returned within a 'package shell'.
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
-        - $ref: "#/components/parameters/optionalLegId"
+        - $ref: "#/components/parameters/optionalPackageElementId"
         - $ref: "#/components/parameters/packageSelection"
       tags:
         - packages
@@ -138,15 +226,16 @@ paths:
       operationId: packageOperation
       summary: "Perform an operation on a package"
       description: This endpoint **must** be used to alter the package.<br>
-        COMMIT - confirm the purchase of this package [state is PENDING and becomes PURCHASED]<br>
-        CANCEL - cancel this package [state is OFFERED, PENDING, PURCHASED and will become CANCELLED]<br>
-        CUSTOMER - replace a traveller in the package [state is in OFFERED or PURCHASED]<br>
-        TRAVELLER - add, remove or change a traveller to this package [state is in OFFERED or PURCHASED]<br>
-        COMMIT_OPERATION - a request to commit an offer resulting from an operation (like a cancellation)<br><br>
-        In the COMMIT request, the 'notificationUrl' is required, so the TO can notify the MP.
+        CONFIRM - confirm the purchase of this package<br>
+        CANCEL - cancel this package<br>
+        CUSTOMER - replace a traveller in the package<br>
+        TRAVELLER - add, remove or change a traveller to this package<br>
+        PACKAGE_ELEMENT - add a package element. When you want to remove or modify a PACKAGE ELEMENT, please use package element operations.<br>
+        CONFIRM_OPTION - a request to confirm an offered option resulting from an operation (like a cancellation)<br><br>
+        When using the NOTIFY extension, the 'notificationUrl' is required, so the TO can notify the MP.
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
         - $ref: "#/components/parameters/callbackUrl"
@@ -169,29 +258,67 @@ paths:
     post:
       operationId: legOperation
       summary: "Perform an operation on a leg"
-      description: This endpoint must be used to alter the STATE of a LEG, using OPERATION requests.
+      description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
-        - $ref: "#/components/parameters/legId"
+        - $ref: "#/components/parameters/packageElementId"
         - $ref: "#/components/parameters/callbackUrl"
-        - name: legOperation
+        - name: operation
           in: query
-          description: OPERATION on the LEG
+          description: OPERATION on a specified leg
           required: true
           schema:
             $ref: "#/components/schemas/legOperation"
       tags:
-        - legs
+        - package elements
       requestBody:
         $ref: "#/components/requestBodies/legOperationRequest"
       responses:
         "200":
-          $ref: "#/components/responses/legResponse"
+          $ref: "#/components/responses/packageElementResponse"
         "202":
-          $ref: "#/components/responses/legResponse"
+          $ref: "#/components/responses/packageElementResponse"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          headers:
+            Retry-After:
+              description: A date after which to retry. See the Date header for more details on the HTTP date format.
+              schema:
+                $ref: "#/components/schemas/httpDate"
+          $ref: "#/components/responses/errorResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /collections/fare-products/items:
+    post:
+      operationId: fareProductOperation
+      summary: "Perform an operation on a fare product"
+      description: This endpoint must be used to alter the state of a FARE PRODUCT, using OPERATION requests.
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/packageElementId"
+        - $ref: "#/components/parameters/callbackUrl"
+        - name: operation
+          in: query
+          description: OPERATION on a specified product
+          required: true
+          schema:
+            $ref: "#/components/schemas/fareProductOperation"
+      tags:
+        - package elements
+      requestBody:
+        $ref: "#/components/requestBodies/fareProductOperationRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/packageElementResponse"
+        "202":
+          $ref: "#/components/responses/packageElementResponse"
         "503":
           description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
           headers:
@@ -226,19 +353,21 @@ components:
           schema:
             discriminator:
               propertyName: type
-              # COMMIT, CANCEL, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER
+              # CONFIRM, CANCEL, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER, PACKAGE_ELEMENT
               mapping:
-                COMMIT: "#/components/schemas/packageOperationRequest"
+                CONFIRM: "#/components/schemas/packageOperationRequest"
                 CANCEL: "#/components/schemas/packageOperationRequest"
                 EXTEND_EXPIRY_TIME: "#/components/schemas/extendExpiryTimeRequest"
                 CUSTOMER: "#/components/schemas/customerRequest"
                 TRAVELLER: "#/components/schemas/travellerRequest"
+                PACKAGE_ELEMENT: "#/components/schemas/packageElementRequest"
             oneOf:
             - $ref: "#/components/schemas/packageOperationRequest"
             - $ref: "#/components/schemas/packageOperationRequest"
             - $ref: "#/components/schemas/extendExpiryTimeRequest"
             - $ref: "#/components/schemas/customerRequest"
             - $ref: "#/components/schemas/travellerRequest"
+            - $ref: "#/components/schemas/packageElementRequest"
 
     legOperationRequest:
       content:
@@ -246,23 +375,17 @@ components:
           schema:
             discriminator:
               propertyName: type
-              # CANCEL, ASSIGN_ASSET, CHANGE_START_TIME, CHANGE_END_TIME, ANCILLARY, PREPARE, SET_IN_USE, PAUSE, START_FINISHING, FINISH, SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER
+              # CANCEL, ASSIGN_ASSET, CHANGE_TIME, CHANGE_TIME, ANCILLARY, PREPARE, START, PAUSE, START_ENDING, END, SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER
               mapping:
                 CANCEL: "#/components/schemas/legOperationRequest"
                 ASSIGN_ASSET: "#/components/schemas/assetRequest"
-                CHANGE_START_TIME: "#/components/schemas/timeRequest"
-                CHANGE_END_TIME: "#/components/schemas/timeRequest"
+                CHANGE_TIME: "#/components/schemas/timeRequest"
                 ANCILLARY: "#/components/schemas/ancillaryRequest"
-                PREPARE: "#/components/schemas/tripExecutionRequest"
-                SET_IN_USE: "#/components/schemas/tripExecutionRequest"
+                START: "#/components/schemas/tripExecutionRequest"
                 PAUSE: "#/components/schemas/tripExecutionRequest"
-                START_FINISHING: "#/components/schemas/tripExecutionRequest"
-                FINISH: "#/components/schemas/tripExecutionRequest"
-                OPEN_TRUNK: "#/components/schemas/tripExecutionRequest"
-                SEND_EVIDENCE_PARKED: "#/components/schemas/evidenceRequest"
-                SEND_EVIDENCE_HELMET: "#/components/schemas/evidenceRequest"
-                SEND_EVIDENCE_CHARGER: "#/components/schemas/evidenceRequest"
-                default : "#/components/schemas/legOperationRequest"
+                RESUME: "#/components/schemas/tripExecutionRequest"
+                END: "#/components/schemas/tripExecutionRequest"
+                SEND_EVIDENCE: "#/components/schemas/evidenceRequest"
             oneOf:
               - $ref: "#/components/schemas/legOperationRequest"
               - $ref: "#/components/schemas/assetRequest"
@@ -271,10 +394,27 @@ components:
               - $ref: "#/components/schemas/tripExecutionRequest"
               - $ref: "#/components/schemas/evidenceRequest"
 
+    fareProductOperationRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - type
+            - timestamp
+            properties:
+              type:
+                type: string
+                enum: [CANCEL, ACTIVATE, PAUSE, RESUME, END, CUSTOM]
+              timestamp:
+                $ref: "#/components/schemas/dateTime"
+
   responses:
     offerResponse:
       description: a list of packages, if there is no option, it will return an empty list. Each offered package has a unique identifier, that can be used to purchase it.
       headers:
+        Version:
+          $ref: "#/components/headers/version"
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
         Expires:
@@ -288,12 +428,14 @@ components:
             $ref: "#/components/schemas/offerResponse"
 
     purchaseResponse:
-      description: A package was succesfully purchased (PURCHASED), or pre-purchased (PENDING, to be committed using the package operation COMMIT).
+      description: A package was succesfully purchased (PURCHASED), or pre-purchased (PENDING, to be confirmed using the package operation CONFIRM).
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/packageResponse"
       headers:
+        Version:
+          $ref: "#/components/headers/version"
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
         Expires:
@@ -302,6 +444,8 @@ components:
     packageResponse:
       description: a single instance of a package
       headers:
+        Version:
+          $ref: "#/components/headers/version"
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
       content:
@@ -309,19 +453,23 @@ components:
           schema:
             $ref: "#/components/schemas/packageResponse"
 
-    legResponse:
+    packageElementResponse:
       description: a single instance of a leg
       headers:
+        Version:
+          $ref: "#/components/headers/version"
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/legResponse"
+            $ref: "#/components/schemas/packageResponse"
 
     availableAssetsResponse:
       description: Available ASSETs for the leg. If no suitable assets are found an empty array is to be returned.
       headers:
+        Version:
+          $ref: "#/components/headers/version"
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
       content:
@@ -332,6 +480,8 @@ components:
     errorResponse:
       description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       headers:
+        Version:
+          $ref: "#/components/headers/version"
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
       content:
@@ -370,8 +520,8 @@ components:
                 "description": "Get offers for a single ticket",
                 "type": "application/geo+json",
                 "href": "/collections/offers/items",
-                "method": "POST",
-                "headers": { "Accept-Language": "", "sending-id": "" },
+                "method": "PUT",
+                "headers": { "Accept-Language": "", "authorization": "" },
                 "body":
                   {
                     "specification":
@@ -387,8 +537,7 @@ components:
                             [
                               {
                                 "type": "INDIVIDUAL_TRAVELLER",
-                                "fullName",
-                                "",
+                                "fullName": "",
                                 "age": 0,
                               },
                             ],
@@ -398,7 +547,7 @@ components:
                   },
                 "required":
                   [
-                    "sending-id",
+                    "headers.authorization",
                     "$.specification.from",
                     "$.specification.to",
                     "$.specification.startTime",
@@ -439,9 +588,8 @@ components:
           example:
             [
               {
-                "module": "legs",
-                "identifiers":
-                  ["ACCESS_CODE_AZTEC", "ACCESS_CODE_IN_COMMIT_EVENT"],
+                "module": "PACKAGE_ELEMENTS",
+                "identifiers": [ "ACCESS_CODE_AZTEC" ] ,
               },
             ]
 
@@ -453,7 +601,7 @@ components:
       properties:
         module:
           type: string
-          enum: [CAPABILITIES, OFFERS, PACKAGES, LEGS, SUPPORT, PAYMENTS]
+          enum: [OFFERS, PACKAGES, PACKAGE_ELEMENTS, SUPPORT, PAYMENTS, DATA_SPACES, DISCOVERY, TECH]
         identifiers:
           type: array
           maxItems: 25
@@ -1016,43 +1164,53 @@ components:
             unavailable:
               type: array
               items:
-                $ref: "#/components/schemas/parameter"
-              example:
-                [
-                  {
-                    "validities":
-                      [
-                        {
-                          "type": "SERVICE",
-                          "serviceJourney": "RUT:ServiceJourney:34929",
-                        },
-                      ],
-                  },
+                $ref: "#/components/schemas/validityParameter"
+      example:
+        {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "LineString",
+                "geometry": [
+                  [
+                    3.2343,
+                    43.342
+                  ],
+                  [
+                    3.3242,
+                    43.939
+                  ]
                 ]
-
-    #      required:
-    #        - offers
-    #properties:
-    #offers:
-    #  type: array
-    #  items:
-    #    $ref: "#/components/schemas/geojson"
-    #unavailable:
-    #  type: array
-    #  items:
-    #    $ref: "#/components/schemas/parameter"
-    #  example:
-    #    [
-    #      {
-    #        "validities":
-    #          [
-    #            {
-    #              "type": "SERVICE",
-    #              "serviceJourney": "RUT:ServiceJourney:34929",
-    #            },
-    #          ],
-    #      },
-    #    ]
+              },
+              "properties": {
+                "type": "package",
+                "specification": { "from": "gps:6.169639,42.3943" }
+              },
+              "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
+              "links": [ { "rel": "details",
+                           "method": "POST", 
+                           "description": "More ...",
+                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
+                         },
+                         { "rel": "purchase", 
+                           "method": "POST", 
+                           "description": "Immediately purchase of this ticket",
+                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=one-stop-purchase",
+                         },
+                         { "rel": "pre-purchase", 
+                           "method": "POST", 
+                           "description": "Take an option on this package, so you can alter it before purchasing it",
+                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=pre-purchase",
+                         } 
+                       ]
+            } ],
+          "properties": { "type": "offers" },
+          "unavailable": [ { "type": "SERVICE",
+                             "serviceJourney": "RUT:ServiceJourney:34929",
+                            } ]
+        }
 
     packageResponse:
       $ref: "#/components/schemas/geojson"
@@ -1078,10 +1236,20 @@ components:
                 "id": "376e1083-92df-44e5-a1bf-d5570507b8",
                 "links":
                   [
+                  ],
+              },
+            ],
+          "properties":
+            {
+              "type": "package",
+              "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
+              "specification": { "from": "...", "startTime": "..." },
+            },
+          "links": [
                     {
-                      "rel": "commit",
+                      "rel": "confirm",
                       "method": "POST",
-                      "href": "/collections/packages/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=COMMIT",
+                      "href": "/collections/packages/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=confirm",
                       "type": "application/geo+json",
                     },
                     {
@@ -1096,16 +1264,7 @@ components:
                       "href": "/collections/packages/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=EXTEND_EXPIRY_TIME",
                       "type": "application/geo+json",
                     },
-                  ],
-              },
-            ],
-          "properties":
-            {
-              "type": "package",
-              "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-              "specification": { "from": "...", "startTime": "..." },
-            },
-          "links": [],
+                   ],
         }
 
     packageOperationRequest:
@@ -1127,9 +1286,12 @@ components:
 
     legOperationRequest:
       type: object
+      required:
+      - type
+      - timestamp
       properties:
         type:
-          $ref: "#/components/schemas/legOperation"
+          type: string
         timestamp:
           $ref: "#/components/schemas/dateTime"
 
@@ -1138,7 +1300,9 @@ components:
         - $ref: "#/components/schemas/legOperationRequest"
         - type: object
           properties:
-            timestamp:
+            start_time:
+              $ref: "#/components/schemas/dateTime"
+            end_time:
               $ref: "#/components/schemas/dateTime"
 
     assetRequest:
@@ -1165,7 +1329,7 @@ components:
               description: location of the user
       example:
         {
-          "type": "SET_IN_USE",
+          "type": "START",
           "timestamp": "2019-10-12T07:20:50.52Z",
           "location": "gps:6.169639,52.253279"
         }
@@ -1175,6 +1339,9 @@ components:
         - $ref: "#/components/schemas/legOperationRequest"
         - type: object
           properties:
+            evidenceFor: 
+              type: string
+              enum: [ PARKED, HELMET_STOWED, CHARGER_CONNECTED ]
             urls:
               type: array
               description: urls to support the operation e.g. pictures justifying the exit conditions
@@ -1202,30 +1369,40 @@ components:
         - type: object
           required:
             - operation
-            - ancillaryParameters
+            - parameters
           properties:
             operation:
               type: string
               enum: [ADD, REMOVE]
-            ancillaryParameters:
-              $ref: "#/components/schemas/parameter"
+            parameters:
+              type: array
+              items:
+                $ref: "#/components/schemas/validityParameter"
       example:
         {
           "type": "ANCILLARY",
           "timestamp": "2019-10-12T07:20:50.52Z",
           "operation": "ADD",
-          "ancillaryParameters":
-            {
-              "validities":
-                [
-                  {
-                    "type": "EQUIPMENT",
-                    "id": "CROW:SA-04:HELMET-#349",
-                    "name": "Bike helmet, adult M",
-                  },
-                ],
-            },
+          "parameters": [ { "type": "EQUIPMENT",
+                            "id": "CROW:SA-04:HELMET-#349",
+                            "name": "Bike helmet, adult M" } ]
         }
+
+    packageElementRequest:
+      allOf:
+        - $ref: "#/components/schemas/packageOperationRequest"
+        - type: object
+          required:
+            - operation
+            - parameters
+          properties:
+            operation:
+              type: string
+              enum: [ADD, UPDATE]
+            parameters:
+              type: array
+              items:
+                $ref: "#/components/schemas/validityParameter"
 
     travellerRequest:
       allOf:
@@ -1233,12 +1410,12 @@ components:
         - type: object
           required:
             - operation
-            - travellerParameters
+            - parameters
           properties:
             operation:
               type: string
               enum: [ADD, REMOVE, UPDATE]
-            travellerParameters:
+            parameters:
               type: array
               items:
                 $ref: "#/components/schemas/parameter"
@@ -1256,7 +1433,7 @@ components:
                     {
                       "type": "INDIVIDUAL_TRAVELLER",
                       "id": "34924-3A334B-C342D",
-                      "fullName": "B. Doe",
+                      "fullName": "J. Doe",
                     },
                   ],
                 "validities":
@@ -1335,7 +1512,7 @@ components:
               items:
                 $ref: "#/components/schemas/damage"
 
-    legResponse:
+    packageElementResponse:
       allOf:
         - $ref: "#/components/schemas/geojsonFeature"
         - $ref: "#/components/schemas/links"
@@ -1353,7 +1530,7 @@ components:
                   "from": "gps:6.234,42.3943",
                   "startTime": "2024-04-22T11:34:00Z",
                 },
-              "state": "FINISHED",
+              "state": "ENDED",
               "price": { "amount": 3.53, currencyCode: "USD" },
               "assetType": "GTFS:trips:GT3492",
               "operator": "GTFS:agency:NY_PT01",
@@ -1385,9 +1562,9 @@ components:
                 "type": "application/geo+json",
               },
               {
-                "rel": "change_start_time",
+                "rel": "change_time",
                 "method": "POST",
-                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=CHANGE_START_TIME",
+                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=CHANGE_TIME",
                 "type": "application/geo+json",
               },
               # only when legState = NOT_STARTED OR PREPARING
@@ -1404,9 +1581,9 @@ components:
                 "type": "application/geo+json",
               },
               {
-                "rel": "set_in_use",
+                "rel": "start",
                 "method": "POST",
-                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=SET_IN_USE",
+                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=START",
                 "type": "application/geo+json",
               },
               # only when legState = IN_USE
@@ -1423,22 +1600,22 @@ components:
                 "type": "application/geo+json",
               },
               {
-                "rel": "start_finishing",
+                "rel": "start_ending",
                 "method": "POST",
-                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=START_FINISHING",
+                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=START_ENDING",
                 "type": "application/geo+json",
               },
               {
-                "rel": "finish",
+                "rel": "end",
                 "method": "POST",
-                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=FINISH",
+                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=END",
                 "type": "application/geo+json",
               },
-              # when legState not in FINISHED or FINISHING
+              # when legState not in ENDED or ENDING
               {
-                "rel": "change_end_time",
+                "rel": "change_times",
                 "method": "POST",
-                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=CHANGE_END_TIME",
+                "href": "/collections/legs/items?packageId=2bcb15a7-084a-40d6-a93d-2c0780d174f1&legId=0bb49b0e-f33b-4e14-843b-aec78eeb7135&operation=CHANGE_TIME",
                 "type": "application/geo+json",
               },
             ],
@@ -1516,52 +1693,47 @@ components:
         Operations:<br>
         _ASSIGN_ASSET_ [Prepurchase, trip execution] - can assign an ASSET to a LEG. Can be used to replace an ASSET, or as first step in the trip execution process [ONBOARDING STEP]<br>
         If assigning an ASSET is not allowed for this package 403 should be returned. If the package is unknown, 404 should be returned.<br>
-        _CHANGE_END_TIME_ [Prepurchase, trip execution] will be used to request a changed end time; the TRAVELER wants to use the ASSET longer (or shorter), the **time** field contains the proposed end time, the end time of the package doesn't change<br>
-        _CHANGE_START_TIME_ [Prepurchase, trip execution] will be used to request a changed start time, e.g. the TRAVELER wants to depart later, the **time** field contains the estimated start time, the start time of the package doesn't change<br>
+        _CHANGE_TIMES_ [Prepurchase, trip execution] will be used to request a changed end or start time<br>
         _CANCEL_ [Prepurchase, after sales] will cancel this LEG. Only allowed when multiple LEGs are included in the package, otherwise the complete package should be cancelled<br>
-        _ADD_ANCILLARY_ [Prepurchase, trip execution] requests to add the specified ANCILLARY to the LEG<br>
-        _REMOVE_ANCILLARY_ [Prepurchase, trip execution] requests to remove the specified ANCILLARY from the LEG<br>
 
-        _PREPARE_ [MP->TO, non-TO-controlled] - MP request the TO to prepare the LEG (e.g. open the locker) [ONBOARDING STEP, RESUMING STEP]<br>
-        If assigning an ASSET is not allowed for this package 403 should be returned. If the package is unknown, 404 should be returned.<br>
-        _SET_IN_USE_ [MP->TO, non-TO-controlled] - will activate the LEG or resume the LEG [ONBOARDING STEP, RESUMING STEP]<br>
+        _ANCILLARIES_ [Prepurchase, trip execution] requests to add or remove the specified ANCILLARY to the LEG<br>
+
+        _START_ [MP->TO, non-TO-controlled] - will activate the LEG or resume the LEG [ONBOARDING STEP, RESUMING STEP]<br>
         _PAUSE_ [MP->TO] will pause the LEG [PAUSING STEP]<br>
-        _START_FINISHING_ [MP->TO] will start the end-of-leg process [OFFBOARDING STEP]<br>
-        _FINISH_ [MP->TO] will end this LEG [OFFBOARDING STEP]<br>
+        _RESUME_ [MP->TO] will resume the LEG [RESUMING STEP]<br>
+        _END_ [MP->TO] will end this LEG [OFFBOARDING STEP]<br>
         _CANCEL_ [MP->TO] will cancel this LEG. Only allowed when multiple LEGs are included in the package, otherwise the complete package should be cancelled<br>
 
-        _SEND_EVIDENCE_PARKED_ [MP->TO] sends pictures (in url field) to prove that the ASSET is parked correctly<br>
-        _SEND_EVIDENCE_HELMET_ [MP->TO] sends pictures (in url field) to prove that the helmet is stowed correctly<br>
-        _SEND_EVIDENCE_CHARGER_ [MP->TO] sends pictures (in url field) to prove that the ASSET connected correctly to the charger<br>
-      #enum: [
-      #    # common
-      #    CANCEL,
-      #    NOTIFY,
-      #    REPORT_PROGRESS,
-      #    # pre purchase- & trip execution state operation requests
-      #    ASSIGN_ASSET,
-      #    # pre purchase - end user request requests
-      #    CHANGE_START_TIME,
-      #    CHANGE_END_TIME,
-      #    # pre purchase - ancillary operation requests
-      #    ADD_ANCILLARY,
-      #    REMOVE_ANCILLARY,
-      #    # trip execution - state operation requests
-      #    PREPARE,
-      #    SET_IN_USE,
-      #    PAUSE,
-      #    START_FINISHING,
-      #    FINISH,
-      #    # trip execution - asset operation requests
-      #    OPEN_TRUNK,
-      #    # trip execution - confirmation requests
-      #    CONFIRM_REPLACE_ASSET,
-      #    CONFIRM_START_LEG,
-      #    # trip execution - evidence requests
-      #    SEND_EVIDENCE_PARKED,
-      #    SEND_EVIDENCE_HELMET,
-      #    SEND_EVIDENCE_CHARGER,
-      #  ]
+        _SEND_EVIDENCE_ [MP->TO] sends pictures (in url field) to prove that the ASSET is parked correctly<br>
+      enum: [
+          CANCEL,
+          ASSIGN_ASSET,
+          CHANGE_TIME,
+          ANCILLARIES,
+          START,
+          PAUSE,
+          RESUME,
+          END,
+          SEND_EVIDENCE,
+          CUSTOM
+        ]
+
+    fareProductOperation:
+      type: string
+      description: -|
+          CANCEL - to cancel this product (package element), optionally to reimburse
+          ACTIVATE - activate the product
+          PAUSE - pause the product
+          RESUME - resume the product
+          END - end the product
+          CUSTOM - custom operations
+      enum:
+        - CANCEL
+        - ACTIVATE
+        - PAUSE
+        - RESUME
+        - END
+        - CUSTOM
 
     legState:
       type: string
@@ -1570,18 +1742,16 @@ components:
         _PREPARING_ the _PREPARE_ operation has been received<br>
         _IN_USE_ the travelers are on their way<br>
         _PAUSED_ the asset is paused<br>
-        _FINISHING_ the _START_FINISHING_ operation has been received<br>
-        _FINISHED_ the travelers have arrived at their destination<br>
+        _ENDING_ the _START_ENDING_ operation has been received<br>
+        _ENDED_ the travelers have arrived at their destination<br>
         _ISSUE_REPORTED_ due to an issue, there is (temporarily) no progress to report, when the issue isn't solved, this is a final state<br>
         _CANCELLED_ the leg has been cancelled (so there must be other legs)
       enum:
         [
           NOT_STARTED,
-          PREPARING,
           IN_USE,
           PAUSED,
-          FINISHING,
-          FINISHED,
+          ENDED,
           ISSUE_REPORTED,
           CANCELLED,
         ]
@@ -1640,7 +1810,7 @@ components:
           "addressLine2": "Muddycity X2433",
         }
 
-    offerDetails:
+    offerSummary:
       type: object
       required:
         - type
@@ -1677,7 +1847,7 @@ components:
         elements:
           type: array
           items:
-            $ref: "#/components/schemas/packageElement"
+            $ref: "#/components/schemas/leg"
         price:
           $ref: "#/components/schemas/amountOfMoney"
           description: the total price of the package
@@ -1804,36 +1974,38 @@ components:
         the 'operation' in the url must match with the type of the operationRequest<br><br>
 
         only in pre-purchased states (OFFERED, PENDING)<br>
-        _COMMIT_ - [MP->TO] Turns the purchased package in a _PURCHASED_ state, the previous state should be _PENDING_. If the package is in state _PURCHASED_, _CANCELLED_ or _EXPIRED_, a commit will result a 403. <BR>
+        _CONFIRM_ - [MP->TO] Turns the purchased package in a _PURCHASED_ state, the previous state should be _PENDING_. If the package is in state _PURCHASED_, _CANCELLED_ or _EXPIRED_, a confirm will result a 403. <BR>
         _EXTEND_EXPIRY_TIME_ - [MP->TO] Request additional time to complete a booking<br><br>
 
         before trip execution, after offered (PENDING, PURCHASED)<br>
         _CANCEL_ - [MP->TO] Cancels a purchased package, it returns a package in a cancelled state.<br>
         _TRAVELLER_ - [MP->TO] request to add, remove or change one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested
+        _PACKAGE_ELEMENT_ [MP->TO] request to add or remove a package element to the package
 
-        _COMMIT_OPERATION_ [MP->TO] commits an offer for an operation (like cancel)
+        _CONFIRM_OPTION_ [MP->TO] confirms an offered option of an operation (like cancel)
       enum:
         [
-          COMMIT,
+          CONFIRM,
           CANCEL,
           EXTEND_EXPIRY_TIME,
           CUSTOMER,
           TRAVELLER,
-          COMMIT_OPERATION,
+          PACKAGE_ELEMENT,
+          CONFIRM_OPTION,
         ]
 
     purchaseStatus:
       type: string
       description:
-        The life-cycle state of the package (from NEW to FINISHED)<br>
+        The life-cycle state of the package (from NEW to ENDED)<br>
         _OFFERED_ the package is offered, including all conditions<br>
-        _PENDING_ the package is pre-puchased (the end user has shown intentions to purchase this offer), must be finalized with the package-commit operation<br>
+        _PENDING_ the package is pre-puchased (the end user has shown intentions to purchase this offer), must be finalized with the package-confirm operation<br>
         _PURCHASED_ a finalized package ('purchased'). Both parties agreed to deliver services in return of payment<br>
         _CANCELLED_ the package is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br>
         _EXPIRED_ the MP didn't respond on time, the package offer has been expired<br>
         _STARTED_ the package is started, the <u>trip execution</u> module is needed now to manage the execution of the package<br>
-        _FINISHED_ the package has ended, the trip has been executed<br>
+        _ENDED_ the package has ended, the trip has been executed<br>
         _RELEASED_ for internal archiving<br>
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2420.htm
@@ -1848,7 +2020,7 @@ components:
           EXPIRED,
           CANCELLED,
           STARTED,
-          FINISHED,
+          ENDED,
         ]
       example: PURCHASED
 
@@ -1939,7 +2111,7 @@ components:
         _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /collection/payments?packageId={id}&legId={id} endpoint. The requests are initiated by the TO (calling the MP)<br>
         _PAY_WHEN_FINISHED_ - in case the TO demands a direct payment after usage, automatically done by the MP<br>
         _UPFRONT_ - in case the TO demands a upfront payment before usage. The payment should be made in the purchase phase. Additional costs could be relevant, e.g. when using the _TIME_EXTEND_ operation is executed.
-        The MP must settle the payment before the package can be started (using SET_IN_USE).
+        The MP must settle the payment before the package can be started (using START).
       type: object
       required:
         - momentOfPayment
@@ -2716,12 +2888,12 @@ components:
             _UNLOCK_LOCKER_ - user action - optionally triggered by the PREPARE operation<br>
             _DISCONNECT_CHARGER_ - requested user action <br>
             _SHOW_DAMAGES_ - show known damages to end user <br>
-            _UNLOCK_ASSET_ - requested user action or triggered by SET_IN_USE operation <br>
+            _UNLOCK_ASSET_ - requested user action or triggered by START operation <br>
             _START_ASSET_ - requested user action <br>
             _SEND_OPEN_TRUNK_ - request TO to open trunk/helmet case remotely<br>
             _UNLOCK_TRUNK_ - requested user action <br>
             _TAKE_HELMET_ - requested user action <br>
-            _SEND_SET_IN_USE_ - request to start leg <br>
+            _SEND_START_ - request to start leg <br>
             _SEND_ASSIGN_ASSET_ - request to assign the specified asset to the leg <br>
             _LOCK_LOCKER_ - requested user action <br>
             <h3>Pausing</h3>
@@ -2733,28 +2905,26 @@ components:
             _STOW_HELMET_ - user action<br>
             _LOCK_TRUNK_ - user action<br>
             <h3>Resuming</h3>
-            _UNLOCK_ASSET_ - user action, could be triggered by SET_IN_USE operations<br>
+            _UNLOCK_ASSET_ - user action, could be triggered by START operations<br>
             _SEND_OPEN_TRUNK_ - request TO to open trunk remotely<br>
             _UNLOCK_TRUNK_ - user action<br>
             _TAKE_HELMET_ - user action<br>
             _LOCK_TRUNK_ - user action<br>
             _START_ASSET_ - user action<br>
-            _SEND_SET_IN_USE_ - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the asset
+            _SEND_START_ - the TO wants to be informed that the leg is resumed. Optionally triggers the unlock of the asset
             <h3>Offboarding</h3>
-            _SEND_START_FINISHING_ - the TO needs to be informed the leg is about to finish<br>
+            _SEND_START_ENDING_ - the TO needs to be informed the leg is about to finish<br>
             _PARK_ASSIST_ - user action to park (stop) using the asset<br>
-            _UNLOCK_LOCKER_ - user action, could be triggered by the START_FINISH operation<br>
+            _UNLOCK_LOCKER_ - user action, could be triggered by the START_END operation<br>
             _CONNECT_CHARGER_ - user action<br>
-            _LOCK_ASSET_ - user action, could be triggered by the FINISH operation<br>
+            _LOCK_ASSET_ - user action, could be triggered by the END operation<br>
             _SEND_OPEN_TRUNK_ - the TO opens the trunk remotely <br>
             _UNLOCK_TRUNK_ - user action <br>
             _STOW_HELMET_ - user action <br>
             _LOCK_TRUNK_ - user action <br>
             _LOCK_LOCKER_ - user action <br>
-            _SEND_FINISH_ - the TO wants to be informed about the end of the leg<br>
-            _SEND_EVIDENCE_PARKED_ - the TO requires parking evidence<br>
-            _SEND_EVIDENCE_HELMET_ - the TO requires evidence of storing the helmet<br>
-            _SEND_EVIDENCE_CHARGER_ - the TO requires evidence of correct usage of the charger"
+            _SEND_END - the TO wants to be informed about the end of the leg<br>
+            _SEND_EVIDENCE_ - the TO requires parking evidence<br>"
           enum: [
               RESULT_SHOWN, # planning, actor: MP, show INFO
               PENDING,
@@ -2765,7 +2935,7 @@ components:
               EXPIRED, # purchase, actor: MP, show INFO
               SEND_PREPARE,
               SEND_OPEN_TRUNK,
-              SEND_SET_IN_USE,
+              SEND_START,
               SEND_ASSIGN_ASSET, # operations, actor: MP, call operations endpoint & show INFO
               UNLOCK_LOCKER,
               LOCK_LOCKER, # locker, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
@@ -2781,11 +2951,9 @@ components:
               STOW_HELMET, # helmet, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
               SEND_PAUSE, # pausing, actor: MP, calls operation endpoint & show INFO
               PARK_ASSIST, # parking, actor: MP, show INSTRUCTIONS & end user, follow INSTRUCTIONS shown
-              SEND_START_FINISHING,
-              SEND_FINISH, # offboarding, actor: MP, calls operation endpoint & shows INFO
-              SEND_EVIDENCE_PARKED,
-              SEND_EVIDENCE_HELMET,
-              SEND_EVIDENCE_CHARGER, # actor: MP request end user action to make pictures, end user: follow INSTRUCTIONS & MP, calls operation endpoint
+              SEND_START_ENDING,
+              SEND_END, # offboarding, actor: MP, calls operation endpoint & shows INFO
+              SEND_EVIDENCE, # actor: MP request end user action to make pictures, end user: follow INSTRUCTIONS & MP, calls operation endpoint
             ]
         contentType:
           type: string
@@ -2973,6 +3141,11 @@ components:
         type:
           type: string
           enum: ["Point", "LineString", "Polygon", "MultiPolygon"]
+      example:
+        {
+          "type": "LineString",
+          "geometry": [[3.2343, 43.342], [3.3242, 43.939]]
+        }
 
     geojsonFeature:
       type: object
@@ -2987,7 +3160,9 @@ components:
           discriminator:
             propertyName: type
             mapping:
+              package: "#/components/schemas/package"
               leg: "#/components/schemas/leg"
+              product: "#/components/schemas/customProperties"
               custom: "#/components/schemas/customProperties"
               startLocation: "#/components/schemas/customProperties"
               endLocation: "#/components/schemas/customProperties"
@@ -2998,10 +3173,11 @@ components:
               asset: "#/components/schemas/availableAsset"
               poi: "#/components/schemas/customProperties"
               area: "#/components/schemas/customProperties"
-          #oneOf:
-          #  - $ref: "#/components/schemas/leg"
-          #  - $ref: "#/components/schemas/availableAsset"
-          #  - $ref: "#/components/schemas/customProperties"
+          oneOf:
+            - $ref: "#/components/schemas/leg"
+            - $ref: "#/components/schemas/package"
+            - $ref: "#/components/schemas/availableAsset"
+            - $ref: "#/components/schemas/customProperties"
           properties:
             type:
               type: string
@@ -3028,10 +3204,14 @@ components:
             propertyName: type
             mapping:
               package: "#/components/schemas/package"
-              offers: "#/components/schemas/offerDetails"
+              offers: "#/components/schemas/offerSummary"
           oneOf:
             - $ref: "#/components/schemas/package"
-            - $ref: "#/components/schemas/offerDetails"
+            - $ref: "#/components/schemas/offerSummary"
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
         links:
           type: array
           description:
@@ -3357,6 +3537,22 @@ components:
         # also: https://www.ietf.org/rfc/rfc4122.txt
 
   parameters:
+    f:
+      description: >-
+        The optional f parameter indicates the output format that the server
+        shall provide as part of the response document.  The default format is
+        JSON.
+      explode: false
+      in: query
+      name: f
+      required: false
+      schema:
+        default: json
+        enum:
+          - json
+          - html
+        type: string
+      style: form
     acceptLanguage:
       in: header
       name: Accept-Language
@@ -3365,19 +3561,19 @@ components:
         $ref: "#/components/schemas/shortString"
       description: "A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5. A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible"
       example: nl, de;q=0.7
-    senderId:
+    authorization:
       in: header
-      name: sending-id
+      name: authorization
       required: true
       schema:
-        $ref: "#/components/schemas/uuid"
-      description: The ID of the sending operator
+        type: string
+      description: The authenticating token/ID of the sending party
     receiverId:
       in: header
-      name: receiving-id
+      name: receiver
       required: false
       schema:
-        $ref: "#/components/schemas/uuid"
+        $ref: "#/components/schemas/externalReference"
       description: the ID of the intended receiver
     packageId:
       in: query
@@ -3393,14 +3589,14 @@ components:
       required: false
       schema:
         $ref: "#/components/schemas/uuid"
-    legId:
+    packageElementId:
       in: query
-      name: legId
-      description: LEG identifier
+      name: packageElementId
+      description: package element identifier
       required: true
       schema:
         $ref: "#/components/schemas/uuid"
-    optionalLegId:
+    optionalPackageElementId:
       in: query
       name: legId
       description: LEG identifier
@@ -3410,21 +3606,19 @@ components:
     packageSelection:
       in: query
       name: selection
-      description: _DETAILS_ - package specification only<br>
+      description: _DETAILS_ - package specification<br>
         _LOGS_ - include event log<br>
         _PROGRESS_ - include progress<br>
         _CUSTOMER_ - include customer<br>
-        _TRAVEL_DOCUMENT_ - include ticket/travel document<br>
+        _TRAVEL_DOCUMENT_ - include tickets/travel documents<br>
         _TRIP_SUPPORT_ - including additional information, like no-go zones, parking places, POIs
       required: false
-      explode: false
+      explode: true
       schema:
-        type: array
-        items:
-          type: string
-          enum:
-            [DETAILS, LOGS, PROGRESS, CUSTOMER, TRAVEL_DOCUMENT, TRIP_SUPPORT]
-          default: DETAILS
+        type: string
+        enum:
+          [DETAILS, LOGS, PROGRESS, CUSTOMER, TRAVEL_DOCUMENT, TRIP_SUPPORT]
+        default: DETAILS
     purchaseOperation:
       in: query
       name: purchaseOperation
@@ -3433,7 +3627,7 @@ components:
       schema:
         type: string
         enum:
-          [one-stop-purchase, pre-purchase, 2-phase-purchase, 1-phase-purchase]
+          [one-stop-purchase, pre-purchase, 1-phase-purchase, 2-phase-purchase]
     packageOperation:
       name: operation
       in: query
@@ -3471,13 +3665,13 @@ components:
         Only items are counted that are on the first level of the collection in the response document.
         Nested objects contained within the explicitly requested items shall not be counted.
 
-        Minimum = 1. Maximum = 10000. Default = 10.
+        Minimum = 1. Maximum = 10000. Default = 100.
       required: false
       schema:
         type: integer
         minimum: 1
         maximum: 10000
-        default: 10
+        default: 100
       style: form
       explode: false
     offset:
@@ -3557,7 +3751,7 @@ components:
         pattern: "^[a-zA-Z]+-[a-zA-Z]+$"
       required: true
     expires:
-      description: The result is valid until this timestamp (and must be committed unless it is already in state _PURCHASED_). A pre-purchased purchased package is expired after this timestamp.
+      description: The result is valid until this timestamp (and must be confirmed unless it is already in state _PURCHASED_). A pre-purchased purchased package is expired after this timestamp.
       schema:
         description: A HTTP date string
         externalDocs:
@@ -3566,6 +3760,11 @@ components:
         format: http-date
         example: Wed, 21 Oct 2015 07:28:00 GMT
       required: false
+    version:
+      description: the version used to format the response
+      schema:
+        type: string
+      required: true
 
   securitySchemes:
     BasicAuth:

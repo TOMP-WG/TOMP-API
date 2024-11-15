@@ -17,6 +17,11 @@ security:
   - OAuth: []
   - OpenId: []
 
+tags:
+  - name: tech
+    description:
+      technical support
+
 servers:
   - url: https://tomp.dat.nl/tomp/v2
 
@@ -25,7 +30,7 @@ paths:
     get:
       operationId: ping
       tags:
-        - capabilities
+        - tech
       summary: "is the API up and running?"
       description: "This is a healthcheck ENDPOINT"
       responses:

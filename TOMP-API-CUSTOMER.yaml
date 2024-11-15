@@ -61,6 +61,7 @@ paths:
       description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
         When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
         can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
+
       tags:
         - customer management
       requestBody:
@@ -84,6 +85,11 @@ paths:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
     get:
       summary: "[MP->TO] get the customer account on the TO system"
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/externalReference"
       tags:
         - customer management
       externalDocs:
@@ -103,6 +109,11 @@ paths:
     delete:
       summary: "Delete the CUSTOMER ACCOUNT on the TO system."
       description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/externalReference"
       tags:
         - customer management
       responses:
@@ -118,23 +129,23 @@ components:
       externalDocs:
         url: https://not-yet-available/
         description: CREATE CUSTOMER ACCOUNT PARAMETERS
-      $ref: "TOMP-API.yaml#/components/schemas/customer"
+      $ref: "TOMP-API.yaml#/components/schemas/externalReference"
     
     customerAccount:
       description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
-      allOf:
-        - $ref: "TOMP-API.yaml#/components/schemas/customer"
-        - type: object
-          properties:
-            creationDate:
-              $ref: "TOMP-API.yaml#/components/schemas/dateTime"
-              description: The date in which the CUSTOMER ACCOUNT has been created
-            modificationDate:
-              $ref: "TOMP-API.yaml#/components/schemas/dateTime"
-              description: Last modification date of CUSTOMER ACCOUNT.
-            status:
-              $ref: "#/components/schemas/customerAccountStatus"
-              description: The status of the CUSTOMER ACCOUNT
+      type: object
+      properties:
+        id:
+          $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+        creationDate:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          description: The date in which the CUSTOMER ACCOUNT has been created
+        modificationDate:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          description: Last modification date of CUSTOMER ACCOUNT.
+        status:
+          $ref: "#/components/schemas/customerAccountStatus"
+          description: The status of the CUSTOMER ACCOUNT
 
     customerAccountStatus:
       type: string
