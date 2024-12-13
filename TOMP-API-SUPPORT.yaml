@@ -14,21 +14,6 @@ tags:
   - name: support-tickets
     description: This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
 
-# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
-#                           bearer (in header: Authorization: Bearer <token>)
-#                           Api-key (in header: X-API-Key: abcdef12345)
-#                           OAutb and OpenId are also available
-# The exact ways to authenticate will be described in a later version
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
-servers:
-  - url: https://tomp.dat.nl/tomp/v2
-
 paths:
   /collections/support-tickets/items:
     post:

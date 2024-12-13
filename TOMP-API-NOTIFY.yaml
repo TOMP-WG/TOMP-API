@@ -14,27 +14,12 @@ tags:
   - name: notifications
     description: This part of the API facilitates communication from the TO to the MP.
 
-# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
-#                           bearer (in header: Authorization: Bearer <token>)
-#                           Api-key (in header: X-API-Key: abcdef12345)
-#                           OAutb and OpenId are also available
-# The exact ways to authenticate will be described in a later version
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
-servers:
-  - url: https://tomp.dat.nl/tomp/v2
-
 paths:
   /collection/notifications/items:
     post:
       operationId: notification
       summary: "Notification endpoint"
-      description: "Notification endpoint. Communication from TO to MP will be done mainly using this endpoint"
+      description: "Notification endpoint. Communication from TO to MP will be done using this endpoint"
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
@@ -71,22 +56,22 @@ components:
                 This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this package for me); to override the default source.<br>
                 In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
                 _TO_ the TO requests this operation<br>
-                _MP_ the MP (not triggered by the travellers NOR customer)<br>
-                _TRAVELLER_ the TRAVELLER triggered this request<br>
-                _CUSTOMER_ the CUSTOMER triggered this request. In case the traveller and customer are the same, take _CUSTOMER_.<br>
+                _DRIVER_ the driver triggered this request<br>
                 _OTHER_ unknown source
-              enum: [TO, MP, TRAVELLER, CUSTOMER, DRIVER, OTHER]
+              enum: [TO, DRIVER, OTHER]
+            destination:
+              type: string
+              description: the destination of the notification
+              enum: [MP, TRAVELLER, CUSTOMER]
             notificationType:
               type: string
               description: <br>
-                * _MESSAGE_TO_DRIVER_ [MP->TO] text messages to the driver, provided by the MP or traveler(s). Text is in **comment**  <br>
+                * _USER_ACTION_ Request to show the actions (links) to the end user<br>
+                * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
+                * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
+                * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
+                * _OTHER_ [TO->MP] unspecified. Text is in **comment**<br>
 
-                * _USER_ACTION_ [TO->NP] Request to show the links to the end user<br>
-                * _USER_NO_SHOW_ [TO->MP, OnDemand/taxi] the traveler didn't show up on the departure location & time  <br>
-                * _ETA_ [TO->MP, OnDemand/taxi] Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
-                * _MESSAGE_TO_END_USER_ [TO->MP] text message to show to the traveler(s). Text is in **comment**  <br>
-                * _USER_OUT_OF_LIMITS_ [TO->MP] indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
-                * _OTHER_ [TO->MP] unspecified. Text is in **comment**  <br>
                 * _LOCKED_ [TO->MP] asset is locked  <br>
                 * _UNLOCKED_ [TO->MP] asset is unlocked  <br><br>
 
@@ -97,37 +82,45 @@ components:
 
                 TO CONTROLLED (Process Identifier)<br>
                 * _PREPARING_ [TO->MP] the leg is in preparation  <br>
-                * _IN_USE_ [TO->MP] leg has started  <br>
+                * _PREPARED_ the leg is ready to get started  <br>
+                * _STARTED_ [TO->MP] leg has started  <br>
                 * _PAUSED_ [TO->MP] leg is paused  <br>
                 * _RESUMED_ [TO->MP] leg is resumed  <br>
-                * _FINISHING_ [TO->MP] leg is in finishing state  <br>
-                * _FINISHED_ [TO->MP] leg has ended
+                * _ENDED_ [TO->MP] leg is in finishing state  <br><br>
+
+                Payment<br>
+                * _PAY_ Request payment (like deposit) from MP
               enum:
                 [
+                  USER_ACTION,
                   USER_NO_SHOW,
                   ETA,
-                  MESSAGE_TO_DRIVER,
-                  MESSAGE_TO_END_USER,
                   USER_OUT_OF_LIMITS,
                   OTHER,
+
                   LOCKED,
                   UNLOCKED,
+
                   PROGRESS,
+                  
                   CONFIRM_REPLACE_ASSET,
                   CONFIRM_START_LEG,
+                  
                   PREPARING,
-                  IN_USE,
+                  PREPARED,
+                  STARTED,
                   PAUSED,
                   RESUMED,
-                  FINISHING,
-                  FINISHED,
+                  ENDED, 
+
+                  PAY
                 ]
               example: USER_NO_SHOW
             location:
               $ref: "TOMP-API.yaml#/components/schemas/externalReference"
             asset:
               $ref: "TOMP-API.yaml#/components/schemas/externalReference"
-            assetType:
+            product:
               $ref: "TOMP-API.yaml#/components/schemas/externalReference"
             assetState:
               $ref: "TOMP-API.yaml#/components/schemas/assetState"
@@ -141,10 +134,26 @@ components:
               $ref: "TOMP-API.yaml#/components/schemas/longInt"
               description: the time in seconds that the assed is used. Only if applicable.
       example:
-        {
-          "type": "NOTIFY",
+      - {
           "timestamp": "2019-10-12T07:20:50.52Z",
           "notificationType": "ETA",
           "location": { "type": "GPS", "lng": 6.169639, "lat": 52.253279 },
+          "links": [
+            { "rel": "details",
+              "href": "https://some.url/tomp/v2/collections/legs/items?packageId=33942&packageElementId=4932" 
+            }
+          ]
+        }
+      - {
+          "timestamp": "2019-10-12T07:20:50.52Z",
+          "notificationType": "PAY",
+          "links": [
+            { "rel": "deposit",
+              "method": "POST",
+              "href": "https://some.url/tomp/v2/collections/payments/items?packageId=33942&packageElementId=4932",
+              "body": { "amount": 100, "currencyCode": "EUR", "category": "DEPOSIT", "timestamp": "" },
+              "required": [ "$.timestamp" ]
+            }
+          ]
         }
 

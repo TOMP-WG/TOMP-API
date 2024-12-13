@@ -10,20 +10,10 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
 tags:
   - name: tech
     description:
       technical support
-
-servers:
-  - url: https://tomp.dat.nl/tomp/v2
 
 paths:
   /health:

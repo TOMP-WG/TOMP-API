@@ -10,19 +10,9 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
 tags:
   - name: dataspaces
     description: required functions to act in dataspaces
-
-servers:
-  - url: https://tomp.dat.nl/tomp/v2
 
 paths:
   /capabilities:

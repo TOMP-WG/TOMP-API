@@ -14,21 +14,6 @@ tags:
   - name: payments
     description: This part of the API describes how the financial settlement should be done. All kinds of fares, fees, debits, and credits are described.
 
-# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
-#                           bearer (in header: Authorization: Bearer <token>)
-#                           Api-key (in header: X-API-Key: abcdef12345)
-#                           OAutb and OpenId are also available
-# The exact ways to authenticate will be described in a later version
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
-servers:
-  - url: https://tomp.dat.nl/tomp/v2
-
 paths:
   /collections/payments/items:
     get:
@@ -85,9 +70,10 @@ paths:
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
     post:
-      operationId: addPaymentEntry
-      summary: "Request financial transaction"
-      description: Payments can be communicated using this endpoint
+      operationId: confirmPaymentEntry
+      summary: "Confirm a financial transaction"
+      description: Payments can be communicated using this endpoint. The MP must have settled the amount of
+        money before they are allowed to call this endpoint. The TO can check whether the money has been submitted.
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
@@ -97,7 +83,6 @@ paths:
       tags:
         - payments
       requestBody:
-        description: the initial request, containing a TRAVEL SPECIFICATION and additional parameters per USER PROFILE or USER GROUP
         content:
           application/json:
             schema:
@@ -117,7 +102,11 @@ components:
         properties:
           timestamp:
             $ref: "TOMP-API.yaml#/components/schemas/dateTime"
-            description: timestamp of the operation, or in case of notification - ETA, the expected time of arrival.
+            description: timestamp of the operation
+          evidence:
+            type: array
+            items:
+              $ref: "TOMP-API.yaml#/components/schemas/evidence"
         example:
           {
             "timestamp": "2019-10-12T07:20:50.52Z",
@@ -130,7 +119,7 @@ components:
     additionalCosts:
       description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive
       allOf:
-        - $ref: "#/components/schemas/amountOfMoney"
+        - $ref: "TOMP-API.yaml#/components/schemas/amountOfMoney"
         - type: object
           required:
             - category
@@ -156,19 +145,26 @@ components:
       type: string
       description: The category of the journalled item <br>
         _ALL_ - for filtering purposes only<br>
+
+        <h2>TO initiated payments </h2>
+        To request these payments, use the notifications, send a notification containing the payment confirmation.<br>
+        _DEPOSIT_ - a deposit, to refund, use _REFUND_<br>
         _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br>
         _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br>
         _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br>
         _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br>
-        _REFUND_ - refund of the deposit<br>
         _FINE_ - a fine that arrived later on<br>
         _OTHER_ASSET_USED_ - additional costs for a replaced asset<br>
         _CREDIT_ - generic CREDIT <br>
         _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br>
-        _DEPOSIT_ - a deposit, to be refunded using _REFUND_<br>
         _OTHER_ - unspecified<br>
         _REPLACEMENT_ - replacement of an asset or leg<br>
         _FARE_ - the normal costs of the purchased and executed leg(s)<br>
+
+        <h2>MP initiated payments</h2>
+        These payment requests require evidence.
+        _REFUND_ - refund of the deposit<br>
+        _REIMBURSEMENT_ - reimbursement of the fare<br>
       enum:
         [
           ALL,
@@ -177,6 +173,7 @@ components:
           STOLEN,
           EXTRA_USAGE,
           REFUND,
+          REIMBURSEMENT,
           FINE,
           OTHER_ASSET_USED,
           CREDIT,
@@ -246,62 +243,39 @@ components:
 
     paymentResponse:
       allOf:
-        - type: array
-          maxItems: 500
-          items:
-            $ref: "#/components/schemas/paymentDetail"
+        - type: object
+          properties:
+            data:
+              type: array
+              maxItems: 500
+              items:
+                $ref: "#/components/schemas/paymentDetail"
         - $ref: "TOMP-API.yaml#/components/schemas/links"
       example:
-        [
-            {
-              "id": "...",
-              "links":
-                [
-                  {
-                    "rel": "self",
-                    "method": "GET",
-                    "href": "/collections/payments/items&offset=100&limit=100",
-                    "type": "application/hal+json",
-                  },
-                  {
-                    "rel": "next",
-                    "method": "GET",
-                    "href": "/collections/payments/items&offset=200&limit=100",
-                    "type": "application/hal+json",
-                  },
-                  {
-                    "rel": "previous",
-                    "method": "GET",
-                    "href": "/payments&limit=100",
-                    "type": "application/hal+json",
-                  },
-                ],
-            }
-        ]
-
-    # base types / formats
-    amountOfMoney:
-      type: object
-      description: an amount of money, usable in fares, fare calculations or in extra costs.
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA1/EA2/EA1688.htm
-        description: FARE PRICE
-      required:
-        - amount
-      properties:
-        amount:
-          type: number
-          format: float
-          description: This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT
-          example: 9.95
-        taxPercentageUsed:
-          $ref: "TOMP-API.yaml#/components/schemas/float"
-          description: value added tax rate (percentage of amount)
-          example: 21.0
-        currencyCode:
-          $ref: "TOMP-API.yaml#/components/schemas/currencyCode"
-        vatCountryCode:
-          $ref: "TOMP-API.yaml#/components/schemas/country"
+          {
+            "data": [ "..." ],
+            "links":
+            [
+              {
+                "rel": "self",
+                "method": "GET",
+                "href": "/collections/payments/items&offset=100&limit=100",
+                "type": "application/hal+json",
+              },
+              {
+                "rel": "next",
+                "method": "GET",
+                "href": "/collections/payments/items&offset=200&limit=100",
+                "type": "application/hal+json",
+              },
+              {
+                "rel": "previous",
+                "method": "GET",
+                "href": "/payments&limit=100",
+                "type": "application/hal+json",
+              },
+            ]
+          }
 
     bankAccount:
       type: object

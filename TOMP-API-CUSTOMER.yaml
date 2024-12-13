@@ -13,21 +13,6 @@ tags:
   - name: customer management
     description: the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly manage the customer account on the TO side .
 
-# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
-#                           bearer (in header: Authorization: Bearer <token>)
-#                           Api-key (in header: X-API-Key: abcdef12345)
-#                           OAutb and OpenId are also available
-# The exact ways to authenticate will be described in a later version
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
-servers:
-  - url: https://tomp.dat.nl/
-
 paths:
   /collections/customers/items:
     parameters:

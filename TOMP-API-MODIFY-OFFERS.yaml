@@ -1,0 +1,302 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: modify offers
+    description: Extension to modify offers. To perform the pre-purchase, implement it at the POST /collections/offers/items endpoint.
+
+paths:
+  /collections/offered-packages/items:
+    post:
+      operationId: offerOperation
+      summary: "Perform an operation on an offered package"
+      description: This endpoint **must** be used to alter the package.<br>
+        CUSTOMER - modify the customer of the package<br>
+        TRAVELLER - add, or modify a traveller to this package<br>
+        PRODUCT - add a product to the package<br>
+        RELEASE - release the current offered package<br>
+        EXTEND_EXPIRY_TIME - request additional time to complete the offer<br>
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
+        - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
+        - $ref: "#/components/parameters/offeredPackageOperation"
+      tags:
+        - modify offers
+      requestBody:
+        $ref: "#/components/requestBodies/offeredPackageOperationRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, the result will be posted on the calbackUrl
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+  /collections/offered-legs/items:
+    post:
+      operationId: offeredLegOperation
+      summary: "Perform an operation on a leg in an offered package"
+      description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
+        - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
+        - name: operation
+          in: query
+          description: OPERATION on a specified offered leg
+          required: true
+          schema:
+            $ref: "#/components/schemas/offeredLegOperation"
+      tags:
+        - modify offers
+      requestBody:
+        $ref: "#/components/requestBodies/offeredLegOperationRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
+        "202":
+          $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          headers:
+            Retry-After:
+              description: A date after which to retry. See the Date header for more details on the HTTP date format.
+              schema:
+                $ref: "TOMP-API.yaml#/components/schemas/httpDate"
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+  /collections/offered-products/items:
+    post:
+      operationId: offeredProductOperation
+      summary: "Perform an operation on a product in an offered package"
+      description: This endpoint must be used to alter the state of a FARE PRODUCT, using OPERATION requests.
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
+        - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
+        - name: operation
+          in: query
+          description: OPERATION on a product in an offered package
+          required: true
+          schema:
+            $ref: "#/components/schemas/offeredProductOperation"
+      tags:
+        - modify offers
+      requestBody:
+        $ref: "#/components/requestBodies/offeredProductOperationRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
+        "202":
+          $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          headers:
+            version:
+              schema:
+                $ref: "TOMP-API.yaml#/components/headers/version"
+            Retry-After:
+              description: A date after which to retry. See the Date header for more details on the HTTP date format.
+              schema:
+                $ref: "TOMP-API.yaml#/components/schemas/httpDate"
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+components:
+  requestBodies:
+    offeredPackageOperationRequest:
+      content:
+        application/json:
+          schema:
+            discriminator:
+              propertyName: type
+              # RELEASE, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER, PRODUCT
+              mapping:
+                RELEASE: "#/components/schemas/offeredPackageOperationRequest"
+                EXTEND_EXPIRY_TIME: "TOMP-API.yaml#/components/schemas/extendExpiryTimeRequest"
+                CUSTOMER: "#/components/schemas/customerRequest"
+                TRAVELLER: "TOMP-API.yaml#/components/schemas/travellerRequest"
+                PRODUCT: "TOMP-API.yaml#/components/schemas/packageElementRequest"
+            oneOf:
+            - $ref: "#/components/schemas/offeredPackageOperationRequest"
+            - $ref: "TOMP-API.yaml#/components/schemas/extendExpiryTimeRequest"
+            - $ref: "#/components/schemas/customerRequest"
+            - $ref: "TOMP-API.yaml#/components/schemas/travellerRequest"
+            - $ref: "TOMP-API.yaml#/components/schemas/packageElementRequest"
+
+    offeredLegOperationRequest:
+      content:
+        application/json:
+          schema:
+            discriminator:
+              propertyName: type
+              # REMOVE, ASSIGN_ASSET, CHANGE_TIME, ANCILLARY
+              mapping:
+                REMOVE: "TOMP-API.yaml#/components/schemas/legOperationRequest"
+                ASSIGN_ASSET: "TOMP-API.yaml#/components/schemas/assetRequest"
+                CHANGE_TIME: "TOMP-API.yaml#/components/schemas/timeRequest"
+                ANCILLARY: "TOMP-API.yaml#/components/schemas/ancillaryRequest"
+                CUSTOM: "TOMP-API.yaml#/components/schemas/legOperationRequest"
+            oneOf:
+              - $ref: "TOMP-API.yaml#/components/schemas/legOperationRequest"
+              - $ref: "TOMP-API.yaml#/components/schemas/assetRequest"
+              - $ref: "TOMP-API.yaml#/components/schemas/timeRequest"
+              - $ref: "TOMP-API.yaml#/components/schemas/ancillaryRequest"
+            properties:
+              type:
+                $ref: "#/components/schemas/offeredLegOperation"
+
+    offeredProductOperationRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - type
+            - timestamp
+            properties:
+              type:
+                type: string
+              parameters:
+                type: array
+                items:
+                  $ref: "TOMP-API.yaml#/components/schemas/parameter"
+              timestamp:
+                $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+
+  schemas:
+    offeredPackageOperationRequest:
+      type: object
+      description: operation request for the (pre-)purchase, trip execution or after sales phase
+      additionalProperties: false
+      required:
+        - timestamp
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/offeredPackageOperation"
+          description: the 'operation' in the url must match with the type of the offeredPackageOperationRequest
+        timestamp:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+        comment:
+          $ref: "TOMP-API.yaml#/components/schemas/longString"
+          description: free text, should match Content-Language.
+
+    offeredLegOperationRequest:
+      type: object
+      required:
+      - type
+      - timestamp
+      properties:
+        type:
+          type: string
+        timestamp:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+
+    offeredPackageOperation:
+      type: string
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
+        description: TYPE OF REQUEST (unspecified)
+      description:
+        _EXTEND_EXPIRY_TIME_ request additional time to complete the offer<br>
+        _TRAVELLER_ request to add/modify a traveller
+        _CUSTOMER_ request to modify the customer
+        _PRODUCT_ request to add/modify a product to an offered package
+        _RELEASE_ request to release the package
+      enum:
+        [ EXTEND_EXPIRY_TIME,
+          CUSTOMER,
+          TRAVELLER,
+          PRODUCT,
+          RELEASE ]          
+
+    offeredLegOperation:
+      type: string
+      externalDocs:
+        url: https://www.transmodel-cen.eu/model/EARoot/EA4/EA2/EA4/EA1162.htm
+        description: TYPE OF EVENT
+      description: -|
+        The list below contains all formalized operations. Other operations are allowed as well, but have one restriction - the external status of the leg cannot not be changed.<br>
+        This allows for instance to introduce a 'OPEN_TRUNK' operation. The links collection can be altered depending on the operations that have been performed.<br>
+        Communication from TO towards MP is handled in the 'notify' extension.<br>
+
+        Operations:<br>
+        _ASSIGN_ASSET_ can assign an ASSET to a LEG. Can be used to replace an ASSET, or as first step in the trip execution process [ONBOARDING STEP]<br>
+
+        If assigning an ASSET is not allowed for this package 403 should be returned. If the package is unknown, 404 should be returned.<br>
+        _CHANGE_TIMES_ will be used to request a changed end or start time<br>
+        _REMOVE_ Will remove this LEG. Only allowed when multiple LEGs are included in the package, otherwise the complete package should be cancelled<br>
+
+        _ANCILLARIES_ requests to add or remove the specified ANCILLARY to the LEG<br>
+      enum: [ REMOVE,
+              ASSIGN_ASSET,
+              CHANGE_TIME,
+              ANCILLARIES,
+              CUSTOM ]
+
+    offeredProductOperation:
+      type: string
+      description: -|
+          REMOVE - to remove this product (package element), optionally to reimburse
+          ADD_PARAMETER - to add parameters
+          REMOVE_PARAMETER - to remove enlisted parameters
+          SPLIT_COMBINED_PRODUCT - to split a combined product in several products
+          CUSTOM - custom operations
+      enum: [ REMOVE
+            , ADD_PARAMETER
+            , REMOVE_PARAMETER
+            , SPLIT_COMBINED_PRODUCT
+            , CUSTOM ]
+
+    customerRequest:
+      description: update the customer with the supplied information
+      allOf:
+        - $ref: "#/components/schemas/offeredPackageOperationRequest"
+        - type: object
+          required:
+            - customer
+          properties:
+            customer:
+              $ref: "TOMP-API.yaml#/components/schemas/customer"
+      example:
+        {
+          "type": "CUSTOMER",
+          "timestamp": "2019-10-12T07:20:50.52Z",
+          "requestOffers": false,
+          "customer":
+            { "id": "ABT:3942349-DFRK", "email": "j.doe@newmail.com" },
+        }
+
+  parameters:
+    offeredPackageOperation:
+      name: operation
+      in: query
+      description: OPERATION to execute
+      required: true
+      schema:
+        $ref: "#/components/schemas/offeredPackageOperation"

@@ -10,26 +10,11 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-# security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
-#                           bearer (in header: Authorization: Bearer <token>)
-#                           Api-key (in header: X-API-Key: abcdef12345)
-#                           OAutb and OpenId are also available
-# The exact ways to authenticate will be described in a later version
-security:
-  - BasicAuth: []
-  - BearerAuth: []
-  - ApiKeyAuth: []
-  - OAuth: []
-  - OpenId: []
-
 tags:
-  - name: capabilities
+  - name: discovery
     description:
       This part of the API delivers a technical and human readable interface, allowing to read how this API should be used. Complies to OGC standard (OGC Features Core)
       (https://ogcapi.ogc.org/features/)
-
-servers:
-  - url: https://tomp.dat.nl/tomp/v2
 
 paths:
   /api:
@@ -44,12 +29,12 @@ paths:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
       summary: This document
       tags:
-        - capabilities
+        - discovery
 
   /collections:
     get:
       tags:
-        - "capabilities"
+        - discovery
       summary: the feature collections in the dataset
       description: returns a collection of available collection (like offers, packages, legs, support-requests and payments)
       operationId: getCollections
@@ -69,7 +54,7 @@ paths:
   /collections/{collectionId}:
     get:
       tags:
-        - capabilities
+        - discovery
       summary: |-
         describe the feature collection with id `collectionId`
       operationId: describeCollection
@@ -93,7 +78,7 @@ paths:
     summary: endpoint showing the standards this endpoint uses (conforms to)
     get:
       tags:
-        - capabilities
+        - discovery
       operationId: getConformance
       description: returns a list of implemented endpoints
       responses:
@@ -123,8 +108,14 @@ components:
             "offers",
             "packages",
             "legs",
+            "products",
+            "offered-packages",
+            "offered-legs",
+            "offered-products",
             "support-tickets",
             "payments",
+            "contracts",
+            "customers",
           ]
 
   schemas:
