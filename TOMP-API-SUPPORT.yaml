@@ -1,0 +1,167 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Support Extension
+  description: Extension on the TOMP-API for support
+  version: "1.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: support-tickets
+    description: This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
+
+paths:
+  /collections/support-tickets/items:
+    post:
+      operationId: requestSupport
+      summary: "Create a support ticket"
+      description: creates a request for SUPPORT from end user via MP
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageElementId"
+      tags:
+        - support-tickets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/supportTicket"
+      responses:
+        "200":
+          description: support request acknowledged, the response contains a support ticket with a unique ID. Multiple support tickets can be created on one single leg.
+          headers:
+            Content-Language:
+              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supportTicket"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+    get:
+      operationId: getSupportTicket
+      summary: "Request for support ticket details"
+      description: returns the statusses of the support tickets of this leg. Each status change will result in a new supportResponse. To find the log of the ticket, group them on ID.
+      tags:
+        - support-tickets
+      responses:
+        "200":
+          description: support status delivered
+          headers:
+            Content-Language:
+              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/supportTicket"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+components:
+  schemas:
+    supportTicket:
+      type: object
+      required:
+        - supportType
+        - location
+        - timestamp
+      properties:
+        id:
+          $ref: "TOMP-API.yaml#/components/schemas/uuid"
+          description: ticketID, to be provided when created. Mandatory when status != REQUESTED
+        status:
+          $ref: "#/components/schemas/supportTicketStatus"
+        supportType:
+          type: string
+          description: these are the currently enlisted support requests<br>
+            _BROKEN_DOWN_ The asset doesn't work anymore<br>
+            _NOT_AT_LOCATION_ The asset isn't available at the specified time/location<br>
+            _MISSING_AFTER_PAUSE_ The asset is missing (stolen?)<br>
+            _NOT_CLEAN_ The asset is not clean<br>
+            _NOT_AVAILABLE_ The asset is at the location, but unreachable<br>
+            _UNABLE_TO_OPEN_ The asset cannot be unlocked (malfunctioning)<br>
+            _UNABLE_TO_CLOSE_ The asset cannot be closed (malfunctioning)<br>
+            _API_TECHNICAL_ A part of the API doesn't work<br>
+            _API_FUNCTIONAL_ A part of the API doesn't work as expected<br>
+            _ACCIDENT_ Accident occurred<br>
+            _OTHER_ unspecified<br>
+            _REPORT_DAMAGE_ Oeps. Photo sent with slight damage
+          enum:
+            [
+              BROKEN_DOWN,
+              NOT_AT_LOCATION,
+              MISSING_AFTER_PAUSE,
+              NOT_CLEAN,
+              NOT_AVAILABLE,
+              UNABLE_TO_OPEN,
+              UNABLE_TO_CLOSE,
+              API_TECHNICAL,
+              API_FUNCTIONAL,
+              ACCIDENT,
+              OTHER,
+              REPORT_DAMAGE,
+            ]
+        location:
+          $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+        timestamp:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          description: the reporting timestamp of the support request
+        priority:
+          type: string
+          description: the priority of the support request.
+          enum:
+            [
+              ERROR_CANNOT_CONTINUE,
+              ERROR_CAN_CONTINUE,
+              DISTURBING_ISSUE,
+              QUESTION,
+              OTHER,
+            ]
+        contactInformationEndUser:
+          $ref: "TOMP-API.yaml#/components/schemas/normalString"
+          description: contact information of the end user in case of direct response requests, like phone number
+        comment:
+          $ref: "TOMP-API.yaml#/components/schemas/longString"
+        urls:
+          type: array
+          description: urls to clarify the support request e.g. pictures showing damage
+          maxItems: 10
+          items:
+            $ref: "TOMP-API.yaml#/components/schemas/url"
+        requestedResponseTime:
+          $ref: "TOMP-API.yaml#/components/schemas/shortInt"
+          description: time to respond in minutes.
+        timeToResolution:
+          $ref: "TOMP-API.yaml#/components/schemas/shortInt"
+          description: time in minutes to the expected resolution of support request
+          example: 9
+        sequence:
+          $ref: "TOMP-API.yaml#/components/schemas/tinyInt"
+          description: the sequence number of the status of tickets on this issue
+
+    supportTicketStatus:
+      type: string
+      description:
+        _ISSUE_REQUESTED_ the ticket is new, to be processed by the TO<br>
+        _ISSUE_OPEN_ the ticket is open, we're on our way<br>
+        _ISSUE_UPDATE_REQUESTED_ we're waiting on a response of the traveler(s)<br>
+        _ISSUE_RESOLVED_ Issue succesfully closed<br>
+        _ISSUE_REVOKED_ Issue revoked<br>
+      enum:
+        [
+          ISSUE_REQUESTED,
+          ISSUE_OPEN,
+          ISSUE_UPDATE_REQUESTED,
+          ISSUE_RESOLVED,
+          ISSUE_REVOKED,
+        ]
+      example: ISSUE_OPEN

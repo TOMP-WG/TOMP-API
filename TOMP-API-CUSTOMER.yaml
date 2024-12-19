@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Customer extension
+  description: Extension on the TOMP-API for registration of customers
+  version: "1.0.0"
+  contact:
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: customer management
+    description: the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly manage the customer account on the TO side .
+
+paths:
+  /collections/customers/items:
+    parameters:
+      - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+    post:
+      summary: "Create a TO CUSTOMER ACCOUNT for the customer"
+      description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createCustomerAccountParameters"
+      responses:
+        "201":
+          description: created CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+    patch:
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+      summary: "Update the CUSTOMER ACCOUNT on the TO system"
+      description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
+        When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
+        can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
+
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/merge-patch+json:
+            schema:
+              description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
+              $ref: "#/components/schemas/customerAccount"
+            example: { "id": "OTP:12345", "email": "new-email@example.com" }
+      responses:
+        "200":
+          description: updated CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+    get:
+      summary: "[MP->TO] get the customer account on the TO system"
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+      tags:
+        - customer management
+      externalDocs:
+        url: https://not-yet-available/
+      responses:
+        "200":
+          description: Customer Account
+          headers:
+            Content-Language:
+              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+    delete:
+      summary: "Delete the CUSTOMER ACCOUNT on the TO system."
+      description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+      tags:
+        - customer management
+      responses:
+        "200":
+          description:  CUSTOMER ACCOUNT deleted successfully
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+components:
+  schemas:
+    createCustomerAccountParameters:
+      description: A CUSTOMER ACCOUNT request, resulting in a new or linked TO CUSTOMER ACCOUNT
+      externalDocs:
+        url: https://not-yet-available/
+        description: CREATE CUSTOMER ACCOUNT PARAMETERS
+      $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+    
+    customerAccount:
+      description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
+      type: object
+      properties:
+        id:
+          $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+        creationDate:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          description: The date in which the CUSTOMER ACCOUNT has been created
+        modificationDate:
+          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          description: Last modification date of CUSTOMER ACCOUNT.
+        status:
+          $ref: "#/components/schemas/customerAccountStatus"
+          description: The status of the CUSTOMER ACCOUNT
+
+    customerAccountStatus:
+      type: string
+      description: status of a CUSTOMER ACCOUNT<br>
+        _CREATED_ the customer account has been created but is not ready to create a purchase yet<br>
+        _TO_PENDING_VALIDATION_ the customer account is pending a verification of identity and properties by the TO. No purchases can be made in this step<br>
+        _OTP_REQUIRED_ the TO has sent an OTP to the customer's phone or email address and is expecting it to activate the account. No purchases can be made in this step<br>
+        _ACTIVE_ the customer account is active and can continue to purchase offers<br>
+        _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
+      enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]

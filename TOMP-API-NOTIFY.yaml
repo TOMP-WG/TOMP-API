@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API - Extension notifications
+  description: Notifications extension on the TOMP-API
+  version: "1.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: notifications
+    description: This part of the API facilitates communication from the TO to the MP.
+
+paths:
+  /collection/notifications/items:
+    post:
+      operationId: notification
+      summary: "Notification endpoint"
+      description: "Notification endpoint. Communication from TO to MP will be done using this endpoint"
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageElementId"
+      tags:
+        - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/notificationRequest"
+      responses:
+        "202":
+          description: Confirmed
+        "204":
+          description: Notification processed
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+components:
+  schemas:
+    notificationRequest:
+      allOf:
+        - $ref: "TOMP-API.yaml#/components/schemas/links"
+        - type: object
+          required:
+            - notificationType
+          properties:
+            source:
+              type: string
+              description:
+                This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this package for me); to override the default source.<br>
+                In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
+                _TO_ the TO requests this operation<br>
+                _DRIVER_ the driver triggered this request<br>
+                _OTHER_ unknown source
+              enum: [TO, DRIVER, OTHER]
+            destination:
+              type: string
+              description: the destination of the notification
+              enum: [MP, TRAVELLER, CUSTOMER]
+            notificationType:
+              type: string
+              description: <br>
+                * _USER_ACTION_ Request to show the actions (links) to the end user<br>
+                * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
+                * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
+                * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
+                * _OTHER_ [TO->MP] unspecified. Text is in **comment**<br>
+
+                * _LOCKED_ [TO->MP] asset is locked  <br>
+                * _UNLOCKED_ [TO->MP] asset is unlocked  <br><br>
+
+                * _PROGRESS_ [TO->MP] report progress <br><br>
+
+                * _CONFIRM_REPLACE_ASSET_ Asks confirmation to replace the ASSET, returns a 202 when confirmed, otherwise it will return 400<br>
+                * _CONFIRM_START_LEG_ Asks confirmation to start the LEG, returns a 202 when confirmed, otherwise it will return 400<br>
+
+                TO CONTROLLED (Process Identifier)<br>
+                * _PREPARING_ [TO->MP] the leg is in preparation  <br>
+                * _PREPARED_ the leg is ready to get started  <br>
+                * _STARTED_ [TO->MP] leg has started  <br>
+                * _PAUSED_ [TO->MP] leg is paused  <br>
+                * _RESUMED_ [TO->MP] leg is resumed  <br>
+                * _ENDED_ [TO->MP] leg is in finishing state  <br><br>
+
+                Payment<br>
+                * _PAY_ Request payment (like deposit) from MP
+              enum:
+                [
+                  USER_ACTION,
+                  USER_NO_SHOW,
+                  ETA,
+                  USER_OUT_OF_LIMITS,
+                  OTHER,
+
+                  LOCKED,
+                  UNLOCKED,
+
+                  PROGRESS,
+                  
+                  CONFIRM_REPLACE_ASSET,
+                  CONFIRM_START_LEG,
+                  
+                  PREPARING,
+                  PREPARED,
+                  STARTED,
+                  PAUSED,
+                  RESUMED,
+                  ENDED, 
+
+                  PAY
+                ]
+              example: USER_NO_SHOW
+            location:
+              $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+            asset:
+              $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+            product:
+              $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+            assetState:
+              $ref: "TOMP-API.yaml#/components/schemas/assetState"
+            distance:
+              $ref: "TOMP-API.yaml#/components/schemas/float"
+              description: the travelled distance, in km. Only if applicable.
+            distanceUnits:
+              type: string
+              enum: [KM, MILE]
+            duration:
+              $ref: "TOMP-API.yaml#/components/schemas/longInt"
+              description: the time in seconds that the assed is used. Only if applicable.
+      example:
+      - {
+          "timestamp": "2019-10-12T07:20:50.52Z",
+          "notificationType": "ETA",
+          "location": { "type": "GPS", "lng": 6.169639, "lat": 52.253279 },
+          "links": [
+            { "rel": "details",
+              "href": "https://some.url/tomp/v2/collections/legs/items?packageId=33942&packageElementId=4932" 
+            }
+          ]
+        }
+      - {
+          "timestamp": "2019-10-12T07:20:50.52Z",
+          "notificationType": "PAY",
+          "links": [
+            { "rel": "deposit",
+              "method": "POST",
+              "href": "https://some.url/tomp/v2/collections/payments/items?packageId=33942&packageElementId=4932",
+              "body": { "amount": 100, "currencyCode": "EUR", "category": "DEPOSIT", "timestamp": "" },
+              "required": [ "$.timestamp" ]
+            }
+          ]
+        }
+
