@@ -17,12 +17,9 @@ The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is
 
 How can I join the TOMP working group?
 ---
-Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-2e81lv5tg-fcb6eicF9Z_Qn308dRqGVA) or contact Ayse (aysehilal.ocal@ndw.nu) to be added to our mailing list and to receive invites for the working group meetings.
+Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease) or contact Ayse (aysehilal.ocal@ndw.nu) to be added to our mailing list and to receive invites for the working group meetings.
 
 The working group meetings take place every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers. All reports can be found at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents/working%20group%20reports).
-
-
-
 
 
 <img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/TOMP%20WG%20grey.png" width="300">
