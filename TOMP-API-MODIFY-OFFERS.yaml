@@ -17,9 +17,9 @@ tags:
     description: Extension to modify offers. To perform the pre-purchase, implement it at the POST /collections/offers/items endpoint.
 
 paths:
-  /collections/offered-packages/items:
+  /collections/pre-purchased-packages/items:
     post:
-      operationId: offerOperation
+      operationId: prePurchaseOperation
       summary: "Perform an operation on an offered package"
       description: This endpoint **must** be used to alter the package.<br>
         CUSTOMER - modify the customer of the package<br>
@@ -34,11 +34,11 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
         - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
-        - $ref: "#/components/parameters/offeredPackageOperation"
+        - $ref: "#/components/parameters/prePurchasedPackageOperation"
       tags:
         - modify offers
       requestBody:
-        $ref: "#/components/requestBodies/offeredPackageOperationRequest"
+        $ref: "#/components/requestBodies/prePurchasedPackageOperationRequest"
       responses:
         "200":
           $ref: "TOMP-API.yaml#/components/responses/packageResponse"
@@ -128,7 +128,7 @@ paths:
 
 components:
   requestBodies:
-    offeredPackageOperationRequest:
+    prePurchasedPackageOperationRequest:
       content:
         application/json:
           schema:
@@ -136,13 +136,13 @@ components:
               propertyName: type
               # RELEASE, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER, PRODUCT
               mapping:
-                RELEASE: "#/components/schemas/offeredPackageOperationRequest"
+                RELEASE: "#/components/schemas/prePurchasedPackageOperationRequest"
                 EXTEND_EXPIRY_TIME: "TOMP-API.yaml#/components/schemas/extendExpiryTimeRequest"
                 CUSTOMER: "#/components/schemas/customerRequest"
                 TRAVELLER: "TOMP-API.yaml#/components/schemas/travellerRequest"
                 PRODUCT: "TOMP-API.yaml#/components/schemas/packageElementRequest"
             oneOf:
-            - $ref: "#/components/schemas/offeredPackageOperationRequest"
+            - $ref: "#/components/schemas/prePurchasedPackageOperationRequest"
             - $ref: "TOMP-API.yaml#/components/schemas/extendExpiryTimeRequest"
             - $ref: "#/components/schemas/customerRequest"
             - $ref: "TOMP-API.yaml#/components/schemas/travellerRequest"
@@ -189,7 +189,7 @@ components:
                 $ref: "TOMP-API.yaml#/components/schemas/dateTime"
 
   schemas:
-    offeredPackageOperationRequest:
+    prePurchasedPackageOperationRequest:
       type: object
       description: operation request for the (pre-)purchase, trip execution or after sales phase
       additionalProperties: false
@@ -198,8 +198,8 @@ components:
         - type
       properties:
         type:
-          $ref: "#/components/schemas/offeredPackageOperation"
-          description: the 'operation' in the url must match with the type of the offeredPackageOperationRequest
+          $ref: "#/components/schemas/prePurchasedPackageOperation"
+          description: the 'operation' in the url must match with the type of the prePurchasedPackageOperationRequest
         timestamp:
           $ref: "TOMP-API.yaml#/components/schemas/dateTime"
         comment:
@@ -217,7 +217,7 @@ components:
         timestamp:
           $ref: "TOMP-API.yaml#/components/schemas/dateTime"
 
-    offeredPackageOperation:
+    prePurchasedPackageOperation:
       type: string
       externalDocs:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
@@ -276,7 +276,7 @@ components:
     customerRequest:
       description: update the customer with the supplied information
       allOf:
-        - $ref: "#/components/schemas/offeredPackageOperationRequest"
+        - $ref: "#/components/schemas/prePurchasedPackageOperationRequest"
         - type: object
           required:
             - customer
@@ -293,10 +293,10 @@ components:
         }
 
   parameters:
-    offeredPackageOperation:
+    prePurchasedPackageOperation:
       name: operation
       in: query
       description: OPERATION to execute
       required: true
       schema:
-        $ref: "#/components/schemas/offeredPackageOperation"
+        $ref: "#/components/schemas/prePurchasedPackageOperation"

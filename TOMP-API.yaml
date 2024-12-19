@@ -38,7 +38,8 @@ security:
   - OpenId: []
 
 servers:
-  - url: https://tomp.dat.nl/tomp/v2
+  - url: https://example.to.eu/tomp/v2
+    description: example url
 
 paths:
   /:
@@ -47,7 +48,8 @@ paths:
         - landing page
       operationId: landingPage
       summary: "Landing page"
-      description: "Gives a (technical & human readable) output describing how this API must be used."
+      description: "Gives a (technical & human readable) output describing how this API must be used. If 
+        the parameter f=html is supplied, a human readable page must be responded."
       externalDocs:
         url: https://app.swaggerhub.com/apis/OGC/ogcapi-features-1-example-1/1.0.1
       parameters:
@@ -86,7 +88,8 @@ paths:
           style: form
           explode: true
           example:
-            { "type":"INDIVIDUAL_TRAVELER", "id": "34924-3A334B-C342D" }
+            type: INDIVIDUAL_TRAVELER
+            id: 34924-3A334B-C342D
         - name: validity
           in: query
           description: a single validity parameter
@@ -95,16 +98,18 @@ paths:
           style: form
           explode: true
           example:
-            { "type": "SERVICE", "class": "FIRST" }
+            type: SERVICE
+            class: FIRST
         - name: from
           in: query
-          description: the origin of the trip (gps, or external specified location).
+          description: the origin of the trip (gps, or external specified location). The location can be formatted
+            using '#/components/schemas/link'. See the documentation how to apply external references here
           required: false
           style: form
           explode: false
           x-example:
-          - "gps:6.234,34.2394"
-          - "CHB:NL:S:sptz"
+           gps:6.234,34.2394
+           CHB:NL:S:sptz
           schema:
             $ref: "#/components/schemas/externalReference"
         - name: to
@@ -114,8 +119,8 @@ paths:
           style: form
           explode: false
           x-example:
-          - "gps:6.234,34.2394"
-          - "CHB:NL:S:sptz"
+            gps:6.234,34.2394
+            CHB:NL:S:sptz
           schema:
             $ref: "#/components/schemas/externalReference"
         - name: via
@@ -257,6 +262,23 @@ paths:
           $ref: "#/components/responses/errorResponse"
 
   /collections/legs/items:
+    get:
+      operationId: getLegs
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/packageElementId"
+      tags:
+        - execute
+      responses:
+        "200":
+          $ref: "#/components/responses/packageResponse"
+        "202":
+          $ref: "#/components/responses/packageResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"      
     post:
       operationId: legOperation
       summary: "Perform an operation on a leg"
@@ -295,6 +317,23 @@ paths:
           $ref: "#/components/responses/errorResponse"
 
   /collections/products/items:
+    get:
+      operationId: getProducts
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/packageElementId"
+      tags:
+        - execute
+      responses:
+        "200":
+          $ref: "#/components/responses/packageResponse"
+        "202":
+          $ref: "#/components/responses/packageResponse"
+        default:
+          $ref: "#/components/responses/errorResponse" 
     post:
       operationId: fareProductOperation
       summary: "Perform an operation on a fare product"
@@ -516,50 +555,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/link"
-          example:
-            [
-              {
-                "rel": "single ticket",
-                "description": "Get offers for a single ticket",
-                "type": "application/geo+json",
-                "href": "/collections/offers/items",
-                "method": "PUT",
-                "headers": { "Accept-Language": "", "authorization": "" },
-                "body":
-                  {
-                    "specification":
-                      {
-                        "from": "NeTEx:stop",
-                        "to": "NeTEx:stop",
-                        "startTime": "",
-                      },
-                    "parameters":
-                      [
-                        {
-                          "usage":
-                            [
-                              {
-                                "type": "INDIVIDUAL_TRAVELLER",
-                                "fullName": "",
-                                "age": 0,
-                              },
-                            ],
-                          "validities": [{ "type": "SERVICE", "class": "" }],
-                        },
-                      ],
-                  },
-                "required":
-                  [
-                    "headers.authorization",
-                    "$.specification.from",
-                    "$.specification.to",
-                    "$.specification.startTime",
-                    "$.parameters[0].usage[0].fullName",
-                    "$.parameters[0].usage[0].age",
-                    "$.parameters[0].validities[0].class",
-                  ],
-              },
-            ]
         dataSources:
           type: array
           items:
@@ -883,7 +878,6 @@ components:
           ROUTING: "#/components/schemas/routingValidityParameter"
           SERVICE: "#/components/schemas/serviceValidityParameter"
           TEMPORAL: "#/components/schemas/temporalValidityParameter"
-          PRODUCT: "#/components/schemas/productValidityParameter"
           EQUIPMENT: "#/components/schemas/equipmentValidityParameter"
       oneOf:
         - $ref: "#/components/schemas/organisationalValidityParameter"
@@ -893,7 +887,6 @@ components:
         - $ref: "#/components/schemas/routingValidityParameter"
         - $ref: "#/components/schemas/serviceValidityParameter"
         - $ref: "#/components/schemas/temporalValidityParameter"
-        - $ref: "#/components/schemas/productValidityParameter"
         - $ref: "#/components/schemas/equipmentValidityParameter"
 
     equipmentValidityParameter:
@@ -929,15 +922,6 @@ components:
         type:
           type: string
           enum: [TEMPORAL]
-
-    productValidityParameter:
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [PRODUCT]
-        product:
-          $ref: "#/components/schemas/externalReference"
 
     seatingValidityParameter:
       type: object
@@ -987,7 +971,7 @@ components:
         type:
           type: string
           enum: [SERVICE]
-        assetType:
+        product:
           $ref: "#/components/schemas/externalReference"
         asset:
           $ref: "#/components/schemas/externalReference"
@@ -996,71 +980,13 @@ components:
         userNeeds:
           type: array
           items:
-            $ref: "#/components/schemas/userNeeds"
+           $ref: "#/components/schemas/externalReference"
         class:
           $ref: "#/components/schemas/classOfUse"
         facilities:
           type: array
           items:
             $ref: "#/components/schemas/facility"
-
-    userNeeds:
-      type: object
-      properties:
-        externalSpecified:
-          type: array
-          items:
-            $ref: "#/components/schemas/externalReference"
-        encumbrance:
-          type: array
-          items:
-            type: string
-            enum:
-              [
-                PUSH_CHAIR,
-                BAGGAGE_TROLLEY,
-                OVERSIZED_BAGGAGE,
-                GUIDE_DOG,
-                OTHER_ANIMAL,
-                OTHER_ENCUMBRANCE_NEED,
-                LAGGAGE_ENCUMBRANCE,
-              ]
-        medical:
-          type: array
-          items:
-            type: string
-            enum: [HEART_CONDITION, OTHER_CONDITION, ALLERGIC]
-        mobility:
-          type: array
-          items:
-            type: string
-            enum:
-              [
-                WHEEL_CHAIR,
-                ASSISTED_WHEEL_CHAIR,
-                MOTORIZED_WHEELCHAIR,
-                MOBILITY_SCOOTER,
-                ROAD_MOBILITY_SCOOTER,
-                WALKING_FRAME,
-                RESTRICTED_MOBILITY,
-                NORMAL_MOBILITY,
-                OTHER_MOBILITY_NEED,
-              ]
-        psychosensory:
-          type: array
-          items:
-            type: string
-            enum:
-              [
-                VISUAL_IMPAIRMENT,
-                AUDITORY_IMPAIRMENT,
-                COGNITIVE_IMPAIRMENT,
-                AVERSE_TO_LIFTS,
-                AVERSE_TO_ESCALATORS,
-                AVERSE_TO_CONFINED_SPACES,
-                AVERSE_TO_CROWDS,
-                OTHER_PSYCHO_SENSORY_NEED,
-              ]
 
     onboardStay:
       type: object
@@ -1203,7 +1129,7 @@ components:
                          { "rel": "purchase", 
                            "method": "POST", 
                            "description": "Immediately purchase of this ticket",
-                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=one-stop-purchase",
+                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=purchase",
                          },
                          { "rel": "pre-purchase", 
                            "method": "POST", 
@@ -1632,7 +1558,7 @@ components:
 
     leg:
       type: object
-      description: A planned (segment of a) package using one asset
+      description: A (planned) consumption of a product within a package
       required:
         - id
         - type
@@ -1720,6 +1646,7 @@ components:
           PAUSE - pause the product
           RESUME - resume the product
           END - end the product
+          INITIATE - initate a new leg
           CUSTOM - custom operations
       enum:
         - CANCEL
@@ -1727,6 +1654,7 @@ components:
         - PAUSE
         - RESUME
         - END
+        - INITIATE
         - CUSTOM
 
     legState:
@@ -1734,20 +1662,24 @@ components:
       description: status of a leg<br>
         _NOT_STARTED_ the leg is not started, initial state<br>
         _PREPARING_ the _PREPARE_ operation has been received<br>
+        _PREPARED_ the leg is ready to use<br>
         _IN_USE_ the travelers are on their way<br>
         _PAUSED_ the asset is paused<br>
-        _ENDING_ the _START_ENDING_ operation has been received<br>
         _ENDED_ the travelers have arrived at their destination<br>
         _ISSUE_REPORTED_ due to an issue, there is (temporarily) no progress to report, when the issue isn't solved, this is a final state<br>
-        _CANCELLED_ the leg has been cancelled (so there must be other legs)
+        _CANCELLED_ the leg has been cancelled, before execution<br>
+        _ABENDED_ the leg is abnormally ended (e.g. due to an issue)
       enum:
         [
           NOT_STARTED,
+          PREPARING,
+          PREPARED,
           IN_USE,
           PAUSED,
           ENDED,
           ISSUE_REPORTED,
           CANCELLED,
+          ABENDED
         ]
 
     postalAddress:
@@ -1835,25 +1767,20 @@ components:
         specification:
           $ref: "#/components/schemas/travelSpecification"
         status:
-          $ref: "#/components/schemas/purchaseStatus"
+          $ref: "#/components/schemas/packageStatus"
         packageLabel:
           $ref: "#/components/schemas/packageLabel"
-        elements:
-          type: array
-          items:
-            $ref: "#/components/schemas/packageElement"
+        #elements:
+        #  type: array
+        #  items:
+        #    $ref: "#/components/schemas/packageElement"
         price:
           $ref: "#/components/schemas/amountOfMoney"
           description: the total price of the package
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2419.htm - (CUSTOMER PURCHASE PACKAGE PRICE) final price
-        paymentItems:
-          type: array
-          description:
-            in this array items can be enlisted, like a voucher for future usage, or in case this package is an alternative,
-            what the financial consequences are whenever you choose this one.
-          items:
-            $ref: "#/components/schemas/fareStructure"
+        customer:
+          $ref: "#/components/schemas/customer"            
         conditions:
           type: array
           items:
@@ -1977,35 +1904,23 @@ components:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
         description: TYPE OF REQUEST (unspecified)
       description:
-        the 'operation' in the url must match with the type of the operationRequest<br><br>
-
-        only in pre-purchased states (OFFERED, PENDING)<br>
-        _CONFIRM_ - [MP->TO] Turns the purchased package in a _PURCHASED_ state, the previous state should be _PENDING_. If the package is in state _PURCHASED_, _CANCELLED_ or _EXPIRED_, a confirm will result a 403. <BR>
-        _EXTEND_EXPIRY_TIME_ - [MP->TO] Request additional time to complete a booking<br><br>
-
-        before trip execution, after offered (PENDING, PURCHASED)<br>
         _CANCEL_ - [MP->TO] Cancels a purchased package, it returns a package in a cancelled state.<br>
         _TRAVELLER_ - [MP->TO] request to add, remove or change one of the travelers. Can be refused if contractual or financial changes are requested<br>
         _CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested
         _PACKAGE_ELEMENT_ [MP->TO] request to add or remove a package element to the package
-
-        _CONFIRM_OPTION_ [MP->TO] confirms an offered option of an operation (like cancel)
       enum:
         [
-          CONFIRM,
           CANCEL,
-          EXTEND_EXPIRY_TIME,
           CUSTOMER,
           TRAVELLER,
           PACKAGE_ELEMENT,
-          CONFIRM_OPTION,
         ]
 
-    purchaseStatus:
+    packageStatus:
       type: string
       description:
         The life-cycle state of the package (from NEW to ENDED)<br>
-        _OFFERED_ the package is offered, including all conditions<br>
+        _OFFERED_ the package is offered<br>
         _PENDING_ the package is pre-puchased (the end user has shown intentions to purchase this offer), must be finalized with the package-confirm operation<br>
         _PURCHASED_ a finalized package ('purchased'). Both parties agreed to deliver services in return of payment<br>
         _CANCELLED_ the package is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br>
@@ -2257,7 +2172,7 @@ components:
           $ref: "#/components/schemas/shortString"
           description: for instance, a license plate or seat number.
 
-        assetType:
+        product:
           $ref: "#/components/schemas/externalReference"
         mode:
           $ref: "#/components/schemas/mode"
@@ -3278,7 +3193,7 @@ components:
         method:
           type: string
           description: a misused field, to indicate the http method.
-          enum: [POST, GET, DELETE]
+          enum: [ POST, GET, DELETE ]
         description:
           type: string
           description: the description of the external data source
@@ -3616,8 +3531,6 @@ components:
       description: _DETAILS_ - package specification<br>
         _LOGS_ - include event log<br>
         _PROGRESS_ - include progress<br>
-        _LEGS_ONLY_ - only show legs<br>
-        _PRODUCTS_ONLY_ - only show products<br>
         _TRAVEL_DOCUMENT_ - include tickets/travel documents<br>
         _TRIP_SUPPORT_ - including additional information, like no-go zones, parking places, POIs
       required: false
