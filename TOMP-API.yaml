@@ -3273,6 +3273,9 @@ components:
           items:
             type: string
             format: url
+        userLocation:
+          description: This field might lead to GDPR issues. Be aware, use it with caution.
+          $ref: "#/components/schemas/place"
         asset:
           $ref: "#/components/schemas/asset"
 
