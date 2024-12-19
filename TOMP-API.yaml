@@ -895,18 +895,16 @@ components:
         type:
           type: string
           enum: [EQUIPMENT]
+        id:
+          $ref: "#/components/schemas/shortString"
         name:
           $ref: "#/components/schemas/shortString"
         description:
           $ref: "#/components/schemas/longString"
         infoLink:
           $ref: "#/components/schemas/url"
-        id:
-          $ref: "#/components/schemas/shortString"
         image:
           $ref: "#/components/schemas/url"
-        externalReference:
-          $ref: "#/components/schemas/shortString"
 
     temporalValidityParameter:
       type: object
@@ -2113,7 +2111,7 @@ components:
           description: in one of these areas the asset must be returned
           maxItems: 10
           items:
-            $ref: "#/components/schemas/geojsonPolygon"
+            $ref: "#/components/schemas/geojsonGeometry"
         returnZones:
           type: array
           description: in one of these externally described zones the asset must be returned
