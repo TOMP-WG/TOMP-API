@@ -16,7 +16,7 @@ tags:
   - name: landing page
     description: landing page, to describe the interface
 
-  - name: offers
+  - name: offer
     description: This part of the API facilitates in supplying offers.
 
   - name: purchase
@@ -31,7 +31,6 @@ tags:
 #                           OAutb and OpenId are also available
 # The exact ways to authenticate will be described in a later version
 security:
-  - BasicAuth: []
   - BearerAuth: []
   - ApiKeyAuth: []
   - OAuth: []
@@ -79,27 +78,6 @@ paths:
       description: Returns offers (purchaseable packages) based a (list of) user(s), and optional start/end (and via) locations and a start time or end time. this
         is a simplified offer request. If you want to publish more advanced offers, use the 'PUT' method, and you can configure more parameters
       parameters:
-        - name: usage
-          in: query
-          description: a single usage
-          required: true
-          schema:
-            $ref: "#/components/schemas/usage"
-          style: form
-          explode: true
-          example:
-            type: INDIVIDUAL_TRAVELER
-            id: 34924-3A334B-C342D
-        - name: validity
-          in: query
-          description: a single validity parameter
-          schema: 
-            $ref: "#/components/schemas/validityParameter"
-          style: form
-          explode: true
-          example:
-            type: SERVICE
-            class: FIRST
         - name: from
           in: query
           description: the origin of the trip (gps, or external specified location). The location can be formatted
@@ -150,6 +128,28 @@ paths:
           explode: false
           schema:
             $ref: "#/components/schemas/dateTime" 
+        - name: usage
+          in: query
+          description: a single usage
+          required: false
+          schema:
+            $ref: "#/components/schemas/usage"
+          style: form
+          explode: true
+          example:
+            type: INDIVIDUAL_TRAVELER
+            id: 34924-3A334B-C342D
+        - name: validity
+          in: query
+          description: a single validity parameter
+          schema: 
+            $ref: "#/components/schemas/validityParameter"
+          style: form
+          explode: true
+          example:
+            type: SERVICE
+            class: FIRST
+        - $ref: "#/components/parameters/optionalPackageId"
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
@@ -157,14 +157,13 @@ paths:
         - $ref: "#/components/parameters/offset"
         - $ref: "#/components/parameters/bbox"                   
       tags:
-        - offers
+        - offer
       responses:
         "200":
           $ref: "#/components/responses/offerResponse"
         default:
           $ref: "#/components/responses/errorResponse"
-
-    put:
+    post:
       operationId: requestOffers
       summary: "Request offers (advanced)"
       description: Returns offers (purchaseable packages) based on user requirements. This is the advanced version of the GET. Implement this only
@@ -177,7 +176,7 @@ paths:
         - $ref: "#/components/parameters/offset"
         - $ref: "#/components/parameters/bbox"
       tags:
-        - offers
+        - offer
       requestBody:
         $ref: "#/components/requestBodies/offerRequest"
       responses:
@@ -186,28 +185,33 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
+  /collections/purchases/items:
     post:
-      operationId: purchaseRequest
-      summary: "Purchase an (offered) package"
-      description: The offered package is transformed into a pre-purchased one. The purchase must be confirmed using the `POST /collections/offers/items/?packageId={id}&operation=confirm`.
+      operationId: purchaseOperation
+      summary: "Perform an purchase of a package"
+      description: This endpoint **must** be used to purchase a package.<br>
+        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
+        _PURCHASE_ - purchase an offered package<br>
+        _2_PHASE_PURCHASE_ - transactional purchase, requires COMMIT to confirm the purchase<br>
+        _EXTEND_EXPIRY_TIME_ - request to extend the expiry time of a 2-phase purchase<br>
+        _COMMIT_ - commit the 2 phase purchase<br>
+        _RELEASE_ - rollback the 2 phase purchase<br>
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
-        - $ref: "#/components/parameters/optionalPackageId"
-        - $ref: "#/components/parameters/callbackUrl"
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/notificationUrl"
         - $ref: "#/components/parameters/purchaseOperation"
       tags:
         - purchase
       requestBody:
-        $ref: "#/components/requestBodies/purchaseRequest"
+        $ref: "#/components/requestBodies/packageOperationRequest"
       responses:
-        "201":
-          $ref: "#/components/responses/purchaseResponse"
+        "200":
+          $ref: "#/components/responses/packageResponse"
         "202":
-          description:
-            A purchase is requested, but not yet confirmed on the TO side. The result will be posted at the requested callbackUrl, specified in the header.
-            Whenever this field is not supplied, and an immediate result is not possible, a 424 would be appropriate (with the error object containing details).
+          description: whenever this is returned, the result will be posted on the calbackUrl
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -223,7 +227,6 @@ paths:
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
         - $ref: "#/components/parameters/optionalPackageElementId"
-        - $ref: "#/components/parameters/packageSelection"
       tags:
         - execute
       responses:
@@ -235,20 +238,23 @@ paths:
       operationId: packageOperation
       summary: "Perform an operation on a package"
       description: This endpoint **must** be used to alter the package.<br>
-        CANCEL - cancel this package<br>
-        CUSTOMER - replace a traveller in the package<br>
-        TRAVELLER - add, remove or change a traveller to this package<br>
-        PACKAGE_ELEMENT - add a package element. When you want to remove or modify a PACKAGE ELEMENT, please use package element operations.<br>
+        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
+        _PURCHASE_ - purchase an offered package<br>
+        _2_PHASE_PURCHASE_ - transactional purchase, requires COMMIT to confirm the purchase<br>
+        _COMMIT_ - commit the 2 phase purchase<br>
+        _RELEASE_ - rollback the 2 phase purchase<br>
+        _CANCEL_ - cancel this package<br>
+        _CUSTOMER_ - replace a traveller in the package<br>
+        _TRAVELLER_ - add, remove or change a traveller to this package<br>
+        _PACKAGE_ELEMENT_ - add a package element. When you want to remove or modify a PACKAGE ELEMENT, please use package element operations.<br>
         When using the NOTIFY extension, the 'notificationUrl' is required, so the TO can notify the MP.
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
-        - $ref: "#/components/parameters/callbackUrl"
         - $ref: "#/components/parameters/notificationUrl"
         - $ref: "#/components/parameters/packageOperation"
-        - $ref: "#/components/parameters/requestOffers"
       tags:
         - execute
       requestBody:
@@ -262,23 +268,6 @@ paths:
           $ref: "#/components/responses/errorResponse"
 
   /collections/legs/items:
-    get:
-      operationId: getLegs
-      parameters:
-        - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
-        - $ref: "#/components/parameters/receiverId"
-        - $ref: "#/components/parameters/packageId"
-        - $ref: "#/components/parameters/packageElementId"
-      tags:
-        - execute
-      responses:
-        "200":
-          $ref: "#/components/responses/packageResponse"
-        "202":
-          $ref: "#/components/responses/packageResponse"
-        default:
-          $ref: "#/components/responses/errorResponse"      
     post:
       operationId: legOperation
       summary: "Perform an operation on a leg"
@@ -289,7 +278,6 @@ paths:
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
         - $ref: "#/components/parameters/packageElementId"
-        - $ref: "#/components/parameters/callbackUrl"
         - name: operation
           in: query
           description: OPERATION on a specified leg
@@ -317,23 +305,6 @@ paths:
           $ref: "#/components/responses/errorResponse"
 
   /collections/products/items:
-    get:
-      operationId: getProducts
-      parameters:
-        - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
-        - $ref: "#/components/parameters/receiverId"
-        - $ref: "#/components/parameters/packageId"
-        - $ref: "#/components/parameters/packageElementId"
-      tags:
-        - execute
-      responses:
-        "200":
-          $ref: "#/components/responses/packageResponse"
-        "202":
-          $ref: "#/components/responses/packageResponse"
-        default:
-          $ref: "#/components/responses/errorResponse" 
     post:
       operationId: fareProductOperation
       summary: "Perform an operation on a fare product"
@@ -344,7 +315,6 @@ paths:
         - $ref: "#/components/parameters/receiverId"
         - $ref: "#/components/parameters/packageId"
         - $ref: "#/components/parameters/packageElementId"
-        - $ref: "#/components/parameters/callbackUrl"
         - name: operation
           in: query
           description: OPERATION on a specified product
@@ -380,22 +350,18 @@ components:
           schema:
             $ref: "#/components/schemas/offerRequest"
 
-    purchaseRequest:
-      description: additional information required to create a purchased package. This information can be retrieved from the the LEGs' **conditions**.
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/purchaseRequest"
-
     packageOperationRequest:
       content:
         application/json:
           schema:
             discriminator:
               propertyName: type
+              # PURCHASE, 2_PHASE_PURCHASE, ONE_STOP_PURCHASE
               # CONFIRM, CANCEL, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER, PACKAGE_ELEMENT
               mapping:
+                PURCHASE: "#/components/schemas/purchaseRequest" 
+                2_PHASE_PURCHASE: "#/components/schemas/purchaseRequest" 
+                ONE_STOP_PURCHASE: "#/components/schemas/oneStopPurchaseRequest" 
                 CONFIRM: "#/components/schemas/packageOperationRequest"
                 CANCEL: "#/components/schemas/packageOperationRequest"
                 EXTEND_EXPIRY_TIME: "#/components/schemas/extendExpiryTimeRequest"
@@ -403,7 +369,8 @@ components:
                 TRAVELLER: "#/components/schemas/travellerRequest"
                 PACKAGE_ELEMENT: "#/components/schemas/packageElementRequest"
             oneOf:
-            - $ref: "#/components/schemas/packageOperationRequest"
+            - $ref: "#/components/schemas/purchaseRequest"
+            - $ref: "#/components/schemas/oneStopPurchaseRequest"
             - $ref: "#/components/schemas/packageOperationRequest"
             - $ref: "#/components/schemas/extendExpiryTimeRequest"
             - $ref: "#/components/schemas/customerRequest"
@@ -416,7 +383,8 @@ components:
           schema:
             discriminator:
               propertyName: type
-              # CANCEL, ASSIGN_ASSET, CHANGE_TIME, CHANGE_TIME, ANCILLARY, PREPARE, START, PAUSE, START_ENDING, END, SEND_EVIDENCE_PARKED, SEND_EVIDENCE_HELMET, SEND_EVIDENCE_CHARGER
+              # CANCEL, ASSIGN_ASSET, CHANGE_TIME, CHANGE_TIME, ANCILLARY, PREPARE,
+              # START, PAUSE, START_ENDING, END, SEND_EVIDENCE
               mapping:
                 CANCEL: "#/components/schemas/legOperationRequest"
                 ASSIGN_ASSET: "#/components/schemas/assetRequest"
@@ -608,6 +576,21 @@ components:
 
     # parameters & responses
     purchaseRequest:
+      type: object
+      properties:
+        customer:
+          $ref: "#/components/schemas/customer"
+          description: The user that wants to purchase this package, only to supply when requested in the conditions
+        customerId:
+          $ref: "#/components/schemas/externalReference"
+        usage:
+          type: array
+          description: this describes the travelling party details, that should be available only at booking time, 
+            like a driver license number.
+          items:
+            $ref: "#/components/schemas/usage"
+
+    oneStopPurchaseRequest:
       allOf:
         - $ref: "#/components/schemas/offerRequest"
         - type: object
@@ -1120,19 +1103,19 @@ components:
               },
               "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
               "links": [ { "rel": "details",
-                           "method": "POST", 
+                           "method": "GET", 
                            "description": "More ...",
                            "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
                          },
                          { "rel": "purchase", 
                            "method": "POST", 
-                           "description": "Immediately purchase of this ticket",
-                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=purchase",
+                           "description": "Immediately purchase this ticket",
+                           "href": "/collections/purchases/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=purchase",
                          },
                          { "rel": "pre-purchase", 
                            "method": "POST", 
                            "description": "Take an option on this package, so you can alter it before purchasing it",
-                           "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=pre-purchase",
+                           "href": "/collections/purchases/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=pre-purchase",
                          } 
                        ]
             } ],
@@ -1356,9 +1339,8 @@ components:
         {
           "type": "TRAVELLER",
           "timestamp": "2019-10-12T07:20:50.52Z",
-          "requestOffers": true,
           "operation": "ADD",
-          "travellerParameters":
+          "parameters":
             [
               {
                 "usage":
@@ -1741,7 +1723,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["offers"]
+          enum: ["OFFERS", "ASSETS"]
 
     package:
       description: a purchased package is a registration of an agreement between end user and TO, to execute a package (=set of legs) according a specification, including all conditions
@@ -1759,7 +1741,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["package"]
+          enum: ["PACKAGE"]
         id:
           type: string
         specification:
@@ -1768,25 +1750,11 @@ components:
           $ref: "#/components/schemas/packageStatus"
         packageLabel:
           $ref: "#/components/schemas/packageLabel"
-        #elements:
-        #  type: array
-        #  items:
-        #    $ref: "#/components/schemas/packageElement"
         price:
           $ref: "#/components/schemas/amountOfMoney"
           description: the total price of the package
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA5/EA5/EA2419.htm - (CUSTOMER PURCHASE PACKAGE PRICE) final price
-        customer:
-          $ref: "#/components/schemas/customer"            
-        conditions:
-          type: array
-          items:
-            $ref: "#/components/schemas/condition"
-        guarantees:
-          type: array
-          items:
-            $ref: "#/components/schemas/guarantee"
       example:
         {
           "properties":
@@ -1886,26 +1854,46 @@ components:
           description: The specific fare structure. The price of a leg can be calculated using all elements.
         conditions:
           type: array
-          description: specific conditions for this product, completing or overruling the package conditions
+          description: specific conditions for this product
           maxItems: 5
           items:
             $ref: "#/components/schemas/condition"
         guarantees:
           type: array
-          description: references to the guarantees
           items:
-            type: string
+            $ref: "#/components/schemas/guarantee"
+        productParts:
+          type: array
+          description: references to products that are contained in this product (to facilitate e.g. travel through)
+          items:
+            $ref: "#/components/schemas/externalReference"
+
+    purchaseOperation:
+      type: string
+      description:
+        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
+        _PURCHASE_ - purchase an offered package<br>
+        _2_PHASE_PURCHASE_ - transactional purchase, COMMIT to confirm the purchase<br>
+        _EXTEND_EXPIRY_TIME_ - entend the expiry time of a 2-phase purchase<br>
+        _CONFIRM_ - commit the 2 phase purchase<br>
+        _RELEASE_ - rollback the 2 phase purchase<br>
+      enum:
+        [
+          ONE_STOP_PURCHASE,
+          PURCHASE,
+          2_PHASE_PURCHASE,
+          EXTEND_EXPIRY_TIME,
+          CONFIRM,
+          RELEASE,
+        ]
 
     packageOperation:
       type: string
-      externalDocs:
-        url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
-        description: TYPE OF REQUEST (unspecified)
       description:
-        _CANCEL_ - [MP->TO] Cancels a purchased package, it returns a package in a cancelled state.<br>
-        _TRAVELLER_ - [MP->TO] request to add, remove or change one of the travelers. Can be refused if contractual or financial changes are requested<br>
-        _CUSTOMER_ - [MP->TO] request a change of the customer. Can be refused if contractual or financial changes are requested
-        _PACKAGE_ELEMENT_ [MP->TO] request to add or remove a package element to the package
+        _CANCEL_ - Cancels a purchased package, it returns a package in a cancelled state.<br>
+        _TRAVELLER_ - request to add, remove or change one of the travelers. Can be refused if contractual or financial changes are requested<br>
+        _CUSTOMER_ - request a change of the customer. Can be refused if contractual or financial changes are requested<br>
+        _PACKAGE_ELEMENT_ request to add or remove a package element to the package
       enum:
         [
           CANCEL,
@@ -1968,13 +1956,11 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          REQUIRED_INTERACTIONS: "#/components/schemas/requiredInteractionsCondition"
           PAYMENT: "#/components/schemas/paymentCondition"
           CANCELLATION: "#/components/schemas/cancellationCondition"
           PURCHASE: "#/components/schemas/purchaseCondition"
           EXECUTION: "#/components/schemas/packageExecutionCondition"
       oneOf:
-        - $ref: "#/components/schemas/requiredInteractionsCondition"
         - $ref: "#/components/schemas/paymentCondition"
         - $ref: "#/components/schemas/cancellationCondition"
         - $ref: "#/components/schemas/purchaseCondition"
@@ -2053,30 +2039,6 @@ components:
           externalDocs:
             url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA9/EA2177.htm
             description: PURCHASE WINDOW.MaximumPeriodBeforeDeparture
-        requiredFields:
-          type: array
-          description:
-            an array containing labels that identify specific fields that are required in the purchase process<br>
-            all fields of the package purchase request can become required, navigating with dots, square brackets and field names.<br>
-            A few examples<br>
-            from.address.station implies that the station reference is mandatory,<br>
-            travelers[*].age requires an age for each traveler, <br>
-            or customer.email for the email address of the customer
-          externalDocs:
-            url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA6/EA2136.htm
-            description: USER PROFILE
-          maxItems: 50
-          items:
-            $ref: "#/components/schemas/normalString"
-
-    requiredInteractionsCondition:
-      description:
-        required sequence of steps to take in a specified phase of the leg. Use this condition only when the steps are different as specified in the `POST /discovery` endpoint.
-        When used in the `POST /discovery`, show the default set of interactions you require. When applied in the leg, you can overrule the default interactions.
-      type: array
-      maxItems: 50
-      items:
-        $ref: "#/components/schemas/interaction"
 
     packageExecutionCondition:
       description: conditions during the package
@@ -3121,8 +3083,9 @@ components:
           discriminator:
             propertyName: type
             mapping:
-              package: "#/components/schemas/package"
-              offers: "#/components/schemas/offerSummary"
+              PACKAGE: "#/components/schemas/package"
+              ASSETS: "#/components/schemas/offerSummary"
+              OFFERS: "#/components/schemas/offerSummary"
           oneOf:
             - $ref: "#/components/schemas/package"
             - $ref: "#/components/schemas/offerSummary"
@@ -3518,60 +3481,30 @@ components:
         $ref: "#/components/schemas/uuid"
     optionalPackageElementId:
       in: query
-      name: legId
-      description: LEG identifier
+      name: packageElementId
+      description: package element identifier
       required: false
       schema:
         $ref: "#/components/schemas/uuid"
-    packageSelection:
-      in: query
-      name: selection
-      description: _DETAILS_ - package specification<br>
-        _LOGS_ - include event log<br>
-        _PROGRESS_ - include progress<br>
-        _TRAVEL_DOCUMENT_ - include tickets/travel documents<br>
-        _TRIP_SUPPORT_ - including additional information, like no-go zones, parking places, POIs
-      required: false
-      explode: true
-      schema:
-        type: string
-        enum:
-          [DETAILS, LOGS, PROGRESS, TRAVEL_DOCUMENT, TRIP_SUPPORT]
-        default: DETAILS
     purchaseOperation:
-      in: query
       name: operation
-      description: the operation to (pre-)purchase an offer
+      in: query
+      description: OPERATION to execute
       required: true
       schema:
-        type: string
-        enum:
-          [one-stop-purchase, pre-purchase, purchase, 2-phase-purchase, confirm]
+        $ref: "#/components/schemas/purchaseOperation" 
+
     packageOperation:
       name: operation
       in: query
       description: OPERATION to execute
       required: true
       schema:
-        $ref: "#/components/schemas/packageOperation"
-    requestOffers:
-      name: requestOffers
-      in: query
-      description: do we request offers or just a direct modification
-      required: false
-      schema:
-        type: boolean    
-    callbackUrl:
-      in: header
-      name: callback-url
-      description: The callback URL of the TO, where results should be send to (only applicable when a result 202 is submitted)
-      required: false
-      schema:
-        $ref: "#/components/schemas/url"
+        $ref: "#/components/schemas/packageOperation" 
     notificationUrl:
       in: header
       name: notification-url
-      description: The URL at the TO side, where notifications will be send to about the purchased packages. Communication towards the TO is always done using notifications.
+      description: The URL at the MP side, where notifications will be send to about the purchased packages. Communication towards the TO is always done using notifications.
       required: false
       schema:
         $ref: "#/components/schemas/url"
@@ -3686,9 +3619,6 @@ components:
       required: true
 
   securitySchemes:
-    BasicAuth:
-      type: http
-      scheme: basic
     BearerAuth:
       type: http
       scheme: bearer

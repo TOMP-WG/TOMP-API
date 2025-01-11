@@ -17,14 +17,15 @@ tags:
     description: Extension to modify offers. To perform the pre-purchase, implement it at the POST /collections/offers/items endpoint.
 
 paths:
-  /collections/pre-purchased-packages/items:
+  /collections/prepurchased-packages/items:
     post:
       operationId: prePurchaseOperation
       summary: "Perform an operation on an offered package"
       description: This endpoint **must** be used to alter the package.<br>
+        PRE_PURCHASE - select an offer to allow operations (modify) on it.
         CUSTOMER - modify the customer of the package<br>
-        TRAVELLER - add, or modify a traveller to this package<br>
-        PRODUCT - add a product to the package<br>
+        TRAVELLER - add, modify or remove a traveller to this package<br>
+        PRODUCT - add, modify or remove a product to the package<br>
         RELEASE - release the current offered package<br>
         EXTEND_EXPIRY_TIME - request additional time to complete the offer<br>
       parameters:
@@ -32,7 +33,6 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
         - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
         - $ref: "#/components/parameters/prePurchasedPackageOperation"
       tags:
@@ -47,7 +47,7 @@ paths:
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
-  /collections/offered-legs/items:
+  /collections/prepurchased-legs/items:
     post:
       operationId: offeredLegOperation
       summary: "Perform an operation on a leg in an offered package"
@@ -58,7 +58,7 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
-        - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
+        - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
         - name: operation
           in: query
           description: OPERATION on a specified offered leg
@@ -85,7 +85,7 @@ paths:
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
-  /collections/offered-products/items:
+  /collections/prepurchased-products/items:
     post:
       operationId: offeredProductOperation
       summary: "Perform an operation on a product in an offered package"
@@ -96,7 +96,7 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
-        - $ref: "TOMP-API.yaml#/components/parameters/callbackUrl"
+        - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
         - name: operation
           in: query
           description: OPERATION on a product in an offered package
@@ -134,8 +134,9 @@ components:
           schema:
             discriminator:
               propertyName: type
-              # RELEASE, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER, PRODUCT
+              # PRE_PURCHASE, RELEASE, EXTEND_EXPIRY_TIME, CUSTOMER, TRAVELLER, PRODUCT
               mapping:
+                PRE_PURCHASE: "#/components/schemas/prePurchasedPackageOperationRequest"
                 RELEASE: "#/components/schemas/prePurchasedPackageOperationRequest"
                 EXTEND_EXPIRY_TIME: "TOMP-API.yaml#/components/schemas/extendExpiryTimeRequest"
                 CUSTOMER: "#/components/schemas/customerRequest"
@@ -223,13 +224,15 @@ components:
         url: https://www.transmodel-cen.eu/model/EARoot/EA7/EA3/EA1/EA3040.htm
         description: TYPE OF REQUEST (unspecified)
       description:
+        _PRE_PURCHASE_ select an offer to modify<br>
         _EXTEND_EXPIRY_TIME_ request additional time to complete the offer<br>
-        _TRAVELLER_ request to add/modify a traveller
+        _TRAVELLER_ request to add/modify/remove a traveller
         _CUSTOMER_ request to modify the customer
-        _PRODUCT_ request to add/modify a product to an offered package
+        _PRODUCT_ request to add/modify/remove a product to an offered package
         _RELEASE_ request to release the package
       enum:
-        [ EXTEND_EXPIRY_TIME,
+        [ PRE_PURCHASE,
+          EXTEND_EXPIRY_TIME,
           CUSTOMER,
           TRAVELLER,
           PRODUCT,
