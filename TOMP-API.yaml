@@ -2690,6 +2690,10 @@ components:
           description: Part/Component of the vehicle affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.
           type: string
           enum: [FRONT, REAR, LEFT, RIGHT, TOP, BOTTOM, INTERIOR, TIRE, ANCILLARY, OTHER]
+        vehicleComponentName:
+          description: a short term to describe the damaged part
+          type: string
+          x-examples: wheel, ring, light, brake, gear, saddle, pedal, window, rack, ...
         description:
           description: Description of the damage.
           type: string
@@ -3990,6 +3994,8 @@ components:
           format: double
           description: time to respond in minutes.
           minimum: 0
+        damage:
+          $ref: "#/components/schemas/damage"
         urls:
           type: array
           description: urls to clarify the support request e.g. pictures showing damage
