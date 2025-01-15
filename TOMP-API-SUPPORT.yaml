@@ -15,7 +15,7 @@ tags:
     description: This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
 
 paths:
-  /collections/support-tickets/items:
+  /collections/support-tickets/items/{packageId}:
     post:
       operationId: requestSupport
       summary: "Create a support ticket"
@@ -24,7 +24,7 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
-        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageElementId"
       tags:
         - support-tickets
@@ -90,8 +90,6 @@ components:
             _NOT_AVAILABLE_ The asset is at the location, but unreachable<br>
             _UNABLE_TO_OPEN_ The asset cannot be unlocked (malfunctioning)<br>
             _UNABLE_TO_CLOSE_ The asset cannot be closed (malfunctioning)<br>
-            _API_TECHNICAL_ A part of the API doesn't work<br>
-            _API_FUNCTIONAL_ A part of the API doesn't work as expected<br>
             _ACCIDENT_ Accident occurred<br>
             _OTHER_ unspecified<br>
             _REPORT_DAMAGE_ Oeps. Photo sent with slight damage
@@ -104,8 +102,6 @@ components:
               NOT_AVAILABLE,
               UNABLE_TO_OPEN,
               UNABLE_TO_CLOSE,
-              API_TECHNICAL,
-              API_FUNCTIONAL,
               ACCIDENT,
               OTHER,
               REPORT_DAMAGE,

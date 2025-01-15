@@ -44,7 +44,7 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/paymentState"
-        - name: id
+        - name: packageId
           in: query
           required: false
           schema:
@@ -69,9 +69,11 @@ paths:
                 $ref: "#/components/schemas/paymentResponse"
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+
+  /collections/payments/items/{packageId}:
     post:
       operationId: confirmPaymentEntry
-      summary: "Confirm a financial transaction"
+      summary: "Request or confirm a financial transaction"
       description: Payments can be communicated using this endpoint. The MP must have settled the amount of
         money before they are allowed to call this endpoint. The TO can check whether the money has been submitted.
       parameters:
@@ -89,7 +91,7 @@ paths:
               $ref: "#/components/schemas/financialRequest"
       responses:
         "204":
-          description: the payment request is accepted
+          description: the payment is acknowledged
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
@@ -108,13 +110,28 @@ components:
             items:
               $ref: "TOMP-API.yaml#/components/schemas/evidence"
         example:
-          {
-            "timestamp": "2019-10-12T07:20:50.52Z",
-            "amount": 39.50,
-            "currencyCode": "NOK",
-            "category": "VOUCHER",
-            "description": "Frequent traveller reward",
-          }
+          - {
+              "timestamp": "2019-10-12T07:20:50.52Z",
+              "amount": 39.50,
+              "currencyCode": "NOK",
+              "category": "VOUCHER",
+              "description": "Frequent traveller reward",
+            }
+          - {
+              "timestamp": "2019-10-12T07:20:50.52Z",
+              "amount": 100,
+              "currencyCode": "EUR",
+              "category": "DEPOSIT",
+              "description": "Deposit is transferred", 
+              # keep in mind that the MP sends this, as response on a PAY notification
+            }
+          - {
+              "timestamp": "2019-10-12T07:20:50.52Z",
+              "amount": 100,
+              "currencyCode": "EUR",
+              "category": "REFUND",
+              "description": "Refund of deposit request",
+            }
 
     additionalCosts:
       description: Costs that the TO is charging the MP; credits are negative. Other amounts should be positive

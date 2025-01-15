@@ -13,52 +13,62 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-  - name: modify offers
-    description: Extension to modify offers. To perform the pre-purchase, implement it at the POST /collections/offers/items endpoint.
+  - name: modify offer
+    description: Extension to modify offers.
 
 paths:
   /collections/prepurchased-packages/items:
-    post:
-      operationId: prePurchaseOperation
-      summary: "Perform an operation on an offered package"
-      description: This endpoint **must** be used to alter the package.<br>
-        PRE_PURCHASE - select an offer to allow operations (modify) on it.
-        CUSTOMER - modify the customer of the package<br>
-        TRAVELLER - add, modify or remove a traveller to this package<br>
-        PRODUCT - add, modify or remove a product to the package<br>
-        RELEASE - release the current offered package<br>
-        EXTEND_EXPIRY_TIME - request additional time to complete the offer<br>
+    get:
+      summary: retrieve the pre-purchased package as registered
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
+      tags:
+        - modify offer
+      responses:
+        "200":
+          $ref: "TOMP-API.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+    post:
+      operationId: prePurchaseOperation
+      summary: "Perform an operation on an pre-purchased package (or to obtain one)"
+      description: -|
+        PRE_PURCHASE - select an offer to allow operations (modify) on it.
+        CUSTOMER - modify the customer of the package<br>
+        TRAVELLER - add, modify or remove a traveller to this package<br>
+        PRODUCT - add, modify or remove a product to the package<br>
+        RELEASE - release the current offered package<br>
+        EXTEND_EXPIRY_TIME - request additional time<br>
+      parameters:
+        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "#/components/parameters/prePurchasedPackageOperation"
       tags:
-        - modify offers
+        - modify offer
       requestBody:
         $ref: "#/components/requestBodies/prePurchasedPackageOperationRequest"
       responses:
         "200":
           $ref: "TOMP-API.yaml#/components/responses/packageResponse"
-        "202":
-          description: whenever this is returned, the result will be posted on the calbackUrl
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
   /collections/prepurchased-legs/items:
     post:
-      operationId: offeredLegOperation
-      summary: "Perform an operation on a leg in an offered package"
-      description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
+      operationId: prepurchasedLegOperation
+      summary: "Perform an operation on a leg in an pre-purchased package"
+      description: This endpoint must be used to adjust the pre-purchased LEG, using OPERATION requests.
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
-        - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
         - name: operation
           in: query
           description: OPERATION on a specified offered leg
@@ -66,37 +76,26 @@ paths:
           schema:
             $ref: "#/components/schemas/offeredLegOperation"
       tags:
-        - modify offers
+        - modify offer
       requestBody:
         $ref: "#/components/requestBodies/offeredLegOperationRequest"
       responses:
         "200":
           $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
-        "202":
-          $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
-        "503":
-          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
-          headers:
-            Retry-After:
-              description: A date after which to retry. See the Date header for more details on the HTTP date format.
-              schema:
-                $ref: "TOMP-API.yaml#/components/schemas/httpDate"
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
   /collections/prepurchased-products/items:
     post:
       operationId: offeredProductOperation
-      summary: "Perform an operation on a product in an offered package"
-      description: This endpoint must be used to alter the state of a FARE PRODUCT, using OPERATION requests.
+      summary: "Perform an operation on a product in an pre-purchased package"
+      description: This endpoint must be used to adjust a FARE PRODUCT, using OPERATION requests.
       parameters:
         - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
-        - $ref: "TOMP-API.yaml#/components/parameters/notificationUrl"
         - name: operation
           in: query
           description: OPERATION on a product in an offered package
@@ -104,25 +103,12 @@ paths:
           schema:
             $ref: "#/components/schemas/offeredProductOperation"
       tags:
-        - modify offers
+        - modify offer
       requestBody:
         $ref: "#/components/requestBodies/offeredProductOperationRequest"
       responses:
         "200":
           $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
-        "202":
-          $ref: "TOMP-API.yaml#/components/responses/packageElementResponse"
-        "503":
-          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
-          headers:
-            version:
-              schema:
-                $ref: "TOMP-API.yaml#/components/headers/version"
-            Retry-After:
-              description: A date after which to retry. See the Date header for more details on the HTTP date format.
-              schema:
-                $ref: "TOMP-API.yaml#/components/schemas/httpDate"
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 

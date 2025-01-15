@@ -73,7 +73,7 @@ paths:
 
   /collections/offers/items:
     get:
-      operationId: getRequestOffers
+      operationId: requestOffers
       summary: "Request offers (simple)"
       description: Returns offers (purchaseable packages) based a (list of) user(s), and optional start/end (and via) locations and a start time or end time. this
         is a simplified offer request. If you want to publish more advanced offers, use the 'PUT' method, and you can configure more parameters
@@ -149,7 +149,6 @@ paths:
           example:
             type: SERVICE
             class: FIRST
-        - $ref: "#/components/parameters/optionalPackageId"
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
@@ -164,7 +163,7 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
     post:
-      operationId: requestOffers
+      operationId: advancedRequestOffers
       summary: "Request offers (advanced)"
       description: Returns offers (purchaseable packages) based on user requirements. This is the advanced version of the GET. Implement this only
         when you support more advanced queries.
@@ -185,12 +184,58 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /collections/purchases/items:
+  /collections/offers/items/{packageId}:
+    get:
+      operationId: getOffer
+      summary: "Retrieve a single offer"
+      description: Returns a previous supplied offer. Only applicable when the offers are stored.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+      tags:
+        - offer
+      responses:
+        "200":
+          $ref: "#/components/responses/offerResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /collections/purchases/items/:
+    post:
+      operationId: oneStopPurchaseOperation
+      summary: "Perform an purchase of a package based on external data"
+      description: This endpoint **must** be used to purchase a package based on external data.<br>
+        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/notificationUrl"
+        - name: operation
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["ONE_STOP_PURCHASE"]
+      tags:
+        - purchase
+      requestBody:
+        $ref: "#/components/requestBodies/packageOperationRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, the notification URL will be used
+        default:
+          $ref: "#/components/responses/errorResponse"
+  
+  /collections/purchases/items/{packageId}:
     post:
       operationId: purchaseOperation
       summary: "Perform an purchase of a package"
       description: This endpoint **must** be used to purchase a package.<br>
-        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
         _PURCHASE_ - purchase an offered package<br>
         _2_PHASE_PURCHASE_ - transactional purchase, requires COMMIT to confirm the purchase<br>
         _EXTEND_EXPIRY_TIME_ - request to extend the expiry time of a 2-phase purchase<br>
@@ -211,38 +256,15 @@ paths:
         "200":
           $ref: "#/components/responses/packageResponse"
         "202":
-          description: whenever this is returned, the result will be posted on the calbackUrl
+          description: whenever this is returned, notification URL will be used
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /collections/packages/items:
-    get:
-      operationId: getPackage
-      summary: "Request package details"
-      description: Retrieves package details, if the packageElementId is not provided, the complete package is returned, otherwise, 
-        only the package element is returned within a 'package shell'.
-      parameters:
-        - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
-        - $ref: "#/components/parameters/receiverId"
-        - $ref: "#/components/parameters/packageId"
-        - $ref: "#/components/parameters/optionalPackageElementId"
-      tags:
-        - execute
-      responses:
-        "200":
-          $ref: "#/components/responses/packageResponse"
-        default:
-          $ref: "#/components/responses/errorResponse"
+  /collections/packages/items/{packageId}:
     post:
       operationId: packageOperation
       summary: "Perform an operation on a package"
       description: This endpoint **must** be used to alter the package.<br>
-        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
-        _PURCHASE_ - purchase an offered package<br>
-        _2_PHASE_PURCHASE_ - transactional purchase, requires COMMIT to confirm the purchase<br>
-        _COMMIT_ - commit the 2 phase purchase<br>
-        _RELEASE_ - rollback the 2 phase purchase<br>
         _CANCEL_ - cancel this package<br>
         _CUSTOMER_ - replace a traveller in the package<br>
         _TRAVELLER_ - add, remove or change a traveller to this package<br>
@@ -263,11 +285,29 @@ paths:
         "200":
           $ref: "#/components/responses/packageResponse"
         "202":
-          description: whenever this is returned, the result will be posted on the calbackUrl
+          description: when the processing has been completed, the notification URL will be used 
+        default:
+          $ref: "#/components/responses/errorResponse"
+    get:
+      operationId: getPackage
+      summary: "Request package details"
+      description: Retrieves package details, if the packageElementId is not provided, the complete package is returned, otherwise, 
+        only the package element is returned within a 'package shell'.
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+        - $ref: "#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/optionalPackageElementId"
+      tags:
+        - execute
+      responses:
+        "200":
+          $ref: "#/components/responses/packageResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /collections/legs/items:
+  /collections/legs/items/{packageId}:
     post:
       operationId: legOperation
       summary: "Perform an operation on a leg"
@@ -304,7 +344,7 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /collections/products/items:
+  /collections/products/items/{packageId}:
     post:
       operationId: fareProductOperation
       summary: "Perform an operation on a fare product"
@@ -1871,7 +1911,6 @@ components:
     purchaseOperation:
       type: string
       description:
-        _ONE_STOP_PURCHASE_ - purchase directly based on external data<br>
         _PURCHASE_ - purchase an offered package<br>
         _2_PHASE_PURCHASE_ - transactional purchase, COMMIT to confirm the purchase<br>
         _EXTEND_EXPIRY_TIME_ - entend the expiry time of a 2-phase purchase<br>
@@ -1879,7 +1918,6 @@ components:
         _RELEASE_ - rollback the 2 phase purchase<br>
       enum:
         [
-          ONE_STOP_PURCHASE,
           PURCHASE,
           2_PHASE_PURCHASE,
           EXTEND_EXPIRY_TIME,
@@ -3105,13 +3143,13 @@ components:
               {
                 "rel": "alternative+1",
                 "type": "application/geo+json",
-                "url": "/collections/package/items?packageId=4394234",
+                "url": "/collections/package/items/4394234",
                 "method": "GET",
               },
               {
                 "rel": "alternative+2",
                 "type": "application/geo+json",
-                "url": "/collections/package/items?packageId=4394235",
+                "url": "/collections/package/items/4394235",
                 "method": "GET",
               },
               {
@@ -3436,6 +3474,13 @@ components:
           - html
         type: string
       style: form
+    packageId:
+      in: path
+      name: packageId
+      schema:
+        type: string
+      required: true
+      description: the identifier of a package
     acceptLanguage:
       in: header
       name: Accept-Language
@@ -3458,20 +3503,6 @@ components:
       schema:
         $ref: "#/components/schemas/externalReference"
       description: the ID of the intended receiver
-    packageId:
-      in: query
-      name: packageId
-      description: package identifier
-      required: true
-      schema:
-        $ref: "#/components/schemas/uuid"
-    optionalPackageId:
-      in: query
-      name: packageId
-      description: optional package identifier
-      required: false
-      schema:
-        $ref: "#/components/schemas/uuid"
     packageElementId:
       in: query
       name: packageElementId

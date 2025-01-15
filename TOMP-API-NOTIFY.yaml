@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Transport Operator MaaS Provider API - Extension notifications
   description: Notifications extension on the TOMP-API
-  version: "1.0.0"
+  version: "2.0.0"
   contact:
     name: TOMP working group
     url: https://github.com/TOMP-WG/TOMP-API
@@ -15,7 +15,7 @@ tags:
     description: This part of the API facilitates communication from the TO to the MP.
 
 paths:
-  /collection/notifications/items:
+  /collection/notifications/items/{packageId}:
     post:
       operationId: notification
       summary: "Notification endpoint"
@@ -34,10 +34,12 @@ paths:
             schema:
               $ref: "#/components/schemas/notificationRequest"
       responses:
-        "202":
-          description: Confirmed
         "204":
           description: Notification processed
+        "202":
+          description: Confirmed, only to be used when a confirmation is requested
+        "400":
+          description: Denied, only to be used when a confirmation is requested
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
@@ -70,26 +72,33 @@ components:
                 * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
                 * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
                 * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
-                * _OTHER_ [TO->MP] unspecified. Text is in **comment**<br>
+                * _OTHER_ unspecified. Text is in **comment**<br>
 
-                * _LOCKED_ [TO->MP] asset is locked  <br>
-                * _UNLOCKED_ [TO->MP] asset is unlocked  <br><br>
+                * _LOCKED_ asset is locked  <br>
+                * _UNLOCKED_ asset is unlocked  <br><br>
 
-                * _PROGRESS_ [TO->MP] report progress <br><br>
+                * _PROGRESS_ report progress <br><br>
 
                 * _CONFIRM_REPLACE_ASSET_ Asks confirmation to replace the ASSET, returns a 202 when confirmed, otherwise it will return 400<br>
                 * _CONFIRM_START_LEG_ Asks confirmation to start the LEG, returns a 202 when confirmed, otherwise it will return 400<br>
 
                 TO CONTROLLED (Process Identifier)<br>
-                * _PREPARING_ [TO->MP] the leg is in preparation  <br>
+                * _PREPARING_ the leg is in preparation  <br>
                 * _PREPARED_ the leg is ready to get started  <br>
-                * _STARTED_ [TO->MP] leg has started  <br>
-                * _PAUSED_ [TO->MP] leg is paused  <br>
-                * _RESUMED_ [TO->MP] leg is resumed  <br>
-                * _ENDED_ [TO->MP] leg is in finishing state  <br><br>
+                * _STARTED_ leg has started  <br>
+                * _PAUSED_ leg is paused  <br>
+                * _RESUMED_ leg is resumed  <br>
+                * _ENDED_ leg is in finishing state  <br><br>
 
                 Payment<br>
                 * _PAY_ Request payment (like deposit) from MP
+
+                TO Process notifications<br>
+                When a call to the TO responds with a 202 (accepted), an asynchronous process starts<br>
+                and the TO will notify with SUCCESS or FAILURE to indicate that the process has been completed<br>
+                * _SUCCESS_ The requested process is completed (e.g. the purchase of a package, responding with HTTP code 202)<br>
+                   The links object must contain a link to retrieve the processed object (e.g. GET /collections/packages/items/34243)
+                * _FAILURE_ The requested process ended in a failure (e.g. payment processing incomplete)
               enum:
                 [
                   USER_ACTION,
@@ -113,7 +122,10 @@ components:
                   RESUMED,
                   ENDED, 
 
-                  PAY
+                  PAY,
+
+                  SUCCESS,
+                  FAILURE
                 ]
               example: USER_NO_SHOW
             location:
@@ -140,7 +152,7 @@ components:
           "location": { "type": "GPS", "lng": 6.169639, "lat": 52.253279 },
           "links": [
             { "rel": "details",
-              "href": "https://some.url/tomp/v2/collections/legs/items?packageId=33942&packageElementId=4932" 
+              "href": "https://some.url/tomp/v2/collections/legs/items/33942?packageElementId=4932" 
             }
           ]
         }
@@ -150,10 +162,9 @@ components:
           "links": [
             { "rel": "deposit",
               "method": "POST",
-              "href": "https://some.url/tomp/v2/collections/payments/items?packageId=33942&packageElementId=4932",
+              "href": "https://some.url/tomp/v2/collections/payments/items/33942?packageElementId=4932",
               "body": { "amount": 100, "currencyCode": "EUR", "category": "DEPOSIT", "timestamp": "" },
               "required": [ "$.timestamp" ]
             }
           ]
         }
-
