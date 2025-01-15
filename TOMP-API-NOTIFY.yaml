@@ -36,10 +36,6 @@ paths:
       responses:
         "204":
           description: Notification processed
-        "202":
-          description: Confirmed, only to be used when a confirmation is requested
-        "400":
-          description: Denied, only to be used when a confirmation is requested
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
@@ -79,9 +75,6 @@ components:
 
                 * _PROGRESS_ report progress <br><br>
 
-                * _CONFIRM_REPLACE_ASSET_ Asks confirmation to replace the ASSET, returns a 202 when confirmed, otherwise it will return 400<br>
-                * _CONFIRM_START_LEG_ Asks confirmation to start the LEG, returns a 202 when confirmed, otherwise it will return 400<br>
-
                 TO CONTROLLED (Process Identifier)<br>
                 * _PREPARING_ the leg is in preparation  <br>
                 * _PREPARED_ the leg is ready to get started  <br>
@@ -111,10 +104,7 @@ components:
                   UNLOCKED,
 
                   PROGRESS,
-                  
-                  CONFIRM_REPLACE_ASSET,
-                  CONFIRM_START_LEG,
-                  
+                                    
                   PREPARING,
                   PREPARED,
                   STARTED,
@@ -144,7 +134,7 @@ components:
               enum: [KM, MILE]
             duration:
               $ref: "TOMP-API.yaml#/components/schemas/longInt"
-              description: the time in seconds that the assed is used. Only if applicable.
+              description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
       example:
       - {
           "timestamp": "2019-10-12T07:20:50.52Z",
@@ -152,7 +142,7 @@ components:
           "location": { "type": "GPS", "lng": 6.169639, "lat": 52.253279 },
           "links": [
             { "rel": "details",
-              "href": "https://some.url/tomp/v2/collections/legs/items/33942?packageElementId=4932" 
+              "href": "https://some.url/tomp/v2/collections/legs/items/33942?elementId=4932" 
             }
           ]
         }
@@ -162,7 +152,7 @@ components:
           "links": [
             { "rel": "deposit",
               "method": "POST",
-              "href": "https://some.url/tomp/v2/collections/payments/items/33942?packageElementId=4932",
+              "href": "https://some.url/tomp/v2/collections/payments/items/33942?elementId=4932",
               "body": { "amount": 100, "currencyCode": "EUR", "category": "DEPOSIT", "timestamp": "" },
               "required": [ "$.timestamp" ]
             }
