@@ -1165,6 +1165,18 @@ paths:
           required: false
           schema: 
             type: string
+        - name: boundingbox
+          in: query
+          required: false
+          description: "an optional filtering bounding box, using the Nomatim definition: south Latitude, north Latitude, west Longitude, east Longitude"
+          schema: 
+            type: array
+            minItems: 4
+            maxItems: 4
+            items:
+              type: string
+          example: '"boundingbox":["51.2867602","51.6918741","-0.5103751","0.3340155"]'
+
       responses:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
