@@ -3054,7 +3054,7 @@ components:
         goal:
           description: the purpose of the information
           type: string
-          enum: [INSTRUCTIONS, SALES]
+          enum: [INSTRUCTIONS, SALES, TERMS_CONDITIONS]
         text:
           type: string
           description: free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE` 
@@ -3601,9 +3601,8 @@ components:
           action:
             type: string
             description: the `RESULT_SHOWN` action requires the MP to display some information to the customer when it is viewing the proposed legs.
-            enum: [
-              RESULT_SHOWN
-            ]
+              the `SHOW_TERMS_CONDITIONS` action requires the MP to show the terms & conditions, as provided in the step
+            enum: [ RESULT_SHOWN, SHOW_TERMS_CONDITIONS ]
 
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
