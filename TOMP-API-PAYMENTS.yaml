@@ -202,56 +202,52 @@ components:
         ]
 
     paymentDetail:
-      type: object
-      description:
-        each leg will result in at least one journal entry, containing a small summary of the leg (distance, duration).
-        The **amount** must be derivable from the fare structure **elements** and **additionalCosts**.
-      additionalProperties: true
-      properties:
-        id:
-          $ref: "TOMP-API.yaml#/components/schemas/uuid"
-          description: id of the JOURNAL ENTRY, the LEG id should be used
-        category:
-          $ref: "#/components/schemas/paymentCategory"
-        sequenceId:
-          $ref: "TOMP-API.yaml#/components/schemas/tinyInt"
-          description: sequence id of the JOURNAL ENTRY, in combination with **id** unique from TO perspective.
-        invoiceId:
-          $ref: "TOMP-API.yaml#/components/schemas/shortString"
-          description: the number of the invoice. Should be filled in when invoiced (**state**=_INVOICED_).
-        invoiceDate:
-          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
-        state:
-          $ref: "#/components/schemas/paymentState"
-        #fareStructure:
-        #  can be obtained using the /components/packages/items?packageId={id}
-        #  $ref: "TOMP-API.yaml#/components/schemas/fareStructure"
-        expirationDate:
-          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
-        comment:
-          $ref: "TOMP-API.yaml#/components/schemas/longString"
-        distance:
-          $ref: "TOMP-API.yaml#/components/schemas/float"
-          description: the travelled distance, in km. Only if applicable.
-        distanceUnits:
-          type: string
-          enum: [KM, MILE]
-        duration:
-          $ref: "TOMP-API.yaml#/components/schemas/longInt"
-          description: the time in seconds that the assed is used. Only if applicable.
-        rentalStartMileage:
-          $ref: "TOMP-API.yaml#/components/schemas/longInt"
-          description: the mileage at the start of the rental. **duration** field is also applicable here
-        vatNumber:
-          $ref: "TOMP-API.yaml#/components/schemas/shortString"
-          description: VAT identification number.
+      allOf:
+      - $ref: "TOMP-API.yaml#/components/schemas/amountOfMoney"
+      - type: object
+        description:
+          each leg will result in at least one journal entry, containing a small summary of the leg (distance, duration).
+          The **amount** must be derivable from the fare structure **elements** and **additionalCosts**.
+        additionalProperties: true
+        properties:
+          id:
+            $ref: "TOMP-API.yaml#/components/schemas/uuid"
+            description: id of the JOURNAL ENTRY, the LEG id should be used
+          category:
+            $ref: "#/components/schemas/paymentCategory"
+          sequenceId:
+            $ref: "TOMP-API.yaml#/components/schemas/tinyInt"
+            description: sequence id of the JOURNAL ENTRY, in combination with **id** unique from TO perspective.
+          invoiceId:
+            $ref: "TOMP-API.yaml#/components/schemas/shortString"
+            description: the number of the invoice. Should be filled in when invoiced (**state**=_INVOICED_).
+          invoiceDate:
+            $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          state:
+            $ref: "#/components/schemas/paymentState"
+          expirationDate:
+            $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          comment:
+            $ref: "TOMP-API.yaml#/components/schemas/longString"
+          distance:
+            $ref: "TOMP-API.yaml#/components/schemas/float"
+            description: the travelled distance, in km. Only if applicable.
+          distanceUnits:
+            type: string
+            enum: [KM, MILE]
+          duration:
+            $ref: "TOMP-API.yaml#/components/schemas/longInt"
+            description: the time in seconds that the assed is used. Only if applicable.
+          rentalStartMileage:
+            $ref: "TOMP-API.yaml#/components/schemas/longInt"
+            description: the mileage at the start of the rental. **duration** field is also applicable here
+          vatNumber:
+            $ref: "TOMP-API.yaml#/components/schemas/shortString"
+            description: VAT identification number.
 
-        bankAccount:
-          $ref: "#/components/schemas/bankAccount"
-          description: this account will be used
-
-        extraInfo:
-          $ref: "TOMP-API.yaml#/components/schemas/customProperties"
+          bankAccount:
+            $ref: "#/components/schemas/bankAccount"
+            description: this account will be used
 
     paymentState:
       type: string

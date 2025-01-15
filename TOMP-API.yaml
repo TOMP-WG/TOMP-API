@@ -391,6 +391,7 @@ components:
             $ref: "#/components/schemas/offerRequest"
 
     packageOperationRequest:
+      required: false
       content:
         application/json:
           schema:
@@ -418,6 +419,7 @@ components:
             - $ref: "#/components/schemas/packageElementRequest"
 
     legOperationRequest:
+      required: false
       content:
         application/json:
           schema:
@@ -445,6 +447,7 @@ components:
               - $ref: "#/components/schemas/evidenceRequest"
 
     fareProductOperationRequest:
+      required: false
       content:
         application/json:
           schema:
@@ -3505,14 +3508,14 @@ components:
       description: the ID of the intended receiver
     packageElementId:
       in: query
-      name: packageElementId
+      name: elementId
       description: package element identifier
       required: true
       schema:
         $ref: "#/components/schemas/uuid"
     optionalPackageElementId:
       in: query
-      name: packageElementId
+      name: elementId
       description: package element identifier
       required: false
       schema:
