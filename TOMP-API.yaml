@@ -658,9 +658,6 @@ components:
           required:
             - id
           properties:
-            externalCustomerId:
-              $ref: "#/components/schemas/shortString"
-              description: The customer id used by the TO system.
             creationDate:
               $ref: "#/components/schemas/dateTime"
               description: The date in which the CUSTOMER ACCOUNT has been created
