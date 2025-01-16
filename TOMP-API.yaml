@@ -3657,6 +3657,8 @@ components:
 
     processIdentifiers:
       type: object
+      description: Process Identifiers deliberately not included in the specification, since new ones pop up regularly. <br>
+       Known identifiers can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers.<br>
       required:
         - operatorInformation
         - planning
