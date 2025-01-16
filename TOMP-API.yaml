@@ -2986,6 +2986,20 @@ components:
               type: object
               additionalProperties: true
               
+    geojsonLine:
+      type: object
+      description: An array of WGS84 coordinate pairs
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              description: Geojson Coordinate
+              type: array
+              example: [ [ 6.169639, 52.253279 ], [ 6.05623, 52.63473 ] ]
+              items:
+                $ref: "#/components/schemas/basePoint"
+
     basePoint:
       type: array
       minItems: 2
@@ -2994,7 +3008,7 @@ components:
         type: number
         format: float
         minimum: 0.0
-      example: [ 4.53432, 55.324523 ]
+      example: [ 4.53432, 55.324523 ]          
 
     geojsonPoint:
       type: object
@@ -3006,19 +3020,6 @@ components:
             coordinates:
               $ref: "#/components/schemas/basePoint"
 
-    geojsonLine:
-      type: object
-      description: An array of WGS84 coordinate pairs
-      allOf:
-        - $ref: "#/components/schemas/geojsonGeometry"
-        - type: object
-          properties:
-            coordinates:
-              type: array
-              example: [ [ 6.169639, 52.253279 ], [ 6.05623, 52.63473 ] ]
-              items:
-                $ref: "#/components/schemas/basePoint"
-
     geojsonPolygon:
       type: object
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
@@ -3028,10 +3029,9 @@ components:
           properties:
             coordinates:
               type: array
-              example: [ [ [ 1.0, 1.0 ], [ 0.0, 1.0 ], [ 0.0, 0.0 ], [ 1.0,0.0 ], [ 1.0, 1.0 ] ] ]
+              example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
               items:
                 type: array
-                example: [ [ 6.169639, 52.253279 ], [ 6.05623, 52.63473 ] ]
                 items:
                   $ref: "#/components/schemas/basePoint"
 
@@ -3044,18 +3044,27 @@ components:
           properties:
             coordinates:
               type: array
-              example: [ [ [ [ 1.0, 1.0 ], [ 0.0, 1.0 ], [ 0.0, 0.0 ], [ 1.0,0.0 ], [ 1.0, 1.0 ] ] ] ]
+              example: [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]]
               items:
                 type: array
-                example: [ [ [ 1.0, 1.0 ], [ 0.0, 1.0 ], [ 0.0, 0.0 ], [ 1.0,0.0 ], [ 1.0, 1.0 ] ] ]
                 items:
                   type: array
-                  example: [ [ 6.169639, 52.253279 ], [ 6.05623, 52.63473 ] ]
                   items:
                     $ref: "#/components/schemas/basePoint"
 
     geojsonGeometry:
       type: object
+      description: geoJSON geometry
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: 
+            - Point
+            - LineString
+            - Polygon
+            - MultiPolygon
       discriminator:
         propertyName: type
         mapping:
@@ -3063,18 +3072,6 @@ components:
           LineString: "#/components/schemas/geojsonLine"
           Polygon: "#/components/schemas/geojsonPolygon"
           MultiPolygon: "#/components/schemas/geojsonMultiPolygon"
-      description: geoJSON geometry
-      required:
-        - type
-      properties:
-        type:
-          type: string
-          enum: [
-            "Point",
-            "LineString",
-            "Polygon",
-            "MultiPolygon"
-          ]
 
     information:
       description: Information provided to end users
