@@ -578,12 +578,13 @@ paths:
                 $ref: "#/components/schemas/customerAccount"
         default:
           $ref: "#/components/responses/errorResponse"
-  /collections/customers/items/{id}:
+
+  /collections/customers/items/{accountId}:
     parameters:
       - $ref: "#/components/parameters/acceptLanguage"
       - $ref: "#/components/parameters/senderId"
       - $ref: "#/components/parameters/callbackUrl"
-      - $ref: "#/components/parameters/customerId"
+      - $ref: "#/components/parameters/accountId"
       - name: operation
         in: query
         schema:
@@ -656,8 +657,10 @@ components:
         - $ref: "#/components/schemas/customer"
         - type: object
           required:
-            - id
+            - accountId
           properties:
+            accountId:
+              type: string              
             creationDate:
               $ref: "#/components/schemas/dateTime"
               description: The date in which the CUSTOMER ACCOUNT has been created
@@ -1928,11 +1931,9 @@ components:
       allOf:
         - $ref: "#/components/schemas/traveler"
         - type: object
-          required:
-            - id
           properties:
             id:
-              $ref: "#/components/parameters/customerId"
+              $ref: "#/components/schemas/shortString"
               description: MaaS customer id. The identifier the MP uses to identify the customer.
               example: "A0-123456"
             initials:
@@ -2362,7 +2363,7 @@ components:
             $ref: "#/components/schemas/uuid"
             description: id of the JOURNAL ENTRY, the LEG id should be used
           customerId:
-            $ref: "#/components/parameters/customerId"
+            $ref: "#/components/schemas/shortString"
             description: MaaS customer id
           category:
             $ref: "#/components/schemas/paymentCategory"
@@ -3266,10 +3267,10 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/uuid"
-    customerId:
+    accountId:
       in: path
       name: id
-      description: MaaS customer id
+      description: Account ID at the TO side.
       required: true
       schema:
         $ref: "#/components/schemas/shortString"
