@@ -555,7 +555,7 @@ paths:
       - $ref: "#/components/parameters/callbackUrl"
     post:
       summary: "[MP->TO] create a TO CUSTOMER ACCOUNT for the customer"
-      description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
+      description: Creates or links a CUSTOMER ACCOUNT that can be later used for purchasing a trip. If the customer is already registered with this TO it's the TO descision whether to link to the existing acount or to create a seperate account.
       tags:
         - customer management
       externalDocs:
@@ -669,9 +669,6 @@ components:
           required:
             - id
           properties:
-            externalCustomerId:
-              $ref: "#/components/schemas/shortString"
-              description: The customer id used by the TO system.
             creationDate:
               $ref: "#/components/schemas/dateTime"
               description: The date in which the CUSTOMER ACCOUNT has been created
@@ -1942,12 +1939,10 @@ components:
       allOf:
         - $ref: "#/components/schemas/traveler"
         - type: object
-          required:
-            - id
           properties:
             id:
               $ref: "#/components/parameters/customerId"
-              description: MaaS customer id. The identifier the MP uses to identify the customer.
+              description: TO customer id. The identifier the TO uses to identify the customer.
               example: "A0-123456"
             initials:
               $ref: "#/components/schemas/tinyString"
@@ -1992,6 +1987,9 @@ components:
               format: byte-array
             extraInfo:
               $ref: "#/components/schemas/customProperties"
+            externalCustomerId:
+              $ref: "#/components/schemas/shortString"
+              description: The customer id used by the MP system.
 
     disability:
       allOf:
@@ -2377,7 +2375,7 @@ components:
             description: id of the JOURNAL ENTRY, the LEG id should be used
           customerId:
             $ref: "#/components/parameters/customerId"
-            description: MaaS customer id
+            description: TO customer ID
           category:
             $ref: "#/components/schemas/paymentCategory"
           sequenceId:
@@ -3283,7 +3281,7 @@ components:
     customerId:
       in: path
       name: id
-      description: MaaS customer id
+      description: TO customer ID
       required: true
       schema:
         $ref: "#/components/schemas/shortString"
