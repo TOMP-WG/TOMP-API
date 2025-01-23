@@ -17,7 +17,7 @@ tags:
     description: Extension to modify offers.
 
 paths:
-  /collections/prepurchased-packages/items/{packageId}:
+  /collections/offers/items/{packageId}:
     get:
       summary: retrieve the pre-purchased package as registered
       parameters:
@@ -58,7 +58,7 @@ paths:
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
-  /collections/prepurchased-legs/items:
+  /collections/offered-legs/items:
     post:
       operationId: prepurchasedLegOperation
       summary: "Perform an operation on a leg in an pre-purchased package"
@@ -85,7 +85,7 @@ paths:
         default:
           $ref: "TOMP-API.yaml#/components/responses/errorResponse"
 
-  /collections/prepurchased-products/items:
+  /collections/offered-products/items:
     post:
       operationId: offeredProductOperation
       summary: "Perform an operation on a product in an pre-purchased package"

@@ -1648,6 +1648,7 @@ components:
 
         _SEND_EVIDENCE_ sends pictures (in url field) to prove that the ASSET is parked correctly<br>
         _CUSTOM_ Custom operation
+        _REVOKE_TICKET_ Revocation of a ticket
       enum: [
           CANCEL,
           ASSIGN_ASSET,
@@ -1658,7 +1659,8 @@ components:
           RESUME,
           END,
           SEND_EVIDENCE,
-          CUSTOM
+          CUSTOM,
+          REVOKE_TICKET
         ]
 
     fareProductOperation:

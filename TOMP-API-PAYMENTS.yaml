@@ -81,7 +81,8 @@ paths:
         - $ref: "TOMP-API.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API.yaml#/components/parameters/packageElementId"
+        - $ref: "TOMP-API.yaml#/components/parameters/optionalPackageElementId"
+        - $ref: "#/components/parameters/optionalPaymentId"
       tags:
         - payments
       requestBody:
@@ -180,7 +181,7 @@ components:
 
         <h2>MP initiated payments</h2>
         These payment requests require evidence.
-        _REFUND_ - refund of the deposit<br>
+        _REFUND_ - refund of the deposit or upfront paid fare<br>
         _REIMBURSEMENT_ - reimbursement of the fare<br>
       enum:
         [
@@ -309,3 +310,12 @@ components:
         bankIdentification:
           $ref: "TOMP-API.yaml#/components/schemas/shortString"
           description: bank identification, like BIC code
+
+  parameters:
+    optionalPaymentId:
+      in: query
+      name: paymentId
+      description: payment identifier
+      required: false
+      schema:
+        $ref: "TOMP-API.yaml#/components/schemas/uuid"
