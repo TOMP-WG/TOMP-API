@@ -17,7 +17,7 @@ tags:
     description: Extension to modify offers.
 
 paths:
-  /collections/prepurchased-packages/items:
+  /collections/prepurchased-packages/items/{packageId}:
     get:
       summary: retrieve the pre-purchased package as registered
       parameters:
