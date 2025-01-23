@@ -19,7 +19,9 @@ OpenAPI 3.0 documentation is available at [Swaggerhub](https://app.swaggerhub.co
 The Blueprint for an Transport Operator to Mobility-as-a-service Provider API is available at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents). 
 
 How can I join the TOMP working group?
-Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease) or contact Ayse (aysehilal.ocal@ndw.nu) to be added to our mailing list and to receive invites for the working group meetings.
+---
+
+Join our [Slack space](https://join.slack.com/t/tomp-wg/shared_invite/zt-e3fftun7-qCs8FyXZPPy9pt_opyFw0QPlease) or contact Jed (tomp-secretary@maas-alliance.eu) to be added to our mailing list and to receive invites for the working group meetings.
 
 The working group meetings take place every month with the goal to develop and specify a generic TOMP-API for use by Transport Operators and Mobility-as-a-service Providers. All reports can be found at the [documentation page](https://github.com/TOMP-WG/TOMP-API/tree/master/documents/working%20group%20reports).
 
@@ -27,6 +29,5 @@ Code of conduct
 ---
 
 [Our code of conduct](https://github.com/TOMP-WG/TOMP-API/blob/master/code_of_conduct.md) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
-
 
 <img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/TOMP%20WG%20grey.png" width="300">

@@ -3017,16 +3017,22 @@ components:
             meta:
               type: object
               additionalProperties: true
-
+              
     geojsonLine:
-      description: An array  of WGS84 coordinate pairs
-      type: array
-      example: [[6.169639, 52.253279], [6.05623, 52.63473]]
-      items:
-        $ref: "#/components/schemas/geojsonPoint"
+      type: object
+      description: An array of WGS84 coordinate pairs
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              description: Geojson Coordinate
+              type: array
+              example: [ [ 6.169639, 52.253279 ], [ 6.05623, 52.63473 ] ]
+              items:
+                $ref: "#/components/schemas/basePoint"
 
-    geojsonPoint:
-      description: Geojson Coordinate
+    basePoint:
       type: array
       minItems: 2
       maxItems: 2
@@ -3034,43 +3040,70 @@ components:
         type: number
         format: float
         minimum: 0.0
-      example: [4.53432, 55.324523]
+      example: [ 4.53432, 55.324523 ]          
+
+    geojsonPoint:
+      type: object
+      description: Geojson Coordinate
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              $ref: "#/components/schemas/basePoint"
 
     geojsonPolygon:
+      type: object
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
-      type: array
-      items:
-        $ref: "#/components/schemas/geojsonLine"
-      example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              type: array
+              example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/basePoint"
 
     geojsonMultiPolygon:
+      type: object
       description: geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon
-      type: array
-      items:
-        $ref: "#/components/schemas/geojsonPolygon"
-      example: [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]]
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              type: array
+              example: [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]]
+              items:
+                type: array
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/basePoint"
 
     geojsonGeometry:
+      type: object
+      description: geoJSON geometry
       required:
-      - type
-      description: 
-        geoJSON geometry
+        - type
       properties:
         type:
           type: string
-          enum:
-          - Point
-          - LineString
-          - Polygon
-          - MultiPolygon
-        coordinates:
-          oneOf: 
-            - $ref: "#/components/schemas/geojsonPoint"
-            - $ref: "#/components/schemas/geojsonLine"
-            - $ref: "#/components/schemas/geojsonPolygon"
-            - $ref: "#/components/schemas/geojsonMultiPolygon"
+          enum: 
+            - Point
+            - LineString
+            - Polygon
+            - MultiPolygon
       discriminator:
         propertyName: type
+        mapping:
+          Point: "#/components/schemas/geojsonPoint"
+          LineString: "#/components/schemas/geojsonLine"
+          Polygon: "#/components/schemas/geojsonPolygon"
+          MultiPolygon: "#/components/schemas/geojsonMultiPolygon"
 
     information:
       description: Information provided to end users
