@@ -1701,6 +1701,92 @@ paths:
           $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
+  
+  /customers:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/callbackUrl"
+    post:
+      summary: "[MP->TO] create a TO CUSTOMER ACCOUNT for the customer"
+      description: Creates or links a CUSTOMER ACCOUNT that can be later used for purchasing a trip. If the customer is already registered with this TO it's the TO descision whether to link to the existing acount or to create a seperate account.
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createCustomerAccountParameters"
+      responses:
+        "200":
+          description: created CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "#/components/parameters/acceptLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/callbackUrl"
+      - $ref: "#/components/parameters/customerId"
+    patch:
+      summary: "[MP->TO] update the CUSTOMER ACCOUNT on the TO system"
+      description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
+        When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
+        can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/merge-patch+json:
+            schema:
+              description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
+              type: object
+              properties: {}
+            example: { "email": "new-email@example.com", "extraFields": { "otp": "12345" } }
+      responses:
+        "200":
+          description: updated CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "#/components/parameters/acceptLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+    get:
+      summary: "[MP->TO] get the customer account on the TO system"
+      tags:
+        - customer management
+      responses:
+        "200":
+          description: Customer Account
+          headers:
+            Content-Language:
+              $ref: "#/components/parameters/acceptLanguage"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+    delete:
+      summary: "[MP->TO] delete the CUSTOMER ACCOUNT on the TO system."
+      description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      tags:
+        - customer management
+      responses:
+        "200":
+          description:  CUSTOMER ACCOUNT deleted successfully
+        default:
+          $ref: "#/components/responses/errorResponse"
 
 components:
   schemas:
@@ -2615,11 +2701,14 @@ components:
       allOf:
         - $ref: "#/components/schemas/traveler"
         - type: object
-          required:
-            - id
           properties:
             id:
-              description: The identifier MaaS uses to identify the customer
+              description: The identifier that the TO uses to identify this customer.
+              type: string
+              example: "A0-123456"
+            externalId:
+              description: The identifier that the MP uses to identify this customer. It is not mandatory to store it at the TOs side,
+                since the communication between TO and MP always uses the identifier on TO side.
               type: string
               example: "A0-123456"
             travelerReference:
@@ -2678,6 +2767,43 @@ components:
               description: dictionary for extra fields (bilatural agreements)
               type: object
               additionalProperties: true
+
+    createCustomerAccountParameters:
+      description: A CUSTOMER ACCOUNT request, resulting in a new or linked TO CUSTOMER ACCOUNT
+      $ref: "#/components/schemas/customer"
+    
+    customerAccount:
+      description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
+      allOf:
+        - $ref: "#/components/schemas/customer"
+        - type: object
+          required:
+            - id
+          properties:
+            creationDate:
+              type: string
+              format: date-time
+              example: "2019-10-12T07:20:50.52Z"
+              pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+              description: The date in which the CUSTOMER ACCOUNT has been created
+            modificationDate:
+              type: string
+              format: date-time
+              pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+              description: Last modification date of CUSTOMER ACCOUNT.
+            status:
+              $ref: "#/components/schemas/customerAccountStatus"
+              description: The status of the CUSTOMER ACCOUNT
+
+    customerAccountStatus:
+      type: string
+      description: status of a CUSTOMER ACCOUNT<br>
+        _CREATED_ the customer account has been created but is not ready to create a purchase yet<br>
+        _TO_PENDING_VALIDATION_ the customer account is pending a verification of identity and properties by the TO. No purchases can be made in this step<br>
+        _OTP_REQUIRED_ the TO has sent an OTP to the customer's phone or email address and is expecting it to activate the account. No purchases can be made in this step<br>
+        _ACTIVE_ the customer account is active and can continue to purchase offers<br>
+        _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
+      enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]
 
     damage:
       description: A damage of the vehicle.
@@ -2777,7 +2903,7 @@ components:
         externalType:
           type: string
           description: this field must be used when adressing other standards for exchanging 'static' data (Level 1 MaaS)
-          enum: [GBFS, GTFS, NeTEx, OSDM_Offline, IXSI5, APDS]
+          enum: [GBFS, GTFS, NeTEx, OSDM_Offline, IXSI5, APDS, CDS]
         useAssetTypes:
           type: array
           items: 
@@ -4577,6 +4703,20 @@ components:
         type: string
       description: The ID of the maas operator that has to receive this message
       example: 1324A-DFB3482-32ACD
+    callbackUrl:
+      in: header
+      name: notification-url
+      description: The URL at the MP side, where notifications will be send to about the purchased packages. Communication towards the TO is always done using notifications.
+      required: false
+      schema:
+        type: string
+    customerId:
+      in: path
+      name: id
+      description: ID of the customer, on TO side
+      required: true
+      schema:
+        type: string
 
   securitySchemes:
     BasicAuth:
@@ -4641,3 +4781,18 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
+    errorResponse:
+      description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      headers:
+        Content-Language:
+          $ref: "#/components/parameters/acceptLanguage"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                maxItems: 10
+                items:
+                  $ref: "#/components/schemas/error"
