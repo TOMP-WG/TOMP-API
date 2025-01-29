@@ -4,7 +4,7 @@ info:
   description:
     An API between MaaS providers and transport operators for booking trips and corresponding assets.
     <p>The documentation (examples, process flows and sequence diagrams) can be found at <a href="https://github.com/TOMP-WG/TOMP-API/">github</a>.
-  version: "1.5.0"
+  version: "1.6.0"
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -30,6 +30,9 @@ tags:
 
   - name: general
     description: general operations (e.g. notifications)
+
+  - name: customer management
+    description: customer management
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
@@ -94,12 +97,7 @@ paths:
                 $ref: "#/components/schemas/planning"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -136,12 +134,7 @@ paths:
                 $ref: "#/components/schemas/planning"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -179,12 +172,7 @@ paths:
                 $ref: "#/components/schemas/planning"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -227,19 +215,9 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-              required: true
+              $ref: "#/components/headers/expires"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -252,6 +230,8 @@ paths:
           $ref: "#/components/responses/409Conflict"
         "410":
           $ref: "#/components/responses/410Gone"
+        "428":
+          $ref: "#/components/responses/428PreconditionRequired"
     get:
       description: Optional - Returns bookings that has been created earlier, selected on state.
       tags:
@@ -311,12 +291,7 @@ paths:
                   $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -351,19 +326,9 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-              required: true
+              $ref: "#/components/headers/expires"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -388,7 +353,7 @@ paths:
           type: string
     post:
       description: This endpoint **must** be used to alter the state of a booking:<br>
-        `CANCEL` - Cancels a confirmed booking.<br> 
+        `CANCEL` - Cancels a pending or confirmed booking.<br> 
         `EXTEND_EXPIRY_TIME` - the MP request to extend the expiry time of the booking. Only available when the Process Identifier 'ALLOW_EXTEND_BOOKING_EXPIRY_TIME' is used. Whenever the extension is not granted, 410 should be returned.<br> 
         `COMMIT` - Turns the booking in a confirmed state, after all legs are in state pending. If the booking is in state COMMITTED, CANCELLED or EXPIRED, a commit will result a 403. <BR> 
         `DENY` - Used for the 'postponed-commit' scenario. Whenever a TO cannot give guarantees directly to fulfil a booking, it can return a 'COMMIT', but the state of the booking object should be 'POSTPONED-COMMIT'. In the conditions returned in the planning phase is stated until when this phase can be. After this time it will become expired. Otherwise, it can be committed when the leg is confirmed or denied (using this event).
@@ -410,19 +375,10 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
             Expires:
               description: Mandatory whenever the EXTEND_EXPIRY_TIME is used. It must contain the updated expiry time
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-              required: false
+              $ref: "#/components/headers/expires"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -461,12 +417,7 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
@@ -495,12 +446,7 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -609,12 +555,7 @@ paths:
           description: The bookings matching the query
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -696,12 +637,7 @@ paths:
           description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1035,12 +971,7 @@ paths:
                   $ref: "#/components/schemas/endpointImplementation"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
 
   /operator/stations:
     parameters:
@@ -1112,12 +1043,7 @@ paths:
                   $ref: "#/components/schemas/stationInformation"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1163,17 +1089,25 @@ paths:
           required: false
           schema: 
             type: string
+        - name: boundingbox
+          in: query
+          required: false
+          description: "an optional filtering bounding box, using the Nomatim definition: south Latitude, north Latitude, west Longitude, east Longitude"
+          schema: 
+            type: array
+            minItems: 4
+            maxItems: 4
+            items:
+              type: number
+          explode: false
+          example: 1,2,3,4
+
       responses:
         "200":
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1241,12 +1175,7 @@ paths:
                   $ref: "#/components/schemas/systemAlert"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1288,12 +1217,7 @@ paths:
                   $ref: "#/components/schemas/systemCalendar"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1336,12 +1260,7 @@ paths:
                   $ref: "#/components/schemas/systemHours"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1369,12 +1288,7 @@ paths:
                 $ref: "#/components/schemas/systemInformation"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1417,12 +1331,7 @@ paths:
                   $ref: "#/components/schemas/systemPricingPlan"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1536,12 +1445,7 @@ paths:
           description: journal entries
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1585,12 +1489,7 @@ paths:
           description: journal entry received, will be processed (state = INVOICED)
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1624,12 +1523,7 @@ paths:
           description: support request acknowledged
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1673,12 +1567,7 @@ paths:
                   $ref: "#/components/schemas/supportStatus"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1687,6 +1576,92 @@ paths:
           $ref: "#/components/responses/403Forbidden"
         "404":
           $ref: "#/components/responses/404NotFound"
+  
+  /customers:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/callbackUrl"
+    post:
+      summary: "[MP->TO] create a TO CUSTOMER ACCOUNT for the customer"
+      description: Creates or links a CUSTOMER ACCOUNT that can be later used for purchasing a trip. If the customer is already registered with this TO it's the TO descision whether to link to the existing acount or to create a seperate account.
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createCustomerAccountParameters"
+      responses:
+        "200":
+          description: created CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /customers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/acceptLanguage"
+      - $ref: "#/components/parameters/callbackUrl"
+      - $ref: "#/components/parameters/customerId"
+    patch:
+      summary: "[MP->TO] update the CUSTOMER ACCOUNT on the TO system"
+      description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
+        When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
+        can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/merge-patch+json:
+            schema:
+              description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
+              type: object
+              properties: {}
+            example: { "email": "new-email@example.com", "extraFields": { "otp": "12345" } }
+      responses:
+        "200":
+          description: updated CUSTOMER ACCOUNT
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+    get:
+      summary: "[MP->TO] get the customer account on the TO system"
+      tags:
+        - customer management
+      responses:
+        "200":
+          description: Customer Account
+          headers:
+            Content-Language:
+              $ref: "#/components/headers/language"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customerAccount"
+        default:
+          $ref: "#/components/responses/errorResponse"
+    delete:
+      summary: "[MP->TO] delete the CUSTOMER ACCOUNT on the TO system."
+      description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      tags:
+        - customer management
+      responses:
+        "200":
+          description:  CUSTOMER ACCOUNT deleted successfully
+        default:
+          $ref: "#/components/responses/errorResponse"
 
 components:
   schemas:
@@ -2320,7 +2295,6 @@ components:
         - type: object
           required:
             - cardNumber
-            - validUntil
           properties:
             cardDescription:
               description: description of the card
@@ -2333,6 +2307,7 @@ components:
               type: string
             validUntil:
               type: string
+              description: the enddate of the card. Mandatory in case of a credit card or ID card.
               format: date
             country:
               $ref: "#/components/schemas/country"
@@ -2412,6 +2387,8 @@ components:
             requiredFields:
               type: array
               items:
+                description: <br>
+                  `NAME` - depricated, use FIRST_NAME, LAST_NAME, ... instead<br>
                 type: string
                 enum:
                   [
@@ -2419,16 +2396,23 @@ components:
                     TO_ADDRESS,
                     BIRTHDATE,
                     EMAIL,
+                    FIRST_NAME,
+                    LAST_NAME
+                    MIDDLE_NAME,
+                    PREFIX,
+                    POSTFIX,
+                    NAME,
+                    AGE,
                     PERSONAL_ADDRESS,
                     PHONE_NUMBERS,
+                    KNOWN_IDENTIFIER,
+                    KNOWN_IDENTIFIER_PROVIDER,
                     LICENSES,
                     BANK_CARDS,
                     DISCOUNT_CARDS,
                     TRAVEL_CARDS,
                     ID_CARDS,
                     CREDIT_CARDS,
-                    NAME,
-                    AGE,
                     BLOCKCHAIN_CLAIMS,
                   ]
             claims:
@@ -2592,11 +2576,14 @@ components:
       allOf:
         - $ref: "#/components/schemas/traveler"
         - type: object
-          required:
-            - id
           properties:
             id:
-              description: The identifier MaaS uses to identify the customer
+              description: The identifier that the TO uses to identify this customer.
+              type: string
+              example: "A0-123456"
+            externalId:
+              description: The identifier that the MP uses to identify this customer. It is not mandatory to store it at the TOs side,
+                since the communication between TO and MP always uses the identifier on TO side.
               type: string
               example: "A0-123456"
             travelerReference:
@@ -2632,6 +2619,11 @@ components:
             birthDate:
               type: string
               format: date
+            placeOfBirth:
+              type: string
+              format: date
+            countryOfBirth:
+              $ref: "#/components/schemas/country"
             address:
               $ref: "#/components/schemas/address"
             photo:
@@ -2651,6 +2643,43 @@ components:
               type: object
               additionalProperties: true
 
+    createCustomerAccountParameters:
+      description: A CUSTOMER ACCOUNT request, resulting in a new or linked TO CUSTOMER ACCOUNT
+      $ref: "#/components/schemas/customer"
+    
+    customerAccount:
+      description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
+      allOf:
+        - $ref: "#/components/schemas/customer"
+        - type: object
+          required:
+            - id
+          properties:
+            creationDate:
+              type: string
+              format: date-time
+              example: "2019-10-12T07:20:50.52Z"
+              pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+              description: The date in which the CUSTOMER ACCOUNT has been created
+            modificationDate:
+              type: string
+              format: date-time
+              pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+              description: Last modification date of CUSTOMER ACCOUNT.
+            status:
+              $ref: "#/components/schemas/customerAccountStatus"
+              description: The status of the CUSTOMER ACCOUNT
+
+    customerAccountStatus:
+      type: string
+      description: status of a CUSTOMER ACCOUNT<br>
+        _CREATED_ the customer account has been created but is not ready to create a purchase yet<br>
+        _TO_PENDING_VALIDATION_ the customer account is pending a verification of identity and properties by the TO. No purchases can be made in this step<br>
+        _OTP_REQUIRED_ the TO has sent an OTP to the customer's phone or email address and is expecting it to activate the account. No purchases can be made in this step<br>
+        _ACTIVE_ the customer account is active and can continue to purchase offers<br>
+        _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
+      enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]
+
     damage:
       description: A damage of the vehicle.
       type: object
@@ -2662,6 +2691,10 @@ components:
           description: Part/Component of the vehicle affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.
           type: string
           enum: [FRONT, REAR, LEFT, RIGHT, TOP, BOTTOM, INTERIOR, TIRE, ANCILLARY, OTHER]
+        vehicleComponentName:
+          description: a short term to describe the damaged part
+          type: string
+          x-examples: wheel, ring, light, brake, gear, saddle, pedal, window, rack, ...
         description:
           description: Description of the damage.
           type: string
@@ -2745,7 +2778,7 @@ components:
         externalType:
           type: string
           description: this field must be used when adressing other standards for exchanging 'static' data (Level 1 MaaS)
-          enum: [GBFS, GTFS, NeTEx, OSDM_Offline, IXSI5, APDS]
+          enum: [GBFS, GTFS, NeTEx, OSDM_Offline, IXSI5, APDS, CDS]
         useAssetTypes:
           type: array
           items: 
@@ -2985,16 +3018,22 @@ components:
             meta:
               type: object
               additionalProperties: true
-
+              
     geojsonLine:
-      description: An array  of WGS84 coordinate pairs
-      type: array
-      example: [[6.169639, 52.253279], [6.05623, 52.63473]]
-      items:
-        $ref: "#/components/schemas/geojsonPoint"
+      type: object
+      description: An array of WGS84 coordinate pairs
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              description: Geojson Coordinate
+              type: array
+              example: [ [ 6.169639, 52.253279 ], [ 6.05623, 52.63473 ] ]
+              items:
+                $ref: "#/components/schemas/basePoint"
 
-    geojsonPoint:
-      description: Geojson Coordinate
+    basePoint:
       type: array
       minItems: 2
       maxItems: 2
@@ -3002,43 +3041,70 @@ components:
         type: number
         format: float
         minimum: 0.0
-      example: [4.53432, 55.324523]
+      example: [ 4.53432, 55.324523 ]          
+
+    geojsonPoint:
+      type: object
+      description: Geojson Coordinate
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              $ref: "#/components/schemas/basePoint"
 
     geojsonPolygon:
+      type: object
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
-      type: array
-      items:
-        $ref: "#/components/schemas/geojsonLine"
-      example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              type: array
+              example: [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/basePoint"
 
     geojsonMultiPolygon:
+      type: object
       description: geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon
-      type: array
-      items:
-        $ref: "#/components/schemas/geojsonPolygon"
-      example: [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]]
+      allOf:
+        - $ref: "#/components/schemas/geojsonGeometry"
+        - type: object
+          properties:
+            coordinates:
+              type: array
+              example: [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0,0.0], [1.0, 1.0]]]]
+              items:
+                type: array
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/basePoint"
 
     geojsonGeometry:
+      type: object
+      description: geoJSON geometry
       required:
-      - type
-      description: 
-        geoJSON geometry
+        - type
       properties:
         type:
           type: string
-          enum:
-          - Point
-          - LineString
-          - Polygon
-          - MultiPolygon
-        coordinates:
-          oneOf: 
-            - $ref: "#/components/schemas/geojsonPoint"
-            - $ref: "#/components/schemas/geojsonLine"
-            - $ref: "#/components/schemas/geojsonPolygon"
-            - $ref: "#/components/schemas/geojsonMultiPolygon"
+          enum: 
+            - Point
+            - LineString
+            - Polygon
+            - MultiPolygon
       discriminator:
         propertyName: type
+        mapping:
+          Point: "#/components/schemas/geojsonPoint"
+          LineString: "#/components/schemas/geojsonLine"
+          Polygon: "#/components/schemas/geojsonPolygon"
+          MultiPolygon: "#/components/schemas/geojsonMultiPolygon"
 
     information:
       description: Information provided to end users
@@ -3054,7 +3120,7 @@ components:
         goal:
           description: the purpose of the information
           type: string
-          enum: [INSTRUCTIONS, SALES]
+          enum: [INSTRUCTIONS, SALES, TERMS_CONDITIONS]
         text:
           type: string
           description: free format text or HTML, depending on the type. Not to use in combination with `URL` or `IMAGE` 
@@ -3273,6 +3339,9 @@ components:
           items:
             type: string
             format: url
+        userLocation:
+          description: This field might lead to GDPR issues. Be aware, use it with caution.
+          $ref: "#/components/schemas/place"
         asset:
           $ref: "#/components/schemas/asset"
 
@@ -3601,9 +3670,8 @@ components:
           action:
             type: string
             description: the `RESULT_SHOWN` action requires the MP to display some information to the customer when it is viewing the proposed legs.
-            enum: [
-              RESULT_SHOWN
-            ]
+              the `SHOW_TERMS_CONDITIONS` action requires the MP to show the terms & conditions, as provided in the step
+            enum: [ RESULT_SHOWN, SHOW_TERMS_CONDITIONS ]
 
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
@@ -3623,6 +3691,8 @@ components:
 
     processIdentifiers:
       type: object
+      description: Process Identifiers deliberately not included in the specification, since new ones pop up regularly. <br>
+       Known identifiers can be found at https://github.com/TOMP-WG/TOMP-API/wiki/ProcessIdentifiers.<br>
       required:
         - operatorInformation
         - planning
@@ -3963,13 +4033,18 @@ components:
           format: double
           description: time to respond in minutes.
           minimum: 0
+        damage:
+          $ref: "#/components/schemas/damage"
         urls:
           type: array
           description: urls to clarify the support request e.g. pictures showing damage
           items:
             type: string
             format: url
-
+        assetId:
+          type: string
+          description: the (visual) ID on the asset, to report damage on an asset that hasn't been booked.
+          
     supportStatus:
       description: the current status of support
       type: object
@@ -4461,6 +4536,22 @@ components:
           type: string
           description: provider for personal information. Can be a URI or identifier.
 
+  headers:
+    language:
+      required: true
+      schema:
+        type: string
+        format: A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5
+      description: A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible, ideally just one language tag from the list in operator/information
+      example: nl, de;q=0.7
+    expires:
+      description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
+      schema:
+        description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+        type: string
+        format: http-date
+      required: true
+
   parameters:
     acceptLanguage:
       in: header
@@ -4503,6 +4594,20 @@ components:
         type: string
       description: The ID of the maas operator that has to receive this message
       example: 1324A-DFB3482-32ACD
+    callbackUrl:
+      in: header
+      name: notification-url
+      description: The URL at the MP side, where notifications will be send to about the purchased packages. Communication towards the TO is always done using notifications.
+      required: false
+      schema:
+        type: string
+    customerId:
+      in: path
+      name: id
+      description: ID of the customer, on TO side
+      required: true
+      schema:
+        type: string
 
   securitySchemes:
     BasicAuth:
@@ -4559,6 +4664,27 @@ components:
       description: The requested resources does not exist or the requester is not authorized to see it or know it exists.
     409Conflict:
       description: The request will not be fulfilled. The request itself is legal, but the content conflicts with the server and might be stale. The user might try again after looking up the current state of the resource.
-
     410Gone:
       description: The requested resource is no longer available. This is permanent.
+    428PreconditionRequired:
+      description: Preconditions are not met in order to access the requested resource. This might happen e.g. if a booking is made but the user has been blocked by the TO. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error"
+
+    errorResponse:
+      description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      headers:
+        Content-Language:
+          $ref: "#/components/headers/language"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                maxItems: 10
+                items:
+                  $ref: "#/components/schemas/error"
