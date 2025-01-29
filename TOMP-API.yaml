@@ -31,6 +31,9 @@ tags:
   - name: general
     description: general operations (e.g. notifications)
 
+  - name: customer management
+    description: customer management
+
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
 
@@ -1095,8 +1098,9 @@ paths:
             minItems: 4
             maxItems: 4
             items:
-              type: string
-          example: '"boundingbox":["51.2867602","51.6918741","-0.5103751","0.3340155"]'
+              type: number
+          explode: false
+          example: 1,2,3,4
 
       responses:
         "200":
@@ -4668,11 +4672,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/error"
+
     errorResponse:
       description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       headers:
         Content-Language:
-          $ref: "#/components/parameters/acceptLanguage"
+          $ref: "#/components/headers/language"
       content:
         application/json:
           schema:
