@@ -94,12 +94,7 @@ paths:
                 $ref: "#/components/schemas/planning"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -136,12 +131,7 @@ paths:
                 $ref: "#/components/schemas/planning"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -179,12 +169,7 @@ paths:
                 $ref: "#/components/schemas/planning"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -227,19 +212,9 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-              required: true
+              $ref: "#/components/headers/expires"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -313,12 +288,7 @@ paths:
                   $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -353,19 +323,9 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
             Expires:
-              description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-              required: true
+              $ref: "#/components/headers/expires"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -412,19 +372,10 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
             Expires:
               description: Mandatory whenever the EXTEND_EXPIRY_TIME is used. It must contain the updated expiry time
-              schema:
-                description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-                type: string
-                format: http-date
-              required: false
+              $ref: "#/components/headers/expires"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -463,12 +414,7 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
@@ -497,12 +443,7 @@ paths:
                 $ref: "#/components/schemas/booking"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -611,12 +552,7 @@ paths:
           description: The bookings matching the query
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -698,12 +634,7 @@ paths:
           description: Available assets for the leg. If no suitable assets are found an empty array is to be returned.
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1037,12 +968,7 @@ paths:
                   $ref: "#/components/schemas/endpointImplementation"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
 
   /operator/stations:
     parameters:
@@ -1114,12 +1040,7 @@ paths:
                   $ref: "#/components/schemas/stationInformation"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1182,12 +1103,7 @@ paths:
           description: Available assets or asset-types. In case assets are replied, the realtime location is also available.
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1255,12 +1171,7 @@ paths:
                   $ref: "#/components/schemas/systemAlert"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1302,12 +1213,7 @@ paths:
                   $ref: "#/components/schemas/systemCalendar"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1350,12 +1256,7 @@ paths:
                   $ref: "#/components/schemas/systemHours"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1383,12 +1284,7 @@ paths:
                 $ref: "#/components/schemas/systemInformation"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1431,12 +1327,7 @@ paths:
                   $ref: "#/components/schemas/systemPricingPlan"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1550,12 +1441,7 @@ paths:
           description: journal entries
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1599,12 +1485,7 @@ paths:
           description: journal entry received, will be processed (state = INVOICED)
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1638,12 +1519,7 @@ paths:
           description: support request acknowledged
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1687,12 +1563,7 @@ paths:
                   $ref: "#/components/schemas/supportStatus"
           headers:
             Content-Language:
-              description: The language/localization of user-facing content
-              example: nl
-              schema:
-                type: string
-                format: One IETF BCP 47 (RFC 5646) language tag
-              required: true
+              $ref: "#/components/headers/language"
         "400":
           $ref: "#/components/responses/400BadRequest"
         "401":
@@ -1721,7 +1592,7 @@ paths:
           description: created CUSTOMER ACCOUNT
           headers:
             Content-Language:
-              $ref: "#/components/parameters/acceptLanguage"
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1754,7 +1625,7 @@ paths:
           description: updated CUSTOMER ACCOUNT
           headers:
             Content-Language:
-              $ref: "#/components/parameters/acceptLanguage"
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -1770,7 +1641,7 @@ paths:
           description: Customer Account
           headers:
             Content-Language:
-              $ref: "#/components/parameters/acceptLanguage"
+              $ref: "#/components/headers/language"
           content:
             application/json:
               schema:
@@ -4660,6 +4531,22 @@ components:
         knownIdentifierProvider:
           type: string
           description: provider for personal information. Can be a URI or identifier.
+
+  headers:
+    language:
+      required: true
+      schema:
+        type: string
+        format: A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5
+      description: A list of the languages/localizations the user would like to see the results in. For user privacy and ease of use on the TO side, this list should be kept as short as possible, ideally just one language tag from the list in operator/information
+      example: nl, de;q=0.7
+    expires:
+      description: The result is valid until this timestamp. The pending booking is expired after this timestamp. 
+      schema:
+        description: A HTTP date string, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+        type: string
+        format: http-date
+      required: true
 
   parameters:
     acceptLanguage:
