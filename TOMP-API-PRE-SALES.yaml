@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: pre-sales module
+    description: Module that can be used 'pre-sales'; in the pre-purchase state. Calling one of these endpoints,
+      will put the package in a pre-purchased state (might reserve resources). The package must be released 
+      (when the intention of purchasing it is removed) or it expires. 
+      The result of each of these endpoints (except for the release) must contain an expiry date in the header.
+
+paths:
+  /processes/{travellerOperation}-traveller/execute/:
+    post:
+      operationId: travellerOperationRequest
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/travellerOperation"
+      tags:
+        - pre-sales module
+      requestBody:
+        description: -|
+          The `input` of the process request body must be of type '#/components/schemas/travellerInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/change-times-package/execute/:
+    post:
+      operationId: travellerOperationRequest
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+      tags:
+        - pre-sales module
+      requestBody:
+        description: -|
+          The `input` of the process request body must be of type '#/components/schemas/changeTimesInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+  /processes/change-times-leg/execute/:
+    post:
+      operationId: travellerOperationRequest
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+      tags:
+        - pre-sales module
+      requestBody:
+        description: -|
+          The `input` of the process request body must be of type '#/components/schemas/changeTimesInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/{productOperation}-product/execute/:
+    post:
+      operationId: productOperationRequest
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/productOperation"
+      tags:
+        - pre-sales module
+      requestBody:
+        description: -|
+          The `input` of the process request body must be of type '#/components/schemas/productInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/assign-asset/execute/:
+    post:
+      operationId: assignAssetRequest
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+      tags:
+        - pre-sales module
+      requestBody:
+        description: -|
+          The `input` of the process request body must be of type '#/components/schemas/assignAssetInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/assign-ancillary/execute/:
+    post:
+      operationId: assignAssetRequest
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+      tags:
+        - pre-sales module
+      requestBody:
+        description: -|
+          The `input` of the process request body must be of type '#/components/schemas/ancillaryInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"          
+
+  # /processes/update-customer/execute/ => customer registration module
+  # /processes/release-offer/execute/ => purchase module
+
+components:
+  parameters:
+    travellerOperation:
+      name: operation
+      in: path
+      description: OPERATION to execute
+      required: true
+      schema:
+        type: string
+        enum: [ADD, REMOVE, UPDATE]
+
+    productOperation:
+      name: operation
+      in: path
+      description: OPERATION to execute
+      required: true
+      schema:
+        type: string
+        enum: [ADD, REMOVE]

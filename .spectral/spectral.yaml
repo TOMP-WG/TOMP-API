@@ -1,8 +1,0 @@
-extends: ["spectral:oas"]
-overrides:
-  - rules:
-      no-$ref-siblings: "off"
-match_ignores:
-    ignores:
-    - rule_id: no-$ref-siblings
-      rule_name: no-$ref-siblings

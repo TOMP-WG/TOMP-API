@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: offer
+    description: This part of the API facilitates in supplying offers. Offers can be obtained in a simple way (the GET), for more 
+     sophisticated searches, the search-offers must be used. Each result must have an expiry-date in the header.
+
+paths:
+  /collections/offers/items:
+    get:
+      operationId: requestOffers
+      summary: "Request offers (simple)"
+      description: Returns offers (purchaseable packages) based a (list of) user(s), and optional start/end (and via) locations and a start time or end time. this
+        is a simplified offer request.
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"                   
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/from"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/to"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/via"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/start-time"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/end-time"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/traveller"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/parameter"
+      tags:
+        - offer
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/offersResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/search-offers/execute:
+    post:
+      operationId: searchOffers
+      summary: "Request offers (advanced)"
+      description: Returns offers (purchaseable packages) based on user requirements. This is the advanced version of the GET. Implement this only
+        when you support more advanced queries.
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
+      tags:
+        - offer
+      requestBody:
+        description: The 'input' of the process request body must be of type '#/components/schemas/searchOfferInput'
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/offersResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+#  /collections/offers/items/{packageId} => use /collections/packages/items/{packageId}
+
+components:
+  schemas:
+    searchOfferInput:
+      allOf: 
+      - $ref: "TOMP-API-CORE.yaml#/components/schemas/defaultInput"
+      - $ref: "TOMP-API-CORE.yaml#/components/schemas/travelSpecification"
+      - type: object
+        description: A package planning request, resulting in package options
+        properties:
+          party:
+            type: array
+            maxItems: 10
+            minItems: 1
+            items:
+              $ref: "TOMP-API-CORE.yaml#/components/schemas/parameterAssignment"
+      examples:
+      - {
+          "type": "SEARCH_OFFER",
+          "from": "gps:6.234,51.6923",
+          "via": ["NSR:Quay:108842"],
+          "to": "RUT:ScheduledStopPoint:28482",
+          "startTime": "2019-10-12T07:20:50.52Z",
+          "endTime": "2019-10-12T07:20:50.52Z",
+          "party":
+            [
+              {
+                "travellers":
+                  [ { "type": "USER_PROFILE", "number": 1, "ageGroup": "ADULT" },
+                    { "type": "ENTITLEMENT", "number": 1, "entitlementType": "NO:MILITARY" },
+                    { "type": "USER_PROFILE", "number": 2, "ageGroup": "ADULT" },
+                    { "type": "COMMERCIAL_PROFILE", "number": 2, "code": "VX34-348J-EI7y" },
+                  ],
+                "parameters":
+                  [ { "type": "SERVICE", "class": "FIRST" },
+                    { "type": "SEATING", "spotType": "LUGGAGE_SPOT" },
+                  ],
+              },
+            ],
+        }

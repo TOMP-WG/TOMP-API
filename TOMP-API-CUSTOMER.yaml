@@ -16,7 +16,7 @@ tags:
 paths:
   /collections/customers/items:
     parameters:
-      - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
+      - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
     post:
       summary: "Create a TO CUSTOMER ACCOUNT for the customer"
       description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
@@ -26,27 +26,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/createCustomerAccountParameters"
+              $ref: "#/components/schemas/customerAccount"
       responses:
         "201":
-          description: created CUSTOMER ACCOUNT
-          headers:
-            Content-Language:
-              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/customerAccount"
+          $ref: "#/components/responses/customerResponse"
         default:
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+  
+  /collections/customers/items/{customerId}:
+    parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
+    get:
+      summary: "Get the customer account from the TO system"
+      tags:
+        - customer management
+      responses:
+        "200":
+          $ref: "#/components/responses/customerResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
     patch:
-      parameters:
-        - $ref: "TOMP-API.yaml#/components/parameters/acceptLanguage"
       summary: "Update the CUSTOMER ACCOUNT on the TO system"
       description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
-        When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
-        can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
-
       tags:
         - customer management
       requestBody:
@@ -58,75 +63,46 @@ paths:
             example: { "id": "OTP:12345", "email": "new-email@example.com" }
       responses:
         "200":
-          description: updated CUSTOMER ACCOUNT
-          headers:
-            Content-Language:
-              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/customerAccount"
+          $ref: "#/components/responses/customerResponse"
         default:
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
-    get:
-      summary: "[MP->TO] get the customer account on the TO system"
-      parameters:
-        - name: id
-          in: query
-          schema:
-            $ref: "TOMP-API.yaml#/components/schemas/externalReference"
-      tags:
-        - customer management
-      externalDocs:
-        url: https://not-yet-available/
-      responses:
-        "200":
-          description: Customer Account
-          headers:
-            Content-Language:
-              $ref: "TOMP-API.yaml#/components/headers/contentLanguage"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/customerAccount"
-        default:
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
     delete:
-      summary: "Delete the CUSTOMER ACCOUNT on the TO system."
+      summary: "Delete the CUSTOMER ACCOUNT from the TO system."
       description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
-      parameters:
-        - name: id
-          in: query
-          schema:
-            $ref: "TOMP-API.yaml#/components/schemas/externalReference"
       tags:
         - customer management
       responses:
         "200":
           description:  CUSTOMER ACCOUNT deleted successfully
         default:
-          $ref: "TOMP-API.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
 components:
+  responses:
+    customerResponse:
+      description: Customer Account
+      headers:
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/customerAccount"
+
   schemas:
-    createCustomerAccountParameters:
-      description: A CUSTOMER ACCOUNT request, resulting in a new or linked TO CUSTOMER ACCOUNT
-      externalDocs:
-        url: https://not-yet-available/
-        description: CREATE CUSTOMER ACCOUNT PARAMETERS
-      $ref: "TOMP-API.yaml#/components/schemas/externalReference"
-    
     customerAccount:
       description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
       type: object
       properties:
         id:
-          $ref: "TOMP-API.yaml#/components/schemas/externalReference"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
         creationDate:
-          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
           description: The date in which the CUSTOMER ACCOUNT has been created
         modificationDate:
-          $ref: "TOMP-API.yaml#/components/schemas/dateTime"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
           description: Last modification date of CUSTOMER ACCOUNT.
         status:
           $ref: "#/components/schemas/customerAccountStatus"

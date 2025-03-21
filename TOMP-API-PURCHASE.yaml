@@ -1,0 +1,193 @@
+openapi: 3.0.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: purchase
+    description: This part of the API facilitates to make a booking (aka purchase an offer).
+
+paths:
+  /processes/{purchaseOperation}-offer/execute/:
+    post:
+      operationId: purchaseRequest
+      summary: "Perform an purchase of a package"
+      description: -|
+        ALL required details MUST be added to the offer (using the pre-sales module) before purchasing the offer.<br>
+
+        _PURCHASE_ - purchase an offered package<br>
+        _2_PHASE_PURCHASE_ - transactional purchase, requires COMMIT to confirm the purchase.<br>
+        _COMMIT_ - confirm the transactional (2-phase) purchase<br>
+        _RELEASE_ - release the offer, remove claims on resources<br>
+
+        The request COULD return a 202, making this an a-synchronous process.
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/purchaseOperation"
+        - $ref: "TOMP-API-CORE.yaml#/components/headers/digest"
+        - $ref: "TOMP-API-CORE.yaml#/components/headers/publicKey"
+        - $ref: "TOMP-API-CORE.yaml#/components/headers/signedDigest"
+      tags:
+        - purchase
+      requestBody:
+        description:
+          <h2>Operations - inputs</h2>
+          - _PURCHASE_ - requires a defaultInput<br>
+          - _2_PHASE_PURCHASE_ - requires a defaultInput<br>
+          - _COMMIT_ - requires a defaultInput<br>
+          - _RELEASE_ - requires a defaultInput<br>
+
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        examples:
+        - { "inputs": { "type": "PURCHASE", "packageId": "some Id" } }
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
+            the completion of the purchase.
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/purchase-package/execute/:
+    post:
+      operationId: purchasePackageRequest
+      summary: "Perform an purchase of a package, based on external data"
+      description: "Perform an purchase of a package, based on external data"
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "#/components/parameters/purchaseOperation"
+      tags:
+        - purchase
+      requestBody:
+        description:
+          <h2>Operations - inputs</h2>
+          - _PURCHASE_PACKAGE_ - requires a purchasePackageInput<br>
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        examples:
+        - { "inputs": 
+            { "type": "PURCHASE_PACKAGE",
+              "from": "NSR:Quay:108842",
+              "to": "RUT:ScheduledStopPoint:28482",
+              "startTime": "2019-10-12T07:20:50.52Z",
+              "endTime": "2019-10-12T07:20:50.52Z",
+              "party":
+                [
+                  {
+                    "travellers":
+                      [ { "type": "USER_PROFILE", "ageGroup": "ADULT" } ],
+                    "parameters":
+                      [ { "type": "SERVICE", "class": "FIRST", "serviceJourney": "VY:ServiceJourney:23438" } ],
+                  }
+                ]
+              } 
+            }
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, notification URL will be used
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/extend-expiry-time/execute/:
+    post:
+      operationId: extendExpiryTimeRequest
+      summary: "Request additional time to complete the purchase"
+      description: 
+        _EXTEND_EXPIRY_TIME_ - request to extend the expiry time of a 2-phase purchase<br>
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+      tags:
+        - purchase
+      requestBody:
+        description: 
+          <h2>Action - inputs</2>
+          - requires a extendExpiryTimeInput as `inputs`
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        example:
+        { "inputs": { "type": "EXTEND_EXPIRY_TIME", "packageId": "some Id", "extensionReason": "PAYMENT_PENDING" } }
+      responses:
+        "200":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, notification URL will be used
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+components:
+  responses:
+    purchaseResponse:
+      description: A package was succesfully purchased (PURCHASED), or pending (PENDING, to be confirmed using the package operation CONFIRM).
+      content:
+        application/json:
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/packageResponseBody"
+      headers:
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/expires"
+
+  schemas:
+    purchasePackageInput:
+      allOf:
+        - $ref: "#/components/schemas/defaultInput"
+        - $ref: "TOMP-API-OFFERS.yaml#/components/schemas/searchOfferInput"
+
+    extendExpiryTimeInput:
+      allOf:
+        - $ref: "TOMP-API-CORE.yaml#/components/schemas/defaultInput"
+        - type: object
+          properties:
+            extensionReason:
+              type: string
+              description:
+                in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
+                _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
+                _PAYMENT_PENDING_ - The customer is in the payment process<br>
+                _OTHER_ - unspecified
+              enum: [PURCHASE_PENDING, PAYMENT_PENDING, OTHER]
+
+    # operations
+    purchaseOperation:
+      type: string
+      description:
+        _ONE_STOP_PURCHASE_ - purchase a package based on external data<br>
+        _PURCHASE_ - purchase an offered package<br>
+        _2_PHASE_PURCHASE_ - transactional purchase, COMMIT to confirm the purchase<br>
+        _CONFIRM_ - commit the 2 phase purchase<br>
+        _RELEASE_ - rollback the 2 phase purchase<br>
+      enum:
+        [ 
+          ONE_STOP_PURCHASE,
+          PURCHASE,
+          2_PHASE_PURCHASE,
+          CONFIRM,
+          RELEASE,
+        ]
+
+  parameters:
+    purchaseOperation:
+      in: path
+      name: Accept-Language
+      required: true
+      schema:
+        $ref: "#/components/schemas/purchaseOperation"

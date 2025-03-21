@@ -1,0 +1,7 @@
+py plantUmlCreator.py -c customer traveler cardType card licenseType license requirement -s address phone -t licenses left requirements up licenseTypes left
+
+py plantUmlCreator.py -c assetType assetClass -s - place asset assetAccessMethods assetProperties -d 1 -n assetClass
+
+py plantUmlCreator.py -c place -n StopReference::type
+
+py plantUmlCreator.py -c asset assetType assetProperties -d 2 -s - assetClass assetAccessMethods place -n AssetProperties::fuel AssetProperties::energyLabel AssetProperties::easyAccessibility AssetProperties::gearbox AssetProperties::propulsion

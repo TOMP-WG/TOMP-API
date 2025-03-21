@@ -1,0 +1,3 @@
+openapi-core==0.6.0
+openapi3-parser==1.1.19 
+openapi-spec-validator==0.6.0
