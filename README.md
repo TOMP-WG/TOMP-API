@@ -9,26 +9,22 @@ The Transport Operator to Mobility-as-a-Service Provider API (TOMP-API) is an op
 TOMP-API is structured into several functional modules and extensions, each addressing a specific aspect of the interaction between Transport Operators and MaaS Providers:
 
 CORE Modules:
-
-1. **Offer**: Enables requesting offers, based on external sources.
+1. **Offer**: Enables requesting offers.
 2. **Purchase**: Facilitates the purchase of (mobility) services.
 3. **Execute**: Manages the execution phase of the trip.
 
-Extensions:
-
-1. **Pay**: Shows payment details for the services.
+Functional extensions:
+1. **Pre sales**: Allows to reserve an offer and modify it before purchasing it.
 2. **Support**: Offers customer support functionalities.
-3. **Customer Management**: Handles user-related information and preferences (draft). 
-4. **Modify offers**: Allows to reserve an offer and modify it before purchasing it (draft).
-5. **After sales**: Manages after sales processes, like refunding or revokation of tickets (draft).
-6. **Contract**: Manages the process of contracting on the fly (draft).
-7. **Discover & Data spaces**: technical part of the API, easing the technical integration into eco-systems (draft).
+3. **After sales**: Manages after sales processes, like refunding or revokation of tickets
+
+Additional supportive extensions:
+1. **Discovery**: to become OGC compliant, you need to implement these endpoints.
+2. **Customer Management**: Handles user-related information and preferences (draft). 
+3. **Data spaces**: technical part of the API, easing the technical integration into eco-systems (draft).
 
 MP Module:
-
 1. **Notify**: the part of the API that must be implemented by the reseller/MP, to cope with messages sent by the TO or driver.
-
-<img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/TOMP-structure.png">
 
 These modules work together to provide a comprehensive framework for MaaS integration.
 
