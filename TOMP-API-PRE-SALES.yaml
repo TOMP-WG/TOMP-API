@@ -42,7 +42,7 @@ paths:
 
   /processes/change-times-package/execute/:
     post:
-      operationId: travellerOperationRequest
+      operationId: changeTimesPackageRequest
       parameters:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
@@ -60,7 +60,7 @@ paths:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
   /processes/change-times-leg/execute/:
     post:
-      operationId: travellerOperationRequest
+      operationId: changeTimesLegRequest
       parameters:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
@@ -118,7 +118,7 @@ paths:
 
   /processes/assign-ancillary/execute/:
     post:
-      operationId: assignAssetRequest
+      operationId: assignAncillaryRequest
       parameters:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"

@@ -52,12 +52,7 @@ paths:
           $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
         "503":
           description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
-          headers:
-            Retry-After:
-              description: A date after which to retry. See the Date header for more details on the HTTP date format.
-              schema:
-                $ref: "#/components/schemas/httpDate"
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "#/components/responses/retryErrorResponse"
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
@@ -128,6 +123,30 @@ paths:
   #  /processes/assign-ancillary/execute/
 
 components:
+  responses:
+    retryErrorResponse:
+      description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      headers:
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Retry-After:
+          description: A date after which to retry. See the Date header for more details on the HTTP date format.
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
+          required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                maxItems: 10
+                items:
+                  $ref: "TOMP-API-CORE.yaml#/components/schemas/error"
+
   schemas:
     legOperation:
       type: string

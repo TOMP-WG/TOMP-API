@@ -71,6 +71,8 @@ components:
         application/json:
           schema:    
             type: object
+            required:
+            - inputs
             properties:
               inputs: 
                 description: this body can be replaced by a subtype of defaultInput
@@ -351,6 +353,19 @@ components:
           PAYMENT_REQUEST: "#/components/schemas/financialInput"
           PAYMENT_CONFIRMATION: "#/components/schemas/financialInput"
           REDRESS: "#/components/schemas/redressInput"
+      oneOf:
+        - $ref: "#/components/schemas/searchOfferInput"
+        - $ref: "#/components/schemas/travellerInput"
+        - $ref: "#/components/schemas/changeTimesInput"
+        - $ref: "#/components/schemas/productInput"
+        - $ref: "#/components/schemas/assignAssetInput"
+        - $ref: "#/components/schemas/ancillaryInput"
+        - $ref: "#/components/schemas/packageInput"
+        - $ref: "#/components/schemas/purchasePackageInput"
+        - $ref: "#/components/schemas/extendExpiryTimeInput"
+        - $ref: "#/components/schemas/legInput"
+        - $ref: "#/components/schemas/financialInput"
+        - $ref: "#/components/schemas/redressInput"      
       required:
         - type
       properties:
@@ -371,8 +386,14 @@ components:
           description: free text, should match Content-Language.
 
     packageInput:
-      allOf:
-      - $ref: "#/components/schemas/defaultInput"
+      type: object
+      required:
+      - type
+      - packageId
+      properties:
+        type: 
+          type: string
+          enum: ["PACKAGE"]
       examples:
       - {
           "type": "PACKAGE",
@@ -380,24 +401,34 @@ components:
         }
 
     legInput:
-      allOf: 
-      - $ref: "#/components/schemas/defaultInput"
-      - type: object
-        required:
-        - legId
-        properties:
-          location: 
-            $ref: "#/components/schemas/externalReference"
-          evidence:
-            type: array
-            minItems: 1
-            items:
-              $ref: "#/components/schemas/link"                      
+      type: object
+      required:
+      - legId
+      - type
+      properties:
+        type:
+          type: string
+          enum: ["LEG"]
+        location: 
+          $ref: "#/components/schemas/externalReference"
+        evidence:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/link"                      
 
     travellerInput:
       allOf:
-      - $ref: "#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/parameterAssignment"
+      - type: object
+        required:
+          - type
+          - travellers
+          - packageId
+        properties:
+          type:
+            type: string
+            enum: ["TRAVELLER"]
       examples:
       - {
           "type": "TRAVELLER",
@@ -407,8 +438,15 @@ components:
 
     changeTimesInput:
       allOf:
-      - $ref: "#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/travelSpecification"
+      - type: object
+        required:
+          - type
+          - packageId
+        properties:
+          type:
+            type: string
+            enum: ["CHANGE_TIMES"]
       examples:
       - {
           "type": "CHANGE_TIMES",
@@ -418,8 +456,16 @@ components:
 
     productInput:
       allOf:
-      - $ref: "#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/product"
+      - type: object
+        required:
+          - type
+          - packageId
+          - id
+        properties:
+          type:
+            type: string
+            enum: ["PRODUCT"]
       examples:
       - {
           "type": "PRODUCT",
@@ -429,10 +475,15 @@ components:
 
     assignAssetInput:
       allOf:
-      - $ref: "#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/travelSpecification"
       - type: object
+        required:
+        - type
+        - assetId
         properties:
+          type:
+            type: string
+            enum: ["ASSET"]
           assetId:
             $ref: "#/components/schemas/externalReference"
           replaceAssetId:
@@ -445,12 +496,18 @@ components:
         }
 
     ancillaryInput:
-      allOf:
-      - $ref: "#/components/schemas/defaultInput"
-      - type: object
-        properties:
-          ancillaryId:
-            $ref: "#/components/schemas/externalReference"
+      type: object
+      required:
+      - type
+      - ancillaryId
+      properties:
+        type:
+          type: string
+          enum: ["ANCILLARY"]
+        ancillaryId:
+          $ref: "#/components/schemas/externalReference"
+        replaceAncillaryId:
+          $ref: "#/components/schemas/externalReference"
       examples:
       - {
           "type": "ANCILLARY",
@@ -520,10 +577,17 @@ components:
               description: the final price of the leg
             product:
               $ref: "#/components/schemas/externalReference"
-              description: The product (v1.x 'asset type') used to execute this leg
-            asset:
-              $ref: "#/components/schemas/asset"
-              description: The physical asset used for the execution of the leg
+              description: The main product (v1.x 'asset type') used to execute this leg
+            additionalProducts:
+              type: array
+              items:
+                $ref: "#/components/schemas/externalReference"
+              description: additional products that can be assigned to this leg
+            assets:
+              type: array
+              items:
+                $ref: "#/components/schemas/asset"
+              description: The physical asset(s) used for the execution of the leg
             operator:
               $ref: "#/components/schemas/externalReference"
             memo:
@@ -641,117 +705,128 @@ components:
           CARD: "#/components/schemas/card"
           LICENSE_TYPE: "#/components/schemas/licenseType"
           LICENSE: "#/components/schemas/license"
-          ASSET: "#/components/schemas/asset"
+          ASSET: "#/components/schemas/assetReference"
+      oneOf:
+        - $ref: "#/components/schemas/individualTraveller"
+        - $ref: "#/components/schemas/userProfile"
+        - $ref: "#/components/schemas/groupProfile"
+        - $ref: "#/components/schemas/companionProfile"
+        - $ref: "#/components/schemas/commercialProfile"
+        - $ref: "#/components/schemas/entitlementGiven"
+        - $ref: "#/components/schemas/cardType"
+        - $ref: "#/components/schemas/card"
+        - $ref: "#/components/schemas/licenseType"
+        - $ref: "#/components/schemas/license"
+        - $ref: "#/components/schemas/assetReference"
       properties:
         type:
           type: string
-        number:
+        sequenceNumber:
           type: number
-          description: specifying the sequence number of the traveller in the travelling party. 
+          description: specifying the sequence number of the traveller(group) in the travelling party. 
           default: 1
 
     userProfile:
       x-tm: USER PROFILE
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-            type:
-              type: string
-              enum: [USER_PROFILE]
-            minimumAge:
-              $ref: "#/components/schemas/shortInt"
-            maximumAge:
-              $ref: "#/components/schemas/shortInt"
-            monthDayOnWhichAgeApplies:
-              $ref: "#/components/schemas/shortInt"
-            ageGroup:
-              type: string
-              enum: [ANYONE, INFANT, CHILD, YOUTH, ADULT, SENIOR]
-            minimumHeight:
-              $ref: "#/components/schemas/shortInt"
-            maximumHeight:
-              $ref: "#/components/schemas/shortInt"
-            localResident:
-              type: boolean
-            genderLimitation:
-              type: boolean
+      type: object
+      required:
+      - type
+      properties:
+        id:
+          $ref: "#/components/schemas/shortString"
+        type:
+          type: string
+          enum: [USER_PROFILE]
+        minimumAge:
+          $ref: "#/components/schemas/shortInt"
+        maximumAge:
+          $ref: "#/components/schemas/shortInt"
+        monthDayOnWhichAgeApplies:
+          $ref: "#/components/schemas/shortInt"
+        ageGroup:
+          type: string
+          enum: [ANYONE, INFANT, CHILD, YOUTH, ADULT, SENIOR]
+        minimumHeight:
+          $ref: "#/components/schemas/shortInt"
+        maximumHeight:
+          $ref: "#/components/schemas/shortInt"
+        localResident:
+          type: boolean
+        genderLimitation:
+          type: boolean
 
     companionProfile:
       x-tm: COMPANION PROFILE
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-            type:
-              type: string
-              enum: [COMPANION_PROFILE]
-            minimumNumberAllowed:
-              $ref: "#/components/schemas/shortInt"
-            maximumNumberAllowed:
-              $ref: "#/components/schemas/shortInt"
+      type: object
+      required:
+      - type
+      properties:
+        id:
+          $ref: "#/components/schemas/externalReference"
+        type:
+          type: string
+          enum: [COMPANION_PROFILE]
+        minimumNumberAllowed:
+          $ref: "#/components/schemas/shortInt"
+        maximumNumberAllowed:
+          $ref: "#/components/schemas/shortInt"
 
     groupProfile:
       x-tm: GROUP PROFILE
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-            type:
-              type: string
-              enum: [GROUP_PROFILE]
-            name:
-              $ref: "#/components/schemas/normalString"
-            profiles:
-              type: array
-              items:
-                allOf:
-                  - $ref: "#/components/schemas/userProfile"
-                  - type: object
-                    required:
-                      - quantity
-                    properties:
-                      quantity:
-                        $ref: "#/components/schemas/shortInt"
+      type: object
+      required:
+      - type
+      properties:
+        id:
+          $ref: "#/components/schemas/externalReference"
+        type:
+          type: string
+          enum: [GROUP_PROFILE]
+        name:
+          $ref: "#/components/schemas/normalString"
+        profiles:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/userProfile"
+              - type: object
+                required:
+                  - quantity
+                properties:
+                  quantity:
+                    $ref: "#/components/schemas/shortInt"
 
     commercialProfile:
       x-tm: COMMERCIAL PROFILE
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-            type:
-              type: string
-              enum: [COMMERCIAL_PROFILE]
-            code:
-              $ref: "#/components/schemas/shortString"
-            name:
-              $ref: "#/components/schemas/normalString"
+      required:
+      - type
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/shortString"
+        type:
+          type: string
+          enum: [COMMERCIAL_PROFILE]
+        code:
+          $ref: "#/components/schemas/shortString"
+        name:
+          $ref: "#/components/schemas/normalString"
 
     entitlementGiven:
       x-tm: ENTITLEMENT GIVEN
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          required:
-            - entitlementType
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-              description: a unique ID for this usage. Especially required when it is a USER PROFILE or an INDIVIDUAL TRAVELLER. Other concepts might refer to this ID.
-            type:
-              type: string
-              enum: [ENTITLEMENT]
-            entitlementType:
-              $ref: "#/components/schemas/normalString"
+      type: object
+      required:
+        - type
+        - entitlementType
+      properties:
+        id:
+          $ref: "#/components/schemas/shortString"
+          description: a unique ID for this usage. Especially required when it is a USER PROFILE or an INDIVIDUAL TRAVELLER. Other concepts might refer to this ID.
+        type:
+          type: string
+          enum: [ENTITLEMENT]
+        entitlementType:
+          $ref: "#/components/schemas/normalString"
 
     travelSpecification:
       x-tm: TRAVEL SPECIFICATION
@@ -855,11 +930,23 @@ components:
           SERVICE: "#/components/schemas/serviceParameter"
           TEMPORAL: "#/components/schemas/temporalParameter"
           EQUIPMENT: "#/components/schemas/equipmentParameter"
-          # non TM compliant
           CANCEL: "#/components/schemas/cancellationParameter"
           PAYMENT: "#/components/schemas/paymentParameter"
           PURCHASE: "#/components/schemas/purchaseParameter"
           EXECUTION: "#/components/schemas/executionParameter"
+      oneOf:
+        - $ref: "#/components/schemas/organisationalParameter"
+        - $ref: "#/components/schemas/seatingParameter"
+        - $ref: "#/components/schemas/distributionParameter"
+        - $ref: "#/components/schemas/networkParameter"
+        - $ref: "#/components/schemas/routingParameter"
+        - $ref: "#/components/schemas/serviceParameter"
+        - $ref: "#/components/schemas/temporalParameter"
+        - $ref: "#/components/schemas/equipmentParameter"
+        - $ref: "#/components/schemas/cancellationParameter"
+        - $ref: "#/components/schemas/paymentParameter"
+        - $ref: "#/components/schemas/purchaseParameter"
+        - $ref: "#/components/schemas/executionParameter"
       required:
       - type
       properties:
@@ -871,100 +958,121 @@ components:
 
     equipmentParameter:
       x-tm: EQUIPMENT VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          id:
-            $ref: "#/components/schemas/shortString"
-          name:
-            $ref: "#/components/schemas/shortString"
-          description:
-            $ref: "#/components/schemas/longString"
-          infoLink:
-            $ref: "#/components/schemas/url"
-          image:
-            $ref: "#/components/schemas/url"
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [EQUIPMENT]
+        id:
+          $ref: "#/components/schemas/externalReference"
+        name:
+          $ref: "#/components/schemas/shortString"
+        description:
+          $ref: "#/components/schemas/longString"
+        infoLink:
+          $ref: "#/components/schemas/url"
+        image:
+          $ref: "#/components/schemas/url"
 
     temporalParameter:
       x-tm: TEMPORAL VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          startTime:
-            $ref: "#/components/schemas/dateTime"
-          endTime:
-            $ref: "#/components/schemas/dateTime"
-          duration:
-            $ref: "#/components/schemas/normalInt"
-          dayType:
-            $ref: "#/components/schemas/day"
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [TEMPORAL]
+        startTime:
+          $ref: "#/components/schemas/dateTime"
+        endTime:
+          $ref: "#/components/schemas/dateTime"
+        duration:
+          $ref: "#/components/schemas/normalInt"
+        dayType:
+          $ref: "#/components/schemas/day"
 
     seatingParameter:
       x-tm: SEATING VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          spotType:
-            type: string
-            enum: [VEHICLE_SPOT, PASSENGER_SPOT, LUGGAGE_SPOT]
-          deck:
-            $ref: "#/components/schemas/shortString"
-          space:
-            $ref: "#/components/schemas/shortString"
-          spot:
-            $ref: "#/components/schemas/shortString"
+      type: object
+      required:
+      - type
+      - spotType
+      - spot
+      properties:
+        type:
+          type: string
+          enum: [SEATING]
+        spotType:
+          type: string
+          enum: [VEHICLE_SPOT, PASSENGER_SPOT, LUGGAGE_SPOT]
+        deck:
+          $ref: "#/components/schemas/externalReference"
+        space:
+          $ref: "#/components/schemas/externalReference"
+        spot:
+          $ref: "#/components/schemas/externalReference"
 
     networkParameter:
       x-tm: NETWORK VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          location:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [NETWORK]
+        location:
+          $ref: "#/components/schemas/externalReference"
+        line:
+          $ref: "#/components/schemas/externalReference"
+        zones:
+          type: array
+          items:
             $ref: "#/components/schemas/externalReference"
-          line:
-            $ref: "#/components/schemas/externalReference"
-          zones:
-            type: array
-            items:
-              $ref: "#/components/schemas/externalReference"
 
     routingParameter:
       x-tm: ROUTING VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          journeyPattern:
-            type: array
-            items:
-              $ref: "#/components/schemas/externalReference"
+      type: object
+      required:
+      - journeyPattern
+      - type
+      properties:
+        type:
+          type: string
+          enum: [ROUTING]
+        journeyPattern:
+          type: array
+          items:
+            $ref: "#/components/schemas/externalReference"
 
     serviceParameter:
       x-tm: SERVICE VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          product:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [SERVICE]
+        product:
+          $ref: "#/components/schemas/externalReference"
+        asset:
+          $ref: "#/components/schemas/externalReference"
+        serviceJourney:
+          $ref: "#/components/schemas/externalReference"
+        userNeeds:
+          type: array
+          items:
             $ref: "#/components/schemas/externalReference"
-          asset:
-            $ref: "#/components/schemas/externalReference"
-          serviceJourney:
-            $ref: "#/components/schemas/externalReference"
-          userNeeds:
-            type: array
-            items:
-              $ref: "#/components/schemas/externalReference"
-          class:
-            $ref: "#/components/schemas/classOfUse"
-          facilities:
-            type: array
-            items:
-              $ref: "#/components/schemas/facility"
+        class:
+          $ref: "#/components/schemas/classOfUse"
+        facilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/facility"
 
     onboardStay:
       x-tm: ONBOARD STAY
@@ -1025,30 +1133,34 @@ components:
 
     distributionParameter:
       x-tm: DISTRIBUTION VALIDITY PARAMETERS
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        properties:
-          fulfilmentMethod:
-            $ref: "#/components/schemas/normalString"
-          distributionChannel:
-            $ref: "#/components/schemas/normalString"
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [DISTRIBUTION]
+        fulfilmentMethod:
+          $ref: "#/components/schemas/normalString"
+        distributionChannel:
+          $ref: "#/components/schemas/normalString"
 
     organisationalParameter:
       x-tm: ORGANISATIONAL VALIDITY PARAMETERS
-      allOf:
-        - $ref: "#/components/schemas/parameter"    
-        - type: object
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-            type:
-              type: string
-              enum: [ORGANISATIONAL]
-            name:
-              $ref: "#/components/schemas/normalString"
-            legalName:
-              $ref: "#/components/schemas/normalString"
+      required:
+      - id
+      - type
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/shortString"
+        type:
+          type: string
+          enum: [ORGANISATIONAL]
+        name:
+          $ref: "#/components/schemas/normalString"
+        legalName:
+          $ref: "#/components/schemas/normalString"
 
     cancellationParameter:
       x-tm: 
@@ -1056,133 +1168,134 @@ components:
       - cancellationFee: lacking
       - cancellationAllowed: cancellationAllowed
       - cancellationFeePercentage: lacking
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        description: conditions regarding cancellation of a purchased package
-        properties:
-          type:
-            type: string
-            enum: [CANCEL]
-          cancellationAllowed:
-            type: boolean
-            description: is it possible to cancel this package?
-          cancellationFee:
-            description: amount of money you have to pay when you cancel this purchased package
-            $ref: "#/components/schemas/amountOfMoney"
-          cancellationFeePercentage:
-            description: percentage of the offered price you have to pay when you cancel this purchased package
-            type: number
-            minimum: 0
-            maximum: 100
+      type: object
+      description: conditions regarding cancellation of a purchased package
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [CANCEL]
+        cancellationAllowed:
+          type: boolean
+          description: is it possible to cancel this package?
+        cancellationFee:
+          description: amount of money you have to pay when you cancel this purchased package
+          $ref: "#/components/schemas/amountOfMoney"
+        cancellationFeePercentage:
+          description: percentage of the offered price you have to pay when you cancel this purchased package
+          type: number
+          minimum: 0
+          maximum: 100
 
     paymentParameter:
       x-tm: lacking
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        description: conditions regarding payment<br>
-          _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /processes/refund/execute endpoint<br>
-          _PAY_WHEN_FINISHED_ - in case the TO demands a direct payment after usage, automatically done by the MP<br>
-          _UPFRONT_ - in case the TO demands a upfront payment before usage. The payment should be made in the purchase phase<br>
-            The MP must settle the payment to the TO before the package can be started (using START).<br>
-          _SUBSCRIPTION_ - in case the TO demands a subscription, to have some kind of guarantee for payment<br>
-        required:
-          - momentOfPayment
-        properties:
-          type:
-            type: string
-            enum: [PAYMENT]
-          momentOfPayment:
-            type: string
-            enum: [DEPOSIT, PAY_WHEN_FINISHED, UPFRONT, SUBSCRIPTION]
-          deposit:
-            $ref: "#/components/schemas/amountOfMoney"
-            description: the amount of money to pay as a deposit.
+      type: object
+      description: conditions regarding payment<br>
+        _DEPOSIT_ - in case the TO demands a deposit before usage. Requesting and refunding should be done using the /processes/refund/execute endpoint<br>
+        _PAY_WHEN_FINISHED_ - in case the TO demands a direct payment after usage, automatically done by the MP<br>
+        _UPFRONT_ - in case the TO demands a upfront payment before usage. The payment should be made in the purchase phase<br>
+          The MP must settle the payment to the TO before the package can be started (using START).<br>
+        _SUBSCRIPTION_ - in case the TO demands a subscription, to have some kind of guarantee for payment<br>
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [PAYMENT]
+        momentOfPayment:
+          type: string
+          enum: [DEPOSIT, PAY_WHEN_FINISHED, UPFRONT, SUBSCRIPTION]
+        deposit:
+          $ref: "#/components/schemas/amountOfMoney"
+          description: the amount of money to pay as a deposit.
 
     purchaseParameter:
       x-tm: 
       - concept: PURCHASE WINDOW
       - maximumPeriodBeforeDeparture: MaximumPeriodBeforeDeparture
       - requiredLicenseTypes: ENTITLEMENT REQUIRED
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - type: object
-        description: specify required information to complete a purchase
-        properties:
-          type:
-            type: string
-            enum: [PURCHASE]
-          maximumPeriodBeforeDeparture:
-            $ref: "#/components/schemas/longInt"
-            description: Maximum time in minutes that an asset can be reserved before a rental begins.
-          requiredLicenseTypes:
-            type: array
-            description: ONE of these licenses is required to operate the asset
-            maxItems: 5
-            items:
-              $ref: "#/components/schemas/licenseType"
+      type: object
+      description: specify required information to complete a purchase
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [PURCHASE]
+        maximumPeriodBeforeDeparture:
+          $ref: "#/components/schemas/longInt"
+          description: Maximum time in minutes that an asset can be reserved before a rental begins.
+        requiredLicenseTypes:
+          type: array
+          description: ONE of these licenses is required to operate the asset
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/licenseType"
 
     executionParameter:
       x-tm: lacking
-      allOf:
-      - $ref: "#/components/schemas/parameter"
-      - description: conditions during the package
-        type: object
-        properties:
-          codeOfConduct:
-            type: array
-            description: code of conduct items during traveling<br>
-              _NO_PETS_ - no pets are allowed in the asset<br>
-              _NO_SMOKING_ - smoking is not allowed in the asset<br>
-              _NO_TRAVEL_ABROAD_ - it is not allowed to enter another country with this asset<br>
-              _NO_UNDERGROUND_PARKING_ - it is not allowed to park the asset underground
-            maxItems: 5
-            items:
-              type: string
-              enum:
-                [NO_PETS, NO_SMOKING, NO_TRAVEL_ABROAD, NO_UNDERGROUND_PARKING]
-          #returnBefore:
-          #  x-tm: USAGE VALIDITY PERIOD.EndDate & EndTime
-          #  $ref: "#/components/schemas/dateTime"
-          #  description: the ultimate return time
-          returnStations:
-            type: array
-            description: to one of these stations the asset must be returned
-            maxItems: 10
-            items:
-              $ref: "#/components/schemas/externalReference"
-          returnAreas:
-            type: array
-            description: in one of these areas the asset must be returned
-            maxItems: 10
-            items:
-              $ref: "#/components/schemas/geojsonGeometry"
-          returnZones:
-            type: array
-            description: in one of these externally described zones the asset must be returned
-            maxItems: 10
-            items:
-              $ref: "#/components/schemas/externalReference"
-          requiredAncillaries:
-            type: array
-            description: required ancillaries to operate the asset (like a helmet, TYPE=ANCILLARY)
-            maxItems: 25
-            items:
-              $ref: "#/components/schemas/externalReference"
-          #maxBounds:
-          #  $ref: "#/components/schemas/geojsonGeometry"
-          #  description: the maximum bounds of movement, can be an (multi)polygon (for bike sharing) or a line, a trajectory (for conventional public transport)
-          #  externalDocs:
-          #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2119.htm
-          #    description: ROUTING.CrossBorder possible, TOMP allowing more use cases.
-          #timeLimits:
-          #  type: array
-          #  externalDocs:
-          #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2121.htm
-          #    description: USAGE VALIDITY PERIOD, except TM tells when it is allowed, TOMP tells when it is not allowed or when there is a reduction.
-          #  items:
-          #    $ref: "#/components/schemas/timeRestriction"
+      description: conditions during the package
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [EXECUTION]
+        codeOfConduct:
+          type: array
+          description: code of conduct items during traveling<br>
+            _NO_PETS_ - no pets are allowed in the asset<br>
+            _NO_SMOKING_ - smoking is not allowed in the asset<br>
+            _NO_TRAVEL_ABROAD_ - it is not allowed to enter another country with this asset<br>
+            _NO_UNDERGROUND_PARKING_ - it is not allowed to park the asset underground
+          maxItems: 5
+          items:
+            type: string
+            enum:
+              [NO_PETS, NO_SMOKING, NO_TRAVEL_ABROAD, NO_UNDERGROUND_PARKING]
+        #returnBefore:
+        #  x-tm: USAGE VALIDITY PERIOD.EndDate & EndTime
+        #  $ref: "#/components/schemas/dateTime"
+        #  description: the ultimate return time
+        returnStations:
+          type: array
+          description: to one of these stations the asset must be returned
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/externalReference"
+        returnAreas:
+          type: array
+          description: in one of these areas the asset must be returned
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/geojsonGeometry"
+        returnZones:
+          type: array
+          description: in one of these externally described zones the asset must be returned
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/externalReference"
+        requiredAncillaries:
+          type: array
+          description: required ancillaries to operate the asset (like a helmet, TYPE=ANCILLARY)
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/externalReference"
+        #maxBounds:
+        #  $ref: "#/components/schemas/geojsonGeometry"
+        #  description: the maximum bounds of movement, can be an (multi)polygon (for bike sharing) or a line, a trajectory (for conventional public transport)
+        #  externalDocs:
+        #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2119.htm
+        #    description: ROUTING.CrossBorder possible, TOMP allowing more use cases.
+        #timeLimits:
+        #  type: array
+        #  externalDocs:
+        #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2121.htm
+        #    description: USAGE VALIDITY PERIOD, except TM tells when it is allowed, TOMP tells when it is not allowed or when there is a reduction.
+        #  items:
+        #    $ref: "#/components/schemas/timeRestriction"
 
     guarantee:
       x-tm: TRAVEL GUARANTEE
@@ -1298,7 +1411,6 @@ components:
       x-tm: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING EQUIPMENT
       allOf:
         - $ref: "#/components/schemas/geojsonFeature"
-        - $ref: "#/components/schemas/usage"
         - description: the asset that can by applied to execute a leg.
           properties:
             type:
@@ -1461,72 +1573,68 @@ components:
     card:
       x-tm: CUSTOMER PAYMENT MEANS, MEDIUM APPLICATION INSTANCE
       allOf:
-        - $ref: "#/components/schemas/cardType"
-        - type: object
-          description: Any kind of card that isn't a license, only provide the cards that are required
-          required:
-            - number
-            - endvalidity
-          properties:
-            type:
-              type: string
-              enum: [CARD]
-            traveller:
-              $ref: "#/components/schemas/shortString"
-              description: refers to the id-field of one of the travellers
-            number:
-              $ref: "#/components/schemas/externalReference"
-              description: number of the card, like ID number, credit card or bank account number
-            description:
-              $ref: "#/components/schemas/shortString"
-              description: description of the card
-            additionalNumber:
-              $ref: "#/components/schemas/shortString"
-              description: additional number, like CVC code or IBAN code
-            endValidity:
-              $ref: "#/components/schemas/date"
-              description: this card is valid until this date
-            country:
-              $ref: "#/components/schemas/country"
+      - $ref: "#/components/schemas/cardType"
+      - type: object
+        description: Any kind of card that isn't a license, only provide the cards that are required
+        required:
+          - type
+          - cardNumber
+        properties:
+          type:
+            type: string
+            enum: [CARD]
+          cardNumber:
+            $ref: "#/components/schemas/externalReference"
+            description: number of the card, like ID number, credit card or bank account number
+          description:
+            $ref: "#/components/schemas/shortString"
+            description: description of the card
+          additionalNumber:
+            $ref: "#/components/schemas/shortString"
+            description: additional number, like CVC code or IBAN code
+          endValidity:
+            $ref: "#/components/schemas/date"
+            description: this card is valid until this date
+          country:
+            $ref: "#/components/schemas/country"
 
     cardType:
       x-tm: TYPE OF PAYMENT METHOD, MEDIUM ACCESS DEVICE
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          description: A generic description of a CARD
-          additionalProperties: true
-          required:
-            - type
-          properties:
-            id:
-              $ref: "#/components/schemas/externalReference"
-              description: external reference to address the card used.
-            type:
-              type: string
-              enum: [CARD_TYPE]
-            cardType:
-              type: string
-              description: The broad category of card<br>
-                DISCOUNT - discount card, can be applied in the purchase process to get rebate<br>
-                TRAVEL - (external) travel card, possibly paid for in other context, but also monthly, weekly or day-cards<br>
-                BANK - bank card<br>
-                CREDIT - credit card<br>
-                ID - identification card, like an ID card<br>
-                PASSPORT - passport to identify yourself<br>
-                OTHER - unspecified
-              enum: [DISCOUNT, TRAVEL, BANK, CREDIT, ID, PASSPORT, OTHER]
-            subType:
-              $ref: "#/components/schemas/shortString"
-              description: For use in case of OTHER. Can be used in bilateral agreements.
-            relatedProduct:
-              $ref: "#/components/schemas/externalReference"
-            transportOrganisations:
-              type: array
-              maxItems: 15
-              description: references to accepting parties, only if applicable
-              items:
-                $ref: "#/components/schemas/externalReference"
+      type: object
+      description: A generic description of a CARD
+      additionalProperties: true
+      required:
+        - type
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/externalReference"
+          description: external reference to address the card used.
+        type:
+          type: string
+          enum: [CARD_TYPE]
+        cardType:
+          type: string
+          description: The broad category of card<br>
+            DISCOUNT - discount card, can be applied in the purchase process to get rebate<br>
+            TRAVEL - (external) travel card, possibly paid for in other context, but also monthly, weekly or day-cards<br>
+            BANK - bank card<br>
+            CREDIT - credit card<br>
+            ID - identification card, like an ID card<br>
+            PASSPORT - passport to identify yourself<br>
+            OTHER - unspecified
+          enum: [DISCOUNT, TRAVEL, BANK, CREDIT, ID, PASSPORT, OTHER]
+        subType:
+          $ref: "#/components/schemas/shortString"
+          description: For use in case of OTHER. Can be used in bilateral agreements.
+        relatedProduct:
+          $ref: "#/components/schemas/externalReference"
+        transportOrganisations:
+          type: array
+          maxItems: 15
+          description: references to accepting parties, only if applicable
+          items:
+            $ref: "#/components/schemas/externalReference"
 
     customer:
       x-tm: CUSTOMER
@@ -1578,81 +1686,84 @@ components:
           $ref: "#/components/schemas/customProperties"
 
     license:
-      x-tm: ACCEPTED DRIVER PERMIT ?
+      x-tm: ACCEPTED DRIVER PERMIT
       allOf:
         - $ref: "#/components/schemas/licenseType"
         - type: object
           description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
           required:
-            - traveller
             - number
+            - type
           properties:
             type:
               type: string
               enum: [LICENSE]
-            traveller:
-              $ref: "#/components/schemas/externalReference"
-              description: refers to the id-field of one of the travellers
-            number:
+            licenseNumber:
               $ref: "#/components/schemas/shortString"
-            endvalidity:
+            endValidity:
               $ref: "#/components/schemas/date"
 
     licenseType:
       x-tm: TYPE OF DRIVER PERMIT
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          description: A category of license to use a certain asset class
-          additionalProperties: true
-          required:
-            - mode
-          properties:
-            id:
-              $ref: "#/components/schemas/shortString"
-              description: a unique ID for this usage. Especially required when it is a USER PROFILE or an INDIVIDUAL TRAVELLER. Other concepts might refer to this ID.
-            type:
-              type: string
-              enum: [LICENSE_TYPE]
-            modes:
-              type: array
-              items:
-                $ref: "#/components/schemas/mode"
-            licenseCode:
-              $ref: "#/components/schemas/shortString"
-              description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
-            issuingCountry:
-              $ref: "#/components/schemas/country"
+      type: object
+      description: A category of license to use a certain asset class
+      additionalProperties: true
+      required:
+        - mode
+        - type
+      properties:
+        type:
+          type: string
+          enum: [LICENSE_TYPE]
+        modes:
+          type: array
+          items:
+            $ref: "#/components/schemas/mode"
+        licenseCode:
+          $ref: "#/components/schemas/shortString"
+          description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
+        issuingCountry:
+          $ref: "#/components/schemas/country"
+
+    assetReference:
+      type: object
+      required:
+      - type
+      - id
+      properties:
+        type:
+          type: string
+          enum: ["ASSET"]
+        id:
+          $ref: "#/components/schemas/externalReference"
 
     individualTraveller:
       x-tm: INDIVIDUAL TRAVELLER
-      allOf:
-        - $ref: "#/components/schemas/usage"
-        - type: object
-          required:
-            - id
-            - type
-          description: A generic description of a traveler, not including any identifying information
-          additionalProperties: true
-          properties:
-            id:
-              $ref: "#/components/schemas/externalReference"
-            type:
-              type: string
-              enum: [INDIVIDUAL_TRAVELLER]
-            isValidated:
-              type: boolean
-              description: Whether this traveler's identity and properties have been verified by the MaaS provider
-            age:
-              $ref: "#/components/schemas/shortInt"
-              description: Age of the traveler, may be approximate
-            fullName:
-              $ref: "#/components/schemas/normalString"
-              description: the name of the traveller, can be used to validate against ID cards
-            profileReference:
-              $ref: "#/components/schemas/shortString"
-            customerRefefence:
-              $ref: "#/components/schemas/externalReference"
+      type: object
+      required:
+        - id
+        - type
+      description: A generic description of a traveler, not including any identifying information
+      additionalProperties: true
+      properties:
+        id:
+          $ref: "#/components/schemas/externalReference"
+        type:
+          type: string
+          enum: [INDIVIDUAL_TRAVELLER]
+        isValidated:
+          type: boolean
+          description: Whether this traveler's identity and properties have been verified by the MaaS provider
+        age:
+          $ref: "#/components/schemas/shortInt"
+          description: Age of the traveler, may be approximate
+        fullName:
+          $ref: "#/components/schemas/normalString"
+          description: the name of the traveller, can be used to validate against ID cards
+        profileReference:
+          $ref: "#/components/schemas/shortString"
+        customerReference:
+          $ref: "#/components/schemas/externalReference"
 
     categorizedFareStructure:
       type: object
@@ -1807,6 +1918,8 @@ components:
         - addressLine1
         - addressLine2
       properties:
+        placeId:
+          $ref: "#/components/schemas/uuid"
         addressLine1:
           $ref: "#/components/schemas/longString"
           description: contains street, housenumber & additions
@@ -2560,6 +2673,14 @@ components:
       required: true
       description: the identifier of a package
 
+    optionalPackageId:
+      in: query
+      name: packageId
+      schema:
+        type: string
+      required: false
+      description: the identifier of a package
+
     acceptLanguage:
       in: header
       name: Accept-Language
@@ -2794,17 +2915,6 @@ components:
         - "nl-NL"
       required: true
 
-    expires:
-      description: The result is valid until this timestamp (and must be confirmed unless it is already in state _PURCHASED_). A pre-purchased purchased package is expired after this timestamp.
-      schema:
-        description: A HTTP date string
-        x-externalDocs:
-          url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-        type: string
-        examples:
-        - "Wed, 21 Oct 2015 07:28:00 GMT"
-      required: false
-
     version:
       description: the version used to format the response
       schema:
@@ -2823,7 +2933,7 @@ components:
       schema:
         type: string
       required: false
-      x-examples: ["SHA-256=3q2+7w==:"]
+      x-examples: ['{"certificate": "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...\n-----END CERTIFICATE-----"}']
 
     signedDigest:
       description: the signed hash of the offer (or package), using the private key

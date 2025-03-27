@@ -6,6 +6,7 @@ If(!(test-path -PathType container $path))
 
 $ask = 'y'
 $join = "";
+
 If ($args.count -ne 0) {
     $files = $args
     $drafts = @()
@@ -15,6 +16,13 @@ Else {
     Write-Host "fetch files"
     $files = Get-ChildItem -Path . -Filter "TOMP-API-*.yaml"
     $drafts = Get-ChildItem -Path "./draft modules/" -Filter "TOMP-API-*.yaml"
+}
+
+If ($args[0] -eq 'all') {
+    Write-Host "fetch files"
+    $files = Get-ChildItem -Path . -Filter "TOMP-API-*.yaml"
+    $drafts = Get-ChildItem -Path "./draft modules/" -Filter "TOMP-API-*.yaml"
+    $ask = 'n'
 }
 
 Write-Host $files
@@ -47,6 +55,7 @@ ForEach ($arg in $files){
             Write-Host $dest
             
             (gc .\$arg) -replace 'TOMP-API-CORE.yaml', '' | Out-File -encoding ASCII $dest
+            (gc .\work\$arg) -replace 'TOMP-API-OFFERS.yaml', '' | Out-File -encoding ASCII $dest
             $join = -join($join, " ", $dest);
         }
     }

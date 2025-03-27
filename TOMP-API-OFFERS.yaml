@@ -76,11 +76,16 @@ components:
   schemas:
     searchOfferInput:
       allOf: 
-      - $ref: "TOMP-API-CORE.yaml#/components/schemas/defaultInput"
       - $ref: "TOMP-API-CORE.yaml#/components/schemas/travelSpecification"
       - type: object
+        required:
+        - party
+        - type
         description: A package planning request, resulting in package options
         properties:
+          type:
+            type: string
+            enum: [ "SEARCH_OFFER" ]
           party:
             type: array
             maxItems: 10

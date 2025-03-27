@@ -21,24 +21,24 @@ paths:
       summary: "Retrieve financial details"
       description: Returns all the JOURNAL ENTRIES that should be paid (per LEG)
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/limit"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/offset"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
         - name: startTime
           in: query
           description: start of the selection
           required: false
           schema:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/dateTime"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
         - name: endTime
           in: query
           description: end of the selection
           required: false
           schema:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/dateTime"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
         - name: invoiceState
           in: query
           required: false
@@ -48,7 +48,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
         - name: category
           in: query
           description: type of PAYMENT DETAIL (e.g. fare, addition costs, fines, ...)
@@ -62,59 +62,59 @@ paths:
           description: journal entries
           headers:
             Content-Language:
-              $ref: "../TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+              $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/paymentResponse"
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
   /processes/cancel-package/execute:
     post:
-      operationId: cancelOperation
+      operationId: cancelPackageOperation
       summary: "(Partial) cancel a package, after purchase. Before purchase you release a package."
       description: 
-        _CANCEL_ - cancel this package or leg<br>
+        _CANCEL_ - cancel this package<br>
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
         - after sales
       requestBody:
         description: input = packageInput
-        $ref: "../TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
         "202":
           description: when the processing has been completed, the notification URL will be used 
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
   /processes/cancel-leg/execute:
     post:
-      operationId: cancelOperation
-      summary: "(Partial) cancel a package, after purchase. Before purchase you release a package."
+      operationId: cancelLegOperation
+      summary: "(Partial) cancel a leg, after purchase."
       description: 
-        _CANCEL_ - cancel this package or leg<br>
+        _CANCEL_ - cancel this leg<br>
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
         - after sales
       requestBody:
         description: input = legInput
-        $ref: "../TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
         "202":
           description: when the processing has been completed, the notification URL will be used 
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
           
   /collections/redresses/items:
     get:
@@ -122,73 +122,38 @@ paths:
       summary: "Retrieve redresses for a guarantee"
       description: Returns possible redresses for a guarantee
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/limit"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/offset"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
         - name: packageId
           in: query
           description: the id of the package that contains a purchased product
           required: true
           schema:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
         - name: productId
           in: query
           description: the guaranteed product
           required: true
           schema:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/externalReference"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
         - name: guaranteeId
           in: query
           description: the guarantee that haven't been met
           required: true
           schema:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
       tags:
         - after sales
       responses:
         "200":
           description: each feature MUST be of the type redressOption
           $ref: "#/components/responses/redressesResponse"
-          example:
-          {
-            "type": "FeatureCollection",
-            "features": [
-              { "type": "Feature",
-                "geometry": { ... },
-                "properties": { "redressOptionId": "REFUND-34238",
-                                "redress": { "redressType": "REFUND" },
-                                "compensations": [ { "category": "VOUCHER", "amount": 42.00, "currencyCode": "EUR" } ]
-                              },
-                "links": []
-              },
-              { "type": "Feature",
-                "geometry": { ... },
-                "properties": { 
-                                "redressOptionId": "PRODUCT_EXCHANGE-3423",
-                                "redress": { "redressType": "PRODUCT_EXCHANGE" }
-                              },
-                "links": [
-                  { "rel": "alternative", "url": "/collections/offers/items/3423" },
-                  { "rel": "claim-redress", 
-                    "url": "/processes/claim-redress/execute", 
-                    "body": { "inputs": { "type": "REDRESS"
-                                        , "packageId": "[from call]"
-                                        , "productId": "[from call]"
-                                        , "guaranteeId": "ALTERNATIVE_JOURNEY"
-                                        , "redressOptionId": "PRODUCT_EXCHANGE-3423" } }
-                  }
-                ]
-              },
-            ],
-            "properties": {
-              "type": "REDRESSES"
-            }
-          }
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
   /processes/claim-redress/execute:
     post:
@@ -204,12 +169,6 @@ paths:
       requestBody:
         description: the input must be of the type redressInput, the redress options are obtained from /collections/redresses/items
         $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
-        examples:
-        - { "inputs": { "type": "REDRESS"
-                      , "packageId": "[package containing guaranteed product]"
-                      , "productId": "[guaranteed product]"
-                      , "guaranteeId": "ALTERNATIVE_JOURNEY"
-                      , "redressOptionId": "PRODUCT_EXCHANGE-342" } }
       responses:
         "200":
           description: the newly created package is returned.
@@ -225,38 +184,38 @@ paths:
       operationId: refundDepositRequest
       summary: "Request to refund a deposit"
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
         - after sales
       requestBody:
         description: The 'input' of the process request body must be of type 'financialInput', with category 'REFUND'
-        $ref: "../TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"        
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"        
       responses:
         "204":
           description: the payment is acknowledged
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
   /processes/claim-kickback/execute:
     post:
       operationId: claimKickbackRequest
       summary: "Request to refund a deposit"
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
         - after sales
       requestBody:
         description: The 'input' of the process request body must be of type 'financialInput', with category 'CREDIT'
-        $ref: "../TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"        
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"        
       responses:
         "204":
           description: the payment is acknowledged
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
   
   /processes/confirm-payment/execute:
     post:
@@ -264,19 +223,19 @@ paths:
       summary: "Confirm a financial transaction"
       description: The MP (reseller) confirm a payment
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
         - after sales
       requestBody:
         description: The 'input' of the process request body must be of type 'financialInput'
-        $ref: "../TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "204":
           description: the payment is acknowledged
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
 components:
   responses:
@@ -284,12 +243,12 @@ components:
       description: a list of redress options
       headers:
         Version:
-          $ref: "#/components/headers/version"
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
         Content-Language:
-          $ref: "#/components/headers/contentLanguage"
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
         Expires:
           schema:
-            $ref: "#/components/schemas/httpDate"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
           required: true
       content:
         application/json:
@@ -301,40 +260,30 @@ components:
       description: a list of redress options. 
         The main 'properties' field must be of type 'redresses' (#/components/schemas/redressesProperties)
         The 'properties' field of each Feature must be of type 'redress'
-      $ref: "#/components/schemas/geojson"
+      $ref: "TOMP-API-CORE.yaml#/components/schemas/geojson"
 
     financialInput:
       allOf:
-      - $ref: "../TOMP-API-CORE.yaml#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/financialDetail"
-
-        examples:
-        - {
-            # from confirmation of a deposit
-            "timestamp": "2019-10-12T07:20:50.52Z",
-            "amount": 100,
-            "currencyCode": "EUR",
-            "category": "DEPOSIT",
-            "id": "2025003304",
-            "description": "Deposit is transferred"
-          }
-        - {
-            # returned object of the refund-deposit
-            "timestamp": "2019-10-12T07:20:50.52Z",
-            "amount": 100,
-            "currencyCode": "EUR",
-            "category": "REFUND",
-            "id": "2025003305",
-            "description": "Refund of deposit request"
-          }
+      - type: object
+        required:
+          - type
+        properties: 
+          type: 
+            type: string
+            enum: ["PAYMENT_REQUEST", "PAYMENT_CONFIRMATION"]
 
     redressInput:
-      allOf:
-      - $ref: "../TOMP-API-CORE.yaml#/components/schemas/defaultInput"
-      - type: object
-        properties:
-          redressOptionId:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+      type: object
+      required:
+      - type
+      - redressOptionId
+      properties:
+        type:
+          type: string
+          enum: ["REDRESS"]
+        redressOptionId:
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
 
     redresses:
       type: object
@@ -345,13 +294,13 @@ components:
 
     redress:
       allOf:
-        - $ref: "../TOMP-API-CORE.yaml#/components/schemas/geojsonFeatureProperties"
+        - $ref: "TOMP-API-CORE.yaml#/components/schemas/geojsonFeatureProperties"
         - type: object
           properties:
             redressOptionId:
-              $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+              $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
             redress:
-              $ref: "../TOMP-API-CORE.yaml#/components/schemas/redress"
+              $ref: "TOMP-API-CORE.yaml#/components/schemas/redress"
             # alternative -> in the links section
             compensations:
               type: array
@@ -401,12 +350,12 @@ components:
 
     financialDetail:
       allOf:
-      - $ref: "../TOMP-API-CORE.yaml#/components/schemas/amountOfMoney"
+      - $ref: "TOMP-API-CORE.yaml#/components/schemas/amountOfMoney"
       - type: object
         additionalProperties: true
         properties:
           id:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
             description: id of the JOURNAL ENTRY, the LEG id should be used
           category:
             $ref: "#/components/schemas/paymentCategory"
@@ -414,18 +363,18 @@ components:
           state:
             $ref: "#/components/schemas/paymentState"
           expirationDate:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/dateTime"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
 
           sequenceId:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/tinyInt"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/tinyInt"
             description: sequence id of the JOURNAL ENTRY, in combination with **id** unique from TO perspective.
           invoiceId:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/shortString"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/shortString"
             description: the number of the invoice. Should be filled in when invoiced (**state**=_INVOICED_).
           invoiceDate:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/dateTime"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
           comment:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/longString"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/longString"
           units:
             type: array
             items:
@@ -440,10 +389,10 @@ components:
                   type: string
                   enum: [KM, MILE, HOURS, MINUTES, DAYS, LITER, KILOWATTHOUR, CO2_COMPENSATION, OTHER]
                 amount:
-                  $ref: "../TOMP-API-CORE.yaml#/components/schemas/float"
+                  $ref: "TOMP-API-CORE.yaml#/components/schemas/float"
 
           vatNumber:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/shortString"
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/shortString"
             description: VAT identification number.
           bankAccount:
             $ref: "#/components/schemas/bankAccount"
@@ -463,7 +412,7 @@ components:
               maxItems: 500
               items:
                 $ref: "#/components/schemas/financialDetail"
-        - $ref: "../TOMP-API-CORE.yaml#/components/schemas/links"
+        - $ref: "TOMP-API-CORE.yaml#/components/schemas/links"
       example:
           {
             "data": [ "..." ],
@@ -499,15 +448,15 @@ components:
         - number
       properties:
         name:
-          $ref: "../TOMP-API-CORE.yaml#/components/schemas/shortString"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/shortString"
           description: account name
         number:
-          $ref: "../TOMP-API-CORE.yaml#/components/schemas/shortString"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/shortString"
           description: account number
         country:
-          $ref: "../TOMP-API-CORE.yaml#/components/schemas/country"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/country"
         bankIdentification:
-          $ref: "../TOMP-API-CORE.yaml#/components/schemas/shortString"
+          $ref: "TOMP-API-CORE.yaml#/components/schemas/shortString"
           description: bank identification, like BIC code
 
   parameters:
@@ -524,4 +473,4 @@ components:
       description: payment identifier
       required: false
       schema:
-        $ref: "../TOMP-API-CORE.yaml#/components/schemas/uuid"
+        $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"

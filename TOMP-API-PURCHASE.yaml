@@ -41,16 +41,13 @@ paths:
       tags:
         - purchase
       requestBody:
-        description:
+        description: -|
           <h2>Operations - inputs</h2>
           - _PURCHASE_ - requires a defaultInput<br>
           - _2_PHASE_PURCHASE_ - requires a defaultInput<br>
           - _COMMIT_ - requires a defaultInput<br>
           - _RELEASE_ - requires a defaultInput<br>
-
         $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
-        examples:
-        - { "inputs": { "type": "PURCHASE", "packageId": "some Id" } }
       responses:
         "200":
           $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
@@ -59,6 +56,18 @@ paths:
             the completion of the purchase.
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+      callbacks:
+        jobCompleted:
+          '{$request.body#/subscriber/successUri}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: 'TOMP-API-CORE.yaml#/components/schemas/packageResponseBody'
+              responses:
+                "200":
+                  description: Results received successfully          
 
   /processes/purchase-package/execute/:
     post:
@@ -77,24 +86,6 @@ paths:
           <h2>Operations - inputs</h2>
           - _PURCHASE_PACKAGE_ - requires a purchasePackageInput<br>
         $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
-        examples:
-        - { "inputs": 
-            { "type": "PURCHASE_PACKAGE",
-              "from": "NSR:Quay:108842",
-              "to": "RUT:ScheduledStopPoint:28482",
-              "startTime": "2019-10-12T07:20:50.52Z",
-              "endTime": "2019-10-12T07:20:50.52Z",
-              "party":
-                [
-                  {
-                    "travellers":
-                      [ { "type": "USER_PROFILE", "ageGroup": "ADULT" } ],
-                    "parameters":
-                      [ { "type": "SERVICE", "class": "FIRST", "serviceJourney": "VY:ServiceJourney:23438" } ],
-                  }
-                ]
-              } 
-            }
       responses:
         "200":
           $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
@@ -102,6 +93,18 @@ paths:
           description: whenever this is returned, notification URL will be used
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+      callbacks:
+        jobCompleted:
+          '{$request.body#/subscriber/successUri}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: 'TOMP-API-CORE.yaml#/components/schemas/packageResponseBody'
+              responses:
+                "200":
+                  description: Results received successfully
 
   /processes/extend-expiry-time/execute/:
     post:
@@ -120,8 +123,6 @@ paths:
           <h2>Action - inputs</2>
           - requires a extendExpiryTimeInput as `inputs`
         $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
-        example:
-        { "inputs": { "type": "EXTEND_EXPIRY_TIME", "packageId": "some Id", "extensionReason": "PAYMENT_PENDING" } }
       responses:
         "200":
           $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
@@ -149,35 +150,42 @@ components:
   schemas:
     purchasePackageInput:
       allOf:
-        - $ref: "#/components/schemas/defaultInput"
         - $ref: "TOMP-API-OFFERS.yaml#/components/schemas/searchOfferInput"
+        - type: object
+          required:
+          - type
+          properties:
+            type:
+              type: string
+              enum: [ "PURCHASE_PACKAGE" ]
 
     extendExpiryTimeInput:
-      allOf:
-        - $ref: "TOMP-API-CORE.yaml#/components/schemas/defaultInput"
-        - type: object
-          properties:
-            extensionReason:
-              type: string
-              description:
-                in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
-                _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
-                _PAYMENT_PENDING_ - The customer is in the payment process<br>
-                _OTHER_ - unspecified
-              enum: [PURCHASE_PENDING, PAYMENT_PENDING, OTHER]
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [EXTEND_EXPIRY_TIME]
+        extensionReason:
+          type: string
+          description:
+            in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
+            _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
+            _PAYMENT_PENDING_ - The customer is in the payment process<br>
+            _OTHER_ - unspecified
+          enum: ["PURCHASE_PENDING", "PAYMENT_PENDING", "OTHER"]
 
     # operations
     purchaseOperation:
       type: string
       description:
-        _ONE_STOP_PURCHASE_ - purchase a package based on external data<br>
         _PURCHASE_ - purchase an offered package<br>
         _2_PHASE_PURCHASE_ - transactional purchase, COMMIT to confirm the purchase<br>
         _CONFIRM_ - commit the 2 phase purchase<br>
         _RELEASE_ - rollback the 2 phase purchase<br>
       enum:
         [ 
-          ONE_STOP_PURCHASE,
           PURCHASE,
           2_PHASE_PURCHASE,
           CONFIRM,
