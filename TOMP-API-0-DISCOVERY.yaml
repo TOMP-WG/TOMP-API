@@ -9,15 +9,11 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-tags:
-  - name: ogc
-    description: URLS to comply to OGC, to describe the interface
-
 paths:
   /:
     get:
       tags:
-        - ogc
+        - discovery
       operationId: landingPage
       summary: "Landing page"
       description: "Gives a (technical & human readable) output describing how this API must be used. If 
@@ -25,15 +21,15 @@ paths:
       externalDocs:
         url: https://app.swaggerhub.com/apis/OGC/ogcapi-features-1-example-1/1.0.1
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/f"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/f"
       responses:
         "200":
           description: successful operation
           headers:
             Content-Language:
-              $ref: "../TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
             Version:
-              $ref: "../TOMP-API-CORE.yaml#/components/headers/version"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
           content:
             application/json:
               schema:
@@ -42,26 +38,43 @@ paths:
               schema:
                 type: string
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /api:
     get:
       description: This document
       parameters:
-        - $ref: '../TOMP-API-CORE.yaml#/components/parameters/f'
+        - $ref: 'TOMP-API-1-CORE.yaml#/components/parameters/f'
       responses:
         '200':
           description: General Success response.
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
       summary: This document
       tags:
-        - ogc
+        - discovery
+
+  /conformance:
+    get:
+      description: >-
+        A list of all conformance classes specified in a standard that the
+        server conforms to.
+      parameters:
+        - $ref: 'TOMP-API-1-CORE.yaml#/components/parameters/f'
+      operationId: getConformanceDeclaration
+      responses:
+        '200':
+          $ref: '#/components/responses/conformanceDeclarationResponse'
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+      summary: API conformance definition
+      tags:
+        - discovery
 
   /collections:
     get:
       tags:
-        - ogc
+        - discovery
       summary: the feature collections in the dataset
       description: returns a collection of available collection (like offers, packages, legs, support-requests and payments)
       operationId: getCollections
@@ -70,18 +83,18 @@ paths:
           description: A list of available collections
           headers:
             Content-Language:
-              $ref: "../TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/collections"
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /collections/{collectionId}:
     get:
       tags:
-        - ogc
+        - discovery
       summary: |-
         describe the feature collection with id `collectionId`
       operationId: describeCollection
@@ -99,12 +112,12 @@ paths:
               schema:
                 type: string
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /processes:
     get:
       tags:
-      - ProcessList
+      - discovery
       summary: retrieve the list of available processes
       description: "The list of processes contains a summary of each process the OGC\
         \ API - Processes offers, including the link to a more detailed description\
@@ -115,20 +128,20 @@ paths:
           description: Information about the available processes
           headers:
             Version:
-              $ref: "../TOMP-API-CORE.yaml#/components/headers/version"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
             Content-Language:
-              $ref: "../TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/processList'
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /processes/{processID}:
     get:
       tags:
-      - ProcessDescription
+      - discovery
       summary: retrieve a process description
       description: "The process description contains information about inputs and\
         \ outputs and a link to the execution-endpoint for the process. The Core does\
@@ -143,6 +156,38 @@ paths:
         required: true
         schema:
           type: string
+          enum: 
+          - search-offers
+          - add-traveller
+          - remove-traveller
+          - update-traveller
+          - change-times-package
+          - change-times-leg
+          - add-product
+          - remove-product
+          - assign-asset
+          - assign-ancillary
+          - purchase-offer
+          - 2-phase-purchase-offer
+          - confirm-offer
+          - release-offer
+          - purchase-package
+          - extend-expiry-time
+          - start-leg
+          - pause-leg
+          - resume-leg
+          - end-leg
+          - activate-product
+          - initiate-product
+          - lock-asset
+          - unlock-asset
+          - open-trunk-asset
+          - request-support
+          - cancel-package
+          - cancel-leg
+          - claim-redress
+          - refund-deposit
+          - confirm-payment
       responses:
         "200":
           description: A process description.
@@ -151,7 +196,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/process'
         default:
-          $ref: '../TOMP-API-CORE.yaml#/components/responses/errorResponse'
+          $ref: 'TOMP-API-1-CORE.yaml#/components/responses/errorResponse'
 
 components:
   parameters:
@@ -162,19 +207,44 @@ components:
       required: true
       schema:
         type: string
+        description: these are all collections exposed when fully implemented
+        enum: [packages, offers, products, fares, assets, ancillaries, support-tickets, payments, redresses]
 
   responses:
     landingPageResponse:
       description: The reponse containing a landing page
       headers:
         Version:
-          $ref: "../TOMP-API-CORE.yaml#/components/headers/version"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
         Content-Language:
-          $ref: "../TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/landingPage"
+
+    conformanceDeclarationResponse:
+      description: |-
+        The URIs of all conformance classes supported by the server.
+
+        To support "generic" clients that want to access multiple
+        OGC API Features implementations - and not "just" a specific
+        API / server, the server declares the conformance
+        classes it implements and conforms to.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/conformance'
+          example:
+            conformsTo:
+              - 'http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/core'
+              - 'http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/landingPage'
+              - 'http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/oas30'
+              - 'http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/html'
+              - 'http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/json'
+        text/html:
+          schema:
+            type: string
 
   schemas:
     landingPage:
@@ -193,7 +263,7 @@ components:
         links:
           type: array
           items:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/link"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
         processIdentifiers:
           type: array
           description: an array with 'care labels', indiacting how this implementation wants to be treated.
@@ -224,7 +294,7 @@ components:
           type: array
           maxItems: 25
           items:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/shortString"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
 
     conformance:
       type: object
@@ -236,17 +306,6 @@ components:
           items:
             type: string
             example: "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core"
-      example:
-        {
-          "conformsTo":
-            [
-              "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
-              "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
-              "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/html",
-              "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
-              "https://www.rfc-editor.org/info/rfc8288"
-            ],
-        }
 
     collection:
       type: object
@@ -269,7 +328,7 @@ components:
         links:
           type: array
           items:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/link"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
         extent:
           $ref: "#/components/schemas/extent"
         crs:
@@ -405,7 +464,7 @@ components:
         links:
           type: array
           items:
-            $ref: "../TOMP-API-CORE.yaml#/components/schemas/link"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
         collections:
           type: array
           items:
@@ -424,7 +483,7 @@ components:
         links:
           type: array
           items:
-            $ref: '../TOMP-API-CORE.yaml#/components/schemas/link'
+            $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/link'
 
     process:
       allOf:
@@ -439,6 +498,15 @@ components:
             type: object
             additionalProperties:
               $ref: '#/components/schemas/outputDescription'
+          subscriber:
+            type: object
+            properties:
+              successUri:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/url"
+              inProgressUri:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/url"
+              failedUri:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/url"
 
     inputDescription:
       allOf:
@@ -459,46 +527,6 @@ components:
               - unbounded
           schema:
             $ref: '#/components/schemas/schema'
-      example:
-      { 
-        "type": "object",
-        "description": "A package planning request, resulting in package options",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "packageId": {
-            "type": "string",
-            "format": "UUID",
-            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-          },
-          "legId": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "productId": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "timestamp": {
-            "description": "intended timestamp of modification",
-            "type": "string",
-            "format": "date-time"
-          },
-          "comment": {
-            "type": "string",
-            "maxLength": 10000
-          },
-          "party": {
-            "type": "array",
-            "maxItems": 10,
-            "minItems": 1,
-            "items": {
-              "$ref": "parameterAssignment.yaml"
-            }
-          }
-        }
-      }
 
     processSummary:
       allOf:
@@ -523,7 +551,7 @@ components:
           links:
             type: array
             items:
-              $ref: '#/components/schemas/link'
+              $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/link'
 
     outputDescription:
       allOf:

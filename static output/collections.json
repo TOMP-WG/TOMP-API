@@ -1,0 +1,112 @@
+{
+    "collections": [
+      {
+        "id": "packages",
+        "title": "Get a package",
+        "description": "Retrieve a single package, including all details",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/packages/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "offers",
+        "title": "Get offers",
+        "description": "Retrieve offers, based on parameters",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/offers/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "products",
+        "title": "Get products (to extend a package)",
+        "description": "Retrieve relevant products, based on parameters",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/products/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "fares",
+        "title": "Get fares",
+        "description": "Retrieve fares, for a product or for other parameters",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/fares/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "assets",
+        "title": "Get assets",
+        "description": "Retrieve (available) assets for a specific package and leg",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/assets/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "ancillaries",
+        "title": "Get ancillaries",
+        "description": "Retrieve ancillaries for a specific package and leg",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/ancillaries/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "support-tickets",
+        "title": "Get support tickets",
+        "description": "Retrieve support tickets for a specific leg",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/support-tickets/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "payments",
+        "title": "Get payment details",
+        "description": "Retrieve payment details, based on parameters",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/payments/items",
+            "type": "application/json"
+          }
+        ]
+      },
+      {
+        "id": "redresses",
+        "title": "Get redresses for a guarantee",
+        "description": "Retrieve redress options",
+        "links": [
+          {
+            "rel": "detail",
+            "href": "/collections/redresses/items",
+            "type": "application/json"
+          }
+        ]
+      }       
+    ]
+  }

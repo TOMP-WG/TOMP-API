@@ -31,13 +31,13 @@ paths:
 
         The request COULD return a 202, making this an a-synchronous process.
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "#/components/parameters/purchaseOperation"
-        - $ref: "TOMP-API-CORE.yaml#/components/headers/digest"
-        - $ref: "TOMP-API-CORE.yaml#/components/headers/publicKey"
-        - $ref: "TOMP-API-CORE.yaml#/components/headers/signedDigest"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/digest"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/publicKey"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
       tags:
         - purchase
       requestBody:
@@ -47,15 +47,15 @@ paths:
           - _2_PHASE_PURCHASE_ - requires a defaultInput<br>
           - _COMMIT_ - requires a defaultInput<br>
           - _RELEASE_ - requires a defaultInput<br>
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "202":
           description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
             the completion of the purchase.
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
       callbacks:
         jobCompleted:
           '{$request.body#/subscriber/successUri}':
@@ -64,7 +64,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: 'TOMP-API-CORE.yaml#/components/schemas/packageResponseBody'
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
               responses:
                 "200":
                   description: Results received successfully          
@@ -75,9 +75,9 @@ paths:
       summary: "Perform an purchase of a package, based on external data"
       description: "Perform an purchase of a package, based on external data"
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "#/components/parameters/purchaseOperation"
       tags:
         - purchase
@@ -85,14 +85,14 @@ paths:
         description:
           <h2>Operations - inputs</h2>
           - _PURCHASE_PACKAGE_ - requires a purchasePackageInput<br>
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "202":
           description: whenever this is returned, notification URL will be used
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
       callbacks:
         jobCompleted:
           '{$request.body#/subscriber/successUri}':
@@ -101,7 +101,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: 'TOMP-API-CORE.yaml#/components/schemas/packageResponseBody'
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
               responses:
                 "200":
                   description: Results received successfully
@@ -113,23 +113,23 @@ paths:
       description: 
         _EXTEND_EXPIRY_TIME_ - request to extend the expiry time of a 2-phase purchase<br>
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
       tags:
         - purchase
       requestBody:
         description: 
           <h2>Action - inputs</2>
           - requires a extendExpiryTimeInput as `inputs`
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "202":
           description: whenever this is returned, notification URL will be used
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
 components:
   responses:
@@ -138,19 +138,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: "TOMP-API-CORE.yaml#/components/schemas/packageResponseBody"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody"
       headers:
         Version:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
         Content-Language:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
         Expires:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/expires"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/expires"
 
   schemas:
     purchasePackageInput:
       allOf:
-        - $ref: "TOMP-API-OFFERS.yaml#/components/schemas/searchOfferInput"
+        - $ref: "TOMP-API-2-OFFERS.yaml#/components/schemas/searchOfferInput"
         - type: object
           required:
           - type
@@ -186,10 +186,10 @@ components:
         _RELEASE_ - rollback the 2 phase purchase<br>
       enum:
         [ 
-          PURCHASE,
-          2_PHASE_PURCHASE,
-          CONFIRM,
-          RELEASE,
+          purchase,
+          2-phase-purchase,
+          confirm,
+          release,
         ]
 
   parameters:

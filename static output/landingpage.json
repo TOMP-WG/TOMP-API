@@ -1,0 +1,22 @@
+{
+    "title": "example TOMP v2.0 implementation",
+    "description": "as mentioned in the title",
+    "links": [
+        {
+            "href": "/conformance",
+            "rel": "conformance"
+        },
+        {
+            "href": "/api",
+            "rel": "service-desc"
+        },
+        {
+            "href": "/collections",
+            "rel": "data"
+        },
+        {
+            "href": "/processes",
+            "rel": "processes"
+        }
+    ]
+}

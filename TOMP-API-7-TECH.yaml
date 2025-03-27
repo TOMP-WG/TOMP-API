@@ -63,4 +63,4 @@ paths:
                   token:
                     type: string
         "404":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"

@@ -16,7 +16,7 @@ tags:
 paths:
   /collections/customers/items:
     parameters:
-      - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
     post:
       summary: "Create a TO CUSTOMER ACCOUNT for the customer"
       description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
@@ -31,7 +31,7 @@ paths:
         "201":
           $ref: "#/components/responses/customerResponse"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
   
   /collections/customers/items/{customerId}:
     parameters:
@@ -39,7 +39,7 @@ paths:
         in: path
         required: true
         schema:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
     get:
       summary: "Get the customer account from the TO system"
       tags:
@@ -48,7 +48,7 @@ paths:
         "200":
           $ref: "#/components/responses/customerResponse"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
     patch:
       summary: "Update the CUSTOMER ACCOUNT on the TO system"
       description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
@@ -65,7 +65,7 @@ paths:
         "200":
           $ref: "#/components/responses/customerResponse"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
     delete:
       summary: "Delete the CUSTOMER ACCOUNT from the TO system."
       description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
@@ -75,7 +75,7 @@ paths:
         "200":
           description:  CUSTOMER ACCOUNT deleted successfully
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
 components:
   responses:
@@ -83,9 +83,9 @@ components:
       description: Customer Account
       headers:
         Content-Language:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
         Version:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
       content:
         application/json:
           schema:
@@ -97,12 +97,12 @@ components:
       type: object
       properties:
         id:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
         creationDate:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
           description: The date in which the CUSTOMER ACCOUNT has been created
         modificationDate:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
           description: Last modification date of CUSTOMER ACCOUNT.
         status:
           $ref: "#/components/schemas/customerAccountStatus"

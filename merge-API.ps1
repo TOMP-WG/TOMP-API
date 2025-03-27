@@ -54,8 +54,8 @@ ForEach ($arg in $files){
             $dest = $dest -replace "\\draft modules\\", "\\"
             Write-Host $dest
             
-            (gc .\$arg) -replace 'TOMP-API-CORE.yaml', '' | Out-File -encoding ASCII $dest
-            (gc .\work\$arg) -replace 'TOMP-API-OFFERS.yaml', '' | Out-File -encoding ASCII $dest
+            (gc .\$arg) -replace 'TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII $dest
+            (gc .\work\$arg) -replace 'TOMP-API-2-OFFERS.yaml', '' | Out-File -encoding ASCII $dest
             $join = -join($join, " ", $dest);
         }
     }
@@ -65,7 +65,7 @@ ForEach ($arg in $drafts){
     $confirmation = Read-Host "Add $($arg) [y/N]"
 
     if ($confirmation -eq 'y') {
-        (gc ".\draft modules\$arg") -replace '../TOMP-API-CORE.yaml', '' | Out-File -encoding ASCII .\work\$arg
+        (gc ".\draft modules\$arg") -replace '../TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII .\work\$arg
         $join = -join($join, " .\work\", $arg );
     }
 }

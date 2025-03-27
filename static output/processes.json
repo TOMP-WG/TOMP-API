@@ -1,0 +1,99 @@
+TO COMPLETE!
+{
+    "processes": [
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+    { "id": "X", "title": "X", "version": "2.0.0", "jobControlOptions": [ "sync-execute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/X/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/X", "rel": "service-desc", "type": "application/json" } ] },
+
+                 { "id": "confirm-payment", "title": "confirm-payment", "version": "2.0.0", "jobControlOptions": [ "sync-econfirm-paymentecute" ], "outputTransmission": ["value"],
+       "links": [{"href": "/processes/confirm-payment/execute","rel": "service","type": "application/json" },
+                 {"href": "/processes/confirm-payment", "rel": "service-desc", "type": "application/json" } ] }
+
+                ]
+                - 
+                - add-traveller
+                - remove-traveller
+                - update-traveller
+                - change-times-package
+                - change-times-leg
+                - add-product
+                - remove-product
+                - assign-asset
+                - assign-ancillary
+                - purchase-offer
+                - 2-phase-purchase-offer
+                - confirm-offer
+                - release-offer
+                - purchase-package
+                - extend-expiry-time
+                - start-leg
+                - pause-leg
+                - resume-leg
+                - end-leg
+                - activate-product
+                - initiate-product
+                - lock-asset
+                - unlock-asset
+                - open-trunk-asset
+                - request-support
+                - cancel-package
+                - cancel-leg
+                - claim-redress
+                - refund-deposit
+                - 
+
+  }

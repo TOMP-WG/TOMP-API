@@ -21,11 +21,11 @@ paths:
       summary: "Get for support tickets of a package/leg"
       description: returns support tickets in their current state, based on the parameters
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/legId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
         - $ref: "#/components/parameters/supportTicketStatus"
       tags:
         - support
@@ -34,7 +34,7 @@ paths:
           description: support status delivered
           headers:
             Content-Language:
-              $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
@@ -42,7 +42,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/supportTicket"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /processes/request-support/execute:
     post:
@@ -50,26 +50,26 @@ paths:
       summary: "Create a support ticket"
       description: creates a request for SUPPORT from end user via MP
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
       tags:
         - support
       requestBody:
         description: The 'input' of the process request body must be of type '#/components/schemas/supportInput'
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
           description: support request acknowledged, the response contains a support ticket with a unique ID. Multiple support tickets can be created on one single leg.
           headers:
             Content-Language:
-              $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/supportTicket"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
           
 components:
   parameters:
@@ -89,7 +89,7 @@ components:
         - timestamp
       properties:
         id:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
           description: ticketID, to be provided when created. Mandatory when status != REQUESTED
         status:
           $ref: "#/components/schemas/supportTicketStatus"
@@ -120,9 +120,9 @@ components:
               REPORT_DAMAGE,
             ]
         location:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
         timestamp:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/dateTime"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
           description: the reporting timestamp of the support request
         priority:
           type: string
@@ -136,30 +136,30 @@ components:
               OTHER,
             ]
         contactInformationEndUser:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/normalString"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
           description: contact information of the end user in case of direct response requests, like phone number
         comment:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/longString"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
         urls:
           type: array
           description: urls to clarify the support request e.g. pictures showing damage
           maxItems: 10
           items:
-            $ref: "TOMP-API-CORE.yaml#/components/schemas/url"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/url"
         requestedResponseTime:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/shortInt"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
           description: time to respond in minutes.
         timeToResolution:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/shortInt"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
           description: time in minutes to the expected resolution of support request
           example: 9
         sequence:
-          $ref: "TOMP-API-CORE.yaml#/components/schemas/tinyInt"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyInt"
           description: the sequence number of the status of tickets on this issue
           
     supportInput:
       allOf:
-      - $ref: "TOMP-API-CORE.yaml#/components/schemas/defaultInput"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/supportTicket"
 
     supportTicketStatus:

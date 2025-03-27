@@ -26,9 +26,9 @@ paths:
       summary: "Perform an operation on a leg"
       description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - name: legOperation
           in: query
           description: OPERATION on a specified leg
@@ -44,17 +44,17 @@ paths:
          - PAUSE - the `inputs` MUST be a legInput
          - RESUME - the `inputs` MUST be a legInput
          - END - the `inputs` MUST be a legInput
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "202":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "503":
           description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
           $ref: "#/components/responses/retryErrorResponse"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /processes/{productExecutionOperation}-product/execute:
     post:
@@ -62,11 +62,11 @@ paths:
       summary: "Perform an operation on a product"
       description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/legId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
         - name: productExecutionOperation
           in: query
           description: OPERATION on a specified product
@@ -80,22 +80,22 @@ paths:
          <h2>Product operations</h2>
          - ACTIVATE - defaultInput required
          - INITIATE - defaultInput required, new leg is added to the package
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "202":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /processes/{assetOperation}-asset/execute/:
     post:
       operationId: assetExecutionRequest
       parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - name: productExecutionOperation
           in: query
           description: OPERATION on a specified asset
@@ -107,12 +107,12 @@ paths:
       requestBody:
         description: -|
           The `input` of the process request body must be of type 'assetInput'
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "200":
-          $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   # Use Pre-sales module for:
   #  /processes/{travellerOperation}-traveller/execute/
@@ -128,13 +128,13 @@ components:
       description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       headers:
         Version:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
         Content-Language:
-          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
         Retry-After:
           description: A date after which to retry. See the Date header for more details on the HTTP date format.
           schema:
-            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
           required: false
       content:
         application/json:
@@ -145,7 +145,7 @@ components:
                 type: array
                 maxItems: 10
                 items:
-                  $ref: "TOMP-API-CORE.yaml#/components/schemas/error"
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/error"
 
   schemas:
     legOperation:
@@ -168,6 +168,6 @@ components:
       type: string
       description: Operations on an asset, the enlisted operations are default, you can extend (outside the TOMP-API).
       # enum:
-      #   - LOCK
-      #   - UNLOCK
-      #   - OPEN_TRUNK
+      #   - lock
+      #   - unlock
+      #   - open-trunk

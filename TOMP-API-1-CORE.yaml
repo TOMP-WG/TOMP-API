@@ -25,19 +25,21 @@ servers:
 tags:
   - name: core
     description: core functions
+  - name: discovery
+    description: URLS to comply to OGC, to describe the interface
 
 paths:
   /collections/datasources/items:
     get:
       operationId: getDataSources
-      summary: "Get all datasources"
+      summary: "Retrieves all (external) datasources, that are used in requests and responses"
       description: Retrieves all datasources
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/receiverId"
       tags:
-        - core
+        - discovery
       responses:
         "200":
           $ref: "#/components/responses/dataSourceResponse"
@@ -77,10 +79,6 @@ components:
               inputs: 
                 description: this body can be replaced by a subtype of defaultInput
                 $ref: "#/components/schemas/defaultInput"
-              response:
-                type: string
-                enum:
-                  - document
               subscriber:
                 type: object
                 required:
@@ -393,7 +391,7 @@ components:
       properties:
         type: 
           type: string
-          enum: ["PACKAGE"]
+          enum: [ PACKAGE ]
       examples:
       - {
           "type": "PACKAGE",
@@ -2655,15 +2653,6 @@ components:
           - html
         type: string
       style: form
-
-    target:
-      name: target
-      in: path
-      description: target
-      required: true
-      schema:
-        type: string
-        enum: [PACKAGE, CUSTOMER, USAGE, PRODUCT, LEG, ASSET, ANCILLARY]
 
     packageId:
       in: query
