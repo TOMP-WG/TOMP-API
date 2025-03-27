@@ -1,18 +1,16 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Template input JSONSchema",
-    "description": "JSON Schema for the request body of input schema",
+    "title": "Purchase package input JSONSchema",
+    "description": "JSON Schema for the request body of the purchase package",
     "$ref": "#/components/requestBodies/processRequestBody",
-    "$comment": "Replace the `inputs` reference in the processRequestBody to create a valid JSONSchema to validate",
     "components": {
         "requestBodies": {
             "processRequestBody": {
                 "type": "object",
                 "properties": {
                     "inputs": {
-                        "description": "this body can be replaced by a subtype of defaultInput",
-                        "$comment": "This is the place to place your input (must be a subclass of defaultInput)",
-                        "$ref": "#/components/schemas/<B: THIS IS WHERE YOU SHOULD PUT YOUR SUBCLASS OF DefaultInput, like searchOfferInput>"
+                        "description": "The required input to purchase a package",
+                        "$ref": "#/components/schemas/packageInput"
                     },
                     "response": {
                         "type": "string",
@@ -53,65 +51,6 @@
                     {
                         "$ref": "#/components/schemas/geojson"
                     }
-                ],
-                "examples": [
-                    {
-                        "type": "FeatureCollection",
-                        "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-                        "features": [
-                            {
-                                "type": "Feature",
-                                "properties": {
-                                    "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                                    "type": "LEG",
-                                    "assetType": "GBFS:vehicle_types:SMALL_CAR"
-                                },
-                                "geometry": {
-                                    "type": "LineString",
-                                    "coordinates": [
-                                        [
-                                            23.343,
-                                            51.6923
-                                        ],
-                                        [
-                                            34.233,
-                                            42.3943
-                                        ]
-                                    ]
-                                },
-                                "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                                "links": []
-                            }
-                        ],
-                        "properties": {
-                            "type": "package",
-                            "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-                            "specification": {
-                                "from": "...",
-                                "startTime": "..."
-                            }
-                        },
-                        "links": [
-                            {
-                                "rel": "confirm",
-                                "method": "POST",
-                                "href": "/processes/confirm-offer/execute?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
-                                "type": "application/geo+json"
-                            },
-                            {
-                                "rel": "withdraw",
-                                "method": "POST",
-                                "href": "/processes/release-offer/execute?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
-                                "type": "application/geo+json"
-                            },
-                            {
-                                "rel": "extend_expiry_time",
-                                "method": "POST",
-                                "href": "/processes/extend-expiry-time/execute?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
-                                "type": "application/geo+json"
-                            }
-                        ]
-                    }
                 ]
             },
             "offersResponseBody": {
@@ -119,103 +58,6 @@
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/geojson"
-                    }
-                ],
-                "examples": [
-                    {
-                        "type": "FeatureCollection",
-                        "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-                        "features": [
-                            {
-                                "type": "Feature",
-                                "properties": {
-                                    "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                                    "type": "PACKAGE",
-                                    "from": "...",
-                                    "startTime": "...",
-                                    "legs": [
-                                        {
-                                            "type": "LEG",
-                                            "operator": "S:VY",
-                                            "product": "S:VY:first_class_ticket",
-                                            "asset": {
-                                                "id": "S:VY:JOURNEY:3942-2349"
-                                            }
-                                        },
-                                        {
-                                            "type": "LEG",
-                                            "operator": "S:VOI",
-                                            "product": "VOI-GBFS:vehicle_types:electric_bike"
-                                        }
-                                    ]
-                                },
-                                "geometry": {
-                                    "type": "MultiLineString",
-                                    "coordinates": [
-                                        [
-                                            [
-                                                23.343,
-                                                51.6923
-                                            ],
-                                            [
-                                                34.233,
-                                                42.3943
-                                            ]
-                                        ],
-                                        [
-                                            23.343,
-                                            51.6923
-                                        ],
-                                        [
-                                            34.233,
-                                            42.3943
-                                        ]
-                                    ]
-                                },
-                                "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                                "links": [
-                                    {
-                                        "rel": "details",
-                                        "method": "GET",
-                                        "description": "See the details of this offer",
-                                        "href": "/collections/offers/items/376e1083-92df-44e5-a1bf-d5570507b8",
-                                        "type": "application/geo+json"
-                                    },
-                                    {
-                                        "rel": "purchase",
-                                        "method": "POST",
-                                        "href": "/processes/purchase-package/execute",
-                                        "body": {
-                                            "packageId": "376e1083-92df-44e5-a1bf-d5570507b8"
-                                        },
-                                        "type": "application/geo+json"
-                                    }
-                                ]
-                            }
-                        ],
-                        "properties": {
-                            "type": "OFFERS"
-                        },
-                        "links": [
-                            {
-                                "rel": "confirm",
-                                "method": "POST",
-                                "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=confirm",
-                                "type": "application/geo+json"
-                            },
-                            {
-                                "rel": "withdraw",
-                                "method": "POST",
-                                "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=withdraw",
-                                "type": "application/geo+json"
-                            },
-                            {
-                                "rel": "extend_expiry_time",
-                                "method": "POST",
-                                "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=extend_expiry_time",
-                                "type": "application/geo+json"
-                            }
-                        ]
                     }
                 ]
             },
@@ -339,13 +181,7 @@
                             "PACKAGE"
                         ]
                     }
-                },
-                "examples": [
-                    {
-                        "type": "PACKAGE",
-                        "packageId": "349204234-342439324-342"
-                    }
-                ]
+                }
             },
             "legInput": {
                 "type": "object",
@@ -393,18 +229,6 @@
                             }
                         }
                     }
-                ],
-                "examples": [
-                    {
-                        "type": "TRAVELLER",
-                        "packageId": "349204234-342439324-342",
-                        "travellers": [
-                            {
-                                "type": "INDIVIDUAL_TRAVELLER",
-                                "id": "ABT:3492"
-                            }
-                        ]
-                    }
                 ]
             },
             "changeTimesInput": {
@@ -426,13 +250,6 @@
                                 ]
                             }
                         }
-                    }
-                ],
-                "examples": [
-                    {
-                        "type": "CHANGE_TIMES",
-                        "packageId": "349204234-342439324-342",
-                        "startTime": "2024-12-13T11:34:00Z"
                     }
                 ]
             },
@@ -456,13 +273,6 @@
                                 ]
                             }
                         }
-                    }
-                ],
-                "examples": [
-                    {
-                        "type": "PRODUCT",
-                        "packageId": "349204234-342439324-342",
-                        "id": "NeTEx:FareProduct:349242"
                     }
                 ]
             },
@@ -492,13 +302,6 @@
                             }
                         }
                     }
-                ],
-                "examples": [
-                    {
-                        "type": "ASSET",
-                        "packageId": "349204234-342439324-342",
-                        "assetId": "GBFS:vehicles:349242"
-                    }
                 ]
             },
             "ancillaryInput": {
@@ -520,14 +323,7 @@
                     "replaceAncillaryId": {
                         "$ref": "#/components/schemas/externalReference"
                     }
-                },
-                "examples": [
-                    {
-                        "type": "ANCILLARY",
-                        "packageId": "349204234-342439324-342",
-                        "ancillaryId": "some-external-reference"
-                    }
-                ]
+                }
             },
             "package": {
                 "x-tm": "SALES OFFER PACKAGE, TRAVEL OFFER PACKAGE, CUSTOMER PURCHASE PACKAGE",
@@ -721,9 +517,6 @@
                     "CANCELLED",
                     "STARTED",
                     "ENDED"
-                ],
-                "examples": [
-                    "PURCHASED"
                 ]
             },
             "legState": {
@@ -984,12 +777,7 @@
                         "items": {
                             "$ref": "#/components/schemas/externalReference"
                         },
-                        "description": "use an ID contained in the 'places' field, or from an external source, when using coordinates, please use the prefix 'gps:'",
-                        "examples": [
-                            [
-                                "NSR:Quay:108842"
-                            ]
-                        ]
+                        "description": "use an ID contained in the 'places' field, or from an external source, when using coordinates, please use the prefix 'gps:'"
                     },
                     "to": {
                         "$ref": "#/components/schemas/externalReference",
@@ -1040,56 +828,13 @@
                         "description": "this describes the travelling party, the users (when purchasing or later, when anonymous travelling is not applicable) or user profiles (during the offers)",
                         "items": {
                             "$ref": "#/components/schemas/usage"
-                        },
-                        "examples": [
-                            [
-                                {
-                                    "type": "USER_PROFILE",
-                                    "ageGroup": "ADULT",
-                                    "number": 1
-                                },
-                                {
-                                    "type": "ENTITLEMENT",
-                                    "entitlementType": "NO:ENTITLEMENT:MILITARY",
-                                    "number": 1
-                                },
-                                {
-                                    "type": "COMMERCIAL_PROFILE",
-                                    "code": "VX34-348J-EI7y",
-                                    "number": 1
-                                },
-                                {
-                                    "type": "LICENSE_TYPE",
-                                    "modes": [
-                                        "CAR"
-                                    ],
-                                    "number": 2
-                                },
-                                {
-                                    "type": "INDIVIDUAL_TRAVELLER",
-                                    "id": "34924-3A334B-C342D",
-                                    "number": 2
-                                }
-                            ]
-                        ]
+                        }
                     },
                     "parameters": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/parameter"
-                        },
-                        "examples": [
-                            [
-                                {
-                                    "type": "SERVICE",
-                                    "class": "FIRST"
-                                },
-                                {
-                                    "type": "SEATING",
-                                    "spotType": "LUGGAGE_SPOT"
-                                }
-                            ]
-                        ]
+                        }
                     }
                 }
             },
@@ -2268,39 +2013,7 @@
                     "fare": {
                         "$ref": "#/components/schemas/fareStructure"
                     }
-                },
-                "examples": [
-                    {
-                        "parameterAssigment": {
-                            "travellers": [
-                                {
-                                    "type": "USER_PROFILE",
-                                    "ageGroup": "ADULT"
-                                }
-                            ],
-                            "parameters": [
-                                {
-                                    "type": "SERVICE",
-                                    "class": "FIRST"
-                                }
-                            ]
-                        },
-                        "fareStructure": {
-                            "elements": [
-                                {
-                                    "type": "FLEX",
-                                    "amount": 0.5,
-                                    "currencyCode": "EUR",
-                                    "unit": "ZONE",
-                                    "interval": {
-                                        "from": 1,
-                                        "to": 3
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
+                }
             },
             "fareStructure": {
                 "x-tm": "TARIFF",
@@ -2525,15 +2238,7 @@
                         "$ref": "#/components/schemas/longString",
                         "description": "additional information to find the address (f.x. just around the corner)"
                     }
-                },
-                "examples": [
-                    {
-                        "id": "PA:fdb151f2-bcd6-4b2a-9998-6c6a2ca8b66d",
-                        "type": "POSTAL_ADDRESS",
-                        "addressLine1": "Clearwater road 18",
-                        "addressLine2": "Muddycity X2433"
-                    }
-                ]
+                }
             },
             "appSupport": {
                 "x-tm": "lacking",
@@ -2615,15 +2320,7 @@
                                 "maxItems": 25,
                                 "items": {
                                     "$ref": "#/components/schemas/shortString"
-                                },
-                                "examples": [
-                                    [
-                                        "return-url",
-                                        "error-url",
-                                        "error-code",
-                                        "error-description"
-                                    ]
-                                ]
+                                }
                             }
                         }
                     }
@@ -2792,13 +2489,7 @@
                     "type": "number",
                     "format": "float",
                     "minimum": 0
-                },
-                "examples": [
-                    [
-                        4.53432,
-                        55.324523
-                    ]
-                ]
+                }
             },
             "geojsonPoint": {
                 "type": "object",
@@ -2835,18 +2526,6 @@
                         "properties": {
                             "coordinates": {
                                 "type": "array",
-                                "examples": [
-                                    [
-                                        [
-                                            6.169639,
-                                            52.253279
-                                        ],
-                                        [
-                                            6.05623,
-                                            52.63473
-                                        ]
-                                    ]
-                                ],
                                 "items": {
                                     "$ref": "#/components/schemas/basePoint"
                                 }
@@ -2870,46 +2549,8 @@
                         "properties": {
                             "coordinates": {
                                 "type": "array",
-                                "examples": [
-                                    [
-                                        [
-                                            [
-                                                1,
-                                                1
-                                            ],
-                                            [
-                                                0,
-                                                1
-                                            ],
-                                            [
-                                                0,
-                                                0
-                                            ],
-                                            [
-                                                1,
-                                                0
-                                            ],
-                                            [
-                                                1,
-                                                1
-                                            ]
-                                        ]
-                                    ]
-                                ],
                                 "items": {
                                     "type": "array",
-                                    "examples": [
-                                        [
-                                            [
-                                                6.169639,
-                                                52.253279
-                                            ],
-                                            [
-                                                6.05623,
-                                                52.63473
-                                            ]
-                                        ]
-                                    ],
                                     "items": {
                                         "$ref": "#/components/schemas/basePoint"
                                     }
@@ -2934,76 +2575,10 @@
                         "properties": {
                             "coordinates": {
                                 "type": "array",
-                                "examples": [
-                                    [
-                                        [
-                                            [
-                                                [
-                                                    1,
-                                                    1
-                                                ],
-                                                [
-                                                    0,
-                                                    1
-                                                ],
-                                                [
-                                                    0,
-                                                    0
-                                                ],
-                                                [
-                                                    1,
-                                                    0
-                                                ],
-                                                [
-                                                    1,
-                                                    1
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
                                 "items": {
                                     "type": "array",
-                                    "examples": [
-                                        [
-                                            [
-                                                [
-                                                    1,
-                                                    1
-                                                ],
-                                                [
-                                                    0,
-                                                    1
-                                                ],
-                                                [
-                                                    0,
-                                                    0
-                                                ],
-                                                [
-                                                    1,
-                                                    0
-                                                ],
-                                                [
-                                                    1,
-                                                    1
-                                                ]
-                                            ]
-                                        ]
-                                    ],
                                     "items": {
                                         "type": "array",
-                                        "examples": [
-                                            [
-                                                [
-                                                    6.169639,
-                                                    52.253279
-                                                ],
-                                                [
-                                                    6.05623,
-                                                    52.63473
-                                                ]
-                                            ]
-                                        ],
                                         "items": {
                                             "$ref": "#/components/schemas/basePoint"
                                         }
@@ -3039,22 +2614,7 @@
                             "MultiPolygon"
                         ]
                     }
-                },
-                "examples": [
-                    {
-                        "type": "LineString",
-                        "geometry": [
-                            [
-                                3.2343,
-                                43.342
-                            ],
-                            [
-                                3.3242,
-                                43.939
-                            ]
-                        ]
-                    }
-                ]
+                }
             },
             "geojsonCustomFeatureProperties": {
                 "allOf": [
@@ -3185,35 +2745,7 @@
                         "description": "actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources In case it is an alternative, specify clearly in the description what the financial consequences are.",
                         "items": {
                             "$ref": "#/components/schemas/link"
-                        },
-                        "examples": [
-                            [
-                                {
-                                    "rel": "alternative+1",
-                                    "type": "application/geo+json",
-                                    "url": "/collections/package/items/4394234",
-                                    "method": "GET"
-                                },
-                                {
-                                    "rel": "alternative+2",
-                                    "type": "application/geo+json",
-                                    "url": "/collections/package/items/4394235",
-                                    "method": "GET"
-                                },
-                                {
-                                    "rel": "android",
-                                    "type": "application/vnd.android.ota",
-                                    "url": "app://yourbrand.go.link?product=4394234",
-                                    "method": "GET"
-                                },
-                                {
-                                    "rel": "apple",
-                                    "type": "application/vnd.apple.installer+xml",
-                                    "url": "https://yourbrand.go.link?product=4394234",
-                                    "method": "GET"
-                                }
-                            ]
-                        ]
+                        }
                     }
                 }
             },
@@ -3244,10 +2776,7 @@
                 "properties": {
                     "rel": {
                         "type": "string",
-                        "description": "the action that can be performed OR part of the URI (e.g. NETEX:StopPoint:342, where the location of the NETEX file can be specified)",
-                        "examples": [
-                            "purchase"
-                        ]
+                        "description": "the action that can be performed OR part of the URI (e.g. NETEX:StopPoint:342, where the location of the NETEX file can be specified)"
                     },
                     "href": {
                         "$ref": "#/components/schemas/url"
@@ -3272,30 +2801,7 @@
                     },
                     "body": {
                         "type": "object",
-                        "description": "the (prefilled) body for the request",
-                        "examples": [
-                            {
-                                "from": "NSR:Quay:108842",
-                                "startTime": "2019-10-12T07:20:50.52Z",
-                                "parameters": [
-                                    {
-                                        "usage": [
-                                            {
-                                                "type": "INDIVIDUAL_TRAVELLER",
-                                                "fullName": null,
-                                                "": null
-                                            }
-                                        ],
-                                        "validities": [
-                                            {
-                                                "type": "SERVICE",
-                                                "class": "FIRST"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
+                        "description": "the (prefilled) body for the request"
                     },
                     "requiredFields": {
                         "type": "array",
@@ -3304,37 +2810,20 @@
                         "maxItems": 50,
                         "items": {
                             "type": "string"
-                        },
-                        "examples": [
-                            [
-                                "$.parameters[0].usage[0].fullName",
-                                "header.Autorization",
-                                "parameter.featureId"
-                            ]
-                        ]
+                        }
                     },
                     "headers": {
                         "type": "object",
                         "additionalProperties": {
                             "type": "string"
-                        },
-                        "examples": [
-                            {
-                                "Autorization": "Bearer 3042-3402-3428"
-                            }
-                        ]
+                        }
                     },
                     "parameters": {
                         "type": "object",
                         "description": "possible parameters, but fixed parameters can be added in the href. It is not mandatory to enlist them in this object. In practice, this object will contain optional parameters and required parameters that have to be completed.",
                         "additionalProperties": {
                             "type": "string"
-                        },
-                        "examples": [
-                            {
-                                "location": "GPS"
-                            }
-                        ]
+                        }
                     },
                     "isMandatory": {
                         "description": "is this link informative, or must it be used?",
@@ -3444,18 +2933,12 @@
             "date": {
                 "type": "string",
                 "x-format": "full-date",
-                "examples": [
-                    "2019-03-31"
-                ],
                 "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
                 "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, full-date"
             },
             "dateTime": {
                 "type": "string",
                 "x-format": "date-time",
-                "examples": [
-                    "2019-10-12T07:20:50.52Z"
-                ],
                 "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time"
             },
             "day": {
@@ -3484,10 +2967,7 @@
                 "x-externalDocs": {
                     "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires",
                     "description": "http-date"
-                },
-                "examples": [
-                    "Wed, 21 Oct 2015 07:28:00 GMT"
-                ]
+                }
             },
             "longInt": {
                 "type": "integer",
@@ -3527,9 +3007,6 @@
             "time": {
                 "type": "string",
                 "x-format": "partial-time",
-                "examples": [
-                    "23:59:59.3498"
-                ],
                 "x-externalDocs": {
                     "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6",
                     "description": "partial-time"
@@ -3555,9 +3032,6 @@
             "uuid": {
                 "type": "string",
                 "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-                "examples": [
-                    "ae76f51c-a1a6-46af-b9ab-8233564adcae"
-                ],
                 "x-externalDocs": {
                     "url": "https://en.wikipedia.org/wiki/Universally_unique_identifier",
                     "description": "see also https://www.ietf.org/rfc/rfc4122.txt"
@@ -3750,32 +3224,7 @@
                     {
                         "$ref": "#/components/schemas/links"
                     }
-                ],
-                "example": {
-                    "data": [
-                        "..."
-                    ],
-                    "links": [
-                        {
-                            "rel": "self",
-                            "method": "GET",
-                            "href": "/collections/payments/items&offset=100&limit=100",
-                            "type": "application/hal+json"
-                        },
-                        {
-                            "rel": "next",
-                            "method": "GET",
-                            "href": "/collections/payments/items&offset=200&limit=100",
-                            "type": "application/hal+json"
-                        },
-                        {
-                            "rel": "previous",
-                            "method": "GET",
-                            "href": "/payments&limit=100",
-                            "type": "application/hal+json"
-                        }
-                    ]
-                }
+                ]
             },
             "bankAccount": {
                 "type": "object",
@@ -3896,54 +3345,6 @@
                                 }
                             }
                         }
-                    }
-                ],
-                "examples": [
-                    {
-                        "type": "SEARCH_OFFER",
-                        "from": "gps:6.234,51.6923",
-                        "via": [
-                            "NSR:Quay:108842"
-                        ],
-                        "to": "RUT:ScheduledStopPoint:28482",
-                        "startTime": "2019-10-12T07:20:50.52Z",
-                        "endTime": "2019-10-12T07:20:50.52Z",
-                        "party": [
-                            {
-                                "travellers": [
-                                    {
-                                        "type": "USER_PROFILE",
-                                        "number": 1,
-                                        "ageGroup": "ADULT"
-                                    },
-                                    {
-                                        "type": "ENTITLEMENT",
-                                        "number": 1,
-                                        "entitlementType": "NO:MILITARY"
-                                    },
-                                    {
-                                        "type": "USER_PROFILE",
-                                        "number": 2,
-                                        "ageGroup": "ADULT"
-                                    },
-                                    {
-                                        "type": "COMMERCIAL_PROFILE",
-                                        "number": 2,
-                                        "code": "VX34-348J-EI7y"
-                                    }
-                                ],
-                                "parameters": [
-                                    {
-                                        "type": "SERVICE",
-                                        "class": "FIRST"
-                                    },
-                                    {
-                                        "type": "SEATING",
-                                        "spotType": "LUGGAGE_SPOT"
-                                    }
-                                ]
-                            }
-                        ]
                     }
                 ]
             },
@@ -4071,8 +3472,7 @@
                     },
                     "timeToResolution": {
                         "$ref": "#/components/schemas/shortInt",
-                        "description": "time in minutes to the expected resolution of support request",
-                        "example": 9
+                        "description": "time in minutes to the expected resolution of support request"
                     },
                     "sequence": {
                         "$ref": "#/components/schemas/tinyInt",
@@ -4099,9 +3499,8 @@
                     "ISSUE_UPDATE_REQUESTED",
                     "ISSUE_RESOLVED",
                     "ISSUE_REVOKED"
-                ],
-                "example": "ISSUE_OPEN"
+                ]
             }
-        }        
+        }
     }
 }

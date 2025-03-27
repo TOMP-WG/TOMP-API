@@ -2915,6 +2915,12 @@ components:
         - "nl-NL"
       required: true
 
+    expires:
+      description: this field MUST be there whenever the package hasn't been purchased.
+      schema:
+        $ref: "#/components/schemas/httpDate"
+      required: false
+
     version:
       description: the version used to format the response
       schema:

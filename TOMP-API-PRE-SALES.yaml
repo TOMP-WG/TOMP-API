@@ -13,7 +13,7 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-  - name: pre-sales module
+  - name: pre sales
     description: Module that can be used 'pre-sales'; in the pre-purchase state. Calling one of these endpoints,
       will put the package in a pre-purchased state (might reserve resources). The package must be released 
       (when the intention of purchasing it is removed) or it expires. 
@@ -29,7 +29,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
         - $ref: "#/components/parameters/travellerOperation"
       tags:
-        - pre-sales module
+        - pre sales
       requestBody:
         description: -|
           The `input` of the process request body must be of type '#/components/schemas/travellerInput'
@@ -48,7 +48,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
-        - pre-sales module
+        - pre sales
       requestBody:
         description: -|
           The `input` of the process request body must be of type '#/components/schemas/changeTimesInput'
@@ -66,7 +66,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
-        - pre-sales module
+        - pre sales
       requestBody:
         description: -|
           The `input` of the process request body must be of type '#/components/schemas/changeTimesInput'
@@ -74,6 +74,63 @@ paths:
       responses:
         "200":
           $ref: "TOMP-API-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/products/items:
+    get:
+      operationId: requestProducts
+      summary: "Request the product catalogue, filter on a single parameter or package"
+      parameters:
+        - name: parameter
+          in: query
+          description: a single parameter
+          schema: 
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/parameter"
+          style: form
+          explode: true
+          example: 
+            type: SERVICE
+            class: FIRST
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/optionalPackageId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"                   
+      tags:
+        - information
+      responses:
+        "200":
+          $ref: "#/components/responses/productsResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+  /collections/fares/items:
+    get:
+      operationId: requestFares
+      summary: "Request the fare for a specific product, times, OD, a traveller 
+        and list of parameterAssignments"
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/productId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/from"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/to"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/via"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/start-time"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/end-time"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/traveller"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/parameter"
+      tags:
+        - information
+      responses:
+        "200":
+          $ref: "#/components/responses/fareResponse"
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
@@ -86,7 +143,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
         - $ref: "#/components/parameters/productOperation"
       tags:
-        - pre-sales module
+        - pre sales
       requestBody:
         description: -|
           The `input` of the process request body must be of type '#/components/schemas/productInput'
@@ -97,6 +154,27 @@ paths:
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
+  /collections/assets/items:
+    get:
+      operationId: requestAssets
+      summary: "Request the assets available for a leg"
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/legId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/optionalProductId"
+      tags:
+        - information
+      responses:
+        "200":
+          $ref: "#/components/responses/assetsResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
   /processes/assign-asset/execute/:
     post:
       operationId: assignAssetRequest
@@ -105,7 +183,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
-        - pre-sales module
+        - pre sales
       requestBody:
         description: -|
           The `input` of the process request body must be of type '#/components/schemas/assignAssetInput'
@@ -116,6 +194,27 @@ paths:
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
+  /collections/ancillaries/items:
+    get:
+      operationId: requestAncillaries
+      summary: "Request the ancillaries available for a leg"
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/legId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/optionalProductId"
+      tags:
+        - information
+      responses:
+        "200":
+          $ref: "#/components/responses/assetsResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
   /processes/assign-ancillary/execute/:
     post:
       operationId: assignAncillaryRequest
@@ -124,7 +223,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
       tags:
-        - pre-sales module
+        - pre sales
       requestBody:
         description: -|
           The `input` of the process request body must be of type '#/components/schemas/ancillaryInput'
@@ -139,6 +238,96 @@ paths:
   # /processes/release-offer/execute/ => purchase module
 
 components:
+  responses:
+    productsResponse:
+      description: a list of products
+      headers:
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/productsResponseBody"
+
+    fareResponse:
+      description: a list of fares for a specific product and usage
+      headers:
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/fareResponseBody"
+
+    assetsResponse:
+      description: a list of assets
+      headers:
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/assetsResponseBody"
+
+    ancillaryResponse:
+      description: a list of ancillaries
+      headers:
+        Version:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ancillaryResponseBody"
+
+  schemas:
+    productsResponseBody:
+      description: a list of products. The main 'properties' field must be of type 'products'
+        each feature-properties field must be of type 'product'. The geometry must represent the
+        geographical validity parameter (=area where it can be used)
+      allOf:
+      - $ref: "TOMP-API-CORE.yaml#/components/schemas/geojson"
+
+    fareResponseBody:
+      description: a list of products. The main 'properties' field must be of type 'fares'
+        each feature-properties field must be of type 'product'. The 'fare' field is mandatory.
+        The geometry must represent the geographical validity parameter (=area where it can be used)
+      allOf:
+      - $ref: "TOMP-API-CORE.yaml#/components/schemas/geojson"
+
+    assetsResponseBody:
+      description: a list of assets. The main 'properties' field must be of type 'offers' (#/components/schemas/offerProperties),
+        each feature-properties field must be of type 'asset'
+      $ref: "TOMP-API-CORE.yaml#/components/schemas/geojson"
+
+    ancillaryResponseBody:
+      description: a list of assets. The main 'properties' field must be of type 'offers' (#/components/schemas/offerProperties),
+        each feature-properties field must be of type 'ancillary'
+      $ref: "TOMP-API-CORE.yaml#/components/schemas/geojson"
+
   parameters:
     travellerOperation:
       name: operation

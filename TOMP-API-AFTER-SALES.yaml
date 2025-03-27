@@ -70,6 +70,45 @@ paths:
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
 
+  /collections/redresses/items:
+    get:
+      operationId: getRedresses
+      summary: "Retrieve redresses for a guarantee"
+      description: Returns possible redresses for a guarantee
+      parameters:
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
+        - name: packageId
+          in: query
+          description: the id of the package that contains a purchased product
+          required: true
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
+        - name: productId
+          in: query
+          description: the guaranteed product
+          required: true
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
+        - name: guaranteeId
+          in: query
+          description: the guarantee that haven't been met
+          required: true
+          schema:
+            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
+      tags:
+        - after sales
+      responses:
+        "200":
+          description: each feature MUST be of the type redressOption
+          $ref: "#/components/responses/redressesResponse"
+        default:
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
+
   /processes/cancel-package/execute:
     post:
       operationId: cancelPackageOperation
@@ -116,49 +155,12 @@ paths:
         default:
           $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
           
-  /collections/redresses/items:
-    get:
-      operationId: getRedresses
-      summary: "Retrieve redresses for a guarantee"
-      description: Returns possible redresses for a guarantee
-      parameters:
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/receiverId"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/limit"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/offset"
-        - $ref: "TOMP-API-CORE.yaml#/components/parameters/bbox"
-        - name: packageId
-          in: query
-          description: the id of the package that contains a purchased product
-          required: true
-          schema:
-            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
-        - name: productId
-          in: query
-          description: the guaranteed product
-          required: true
-          schema:
-            $ref: "TOMP-API-CORE.yaml#/components/schemas/externalReference"
-        - name: guaranteeId
-          in: query
-          description: the guarantee that haven't been met
-          required: true
-          schema:
-            $ref: "TOMP-API-CORE.yaml#/components/schemas/uuid"
-      tags:
-        - after sales
-      responses:
-        "200":
-          description: each feature MUST be of the type redressOption
-          $ref: "#/components/responses/redressesResponse"
-        default:
-          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
-
   /processes/claim-redress/execute:
     post:
       operationId: claimRedressRequest
       description: claimed redresses CAN create additional payment-items (of types REFUND, REBATE)
+      tags:
+        - after sales
       parameters:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/authorization"

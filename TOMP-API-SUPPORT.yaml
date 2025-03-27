@@ -28,7 +28,7 @@ paths:
         - $ref: "TOMP-API-CORE.yaml#/components/parameters/legId"
         - $ref: "#/components/parameters/supportTicketStatus"
       tags:
-        - support-tickets
+        - support
       responses:
         "200":
           description: support status delivered

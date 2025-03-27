@@ -33,3 +33,34 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
+
+  /auth/token:
+    post:
+      operationId: get authentication token (JWT)
+      tags:
+        - tech
+      description: "Request a JWT token"
+      requestBody:
+        content:
+          application/json:
+            schema:    
+              type: object
+              properties:
+                user:
+                  type: string
+                password:
+                  type: string
+                certificate:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "404":
+          $ref: "TOMP-API-CORE.yaml#/components/responses/errorResponse"
