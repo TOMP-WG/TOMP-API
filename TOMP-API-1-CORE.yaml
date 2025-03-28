@@ -14,17 +14,16 @@ info:
 
 security:
   - BearerAuth: []
-  - ApiKeyAuth: []
   - OAuth: []
-  - OpenId: []
+  - OAuthPKI: []
 
 servers:
   - url: https://example.to.eu/tomp/v2
     description: example url
 
 tags:
-  - name: core
-    description: core functions
+  - name: package
+    description: retrieve the package (or offer, which is a non-purchased package)
   - name: discovery
     description: URLS to comply to OGC, to describe the interface
 
@@ -59,7 +58,7 @@ paths:
         - $ref: "#/components/parameters/optionalLegId"
         - $ref: "#/components/parameters/optionalProductId"
       tags:
-        - core
+        - package
       responses:
         "200":
           $ref: "#/components/responses/packageResponse"
@@ -165,151 +164,17 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/link"
-            example:
-              [
-                {
-                  "rel": "GBFS:vehicles",
-                  "type": "application/json",
-                  "href": "/v2/GBFS/vehicles.json",
-                  "method": "GET",
-                },
-                {
-                  "rel": "ARR:ScheduledStopPoint",
-                  "type": "application/xml+netex",
-                  "href": "https://data.ndovloket.nl/netex/arr/NeTEx_ARR_NL_20240903_20240904_1420.xml.gz#NeTEx_ARR_NL_20240903_20240904_1420.xml",
-                  "method": "GET",
-                },
-              ]
 
   schemas:
     packageResponseBody:
       description: a package response is always a geojson.
       allOf:
       - $ref: "#/components/schemas/geojson"
-      examples:
-      - {
-          "type": "FeatureCollection",
-          "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-          "features":
-            [
-              {
-                "type": "Feature",
-                "properties":
-                  {
-                    "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                    "type": "LEG",
-                    "assetType": "GBFS:vehicle_types:SMALL_CAR",
-                  },
-                "geometry":
-                  {
-                    "type": "LineString",
-                    "coordinates": [[23.343, 51.6923], [34.233, 42.3943]],
-                  },
-                "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                "links":
-                  [
-                  ],
-              },
-            ],
-          "properties":
-            {
-              "type": "package",
-              "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-              "specification": { "from": "...", "startTime": "..." },
-            },
-          "links": [
-                    {
-                      "rel": "confirm",
-                      "method": "POST",
-                      "href": "/processes/confirm-offer/execute?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
-                      "type": "application/geo+json",
-                    },
-                    {
-                      "rel": "withdraw",
-                      "method": "POST",
-                      "href": "/processes/release-offer/execute?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
-                      "type": "application/geo+json",
-                    },
-                    {
-                      "rel": "extend_expiry_time",
-                      "method": "POST",
-                      "href": "/processes/extend-expiry-time/execute?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff",
-                      "type": "application/geo+json",
-                    },
-                   ],
-        }
 
     offersResponseBody:
       description: a list of offers. The main 'properties' field must be of type 'offers' (#/components/schemas/offerProperties)
       allOf:
       - $ref: "#/components/schemas/geojson"
-      examples:
-      - {
-          "type": "FeatureCollection",
-          "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
-          "features":
-            [
-              {
-                "type": "Feature",
-                "properties":
-                  {
-                    "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                    "type": "PACKAGE",
-                    "from": "...", 
-                    "startTime": "...",
-                    "legs": [ { "type": "LEG", "operator": "S:VY", "product": "S:VY:first_class_ticket", "asset": { "id": "S:VY:JOURNEY:3942-2349" } },
-                              { "type": "LEG", "operator": "S:VOI", "product": "VOI-GBFS:vehicle_types:electric_bike" } ]
-                  },
-                "geometry":
-                  {
-                    "type": "MultiLineString",
-                    "coordinates": [[[23.343, 51.6923], [34.233, 42.3943]],[23.343, 51.6923], [34.233, 42.3943]]
-                  },
-                "id": "376e1083-92df-44e5-a1bf-d5570507b8",
-                "links":
-                  [
-                    {
-                      "rel": "details",
-                      "method": "GET",
-                      "description": "See the details of this offer",
-                      "href": "/collections/offers/items/376e1083-92df-44e5-a1bf-d5570507b8",
-                      "type": "application/geo+json"
-                    },
-                    {
-                      "rel": "purchase",
-                      "method": "POST",
-                      "href": "/processes/purchase-package/execute",
-                      "body": { "packageId": "376e1083-92df-44e5-a1bf-d5570507b8" },
-                      "type": "application/geo+json"
-                    },
-                  ],
-              },
-            ],
-          "properties":
-            {
-              "type": "OFFERS",
-            },
-          "links": [
-                    {
-                      "rel": "confirm",
-                      "method": "POST",
-                      "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=confirm",
-                      "type": "application/geo+json",
-                    },
-                    {
-                      "rel": "withdraw",
-                      "method": "POST",
-                      "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=withdraw",
-                      "type": "application/geo+json",
-                    },
-                    {
-                      "rel": "extend_expiry_time",
-                      "method": "POST",
-                      "href": "/collections/offers/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8ff&operation=extend_expiry_time",
-                      "type": "application/geo+json",
-                    },
-                   ],
-        }
 
     offerProperties:
       allOf:
@@ -324,34 +189,53 @@ components:
 
     # Request objects
     defaultInput:
-      type: object
-      description: superclass for all request bodies. Not every subclass has to be in your implementation, it depends on your 
-        selection of modules.
-      discriminator:
-        propertyName: type
-        mapping:
-          # offer module
-          SEARCH_OFFER: "#/components/schemas/searchOfferInput"
-          # pre-sales module
-          TRAVELLER: "#/components/schemas/travellerInput"
-          CHANGE_TIMES: "#/components/schemas/changeTimesInput"
-          PRODUCT: "#/components/schemas/productInput"
-          ASSET: "#/components/schemas/assignAssetInput"
-          ANCILLARY: "#/components/schemas/ancillaryInput"
-          # purchase module
-          PURCHASE: "#/components/schemas/packageInput"
-          2_PHASE_PURCHASE: "#/components/schemas/packageInput"
-          COMMIT: "#/components/schemas/packageInput"
-          RELEASE: "#/components/schemas/packageInput"
-          PURCHASE_PACKAGE: "#/components/schemas/purchasePackageInput"
-          EXTEND_EXPIRY_TIME: "#/components/schemas/extendExpiryTimeInput"
-          # execute module
-          LEG: "#/components/schemas/legInput"
-          # after sales
-          PAYMENT_REQUEST: "#/components/schemas/financialInput"
-          PAYMENT_CONFIRMATION: "#/components/schemas/financialInput"
-          REDRESS: "#/components/schemas/redressInput"
-      oneOf:
+      allOf:
+      - type: object
+        description: superclass for all request bodies. Not every subclass has to be in your implementation, it depends on your 
+          selection of modules.
+        discriminator:
+          propertyName: type
+          mapping:
+            # offer module
+            SEARCH_OFFER: "#/components/schemas/searchOfferInput"
+            # pre-sales module
+            TRAVELLER: "#/components/schemas/travellerInput"
+            CHANGE_TIMES: "#/components/schemas/changeTimesInput"
+            PRODUCT: "#/components/schemas/productInput"
+            ASSET: "#/components/schemas/assignAssetInput"
+            ANCILLARY: "#/components/schemas/ancillaryInput"
+            # purchase module
+            PURCHASE: "#/components/schemas/packageInput"
+            2_PHASE_PURCHASE: "#/components/schemas/packageInput"
+            COMMIT: "#/components/schemas/packageInput"
+            RELEASE: "#/components/schemas/packageInput"
+            PURCHASE_PACKAGE: "#/components/schemas/purchasePackageInput"
+            EXTEND_EXPIRY_TIME: "#/components/schemas/extendExpiryTimeInput"
+            # execute module
+            LEG: "#/components/schemas/legInput"
+            # after sales
+            PAYMENT_REQUEST: "#/components/schemas/financialInput"
+            PAYMENT_CONFIRMATION: "#/components/schemas/financialInput"
+            REDRESS: "#/components/schemas/redressInput"
+        required:
+        - type
+        properties:
+          type:
+            type: string
+          packageId:
+            $ref: "#/components/schemas/packageReference"
+          legId:
+            $ref: "#/components/schemas/legReference"
+          productId:
+            $ref: "#/components/schemas/productReference"
+
+          timestamp:
+            description: intended timestamp of modification
+            $ref: "#/components/schemas/dateTime"
+          comment:
+            $ref: "#/components/schemas/longString"
+            description: free text, should match Content-Language.
+      - oneOf:
         - $ref: "#/components/schemas/searchOfferInput"
         - $ref: "#/components/schemas/travellerInput"
         - $ref: "#/components/schemas/changeTimesInput"
@@ -363,25 +247,7 @@ components:
         - $ref: "#/components/schemas/extendExpiryTimeInput"
         - $ref: "#/components/schemas/legInput"
         - $ref: "#/components/schemas/financialInput"
-        - $ref: "#/components/schemas/redressInput"      
-      required:
-        - type
-      properties:
-        type:
-          type: string
-        packageId:
-          $ref: "#/components/schemas/uuid"
-        legId:
-          $ref: "#/components/schemas/externalReference"
-        productId:
-          $ref: "#/components/schemas/externalReference"
-
-        timestamp:
-          description: intended timestamp of modification
-          $ref: "#/components/schemas/dateTime"
-        comment:
-          $ref: "#/components/schemas/longString"
-          description: free text, should match Content-Language.
+        - $ref: "#/components/schemas/redressInput"
 
     packageInput:
       type: object
@@ -392,11 +258,6 @@ components:
         type: 
           type: string
           enum: [ PACKAGE ]
-      examples:
-      - {
-          "type": "PACKAGE",
-          "packageId": "349204234-342439324-342"
-        }
 
     legInput:
       type: object
@@ -406,9 +267,9 @@ components:
       properties:
         type:
           type: string
-          enum: ["LEG"]
+          enum: [ LEG ]
         location: 
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/placeReference"
         evidence:
           type: array
           minItems: 1
@@ -427,12 +288,6 @@ components:
           type:
             type: string
             enum: ["TRAVELLER"]
-      examples:
-      - {
-          "type": "TRAVELLER",
-          "packageId": "349204234-342439324-342",
-          "travellers": [ { "type": "INDIVIDUAL_TRAVELLER", "id": "ABT:3492" } ]
-        }
 
     changeTimesInput:
       allOf:
@@ -445,12 +300,6 @@ components:
           type:
             type: string
             enum: ["CHANGE_TIMES"]
-      examples:
-      - {
-          "type": "CHANGE_TIMES",
-          "packageId": "349204234-342439324-342",
-          "startTime": "2024-12-13T11:34:00Z"
-        }
 
     productInput:
       allOf:
@@ -464,63 +313,97 @@ components:
           type:
             type: string
             enum: ["PRODUCT"]
-      examples:
-      - {
-          "type": "PRODUCT",
-          "packageId": "349204234-342439324-342",
-          "id": "NeTEx:FareProduct:349242"
-        }
 
     assignAssetInput:
-      allOf:
-      - $ref: "#/components/schemas/travelSpecification"
-      - type: object
-        required:
-        - type
-        - assetId
-        properties:
-          type:
-            type: string
-            enum: ["ASSET"]
-          assetId:
-            $ref: "#/components/schemas/externalReference"
-          replaceAssetId:
-            $ref: "#/components/schemas/externalReference"
-      examples:
-      - {
-          "type": "ASSET",
-          "packageId": "349204234-342439324-342",
-          "assetId": "GBFS:vehicles:349242"
-        }
+      type: object
+      required:
+      - type
+      - packageId
+      - assetId
+      properties:
+        type:
+          type: string
+          enum: ["ASSET"]
+        assetId:
+          $ref: "#/components/schemas/assetReference"
+        replaceAssetId:
+          $ref: "#/components/schemas/assetReference"
 
     ancillaryInput:
       type: object
       required:
       - type
+      - packageId
+      - legId
       - ancillaryId
       properties:
         type:
           type: string
           enum: ["ANCILLARY"]
         ancillaryId:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/ancillaryReference"
         replaceAncillaryId:
-          $ref: "#/components/schemas/externalReference"
-      examples:
-      - {
-          "type": "ANCILLARY",
-          "packageId": "349204234-342439324-342",
-          "ancillaryId": "some-external-reference"
-        }
+          $ref: "#/components/schemas/ancillaryReference"
+
+    offers:
+      type: object
+      description: the featurecollection properties of 'offers'
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: ["offers"]
+
+    ancillaries:
+      type: object
+      description: the featurecollection properties of 'ancillaries'
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: ["ancillaries"]
+
+    redresses:
+      type: object
+      description: the featurecollection properties of 'redresses'
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: ["redresses"]
+
+    products:
+      type: object
+      description: the featurecollection properties of 'products'
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: ["products"]
+
+    fares:
+      type: object
+      description: the featurecollection properties of 'fares'
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: ["fares"]
 
     # Transmodel concepts (x-tm)
     package:
       x-tm: SALES OFFER PACKAGE, TRAVEL OFFER PACKAGE, CUSTOMER PURCHASE PACKAGE
       allOf:
-      - $ref: "#/components/schemas/geojsonProperties"
       - $ref: "#/components/schemas/travelSpecification"
+      - $ref: "#/components/schemas/placeDefinitions"
       - type: object
-        description: a purchased package is a registration of an agreement between end user and TO, to execute a package (=set of legs) according a specification, including all conditions
+        description: a purchased package is a registration of an agreement between end user and TO, 
+          to execute a package (=set of legs) according a specification, including all conditions
         required:
           - type
           - status
@@ -528,7 +411,7 @@ components:
         properties:
           type:
             type: string
-            enum: ["PACKAGE"]
+            enum: ["package"]
           id:
             type: string
           status:
@@ -558,7 +441,7 @@ components:
             - type
           properties:
             id:
-              $ref: "#/components/schemas/externalReference"
+              $ref: "#/components/schemas/legReference"
               description:
                 The unique identifier (TO) of this leg. Must always the same as applied in the request URL.
                 And when there are not additional legs in the offered or purchased package, the same **id** as the package id.
@@ -574,20 +457,22 @@ components:
               $ref: "#/components/schemas/amountOfMoney"
               description: the final price of the leg
             product:
-              $ref: "#/components/schemas/externalReference"
+              $ref: "#/components/schemas/productReference"
               description: The main product (v1.x 'asset type') used to execute this leg
+            travelDocument:
+              $ref: "#/components/schemas/travelDocument"
             additionalProducts:
               type: array
               items:
-                $ref: "#/components/schemas/externalReference"
+                $ref: "#/components/schemas/productReference"
               description: additional products that can be assigned to this leg
             assets:
               type: array
               items:
-                $ref: "#/components/schemas/asset"
+                $ref: "#/components/schemas/assetReference"
               description: The physical asset(s) used for the execution of the leg
             operator:
-              $ref: "#/components/schemas/externalReference"
+              $ref: "#/components/schemas/organisationReference"
             memo:
               $ref: "#/components/schemas/longString"
             extraInfo:
@@ -603,9 +488,9 @@ components:
               type: string
               enum: [PRODUCT]
             id: 
-              $ref: "#/components/schemas/externalReference"
+              $ref: "#/components/schemas/productReference"
             fare:
-              $ref: "#/components/schemas/categorizedFareStructure"
+              $ref: "#/components/schemas/userTariff"
               description: The specific fare structure. The price of a leg can be calculated using all elements.
             conditions:
               type: array
@@ -620,7 +505,7 @@ components:
               type: array
               description: references to products that are contained in this product (to facilitate e.g. travel through)
               items:
-                $ref: "#/components/schemas/externalReference"
+                $ref: "#/components/schemas/productReference"
 
     packageLabel:
       type: string
@@ -659,8 +544,6 @@ components:
           STARTED,
           ENDED,
         ]
-      examples:
-      - PURCHASED
 
     legState:
       type: string
@@ -689,22 +572,30 @@ components:
 
     usage:
       x-tm: USAGE PARAMETER
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          INDIVIDUAL_TRAVELLER: "#/components/schemas/individualTraveller"
-          USER_PROFILE: "#/components/schemas/userProfile"
-          GROUP_PROFILE: "#/components/schemas/groupProfile"
-          COMPANION_PROFILE: "#/components/schemas/companionProfile"
-          COMMERCIAL_PROFILE: "#/components/schemas/commercialProfile"
-          ENTITLEMENT: "#/components/schemas/entitlementGiven"
-          CARD_TYPE: "#/components/schemas/cardType"
-          CARD: "#/components/schemas/card"
-          LICENSE_TYPE: "#/components/schemas/licenseType"
-          LICENSE: "#/components/schemas/license"
-          ASSET: "#/components/schemas/assetReference"
-      oneOf:
+      allOf:
+      - type: object
+        discriminator:
+          propertyName: type
+          mapping:
+            INDIVIDUAL_TRAVELLER: "#/components/schemas/individualTraveller"
+            USER_PROFILE: "#/components/schemas/userProfile"
+            GROUP_PROFILE: "#/components/schemas/groupProfile"
+            COMPANION_PROFILE: "#/components/schemas/companionProfile"
+            COMMERCIAL_PROFILE: "#/components/schemas/commercialProfile"
+            ENTITLEMENT: "#/components/schemas/entitlementGiven"
+            CARD_TYPE: "#/components/schemas/cardType"
+            CARD: "#/components/schemas/card"
+            LICENSE_TYPE: "#/components/schemas/licenseType"
+            LICENSE: "#/components/schemas/license"
+            ASSET: "#/components/schemas/assetParameter"
+        properties:
+          type:
+            type: string
+          sequenceNumber:
+            type: number
+            description: specifying the sequence number of the traveller(group) in the travelling party. 
+            default: 1
+      - oneOf:
         - $ref: "#/components/schemas/individualTraveller"
         - $ref: "#/components/schemas/userProfile"
         - $ref: "#/components/schemas/groupProfile"
@@ -715,14 +606,7 @@ components:
         - $ref: "#/components/schemas/card"
         - $ref: "#/components/schemas/licenseType"
         - $ref: "#/components/schemas/license"
-        - $ref: "#/components/schemas/assetReference"
-      properties:
-        type:
-          type: string
-        sequenceNumber:
-          type: number
-          description: specifying the sequence number of the traveller(group) in the travelling party. 
-          default: 1
+        - $ref: "#/components/schemas/assetParameter"      
 
     userProfile:
       x-tm: USER PROFILE
@@ -760,7 +644,7 @@ components:
       - type
       properties:
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/travellerReference"
         type:
           type: string
           enum: [COMPANION_PROFILE]
@@ -776,7 +660,7 @@ components:
       - type
       properties:
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/travellerReference"
         type:
           type: string
           enum: [GROUP_PROFILE]
@@ -831,19 +715,17 @@ components:
       type: object
       properties:
         from:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/placeReference"
           description: use an ID contained in the 'places' field, or from an external source, when using coordinates, please use the prefix 'gps:'
         via:
           type: array
           minItems: 0
           maxItems: 3
           items:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/placeReference"
           description: use an ID contained in the 'places' field, or from an external source, when using coordinates, please use the prefix 'gps:'
-          examples:
-          - [ "NSR:Quay:108842" ]
         to:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/placeReference"
           description: use an ID contained in the 'places' field, or from an external source, when using coordinates, please use the prefix 'gps:'
         startTime:
           $ref: "#/components/schemas/dateTime"
@@ -853,6 +735,10 @@ components:
         endTime:
           $ref: "#/components/schemas/dateTime"
           description: The intended arrival time, at the `to place`. When the **startTime** is not set, and **endTime** is set, it is an implicit request for an arrival time guarantee.
+
+    placeDefinitions:
+      type: object
+      properties:
         placeDefinitions:
           description: Places that are not specified in an external data source (like a home address)
           type: array
@@ -888,51 +774,39 @@ components:
           description: this describes the travelling party, the users (when purchasing or later, when anonymous travelling is not applicable) or user profiles (during the offers)
           items:
             $ref: "#/components/schemas/usage"
-          examples:
-          - [
-              { "type": "USER_PROFILE", "ageGroup": "ADULT", "number": 1 },
-              {
-                "type": "ENTITLEMENT",
-                "entitlementType": "NO:ENTITLEMENT:MILITARY",
-                "number": 1,
-              },
-              {
-                "type": "COMMERCIAL_PROFILE",
-                "code": "VX34-348J-EI7y",
-                "number": 1,
-              },
-              { "type": "LICENSE_TYPE", "modes": ["CAR"], "number": 2 },
-              { "type": "INDIVIDUAL_TRAVELLER", "id": "34924-3A334B-C342D", "number": 2 },
-            ]
         parameters:
           type: array
           items:
             $ref: "#/components/schemas/parameter"
-          examples:
-          - [
-              { "type": "SERVICE", "class": "FIRST" },
-              { "type": "SEATING", "spotType": "LUGGAGE_SPOT" },
-            ]
 
     parameter:
       x-tm: SCOPING VALIDITY PARAMETERS
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          ORGANISATIONAL: "#/components/schemas/organisationalParameter"
-          SEATING: "#/components/schemas/seatingParameter"
-          DISTRIBUTION: "#/components/schemas/distributionParameter"
-          NETWORK: "#/components/schemas/networkParameter"
-          ROUTING: "#/components/schemas/routingParameter"
-          SERVICE: "#/components/schemas/serviceParameter"
-          TEMPORAL: "#/components/schemas/temporalParameter"
-          EQUIPMENT: "#/components/schemas/equipmentParameter"
-          CANCEL: "#/components/schemas/cancellationParameter"
-          PAYMENT: "#/components/schemas/paymentParameter"
-          PURCHASE: "#/components/schemas/purchaseParameter"
-          EXECUTION: "#/components/schemas/executionParameter"
-      oneOf:
+      allOf:
+      - type: object
+        discriminator:
+          propertyName: type
+          mapping:
+            ORGANISATIONAL: "#/components/schemas/organisationalParameter"
+            SEATING: "#/components/schemas/seatingParameter"
+            DISTRIBUTION: "#/components/schemas/distributionParameter"
+            NETWORK: "#/components/schemas/networkParameter"
+            ROUTING: "#/components/schemas/routingParameter"
+            SERVICE: "#/components/schemas/serviceParameter"
+            TEMPORAL: "#/components/schemas/temporalParameter"
+            EQUIPMENT: "#/components/schemas/equipmentParameter"
+            CANCEL: "#/components/schemas/cancellationParameter"
+            PAYMENT: "#/components/schemas/paymentParameter"
+            PURCHASE: "#/components/schemas/purchaseParameter"
+            EXECUTION: "#/components/schemas/executionParameter"
+        required:
+        - type
+        properties:
+          type:
+            type: string
+          number:
+            description: reference to a specific numbered usage. If lacking, it applies to the whole travelling party.
+            type: number
+      - oneOf:
         - $ref: "#/components/schemas/organisationalParameter"
         - $ref: "#/components/schemas/seatingParameter"
         - $ref: "#/components/schemas/distributionParameter"
@@ -945,14 +819,7 @@ components:
         - $ref: "#/components/schemas/paymentParameter"
         - $ref: "#/components/schemas/purchaseParameter"
         - $ref: "#/components/schemas/executionParameter"
-      required:
-      - type
-      properties:
-        type:
-          type: string
-        number:
-          description: reference to a specific numbered usage. If lacking, it applies to the whole travelling party.
-          type: number
+      
 
     equipmentParameter:
       x-tm: EQUIPMENT VALIDITY PARAMETERS
@@ -964,7 +831,7 @@ components:
           type: string
           enum: [EQUIPMENT]
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/equipmentReference"
         name:
           $ref: "#/components/schemas/shortString"
         description:
@@ -1023,13 +890,13 @@ components:
           type: string
           enum: [NETWORK]
         location:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/placeReference"
         line:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/lineReference"
         zones:
           type: array
           items:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/zoneReference"
 
     routingParameter:
       x-tm: ROUTING VALIDITY PARAMETERS
@@ -1056,15 +923,15 @@ components:
           type: string
           enum: [SERVICE]
         product:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/productReference"
         asset:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/assetReference"
         serviceJourney:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/serviceJourneyReference"
         userNeeds:
           type: array
           items:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/userNeedReference"
         class:
           $ref: "#/components/schemas/classOfUse"
         facilities:
@@ -1116,18 +983,22 @@ components:
 
     facility:
       x-tm: FACILITY
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          ONBOARD_STAY: "#/components/schemas/onboardStay"
-          ACCOMODATION: "#/components/schemas/accommodation"
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          enum: [ONBOARD_STAY, ACCOMODATION]
+      allOf:
+      - type: object
+        discriminator:
+          propertyName: type
+          mapping:
+            ONBOARD_STAY: "#/components/schemas/onboardStay"
+            ACCOMODATION: "#/components/schemas/accommodation"
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum: [ONBOARD_STAY, ACCOMODATION]
+      - oneOf:
+          - $ref: "#/components/schemas/onboardStay"
+          - $ref: "#/components/schemas/accommodation"
 
     distributionParameter:
       x-tm: DISTRIBUTION VALIDITY PARAMETERS
@@ -1253,16 +1124,12 @@ components:
             type: string
             enum:
               [NO_PETS, NO_SMOKING, NO_TRAVEL_ABROAD, NO_UNDERGROUND_PARKING]
-        #returnBefore:
-        #  x-tm: USAGE VALIDITY PERIOD.EndDate & EndTime
-        #  $ref: "#/components/schemas/dateTime"
-        #  description: the ultimate return time
         returnStations:
           type: array
           description: to one of these stations the asset must be returned
           maxItems: 10
           items:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/placeReference"
         returnAreas:
           type: array
           description: in one of these areas the asset must be returned
@@ -1274,38 +1141,25 @@ components:
           description: in one of these externally described zones the asset must be returned
           maxItems: 10
           items:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/zoneReference"
         requiredAncillaries:
           type: array
           description: required ancillaries to operate the asset (like a helmet, TYPE=ANCILLARY)
           maxItems: 25
           items:
-            $ref: "#/components/schemas/externalReference"
-        #maxBounds:
-        #  $ref: "#/components/schemas/geojsonGeometry"
-        #  description: the maximum bounds of movement, can be an (multi)polygon (for bike sharing) or a line, a trajectory (for conventional public transport)
-        #  externalDocs:
-        #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2119.htm
-        #    description: ROUTING.CrossBorder possible, TOMP allowing more use cases.
-        #timeLimits:
-        #  type: array
-        #  externalDocs:
-        #    url: https://www.transmodel-cen.eu/model/EARoot/EA6/EA3/EA3/EA5/EA2121.htm
-        #    description: USAGE VALIDITY PERIOD, except TM tells when it is allowed, TOMP tells when it is not allowed or when there is a reduction.
-        #  items:
-        #    $ref: "#/components/schemas/timeRestriction"
+            $ref: "#/components/schemas/ancillaryReference"
 
     guarantee:
       x-tm: TRAVEL GUARANTEE
       type: object
       properties:
         id:
-          type: string
+          $ref: "#/components/schemas/shortString"
         name:
           type: string
         organisation:
           description: guaranteeing organisation
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/organisationReference"
         type:
           type: string
           description:
@@ -1395,7 +1249,7 @@ components:
               _ACCOMODATION_ - A PASSENGER SUPPORT REDRESS comprising accommodation in a hotel or other lodging.
             enum: [PRODUCT_EXCHANGE, EASEMENT, TAXI_HOME, RETURN_TO_ORIGIN, ACCESS_RIGHT_REBATE, MONETARY_REBATE, REFUND, REFRESHMENT, ACCOMODATION]
           product:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/productReference"
           reimbursementMoment:
             type: string
           typeOfPayment:
@@ -1408,21 +1262,21 @@ components:
     asset:
       x-tm: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING EQUIPMENT
       allOf:
-        - $ref: "#/components/schemas/geojsonFeature"
+        - $ref: "#/components/schemas/geojsonFeatureProperties"
         - description: the asset that can by applied to execute a leg.
           properties:
             type:
               type: string
               enum: [ASSET]
             id:
-              $ref: "#/components/schemas/externalReference"
+              $ref: "#/components/schemas/assetReference"
               description: Identifier of an asset. Can be an external reference, but also a (internal) ID
             visualId:
               $ref: "#/components/schemas/shortString"
               description: for instance, a license plate or seat number.
 
             product:
-              $ref: "#/components/schemas/externalReference"
+              $ref: "#/components/schemas/productReference"
             mode:
               $ref: "#/components/schemas/mode"
             subMode:
@@ -1441,7 +1295,7 @@ components:
               description: list of external references
               maxItems: 100
               items:
-                $ref: "#/components/schemas/externalReference"
+                $ref: "#/components/schemas/equipmentReference"
             extraInfo:
               $ref: "#/components/schemas/customProperties"
 
@@ -1582,7 +1436,7 @@ components:
             type: string
             enum: [CARD]
           cardNumber:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/shortString"
             description: number of the card, like ID number, credit card or bank account number
           description:
             $ref: "#/components/schemas/shortString"
@@ -1606,7 +1460,7 @@ components:
         - id
       properties:
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/shortString"
           description: external reference to address the card used.
         type:
           type: string
@@ -1626,13 +1480,13 @@ components:
           $ref: "#/components/schemas/shortString"
           description: For use in case of OTHER. Can be used in bilateral agreements.
         relatedProduct:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/productReference"
         transportOrganisations:
           type: array
           maxItems: 15
           description: references to accepting parties, only if applicable
           items:
-            $ref: "#/components/schemas/externalReference"
+            $ref: "#/components/schemas/organisationReference"
 
     customer:
       x-tm: CUSTOMER
@@ -1642,7 +1496,7 @@ components:
         - id
       properties:
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/customerReference"
           description: The identifier the MP uses to identify the customer. Could be an external referenced ID, like a ABT account number
         initials:
           $ref: "#/components/schemas/tinyString"
@@ -1723,7 +1577,7 @@ components:
         issuingCountry:
           $ref: "#/components/schemas/country"
 
-    assetReference:
+    assetParameter:
       type: object
       required:
       - type
@@ -1733,7 +1587,7 @@ components:
           type: string
           enum: ["ASSET"]
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/assetReference"
 
     individualTraveller:
       x-tm: INDIVIDUAL TRAVELLER
@@ -1745,7 +1599,7 @@ components:
       additionalProperties: true
       properties:
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/travellerReference"
         type:
           type: string
           enum: [INDIVIDUAL_TRAVELLER]
@@ -1761,29 +1615,15 @@ components:
         profileReference:
           $ref: "#/components/schemas/shortString"
         customerReference:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/customerReference"
 
-    categorizedFareStructure:
+    userTariff:
       type: object
       properties: 
         parameterAssignment:
           $ref: "#/components/schemas/parameterAssignment"
         fare:
           $ref: "#/components/schemas/fareStructure"
-      examples: 
-      - {
-          "parameterAssigment": 
-            { "travellers": [ { "type": "USER_PROFILE", "ageGroup": "ADULT" } ] 
-            , "parameters": [ { "type": "SERVICE", "class": "FIRST" } ]
-            },
-          "fareStructure": {
-            "elements": [
-              { "type": "FLEX"
-              , "amount": 0.5, "currencyCode": "EUR"
-              , "unit": "ZONE", "interval": { "from": 1, "to": 3 } }
-            ]
-          }
-        }
 
     fareStructure:
       x-tm: TARIFF
@@ -1917,7 +1757,7 @@ components:
         - addressLine2
       properties:
         placeId:
-          $ref: "#/components/schemas/uuid"
+          $ref: "#/components/schemas/placeReference"
         addressLine1:
           $ref: "#/components/schemas/longString"
           description: contains street, housenumber & additions
@@ -1952,13 +1792,6 @@ components:
         additionalInfo:
           $ref: "#/components/schemas/longString"
           description: additional information to find the address (f.x. just around the corner)
-      examples:
-      - {
-          "id": "PA:fdb151f2-bcd6-4b2a-9998-6c6a2ca8b66d",
-          "type": "POSTAL_ADDRESS",
-          "addressLine1": "Clearwater road 18",
-          "addressLine2": "Muddycity X2433",
-        }
 
     # app concepts
     appSupport:
@@ -1987,85 +1820,54 @@ components:
     binaryAccessInfo:
       x-tm: lacking
       description: Binary information, like a image or certificate
-      allOf:
-        - $ref: "#/components/schemas/travelDocument"
-        - type: object
-          required:
-            - base64
-          properties:
-            base64:
-              $ref: "#/components/schemas/longString"
-              description: base 64 QR code
-            version:
-              $ref: "#/components/schemas/tinyString"
-
-    deeplink:
-      x-tm: 
-      - concepts: TRAVEL DOCUMENT
-      description: deeplink info
-      allOf:
-        - $ref: "#/components/schemas/travelDocument"
-        - type: object
-          required:
-            - url
-          properties:
-            url:
-              description:
-                the base deeplink url for the MP app. Can be extended by
-                the 'knownParamaters'. Including the scheme (mp1.app://something/?auth=sdfkjhrkjsdf003df38=dfsdf)
-              $ref: "#/components/schemas/url"
-            knownParameters:
-              type: array
-              maxItems: 25
-              items:
-                $ref: "#/components/schemas/shortString"
-              examples:
-              - ["return-url", "error-url", "error-code", "error-description"]
+      type: object
+      required:
+        - contentType
+        - base64
+      properties:
+        contentType:
+          description: the media type (IANA)
+          type: string
+        base64:
+          $ref: "#/components/schemas/longString"
+          description: base 64 binary data
+        version:
+          $ref: "#/components/schemas/tinyString"
 
     digitalTicket:
       x-tm: 
       - concept: TRAVEL DOCUMENT
-      description: Arbitrary data the TO may pass along the ticket to the client
-      allOf:
-        - $ref: "#/components/schemas/travelDocument"
-        - type: object
-          required:
-            - url
-          properties:
-            url:
-              $ref: "#/components/schemas/url"
-              description: download url for html/pdf
+      description: External ticket, can be accessed using the links collection, with rel=ticket
+      type: object
 
     eKey:
       x-tm: TRAVEL DOCUMENT
       description: Axa EKey information
-      allOf:
-        - $ref: "#/components/schemas/travelDocument"
-        - type: object
-          required:
-            - ekey
-            - lock
+      type: object
+      required:
+        - ekey
+        - lock
+      properties:
+        ekey:
+          type: object
+          additionalProperties: false
           properties:
-            ekey:
-              type: object
-              additionalProperties: false
-              properties:
-                key:
-                  $ref: "#/components/schemas/longString"
-                  description: certificate
-                passkey:
-                  $ref: "#/components/schemas/longString"
-                  description: one time pass key
-            lock:
-              type: object
-              additionalProperties: false
-              properties:
-                bdAddress:
-                  $ref: "#/components/schemas/longString"
-                  description: physical address
-                deviceName:
-                  $ref: "#/components/schemas/normalString"
-                  description: how it advertises itself
+            key:
+              $ref: "#/components/schemas/longString"
+              description: certificate
+            passkey:
+              $ref: "#/components/schemas/longString"
+              description: one time pass key
+        lock:
+          type: object
+          additionalProperties: false
+          properties:
+            bdAddress:
+              $ref: "#/components/schemas/longString"
+              description: physical address
+            deviceName:
+              $ref: "#/components/schemas/normalString"
+              description: how it advertises itself
 
     otherAccessInfo:
       x-tm: 
@@ -2076,65 +1878,117 @@ components:
 
     travelDocument:
       x-tm: TRAVEL DOCUMENT
-      type: object
-      discriminator:
-        propertyName: travelDocumentType
-        mapping:
-          PDF: "#/components/schemas/digitalTicket"
-          HTML: "#/components/schemas/digitalTicket"
-          DEEPLINK: "#/components/schemas/deeplink"
-          AXA_EKEY_OTP: "#/components/schemas/eKey"
-          BLUETOOTH: "#/components/schemas/otherAccessInfo"
-          NFC: "#/components/schemas/otherAccessInfo"
-          QR: "#/components/schemas/binaryAccessInfo"
-          AZTEC: "#/components/schemas/binaryAccessInfo"
-          BARCODE: "#/components/schemas/binaryAccessInfo"
-          CERTIFICATE: "#/components/schemas/binaryAccessInfo"
-          PHYSICAL_KEY: "#/components/schemas/otherAccessInfo"
-          TOMP_API: "#/components/schemas/otherAccessInfo"
-          EXTERNAL_CARD: "#/components/schemas/otherAccessInfo"
-          NONE: "#/components/schemas/otherAccessInfo"
-      #oneOf:
-      #- $ref: "#/components/schemas/digitalTicket"
-      #- $ref: "#/components/schemas/deeplink"
-      #- $ref: "#/components/schemas/eKey"
-      #- $ref: "#/components/schemas/otherAccessInfo"
-      #- $ref: "#/components/schemas/binaryAccessInfo"
-      required:
-        - startvalidity
-        - endvalidity
-        - travelDocumentType
-      properties:
-        startvalidity:
-          $ref: "#/components/schemas/dateTime"
-        endvalidity:
-          $ref: "#/components/schemas/dateTime"
-        travelDocumentType:
-          $ref: "#/components/schemas/typeOfTravelDocument"
+      allOf:
+      - type: object
+        discriminator:
+          propertyName: travelDocumentType
+          mapping:
+            LINK: "#/components/schemas/digitalTicket"
+            BARCODE: "#/components/schemas/binaryAccessInfo"
+            QRCODE: "#/components/schemas/binaryAccessInfo"
+            AZTECCODE: "#/components/schemas/binaryAccessInfo"
+            AXA_EKEY_OTP: "#/components/schemas/eKey"
+            BLUETOOTH: "#/components/schemas/otherAccessInfo"
+            NFC: "#/components/schemas/otherAccessInfo"
+            PHYSICAL_KEY: "#/components/schemas/otherAccessInfo"
+            EXTERNAL_CARD: "#/components/schemas/otherAccessInfo"
+        required:
+          - startvalidity
+          - endvalidity
+          - travelDocumentType
+        properties:
+          startvalidity:
+            $ref: "#/components/schemas/dateTime"
+          endvalidity:
+            $ref: "#/components/schemas/dateTime"
+          travelDocumentType:
+            $ref: "#/components/schemas/typeOfTravelDocument"
+      - oneOf:
+        - $ref: "#/components/schemas/digitalTicket"
+        - $ref: "#/components/schemas/binaryAccessInfo"
+        - $ref: "#/components/schemas/eKey"
+        - $ref: "#/components/schemas/otherAccessInfo"
 
     typeOfTravelDocument:
-      x-tm: 
+      x-tm:
       - concept: TYPE OF TRAVEL DOCUMENT
       type: string
       description: how this type is implemented?<br>
       enum: [
-          PDF,
-          HTML, # digitalTicket
-          DEEPLINK, # deeplink
+          LINK,
+          BARCODE,
+          QRCODE,
+          AZTECCODE,
           AXA_EKEY_OTP,
           BLUETOOTH,
           NFC, # proprietary
-          QR,
-          AZTEC,
-          BARCODE,
-          CERTIFICATE, # binaryAccessInfo
-          TOMP_API,
           PHYSICAL_KEY,
           EXTERNAL_CARD,
           NONE, # OTHER
         ]
 
     externalReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    organisationReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    placeReference:
+      type: string
+      description: this string references to information that can be found in the `data sources`. 
+        Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location.
+        Default it matches already with 'GPS' (no entry required in the datasources).
+      maxLength: 200
+      x-example-format: "^(GPS:|GBFS:stations:)"
+      format: "^(GPS:)"
+
+    customerReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    travellerReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    productReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    packageReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    legReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    lineReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    zoneReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    assetReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    ancillaryReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    equipmentReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    serviceJourneyReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    userNeedReference:
       allOf:
         - $ref: "#/components/schemas/normalString"
 
@@ -2147,8 +2001,6 @@ components:
         type: number
         format: float
         minimum: 0.0
-      examples: 
-      - [4.53432, 55.324523]
 
     geojsonPoint:
       type: object
@@ -2173,76 +2025,59 @@ components:
           properties:
             coordinates:
               type: array
-              examples: 
-              - [[6.169639, 52.253279], [6.05623, 52.63473]]
               items:
                 $ref: "#/components/schemas/basePoint"
 
     geojsonPolygon:
       type: object
       description: geojson representation of a polygon. First and last point must be equal. See also https://geojson.org/geojson-spec.html#polygon and example https://geojson.org/geojson-spec.html#id4. The order should be lon, lat [[[lon1, lat1], [lon2,lat2], [lon3,lat3], [lon1,lat1]]], the first point should match the last point.
-      allOf:
-        - $ref: "#/components/schemas/geojsonGeometry"
-        - type: object
-          required:
-            - coordinates
-          properties:
-            coordinates:
-              type: array
-              examples:
-              - [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0, 0.0], [1.0, 1.0]]]
-              items:
-                type: array
-                examples:
-                - [[6.169639, 52.253279], [6.05623, 52.63473]]
-                items:
-                  $ref: "#/components/schemas/basePoint"
+      required:
+        - coordinates
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: "#/components/schemas/basePoint"
 
     geojsonMultiPolygon:
       type: object
       description: geojson representation of a multi polygon. See also https://geojson.org/geojson-spec.html#multipolygon
-      allOf:
-        - $ref: "#/components/schemas/geojsonGeometry"
-        - type: object
-          required:
-            - coordinates
-          properties:
-            coordinates:
+      required:
+        - coordinates
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
               type: array
-              examples:
-              - [[[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0, 0.0], [1.0, 1.0]]]]
               items:
-                type: array
-                examples:
-                - [[[1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0, 0.0], [1.0, 1.0]]]
-                items:
-                  type: array
-                  examples: 
-                  - [[6.169639, 52.253279], [6.05623, 52.63473]]
-                  items:
-                    $ref: "#/components/schemas/basePoint"
+                $ref: "#/components/schemas/basePoint"
 
     geojsonGeometry:
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          Point: "#/components/schemas/geojsonPoint"
-          LineString: "#/components/schemas/geojsonLine"
-          Polygon: "#/components/schemas/geojsonPolygon"
-          MultiPolygon: "#/components/schemas/geojsonMultiPolygon"
-      description: geoJSON geometry
-      required:
-        - type
-      properties:
-        type:
-          type: string
-          enum: ["Point", "LineString", "Polygon", "MultiPolygon"]
-      examples:
-      - {
-          "type": "LineString",
-          "geometry": [[3.2343, 43.342], [3.3242, 43.939]]
-        }
+      allOf:
+      - type: object
+        discriminator:
+          propertyName: type
+          mapping:
+            Point: "#/components/schemas/geojsonPoint"
+            LineString: "#/components/schemas/geojsonLine"
+            Polygon: "#/components/schemas/geojsonPolygon"
+            MultiPolygon: "#/components/schemas/geojsonMultiPolygon"
+        description: geoJSON geometry
+        required:
+          - type
+        properties:
+          type:
+            type: string
+            enum: ["Point", "LineString", "Polygon", "MultiPolygon"]
+      - oneOf:
+        - $ref: "#/components/schemas/geojsonPoint"
+        - $ref: "#/components/schemas/geojsonLine"
+        - $ref: "#/components/schemas/geojsonPolygon"
+        - $ref: "#/components/schemas/geojsonMultiPolygon"
 
     geojsonCustomFeatureProperties:
       allOf:
@@ -2256,25 +2091,34 @@ components:
             type: string
 
     geojsonFeatureProperties:
-      discriminator:
-        propertyName: type
-        mapping:
-          package: "#/components/schemas/package"
-          leg: "#/components/schemas/leg"
-          product: "#/components/schemas/product"
-          custom: "#/components/schemas/geojsonCustomFeatureProperties"
-          start_location: "#/components/schemas/geojsonCustomFeatureProperties"
-          end_location: "#/components/schemas/geojsonCustomFeatureProperties"
-          via_point: "#/components/schemas/geojsonCustomFeatureProperties"
-          progress: "#/components/schemas/geojsonCustomFeatureProperties"
-          station: "#/components/schemas/geojsonCustomFeatureProperties"
-          stop: "#/components/schemas/geojsonCustomFeatureProperties"
-          available_asset: "#/components/schemas/availableAsset"
-          poi: "#/components/schemas/geojsonCustomFeatureProperties"
-          area: "#/components/schemas/geojsonCustomFeatureProperties"
-      properties:
-        type:
-          type: string
+      allOf:
+      - type: object
+        discriminator:
+          propertyName: type
+          mapping:
+            package: "#/components/schemas/package"
+            leg: "#/components/schemas/leg"
+            product: "#/components/schemas/product"
+            asset: "#/components/schemas/asset"
+            ancillary: "#/components/schemas/geojsonCustomFeatureProperties"
+            start_location: "#/components/schemas/geojsonCustomFeatureProperties"
+            end_location: "#/components/schemas/geojsonCustomFeatureProperties"
+            via_point: "#/components/schemas/geojsonCustomFeatureProperties"
+            progress: "#/components/schemas/geojsonCustomFeatureProperties"
+            station: "#/components/schemas/geojsonCustomFeatureProperties"
+            stop: "#/components/schemas/geojsonCustomFeatureProperties"
+            poi: "#/components/schemas/geojsonCustomFeatureProperties"
+            area: "#/components/schemas/geojsonCustomFeatureProperties"
+            custom: "#/components/schemas/geojsonCustomFeatureProperties"
+        properties:
+          type:
+            type: string
+      - oneOf:
+        - $ref: "#/components/schemas/package"
+        - $ref: "#/components/schemas/leg"
+        - $ref: "#/components/schemas/product"
+        - $ref: "#/components/schemas/asset"
+        - $ref: "#/components/schemas/geojsonCustomFeatureProperties"
 
     geojsonFeature:
       type: object
@@ -2287,30 +2131,40 @@ components:
         properties:
           $ref: "#/components/schemas/geojsonFeatureProperties"          
         id:
-          $ref: "#/components/schemas/externalReference"
+          $ref: "#/components/schemas/shortString"
         links:
           type: array
           items:
             $ref: "#/components/schemas/link"
 
     geojsonProperties:
-      description: the 'properties' object of the geojson collection
-      additionalProperties: true
-      discriminator:
-        propertyName: type
-        mapping:
-          OFFERS: "#/components/schemas/offers"
-          PACKAGE: "#/components/schemas/package"
-          # in after sales
-          REDRESSES: "#/components/schemas/redresses"
-          # in information
-          ASSETS: "#/components/schemas/offers"
-          PRODUCTS: "#/components/schemas/products"
-          FARES: "#/components/schemas/fares"
-      properties:
-        type:
-          type: string
-          enum: [OFFERS, PACKAGE, ASSETS, PRODUCTS, REDRESSES, FARES]
+      allOf: 
+      - type: object
+        description: the 'properties' object of the geojson collection
+        additionalProperties: true
+        discriminator:
+          propertyName: type
+          mapping:
+            offers: "#/components/schemas/offers"
+            package: "#/components/schemas/package"
+            # in after sales
+            redresses: "#/components/schemas/redresses"
+            # in information
+            assets: "#/components/schemas/offers"
+            products: "#/components/schemas/products"
+            fares: "#/components/schemas/fares"
+            ancillaries: "#/components/schemas/ancillaries"
+        properties:
+          type:
+            type: string
+            enum: [offers, package, assets, products, ancillaries, redresses, fares]
+      - oneOf:
+        - $ref: "#/components/schemas/offers"
+        - $ref: "#/components/schemas/package"
+        - $ref: "#/components/schemas/ancillaries"
+        - $ref: "#/components/schemas/redresses"
+        - $ref: "#/components/schemas/products"
+        - $ref: "#/components/schemas/fares"
 
     geojson:
       type: object
@@ -2335,33 +2189,6 @@ components:
             In case it is an alternative, specify clearly in the description what the financial consequences are.
           items:
             $ref: "#/components/schemas/link"
-          examples:
-          - [
-              {
-                "rel": "alternative+1",
-                "type": "application/geo+json",
-                "url": "/collections/package/items/4394234",
-                "method": "GET",
-              },
-              {
-                "rel": "alternative+2",
-                "type": "application/geo+json",
-                "url": "/collections/package/items/4394235",
-                "method": "GET",
-              },
-              {
-                "rel": "android",
-                "type": "application/vnd.android.ota",
-                "url": "app://yourbrand.go.link?product=4394234",
-                "method": "GET",
-              },
-              {
-                "rel": "apple",
-                "type": "application/vnd.apple.installer+xml",
-                "url": "https://yourbrand.go.link?product=4394234",
-                "method": "GET",
-              },
-            ]
 
     # links
     links:
@@ -2386,14 +2213,13 @@ components:
         rel:
           type: string
           description: the action that can be performed OR part of the URI 
-            (e.g. NETEX:StopPoint:342, where the location of the NETEX file can be specified)
-          examples: 
-          - purchase
+            allowed values include the 'processId's, prefixes for the referenced data sources,
+            prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)
         href:
           $ref: "#/components/schemas/url"
         type:
           $ref: "#/components/schemas/shortString"
-          description: like "application/geo+json" [IANA]
+          description: allowed values are described by IANA, ("application/geo+json")
         method:
           type: string
           description: to indicate the http method.
@@ -2404,44 +2230,10 @@ components:
         body:
           type: object
           description: the (prefilled) body for the request
-          examples:
-          - {
-              "from": "NSR:Quay:108842",
-              "startTime": "2019-10-12T07:20:50.52Z",
-              "parameters":
-                [
-                  {
-                    "usage": [{ "type": "INDIVIDUAL_TRAVELLER", "fullName", "" }],
-                    "validities": [{ "type": "SERVICE", "class": "FIRST" }],
-                  },
-                ],
-            }
-        requiredFields:
-          type: array
-          description: the required fields in the body, using JSONPath to identify the fields, these items
-            start with a '$.'. If a header field is required, it must start with 'header.headername' Required parameters
-            must start with 'parameter.parametername'
-          minItems: 0
-          maxItems: 50
-          items:
-            type: string
-          examples: 
-          - ["$.parameters[0].usage[0].fullName", "header.Autorization", "parameter.featureId"]
         headers:
           type: object
           additionalProperties:
             type: string
-          examples: 
-          - { "Autorization": "Bearer 3042-3402-3428" }
-        parameters:
-          type: object
-          description: possible parameters, but fixed parameters can be added in the href. It is 
-            not mandatory to enlist them in this object. In practice, this object will contain
-            optional parameters and required parameters that have to be completed.
-          additionalProperties:
-            type: string
-          examples: 
-          - { "location": "GPS" }
         isMandatory:
           description: is this link informative, or must it be used?
           type: boolean
@@ -2531,18 +2323,14 @@ components:
     date:
       type: string
       x-format: full-date
-      examples: 
-      - "2019-03-31"
       pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, full-date
+      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, full-date (2019-10-12)
 
     dateTime:
       type: string
       x-format: date-time
-      examples: 
-      - "2019-10-12T07:20:50.52Z"
       # pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
-      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time
+      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)
 
     day:
       x-tm: DAY OF WEEK
@@ -2562,8 +2350,6 @@ components:
       x-externalDocs:
         url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
         description: http-date
-      examples: 
-      - Wed, 21 Oct 2015 07:28:00 GMT
 
     longInt:
       type: integer
@@ -2603,12 +2389,8 @@ components:
     time:
       type: string
       x-format: partial-time
-      examples: 
-      - "23:59:59.3498"
+      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, partial-time ("23:59:59.3498")
       # pattern: "^[0-9]{2}:[0-9]{2}:[0-9]{2}('.'[0-9]+)?$"
-      x-externalDocs:
-        url: https://www.rfc-editor.org/rfc/rfc3339#section-5.6
-        description: partial-time
 
     tinyInt:
       type: integer
@@ -2630,11 +2412,8 @@ components:
     uuid:
       type: string
       x-preferred-pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-      examples: 
-      - ae76f51c-a1a6-46af-b9ab-8233564adcae
-      x-externalDocs:
-        url: https://en.wikipedia.org/wiki/Universally_unique_identifier
-        description: see also https://www.ietf.org/rfc/rfc4122.txt
+      description: https://en.wikipedia.org/wiki/Universally_unique_identifier
+       see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)
 
   parameters:
     f:
@@ -2693,7 +2472,7 @@ components:
       name: receiver
       required: false
       schema:
-        $ref: "#/components/schemas/externalReference"
+        $ref: "#/components/schemas/shortString"
       description: the ID of the intended receiver
 
     legId:
@@ -2823,9 +2602,8 @@ components:
       required: false
       style: form
       explode: false
-      x-examples: ["gps:6.234,34.2394", "CHB:NL:S:sptz"]
       schema:
-        $ref: "#/components/schemas/externalReference"
+        $ref: "#/components/schemas/placeReference"
 
     to:
       name: to
@@ -2834,9 +2612,8 @@ components:
       required: false
       style: form
       explode: false
-      x-examples: ["gps:6.234,34.2394", "CHB:NL:S:sptz"]
       schema:
-        $ref: "#/components/schemas/externalReference"
+        $ref: "#/components/schemas/placeReference"
     
     via:
       name: via
@@ -2847,7 +2624,7 @@ components:
       explode: true
       example: ["gps:6.234,34.2394", "CHB:NL:S:sptz"]
       schema:
-        $ref: "#/components/schemas/externalReference"
+        $ref: "#/components/schemas/placeReference"
 
     start-time:
       name: start-time
@@ -2896,12 +2673,10 @@ components:
 
   headers:
     contentLanguage:
-      description: The language/localization of user-facing content, One IETF BCP 47 (RFC 5646) language tag
+      description: The language/localization of user-facing content, One IETF BCP 47 (RFC 5646) language tag (nl-NL)
       schema:
         type: string
         pattern: "^[a-zA-Z]+-[a-zA-Z]+$"
-        examples: 
-        - "nl-NL"
       required: true
 
     expires:
@@ -2917,42 +2692,50 @@ components:
       required: true
 
     digest:
-      description: the hash of the body, SHA-256
+      description: the hash of the body, SHA-256 ("SHA-256=3q2+7w==:")
       schema:
         type: string
       required: false
-      x-examples: ["SHA-256=3q2+7w==:"]
 
     publicKey:
       description: the public key of the sending party, can be used to validate the signed digest (it should deliver the digest)
+      x-example: '{"certificate": "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...\n-----END CERTIFICATE-----"}'
       schema:
         type: string
       required: false
-      x-examples: ['{"certificate": "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...\n-----END CERTIFICATE-----"}']
 
     signedDigest:
-      description: the signed hash of the offer (or package), using the private key
+      description: the signed hash of the offer (or package), using the private key, SHA-256 base64 encoded
       schema:
         type: string
       required: false
-      x-examples: ["324342343-3420948234"]
 
   securitySchemes:
     BearerAuth:
       type: http
+      description: This authentication is the basic one. If you have obtained a JWT (somewhere),
+        you can use this token to identify you at endpoints.
       scheme: bearer
       bearerFormat: JWT
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     OAuth:
       type: oauth2
+      description: This flow facilitates to get access tokens based on username/password.
+        These can be obtained by the owner of the service, look at the landing page to 
+        find out how to contact it.
       flows:
         authorizationCode:
-          authorizationUrl: /authorize
-          tokenUrl: /connect/token
-          scopes: {}
-    OpenId:
-      type: openIdConnect
-      openIdConnectUrl: https://unknownserver/.well-known/openid-configuration
+          authorizationUrl: /
+          tokenUrl: /oauth/token
+          scopes: 
+            processes: "Access to /processes/"
+    OAuthPKI:
+      type: oauth2
+      description: OAuth 2.0 with PKI and mutual TLS for client authentication
+        The client sends its X.509 during the handshake. The server validates 
+        and accepts the certificate. The call to the /oauth/token can use the 
+        provided credentials (O or CN) to provide a access_token (JWT).
+      flows:
+        clientCredentials:
+          tokenUrl: "/oauth/token"
+          scopes:
+            processes: "Access to /processes/"

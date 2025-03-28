@@ -10,9 +10,16 @@
                 "type": "object",
                 "properties": {
                     "inputs": {
-                        "description": "this body can be replaced by a subtype of defaultInput",
-                        "$comment": "This is the place to place your input (must be a subclass of defaultInput)",
-                        "$ref": "#/components/schemas/<B: THIS IS WHERE YOU SHOULD PUT YOUR SUBCLASS OF DefaultInput, like searchOfferInput>"
+                        "allOf": [
+                            {
+                                "description": "this body can be replaced by a subtype of defaultInput",
+                                "$comment": "This is the place to place your input (must be a subclass of defaultInput)",
+                                "$ref": "#/components/schemas/<B: THIS IS WHERE YOU SHOULD PUT YOUR SUBCLASS OF DefaultInput, like searchOfferInput>"
+                            },
+                            {
+                                "$ref": "#/components/schemas/defaultInput"
+                            }
+                        ]
                     },
                     "response": {
                         "type": "string",

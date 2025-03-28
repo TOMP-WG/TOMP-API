@@ -1,0 +1,26 @@
+[
+    {
+      "rel": "alternative+1",
+      "type": "application/geo+json",
+      "url": "/collections/package/items/?packageId=342",
+      "method": "GET"
+    },
+    {
+      "rel": "alternative+2",
+      "type": "application/geo+json",
+      "url": "/collections/package/items/?packageId=343",
+      "method": "GET"
+    },
+    {
+      "rel": "android",
+      "type": "application/vnd.android.ota",
+      "url": "app://yourbrand.go.link?product=4394234",
+      "method": "GET"
+    },
+    {
+      "rel": "apple",
+      "type": "application/vnd.apple.installer+xml",
+      "url": "https://yourbrand.go.link?product=4394234",
+      "method": "GET"
+    }
+  ]

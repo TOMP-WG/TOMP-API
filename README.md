@@ -9,21 +9,25 @@ The Transport Operator to Mobility-as-a-Service Provider API (TOMP-API) is an op
 TOMP-API is structured into several functional modules and extensions, each addressing a specific aspect of the interaction between Transport Operators and MaaS Providers:
 
 CORE Modules:
+
 1. **Offer**: Enables requesting offers.
 2. **Purchase**: Facilitates the purchase of (mobility) services.
 3. **Execute**: Manages the execution phase of the trip.
 
 Functional extensions:
+
 1. **Pre sales**: Allows to reserve an offer and modify it before purchasing it.
 2. **Support**: Offers customer support functionalities.
 3. **After sales**: Manages after sales processes, like refunding or revokation of tickets
 
 Additional supportive extensions:
+
 1. **Discovery**: to become OGC compliant, you need to implement these endpoints.
 2. **Customer Management**: Handles user-related information and preferences (draft). 
 3. **Data spaces**: technical part of the API, easing the technical integration into eco-systems (draft).
 
 MP Module:
+
 1. **Notify**: the part of the API that must be implemented by the reseller/MP, to cope with messages sent by the TO or driver.
 
 These modules work together to provide a comprehensive framework for MaaS integration.
@@ -44,6 +48,9 @@ To begin implementing TOMP-API:
 1. **Documentation**: The latest version of the API is available on [SwaggerHub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/).
 2. **Blueprint**: Refer to the [Blueprint for a TOMP-API](https://github.com/TOMP-WG/TOMP-API/tree/master/documents) for detailed insights.
 3. **Wiki**: Explore the [TOMP-API Wiki](https://github.com/TOMP-WG/TOMP-API/wiki/) for implementation guidance.
+4. **code-snippets**: there are some code snippets (mostly Python available to speed up your implementation).
+5. **static output**: we already prepared all static output from some endpoints (meta-data).
+6. **process descriptions**: to validate your output, you can use the JSONSchema files in this folder.
 
 ## Community and Support
 
@@ -57,4 +64,3 @@ Working group meetings are held monthly to develop and specify the TOMP-API. All
 ## License
 
 This project is licensed under the Apache-2.0 License.
-

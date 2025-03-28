@@ -21,45 +21,45 @@ paths:
       summary: "Notification endpoint"
       description: "Notification endpoint. Communication from TO to MP will be done using this endpoint"
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
       tags:
         - notifications
       requestBody:
         description: The 'input' of the process request body must be of type '#/components/schemas/notificationInput'
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "204":
           description: Notification processed
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
   /collections/request-payment/items:
     post:
       operationId: paymentRequest
       summary: "Payment request endpoint"
       parameters:
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-CORE.yaml#/components/parameters/receiverId"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
       tags:
         - notifications
       requestBody:
         description: The 'input' of the process request body must be of type '#/components/schemas/paymentRequestInput'
-        $ref: "TOMP-API-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "204":
           description: Payment request processed
         default:
-          $ref: "../TOMP-API-CORE.yaml#/components/responses/errorResponse"
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
 components:
   schemas:
     paymentRequestInput:
       allOf:
-        - $ref: "../TOMP-API-CORE.yaml#/components/schemas/defaultInput"
-        - $ref: "../TOMP-API-CORE.yaml#/components/schemas/links"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
         - type: object
       example:
         {
@@ -86,8 +86,8 @@ components:
 
     notificationInput:
       allOf:
-        - $ref: "../TOMP-API-CORE.yaml#/components/schemas/defaultInput"
-        - $ref: "../TOMP-API-CORE.yaml#/components/schemas/links"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
         - type: object
           required:
             - notificationType
@@ -157,19 +157,19 @@ components:
                 ]
               example: USER_NO_SHOW
             location:
-              $ref: "../TOMP-API-CORE.yaml#/components/schemas/externalReference"
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
             # asset: in links
             # product: in links
             assetState:
-              $ref: "../TOMP-API-CORE.yaml#/components/schemas/assetState"
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetState"
             distance:
-              $ref: "../TOMP-API-CORE.yaml#/components/schemas/float"
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/float"
               description: the travelled distance, in km. Only if applicable.
             distanceUnits:
               type: string
               enum: [KM, MILE]
             duration:
-              $ref: "../TOMP-API-CORE.yaml#/components/schemas/longInt"
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/longInt"
               description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
       example:
         {

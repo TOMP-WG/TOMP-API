@@ -9,8 +9,15 @@
                 "type": "object",
                 "properties": {
                     "inputs": {
-                        "description": "this body can be replaced by a subtype of defaultInput",
-                        "$ref": "#/components/schemas/searchOfferInput"
+                        "allOf": [
+                            {
+                                "description": "this body can be replaced by a subtype of defaultInput",
+                                "$ref": "#/components/schemas/searchOfferInput"
+                            },
+                            {
+                                "$ref": "#/components/schemas/defaultInput"
+                            }
+                        ]
                     },
                     "response": {
                         "type": "string",

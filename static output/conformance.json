@@ -6,6 +6,18 @@
       "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/html",
       "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/json",
       "http://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/ogc-process-description",
-      "http://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/callback"
+      "http://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/callback",
+      "https://datatracker.ietf.org/doc/html/rfc7946",
+      "https://datatracker.ietf.org/doc/html/rfc7807",
+      "https://datatracker.ietf.org/doc/html/rfc7396",
+      "https://datatracker.ietf.org/doc/html/rfc5646",
+      "https://datatracker.ietf.org/doc/html/rfc7231",
+      "https://datatracker.ietf.org/doc/html/rfc3339",
+      "https://datatracker.ietf.org/doc/html/rfc4122",
+      "https://datatracker.ietf.org/doc/html/rfc5988", 
+      "https://datatracker.ietf.org/doc/html/rfc7159",
+      "https://datatracker.ietf.org/doc/html/rfc5280",
+      "https://semver.org/",
+      "https://json-schema.org/"
     ]
   }

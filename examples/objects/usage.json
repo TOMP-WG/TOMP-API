@@ -1,0 +1,15 @@
+[
+    { "type": "USER_PROFILE", "ageGroup": "ADULT", "number": 1 },
+    {
+      "type": "ENTITLEMENT",
+      "entitlementType": "NO:ENTITLEMENT:MILITARY",
+      "number": 1
+    },
+    {
+      "type": "COMMERCIAL_PROFILE",
+      "code": "VX34-348J-EI7y",
+      "number": 1
+    },
+    { "type": "LICENSE_TYPE", "modes": ["CAR"], "number": 2 },
+    { "type": "INDIVIDUAL_TRAVELLER", "id": "34924-3A334B-C342D", "number": 2 }
+  ]

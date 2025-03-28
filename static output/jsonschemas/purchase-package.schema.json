@@ -9,8 +9,15 @@
                 "type": "object",
                 "properties": {
                     "inputs": {
-                        "description": "The required input to purchase a package",
-                        "$ref": "#/components/schemas/packageInput"
+                        "allOf": [
+                            {
+                                "description": "The required input to purchase a package",
+                                "$ref": "#/components/schemas/packageInput"
+                            },
+                            {
+                                "$ref": "#/components/schemas/defaultInput"
+                            }
+                        ]
                     },
                     "response": {
                         "type": "string",

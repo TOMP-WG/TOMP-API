@@ -1,0 +1,10 @@
+[
+    {
+        "type": "SERVICE",
+        "class": "FIRST"
+    },
+    {
+        "type": "SEATING",
+        "spotType": "LUGGAGE_SPOT"
+    }
+]

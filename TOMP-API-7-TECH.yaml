@@ -1,8 +1,10 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
-  title: Transport Operator MaaS Provider API - Technical extension
-  description: This API extension allows to perform a health check    
-  version: "1.0.0"
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
   contact:
     name: TOMP working group
     url: https://github.com/TOMP-WG/TOMP-API
@@ -34,33 +36,60 @@ paths:
                 type: object
                 additionalProperties: true
 
-  /auth/token:
+  /oauth/token:
     post:
-      operationId: get authentication token (JWT)
-      tags:
-        - tech
-      description: "Request a JWT token"
+      summary: "Token Endpoint"
+      description: This endpoint is used to obtain an access token and optionally an ID token 
+        through different OAuth 2.0 grant types, including Client Credentials Flow.
+        Whenever the mTLS flow is taken, the properties will be ignored, and the access token 
+        will be generated based on the credentials in the certificate (O or CN).
       requestBody:
         content:
-          application/json:
-            schema:    
+          application/x-www-form-urlencoded:
+            schema:
               type: object
               properties:
-                user:
+                grant_type:
                   type: string
+                  enum: [client_credentials, password, refresh_token]
+                  description: "The grant type: 'client_credentials', 'password', or 'refresh_token'."
+                  default: client_credentials
+                username:
+                  type: string
+                  description: "The username"
                 password:
                   type: string
-                certificate:
+                  description: "The password"
+                client_id:
                   type: string
+                  description: "The client ID (Client Credentials Flow)"
+                client_secret:
+                  type: string
+                  description: "The client secret (Client Credentials Flow)"
       responses:
-        "200":
-          description: successful operation
+        '200':
+          description: "Successful token issuance."
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  token:
+                  access_token:
                     type: string
-        "404":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+                    description: "The issued access token."
+                  refresh_token:
+                    type: string
+                    description: "The optional refresh token."
+                  token_type:
+                    type: string
+                    description: "The type of the token."
+                    default: "Bearer"
+                  expires_in:
+                    type: integer
+                    description: "The lifetime of the access token in seconds."
+        '400':
+          description: "Bad Request: Invalid request or wrong grant type."
+        '401':
+          description: "Unauthorized: Invalid client ID or secret."
+        '500':
+          description: "Internal Server Error: Something went wrong."
