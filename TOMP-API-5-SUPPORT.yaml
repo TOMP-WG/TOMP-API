@@ -25,10 +25,13 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
         - $ref: "#/components/parameters/supportTicketStatus"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - support
       responses:
@@ -54,7 +57,10 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - support
       requestBody:
@@ -154,7 +160,6 @@ components:
         timeToResolution:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
           description: time in minutes to the expected resolution of support request
-          example: 9
         sequence:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyInt"
           description: the sequence number of the status of tickets on this issue
@@ -180,4 +185,3 @@ components:
           ISSUE_RESOLVED,
           ISSUE_REVOKED,
         ]
-      example: ISSUE_OPEN

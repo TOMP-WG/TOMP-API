@@ -71,7 +71,7 @@ ForEach ($arg in $drafts){
 }
 
 #$join = -join($join, " ", ".\TOMP-API-CORE.yaml > .\TOMP-API.yaml" );
-$join = -join("yaml-merge .\TOMP-API-CORE.yaml ", $join, " > .\TOMP-API.yaml");
+$join = -join("yaml-merge .\TOMP-API-1-CORE.yaml ", $join, " > .\TOMP-API.yaml");
 Write-Host $join
 Invoke-Expression $join
 

@@ -23,12 +23,11 @@ paths:
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
       tags:
         - notifications
       requestBody:
         description: The 'input' of the process request body must be of type '#/components/schemas/notificationInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "../TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "204":
           description: Notification processed
@@ -42,12 +41,10 @@ paths:
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
       tags:
         - notifications
       requestBody:
-        description: The 'input' of the process request body must be of type '#/components/schemas/paymentRequestInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "../TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
       responses:
         "204":
           description: Payment request processed
@@ -60,29 +57,6 @@ components:
       allOf:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
         - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
-        - type: object
-      example:
-        {
-          "timestamp": "2019-10-12T07:20:50.52Z",
-          "packageId": "324-42394234903X34283BV24234a3482g231-34",
-          "links": [
-            { 
-              "rel": "deposit",
-              "method": "POST",
-              "description": "After settlement of the payment with the bank, the MP can send a confirmation to the TO that is has been paid",
-              "href": "https://some.url/tomp/v2/processes/confirm-payment/execute",
-              "body": { 
-                        "packageId": "324-42394234903X34283BV24234a3482g231-34",
-                        "amount": 100.00, 
-                        "currencyCode": "EUR", 
-                        "category": "DEPOSIT", 
-                        "id": "2025003305",
-                        "timestamp": "" 
-                      },
-              "required": [ "$.timestamp" ]
-            }
-          ]
-        }
 
     notificationInput:
       allOf:
@@ -155,7 +129,6 @@ components:
                   SUCCESS,
                   FAILURE
                 ]
-              example: USER_NO_SHOW
             location:
               $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
             # asset: in links
@@ -171,14 +144,3 @@ components:
             duration:
               $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/longInt"
               description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
-      example:
-        {
-          "timestamp": "2019-10-12T07:20:50.52Z",
-          "notificationType": "ETA",
-          "location": "GPS:6.169639,52.253279",
-          "links": [
-            { "rel": "details",
-              "href": "https://some.url/tomp/v2/collections/packages/items/33942?legId=4932" 
-            }
-          ]
-        }

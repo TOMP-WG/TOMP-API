@@ -25,7 +25,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
@@ -57,6 +56,10 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/paymentCategory"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - after sales
       responses:
@@ -80,7 +83,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
@@ -102,6 +104,10 @@ paths:
           required: true
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - after sales
       responses:
@@ -120,7 +126,10 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - after sales
       requestBody:
@@ -143,7 +152,10 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - after sales
       requestBody:
@@ -166,10 +178,13 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/headers/digest"
         - $ref: "TOMP-API-1-CORE.yaml#/components/headers/publicKey"
         - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       requestBody:
         description: the input must be of the type redressInput, the redress options are obtained from /collections/redresses/items
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
@@ -190,7 +205,10 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - after sales
       requestBody:
@@ -210,7 +228,10 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - after sales
       requestBody:
@@ -243,12 +264,14 @@ components:
   schemas:
     redressesResponseBody:
       description: a list of redress options. 
-        The main 'properties' field must be of type 'redresses' (#/components/schemas/redressesProperties)
-        The 'properties' field of each Feature must be of type 'redress'
-      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+          The main 'properties' field must be of type 'redresses' (#/components/schemas/redressesProperties)
+          The 'properties' field of each Feature must be of type 'redress'
+      allOf:
+      -  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
 
     financialInput:
-      allOf:
+      allOf: 
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
       - $ref: "#/components/schemas/financialDetail"
       - type: object
         required:
@@ -256,41 +279,44 @@ components:
         properties: 
           type: 
             type: string
-            enum: ["PAYMENT_REQUEST", "PAYMENT_CONFIRMATION"]
+            pattern: "^(payment_request|payment_confirmation)"
+            enum: ["payment_request", "payment_confirmation"]
 
     redressInput:
-      type: object
-      required:
-      - type
-      - redressOptionId
-      properties:
-        type:
-          type: string
-          enum: ["REDRESS"]
-        redressOptionId:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+      allOf: 
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageInput"
+      - type: object
+        required:
+        - type
+        - redressOptionId
+        properties:
+          type:
+            type: string
+            enum: ["redress"]
+            pattern: "^(redress)"
+          redressOptionId:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
 
     redresses:
       type: object
       properties:
         type: 
           type: string
-          enum: [REDRESSES]
+          pattern: "^(redresses)"
+          enum: [ redresses ]
 
     redress:
-      allOf:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeatureProperties"
-        - type: object
-          properties:
-            redressOptionId:
-              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
-            redress:
-              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/redress"
-            # alternative -> in the links section
-            compensations:
-              type: array
-              items:
-                $ref: "#/components/schemas/financialDetail"
+      type: object
+      properties:
+        redressOptionId:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+        redress:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/redress"
+        # alternative -> in the links section
+        compensations:
+          type: array
+          items:
+            $ref: "#/components/schemas/financialDetail"
 
     paymentCategory:
       type: string
@@ -398,31 +424,6 @@ components:
               items:
                 $ref: "#/components/schemas/financialDetail"
         - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
-      example:
-          {
-            "data": [ "..." ],
-            "links":
-            [
-              {
-                "rel": "self",
-                "method": "GET",
-                "href": "/collections/payments/items&offset=100&limit=100",
-                "type": "application/hal+json",
-              },
-              {
-                "rel": "next",
-                "method": "GET",
-                "href": "/collections/payments/items&offset=200&limit=100",
-                "type": "application/hal+json",
-              },
-              {
-                "rel": "previous",
-                "method": "GET",
-                "href": "/payments&limit=100",
-                "type": "application/hal+json",
-              },
-            ]
-          }
 
     bankAccount:
       type: object

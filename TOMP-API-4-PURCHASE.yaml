@@ -33,11 +33,14 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "#/components/parameters/purchaseOperation"
         - $ref: "TOMP-API-1-CORE.yaml#/components/headers/digest"
         - $ref: "TOMP-API-1-CORE.yaml#/components/headers/publicKey"
         - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -77,8 +80,11 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "#/components/parameters/purchaseOperation"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -115,7 +121,10 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -157,24 +166,27 @@ components:
           properties:
             type:
               type: string
-              enum: [ "PURCHASE_PACKAGE" ]
+              enum: [ purchase_package ]
 
     extendExpiryTimeInput:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          enum: [EXTEND_EXPIRY_TIME]
-        extensionReason:
-          type: string
-          description:
-            in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
-            _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
-            _PAYMENT_PENDING_ - The customer is in the payment process<br>
-            _OTHER_ - unspecified
-          enum: ["PURCHASE_PENDING", "PAYMENT_PENDING", "OTHER"]
+      allOf: 
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageInput"
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            pattern: "^(extend_expiry_time)"
+            enum: [extend_expiry_time]
+          extensionReason:
+            type: string
+            description:
+              in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
+              _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
+              _PAYMENT_PENDING_ - The customer is in the payment process<br>
+              _OTHER_ - unspecified
+            enum: ["PURCHASE_PENDING", "PAYMENT_PENDING", "OTHER"]
 
     # operations
     purchaseOperation:

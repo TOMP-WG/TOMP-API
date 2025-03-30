@@ -28,13 +28,16 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - name: legOperation
           in: query
           description: OPERATION on a specified leg
           required: false
           schema:
             $ref: "#/components/schemas/legOperation"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - execute
       requestBody:
@@ -64,7 +67,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
         - name: productExecutionOperation
@@ -73,6 +75,10 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/productExecutionOperation"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - execute
       requestBody:
@@ -95,13 +101,16 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
-        - name: productExecutionOperation
+        - name: assetOperation
           in: query
           description: OPERATION on a specified asset
           required: false
           schema:
             $ref: "#/components/schemas/assetOperation"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - execute
       requestBody:

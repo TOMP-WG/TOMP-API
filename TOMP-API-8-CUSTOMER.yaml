@@ -23,6 +23,10 @@ paths:
     post:
       summary: "Create a TO CUSTOMER ACCOUNT for the customer"
       description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - customer management
       requestBody:
@@ -45,6 +49,10 @@ paths:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
     get:
       summary: "Get the customer account from the TO system"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - customer management
       responses:
@@ -55,6 +63,10 @@ paths:
     patch:
       summary: "Update the CUSTOMER ACCOUNT on the TO system"
       description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - customer management
       requestBody:
@@ -63,7 +75,6 @@ paths:
             schema:
               description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
               $ref: "#/components/schemas/customerAccount"
-            example: { "id": "OTP:12345", "email": "new-email@example.com" }
       responses:
         "200":
           $ref: "#/components/responses/customerResponse"
@@ -72,6 +83,10 @@ paths:
     delete:
       summary: "Delete the CUSTOMER ACCOUNT from the TO system."
       description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       tags:
         - customer management
       responses:

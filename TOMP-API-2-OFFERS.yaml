@@ -24,10 +24,13 @@ paths:
       summary: "Request offers (simple)"
       description: Returns offers (purchaseable packages) based a (list of) user(s), and optional start/end (and via) locations and a start time or end time. this
         is a simplified offer request.
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"                   
@@ -52,10 +55,13 @@ paths:
       summary: "Request offers (advanced)"
       description: Returns offers (purchaseable packages) based on user requirements. This is the advanced version of the GET. Implement this only
         when you support more advanced queries.
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/receiverId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
@@ -76,6 +82,7 @@ components:
   schemas:
     searchOfferInput:
       allOf: 
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeDefinitions"
       - type: object
@@ -86,7 +93,8 @@ components:
         properties:
           type:
             type: string
-            enum: [ "SEARCH_OFFER" ]
+            pattern: "^(search_offer)"
+            enum: [ "search_offer" ]
           party:
             type: array
             maxItems: 10
