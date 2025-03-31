@@ -13,6 +13,8 @@
                     {
                         "type": "LEG",
                         "operator": "S:VY",
+                        "to": "S:VY:STOPPOINT:342432",
+                        "from": "S:VY:ZONE:342", 
                         "product": "S:VY:first_class_ticket",
                         "asset": {
                             "id": "S:VY:JOURNEY:3942-2349"
@@ -64,6 +66,12 @@
                     "body": {
                         "packageId": "376e1083-92df-44e5-a1bf-d5570507b8"
                     },
+                    "type": "application/geo+json"
+                },
+                {
+                    "rel": "add ancillaries",
+                    "method": "GET",
+                    "href": "/collections/ancillaries/items?packageId=376e1083-92df-44e5-a1bf-d5570507b8",
                     "type": "application/geo+json"
                 }
             ]

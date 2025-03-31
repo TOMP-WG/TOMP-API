@@ -907,6 +907,10 @@ components:
             type: number
           height:
             type: number
+          fuel:
+            type: string
+          weight:
+            type: string
           mode:
             $ref: "#/components/schemas/mode"
 

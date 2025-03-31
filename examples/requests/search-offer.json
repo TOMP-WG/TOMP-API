@@ -1,0 +1,16 @@
+{
+    "inputs": { "type": "search_offer",
+                "from": "",
+                "party": [
+                    { "travellers": [ 
+                        { 
+                            "type": "INDIVIDUAL_TRAVELLER", "age": 7
+                        }, 
+                        {
+
+                        } ]
+                    , "parameters": [ {"type": "SERVICE", "class": "FIRST_CLASS" }]
+                    }
+                ]
+             }
+}
