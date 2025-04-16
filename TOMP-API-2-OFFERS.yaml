@@ -11,50 +11,20 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-
+  x-modules:
+    - offers
+    
 tags:
   - name: offer
     description: This part of the API facilitates in supplying offers. Offers can be obtained in a simple way (the GET), for more 
      sophisticated searches, the search-offers must be used. Each result must have an expiry-date in the header.
 
 paths:
-  /collections/offers/items:
-    get:
-      operationId: requestOffers
-      summary: "Request offers (simple)"
-      description: Returns offers (purchaseable packages) based a (list of) user(s), and optional start/end (and via) locations and a start time or end time. this
-        is a simplified offer request.
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
-      parameters:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"                   
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/from"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/to"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/via"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/start-time"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/end-time"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/traveller"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/parameter"
-      tags:
-        - offer
-      responses:
-        "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/offersResponse"
-        default:
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-
   /processes/search-offers/execute:
     post:
       operationId: searchOffers
-      summary: "Request offers (advanced)"
-      description: Returns offers (purchaseable packages) based on user requirements. This is the advanced version of the GET. Implement this only
-        when you support more advanced queries.
+      summary: "Search for offers"
+      description: Returns offers based on travel specification, trip pattern, location, asset, product and user preferences.
       security:
         - BearerAuth: []
         - OAuth: []
@@ -68,36 +38,212 @@ paths:
       tags:
         - offer
       requestBody:
-        description: The 'input' of the process request body must be of type '#/components/schemas/searchOfferInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/searchOfferRequest"
       responses:
         "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/offersResponse"
+          $ref: "#/components/responses/offersResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-#  /collections/offers/items/{packageId} => use /collections/packages/items/{packageId}
-
+  /collections/offers/items:
+    get:
+      operationId: requestOffer
+      summary: "Get offer details"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offerId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - offer
+      responses:
+        "200":
+          $ref: "#/components/responses/offerResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 components:
+  requestBodies:
+    searchOfferRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: "#/components/schemas/searchOfferInput"
+
+  responses:
+    offersResponse:
+      description: a list of offers
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/offers"
+        application/geo+json:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
+    
+    offerResponse:
+      description: a list of offers
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/json:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
+        application/geo+json:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
+
   schemas:
     searchOfferInput:
-      allOf: 
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
+      type: object
+      required:
+      - type
+      - specification
+      description: A package planning request, resulting in offers
+      properties:
+        type:
+          type: string
+          pattern: "^(search_offer)"
+          enum: [search_offer]
+        specification:
+          oneOf:
+          - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
+          - $ref: "#/components/schemas/tripPattern"
+          discriminator:
+            propertyName: type
+            mapping:
+              travel_specification: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
+              trip_pattern: "#/components/schemas/tripPattern"
+        groupRequirements:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerRequirements"
+        travellers:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"
+        places:
+          description: Places that are not specified in an external data source (like a home address)
+          type: array
+          minItems: 0
+          maxItems: 5
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/place"
+        packageToExchange:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+
+    tripPattern:
+      allOf:
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeDefinitions"
       - type: object
-        required:
-        - party
-        - type
-        description: A package planning request, resulting in package options
         properties:
           type:
             type: string
-            pattern: "^(search_offer)"
-            enum: [ "search_offer" ]
-          party:
+            enum: [ trip_pattern ]
+            pattern: "^(trip_pattern)"
+          serviceJourneys:
             type: array
-            maxItems: 10
-            minItems: 1
             items:
-              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/parameterAssignment"
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/serviceJourneyReference"
+          travelDate:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/date"
+
+    offers:
+      description: a list of offers.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [OfferCollection]
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/offer"
+        properties:
+          $ref: "#/components/schemas/offersProperties"
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+    offer:
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeature"
+      - type: object
+        properties:
+          type:
+            type: string
+            enum: [offer]
+          properties:
+            $ref: "#/components/schemas/offerProperties"          
+
+    offersProperties:
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
+      - type: object
+        required:
+        - type
+        additionalProperties: true
+        properties:
+          type:
+            type: string
+            enum: [offers]
+
+    offerProperties:
+      type: object
+      additionalProperties: true
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [offer]
+        price:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/amountOfMoney"
+        legs:
+          type: array
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/leg"
+        travellers:
+          type: array
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
+        products:
+          type: array
+          description: must be replaced by product descriptions
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+        assets:
+          type: array
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+        ancillaries:
+          type: array
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"

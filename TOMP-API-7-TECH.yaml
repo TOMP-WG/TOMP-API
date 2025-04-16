@@ -11,18 +11,15 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-
-tags:
-  - name: tech
-    description:
-      technical support
+  x-modules:
+    - tech
 
 paths:
   /health:
     get:
       operationId: ping
       tags:
-        - tech
+        - generic
       summary: "is the API up and running?"
       description: "This is a healthcheck ENDPOINT"
       responses:
@@ -39,6 +36,8 @@ paths:
   /oauth/token:
     post:
       summary: "Token Endpoint"
+      tags:
+      - generic
       description: This endpoint is used to obtain an access token and optionally an ID token 
         through different OAuth 2.0 grant types, including Client Credentials Flow.
         Whenever the mTLS flow is taken, the properties will be ignored, and the access token 

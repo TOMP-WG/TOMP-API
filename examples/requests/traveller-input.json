@@ -1,10 +1,17 @@
 {
-    "type": "TRAVELLER",
-    "packageId": "349204234-342439324-342",
-    "travellers": [
-        {
-            "type": "INDIVIDUAL_TRAVELLER",
-            "id": "ABT:3492"
-        }
-    ]
+    "inputs": {
+        "package": "d4a18f21-8bc1-4caa-b36d-7392c4251b15",
+        "traveller": "cee84743-49a1-4fbd-8b2f-09672e1e8582",
+        "fullName": "G. Goudglans",
+        "entitlements": [
+            {
+                "id": "NL:NS:OFF_PEAK_40",
+                "type": "card_type",
+                "cardType": "DISCOUNT",
+                "transportOrganisations": [
+                    "NL:NS"
+                ]
+            }
+        ]
+    }
 }

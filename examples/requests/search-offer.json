@@ -1,16 +1,36 @@
 {
-    "inputs": { "type": "search_offer",
-                "from": "",
-                "party": [
-                    { "travellers": [ 
-                        { 
-                            "type": "INDIVIDUAL_TRAVELLER", "age": 7
-                        }, 
-                        {
-
-                        } ]
-                    , "parameters": [ {"type": "SERVICE", "class": "FIRST_CLASS" }]
+    "inputs": {
+        "type": "search_offer",
+        "travellers": [
+            {
+                "id": "ABT:761654e2-39f9-4dae-a9a1-0320528be69e",
+                "entitlements": [
+                    {
+                        "id": "REDUCTION_40_OFF_PEAK",
+                        "type": "card_type",
+                        "cardType": "DISCOUNT",
+                        "transportOrganisations": [
+                            "NL:NS"
+                        ]
                     }
-                ]
-             }
+                ],
+                "type": "traveller"
+            }
+        ],
+        "specification": {
+            "from": "GPS:6.3242,52.34329",
+            "to": "NL:NS:StopPoint:3429",
+            "startTime": "2025-04-16T08:24:53.292Z",
+            "endTime": "2025-04-16T08:24:53.292Z"
+        },
+        "requirements": {
+            "class": "SECOND_CLASS",
+            "needs": {
+                "encumbranceNeed": "pushchair",
+                "medicalNeed": "heart_condition",
+                "mobilityNeed": "wheelchair",
+                "psychoSensoryNeed": "visual_impaired"
+            }
+        }
+    }
 }

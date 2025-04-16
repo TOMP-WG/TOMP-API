@@ -28,8 +28,8 @@ If ($args[0] -eq 'all') {
 Write-Host $files
 
 ForEach ($arg in $files){
-    if ('TOMP-API-CORE.yaml' -cne $arg) {
-        if (('TOMP-API-OFFERS.yaml' -cne $arg) -and ('TOMP-API-PURCHASE.yaml' -cne $arg)) {
+    if ('TOMP-API-1-CORE.yaml' -cne $arg) {
+        if (('TOMP-API-2-OFFERS.yaml' -cne $arg) -and ('TOMP-API-4-PURCHASE.yaml' -cne $arg)) {
             $defaultValue = 'N'
             $display = "Add $($arg) [y/N]"
         }
@@ -56,6 +56,7 @@ ForEach ($arg in $files){
             
             (gc .\$arg) -replace 'TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII $dest
             (gc .\work\$arg) -replace 'TOMP-API-2-OFFERS.yaml', '' | Out-File -encoding ASCII $dest
+            (gc .\work\$arg) -replace 'TOMP-API-4-PURCHASE.yaml', '' | Out-File -encoding ASCII $dest
             $join = -join($join, " ", $dest);
         }
     }
@@ -71,7 +72,7 @@ ForEach ($arg in $drafts){
 }
 
 #$join = -join($join, " ", ".\TOMP-API-CORE.yaml > .\TOMP-API.yaml" );
-$join = -join("yaml-merge .\TOMP-API-1-CORE.yaml ", $join, " > .\TOMP-API.yaml");
+$join = -join("yaml-merge ", $join, " .\TOMP-API-1-CORE.yaml > .\TOMP-API.yaml");
 Write-Host $join
 Invoke-Expression $join
 

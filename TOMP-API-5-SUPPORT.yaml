@@ -11,7 +11,8 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-
+  x-modules:
+    - support
 tags:
   - name: support
     description: This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
@@ -36,16 +37,7 @@ paths:
         - support
       responses:
         "200":
-          description: support status delivered
-          headers:
-            Content-Language:
-              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/supportTicket"
+         $ref: "#/components/responses/ticketsResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -65,7 +57,7 @@ paths:
         - support
       requestBody:
         description: The 'input' of the process request body must be of type '#/components/schemas/supportInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/supportRequest"
       responses:
         "200":
           description: support request acknowledged, the response contains a support ticket with a unique ID. Multiple support tickets can be created on one single leg.
@@ -80,6 +72,46 @@ paths:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
           
 components:
+  requestBodies:
+    supportRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: "#/components/schemas/supportTicket"
+
+  responses:
+    ticketsResponse:
+      description: a list of tickets
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: ["TicketCollection"]
+              tickets:
+                type: array
+                items:
+                  $ref: "#/components/schemas/supportTicket"
+              links:
+                type: array
+                description:
+                  actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+                  In case it is an alternative, specify clearly in the description what the financial consequences are.
+                items:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
+  
   parameters:
     supportTicketStatus:
       name: supportTicketStatus
@@ -93,12 +125,16 @@ components:
       type: object
       required:
         - supportType
+        - type
         - location
         - timestamp
       properties:
         id:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
           description: ticketID, to be provided when created. Mandatory when status != REQUESTED
+        type:
+          type: string
+          enum: [support_ticket]
         status:
           $ref: "#/components/schemas/supportTicketStatus"
         supportType:
@@ -163,12 +199,9 @@ components:
         sequence:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyInt"
           description: the sequence number of the status of tickets on this issue
+        links:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
           
-    supportInput:
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
-      - $ref: "#/components/schemas/supportTicket"
-
     supportTicketStatus:
       type: string
       description:

@@ -1,0 +1,51 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+  - url: https://example.to.eu/tomp/v2
+    description: example url
+
+tags:
+  - name: travel information
+    description: Traveller information that is not (yet) (completely) available in other standards
+
+paths:
+  /collections/user-profiles/items/:
+    get:
+      operationId: getUserProfiles
+      summary: "Get user profile overview"
+      description: Retrieves all user profiles
+      security:
+        - OpenData: []
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - travel information
+      responses:
+        "200":
+          description: a single instance of a package
+          headers:
+            Version:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/headers/version"
+            Content-Language:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfile"
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"

@@ -11,99 +11,51 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-
+  x-modules:
+    - after-sales
 tags:
   - name: after sales
     description: This part of the API describes how the financial settlement should be done. All kinds of fares, fees, debits, and credits are described.
 
 paths:
-  /collections/payments/items:
+  /collections/refund-options/items:
     get:
-      operationId: getPaymentOverview
-      summary: "Retrieve financial details"
-      description: Returns all the JOURNAL ENTRIES that should be paid (per LEG)
+      operationId: getRefundOptions
+      summary: "Retrieve refund options for a guarantee"
+      description: Returns possible refund options for a guarantee
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
-        - name: startTime
-          in: query
-          description: start of the selection
-          required: false
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
-        - name: endTime
-          in: query
-          description: end of the selection
-          required: false
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
-        - name: invoiceState
-          in: query
-          required: false
-          schema:
-            $ref: "#/components/schemas/paymentState"
-        - name: packageId
-          in: query
-          required: false
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
-        - name: category
-          in: query
-          description: type of PAYMENT DETAIL (e.g. fare, addition costs, fines, ...)
-          required: false
-          schema:
-            $ref: "#/components/schemas/paymentCategory"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
-      tags:
-        - after sales
-      responses:
-        "200":
-          description: journal entries
-          headers:
-            Content-Language:
-              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/paymentResponse"
-        default:
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-
-  /collections/redresses/items:
-    get:
-      operationId: getRedresses
-      summary: "Retrieve redresses for a guarantee"
-      description: Returns possible redresses for a guarantee
-      parameters:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
         - name: packageId
           in: query
           description: the id of the package that contains a purchased product
           required: true
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
-        - name: productId
+        - name: offerId
           in: query
-          description: the guaranteed product
+          description: the offer with a guarantee
           required: true
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
         - name: guaranteeId
           in: query
           description: the guarantee that haven't been met
-          required: true
+          required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+        - name: travellerId
+          in: query
+          description: to request refunds for a single traveller
+          required: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
+        - name: ancillaryId
+          in: query
+          description: to request refunds for a not-used ancillary or ancillary to remove
+          required: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -112,17 +64,16 @@ paths:
         - after sales
       responses:
         "200":
-          description: each feature MUST be of the type redressOption
-          $ref: "#/components/responses/redressesResponse"
+          $ref: "#/components/responses/refundResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/cancel-package/execute:
+  /processes/claim-refund-option/execute:
     post:
-      operationId: cancelPackageOperation
-      summary: "(Partial) cancel a package, after purchase. Before purchase you release a package."
-      description: 
-        _CANCEL_ - cancel this package<br>
+      operationId: refundOptionRequest
+      description: refund options must be claimed & confirmed
+      tags:
+        - after sales
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -130,25 +81,20 @@ paths:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-      tags:
-        - after sales
       requestBody:
-        description: input = packageInput
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/refundOptionRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: when the processing has been completed, the notification URL will be used 
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/cancel-leg/execute:
+  /processes/confirm-refund-option/execute:
     post:
-      operationId: cancelLegOperation
-      summary: "(Partial) cancel a leg, after purchase."
-      description: 
-        _CANCEL_ - cancel this leg<br>
+      operationId: confirmRefundOptionRequest
+      description: confirm the claimed refund option
+      tags:
+        - after sales
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -156,45 +102,11 @@ paths:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-      tags:
-        - after sales
       requestBody:
-        description: input = legInput
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/refundOptionRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: when the processing has been completed, the notification URL will be used 
-        default:
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-          
-  /processes/claim-redress/execute:
-    post:
-      operationId: claimRedressRequest
-      description: claimed redresses CAN create additional payment-items (of types REFUND, REBATE)
-      tags:
-        - after sales
-      parameters:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/digest"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/publicKey"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
-      requestBody:
-        description: the input must be of the type redressInput, the redress options are obtained from /collections/redresses/items
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
-      responses:
-        "200":
-          description: the newly created package is returned.
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the redress.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -212,19 +124,68 @@ paths:
       tags:
         - after sales
       requestBody:
-        description: The 'input' of the process request body must be of type 'financialInput', with category 'REFUND'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"        
+        $ref: "#/components/requestBodies/refundDepositRequest"        
       responses:
         "204":
           description: the payment is acknowledged
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-  
+
+  /collections/payments/items:
+    get:
+      operationId: getPaymentOverview
+      summary: "Retrieve financial details"
+      description: Returns all the JOURNAL ENTRIES that should be paid
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
+        - name: startTime
+          in: query
+          description: start of the selection
+          required: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+        - name: endTime
+          in: query
+          description: end of the selection
+          required: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+        - name: invoiceState
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/paymentState"
+        - name: package
+          in: query
+          required: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+        - name: category
+          in: query
+          description: type of PAYMENT DETAIL (e.g. fare, addition costs, fines, ...)
+          required: false
+          schema:
+            $ref: "#/components/schemas/paymentCategory"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - after sales
+      responses:
+        "200":
+          $ref: "#/components/responses/paymentResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
   /processes/confirm-payment/execute:
     post:
       operationId: confirmPaymentEntry
       summary: "Confirm a financial transaction"
-      description: The MP (reseller) confirm a payment
+      description: The MP (reseller) confirms a payment
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -235,18 +196,102 @@ paths:
       tags:
         - after sales
       requestBody:
-        description: The 'input' of the process request body must be of type 'financialInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/confirmPaymentRequest"
       responses:
         "204":
           description: the payment is acknowledged
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
+  /processes/cancel-package/execute:
+    post:
+      operationId: cancelPackageOperation
+      summary: "Cancel a package in confirmed state for (technical issues)."
+      description: 
+        Cancel this package. This endpoint is only there to correct (technical) issues.<br>
+        Normally, after purchase, you have to request refund options, claim it and confirm the claim.<br>
+        <br>
+        Before purchase you release a package.<br>
+        During the purchase you rollback a package.<br>
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - after sales
+      requestBody:
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: when the processing has been completed, the notification URL will be used 
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
 components:
+  requestBodies:
+    refundOptionRequest:
+     content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - offer
+                - guarantee
+                - option
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  offer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+                  guarantee:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+                  option:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+
+    refundDepositRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  offer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+
+    confirmPaymentRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  paymentId:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"                    
+
   responses:
-    redressesResponse:
-      description: a list of redress options
+    refundResponse:
+      description: a list of refund options
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
@@ -259,61 +304,85 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/redressesResponseBody"
+            $ref: "#/components/schemas/refundOptions"
+
+    paymentResponse:
+      description: journal entries
+      headers:
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/payments"    
 
   schemas:
-    redressesResponseBody:
-      description: a list of redress options. 
-          The main 'properties' field must be of type 'redresses' (#/components/schemas/redressesProperties)
-          The 'properties' field of each Feature must be of type 'redress'
-      allOf:
-      -  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
-
-    financialInput:
-      allOf: 
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
-      - $ref: "#/components/schemas/financialDetail"
-      - type: object
-        required:
-          - type
-        properties: 
-          type: 
-            type: string
-            pattern: "^(payment_request|payment_confirmation)"
-            enum: ["payment_request", "payment_confirmation"]
-
-    redressInput:
-      allOf: 
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageInput"
-      - type: object
-        required:
+    refundOptions:
+      type: object
+      required:
         - type
-        - redressOptionId
-        properties:
-          type:
-            type: string
-            enum: ["redress"]
-            pattern: "^(redress)"
-          redressOptionId:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
-
-    redresses:
-      type: object
       properties:
-        type: 
+        type:
           type: string
-          pattern: "^(redresses)"
-          enum: [ redresses ]
+          enum: [RefundOptions]
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id: 
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+              properties:
+                $ref: "#/components/schemas/refundOption"
+              links:
+                type: array
+                items:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
+        properties:
+          type: object
+          properties:
+            type: 
+              type: string
+              enum: [refundOptions]
+            package:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+            offer:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+            guarantee:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link" 
 
-    redress:
+    refundOption:
       type: object
       properties:
-        redressOptionId:
+        type:
+          type: string
+          enum: [ refund_option ]
+        id:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
-        redress:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/redress"
-        # alternative -> in the links section
-        compensations:
+        packageState:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageStatus"
+        refundType:
+          type: string
+          enum: [ package_refund
+                , offer_refund
+                , remove_traveller
+                , remove_ancillary 
+                , unused_ancillary
+                ]
+        consequences:
           type: array
           items:
             $ref: "#/components/schemas/financialDetail"
@@ -414,16 +483,49 @@ components:
       description: the state of the payment detail
       enum: [TO_INVOICE, INVOICING, INVOICED]
 
-    paymentResponse:
-      allOf:
-        - type: object
+    payments:
+      description: a list of offers.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [PaymentCollection]
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/financialDetail"
+        properties:
+          type: object
+          description: this object contains the filter parameters
           properties:
-            data:
-              type: array
-              maxItems: 500
-              items:
-                $ref: "#/components/schemas/financialDetail"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
+            type:
+              type: string
+              enum: [payments]
+            limit:
+              $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
+            offset:
+              $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
+            startTime:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+            endTime:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+            invoiceState:
+              $ref: "#/components/schemas/paymentState"
+            package:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+            category:
+              $ref: "#/components/schemas/paymentCategory"          
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
 
     bankAccount:
       type: object
@@ -444,19 +546,3 @@ components:
         bankIdentification:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
           description: bank identification, like BIC code
-
-  parameters:
-    paymentType:
-      in: path
-      name: paymentType
-      required: true
-      schema:
-        $ref: "#/components/parameters/paymentType"
-
-    optionalPaymentId:
-      in: query
-      name: paymentId
-      description: payment identifier
-      required: false
-      schema:
-        $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"

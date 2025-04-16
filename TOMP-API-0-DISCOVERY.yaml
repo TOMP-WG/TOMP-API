@@ -201,7 +201,8 @@ paths:
           - request-support
           - cancel-package
           - cancel-leg
-          - claim-redress
+          - claim-refund-option
+          - confirm-refund-option
           - refund-deposit
           - confirm-payment
       responses:
@@ -224,7 +225,7 @@ components:
       schema:
         type: string
         description: these are all collections exposed when fully implemented
-        enum: [packages, offers, products, fares, assets, ancillaries, support-tickets, payments, redresses]
+        enum: [packages, offers, assets, ancillaries, support-tickets, payments, refund-options]
 
   responses:
     landingPageResponse:
@@ -288,7 +289,7 @@ components:
       properties:
         module:
           type: string
-          enum: [OFFERS, PURCHASE, EXECUTE, SUPPORT, PAYMENTS, DATA_SPACES, DISCOVERY, TECH]
+          enum: [offers, pre-sales, purchase, execute, support, after-sales]
         identifiers:
           type: array
           maxItems: 25
@@ -398,8 +399,7 @@ components:
                 Extensions may support additional coordinate reference systems and add
                 additional enum values.
               type: string
-              enum:
-                - "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+              enum: [ "http://www.opengis.net/def/crs/OGC/1.3/CRS84" ]
               default: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
         temporal:
           description: |-
@@ -434,8 +434,7 @@ components:
                 Extensions may support additional temporal coordinate reference systems and add
                 additional enum values.
               type: string
-              enum:
-                - "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
+              enum: [ "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian" ]
               default: "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
 
     collections:

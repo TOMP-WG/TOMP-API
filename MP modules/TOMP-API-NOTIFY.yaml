@@ -15,7 +15,7 @@ tags:
     description: This part of the API facilitates communication from the TO to the MP.
 
 paths:
-  /collections/notification/items:
+  /processes/notification/execute:
     post:
       operationId: postNotification
       summary: "Notification endpoint"
@@ -26,15 +26,14 @@ paths:
       tags:
         - notifications
       requestBody:
-        description: The 'input' of the process request body must be of type '#/components/schemas/notificationInput'
-        $ref: "../TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/notificationRequest"
       responses:
         "204":
           description: Notification processed
         default:
           $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /collections/request-payment/items:
+  /processes/request-payment/execute:
     post:
       operationId: paymentRequest
       summary: "Payment request endpoint"
@@ -44,103 +43,118 @@ paths:
       tags:
         - notifications
       requestBody:
-        $ref: "../TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/paymentRequest"
       responses:
         "204":
-          description: Payment request processed
+          description: Payment request received
         default:
           $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
 components:
+  requestBodies:
+    notificationRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: "#/components/schemas/notificationInput"
+
+    paymentRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: "../TOMP-API-6-AFTER-SALES.yaml#/components/schemas/financialDetail"
+
   schemas:
-    paymentRequestInput:
-      allOf:
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
-
     notificationInput:
-      allOf:
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/defaultInput"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
-        - type: object
-          required:
-            - notificationType
-          properties:
-            source:
-              type: string
-              description:
-                This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this package for me); to override the default source.<br>
-                In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
-                _TO_ the TO requests this operation<br>
-                _DRIVER_ the driver triggered this request<br>
-                _OTHER_ unknown source
-              enum: [TO, DRIVER, OTHER]
-            destination:
-              type: string
-              description: the destination of the notification
-              enum: [MP, TRAVELLER, CUSTOMER]
-            notificationType:
-              type: string
-              description: <br>
-                * _USER_ACTION_ Request to show the actions (links) to the end user<br>
-                * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
-                * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
-                * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
-                * _OTHER_ unspecified. Text is in **comment**<br>
+      type: object
+      required:
+        - notificationType
+      properties:
+        source:
+          type: string
+          description:
+            This operation can be done on behalf of another party. The MP can act on behalf of the CUSTOMER (cancel this package for me); to override the default source.<br>
+            In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
+            _TO_ the TO requests this operation<br>
+            _DRIVER_ the driver triggered this request<br>
+            _OTHER_ unknown source
+          enum: [TO, DRIVER, OTHER]
+        destination:
+          type: string
+          description: the destination of the notification
+          enum: [MP, TRAVELLER, CUSTOMER]
+        notificationType:
+          type: string
+          description: <br>
+            * _USER_ACTION_ Request to show the actions (links) to the end user<br>
+            * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
+            * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
+            * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
+            * _OTHER_ unspecified. Text is in **comment**<br>
 
-                * _LOCKED_ asset is locked  <br>
-                * _UNLOCKED_ asset is unlocked  <br><br>
+            * _LOCKED_ asset is locked  <br>
+            * _UNLOCKED_ asset is unlocked  <br><br>
 
-                * _PROGRESS_ report progress <br><br>
+            * _PROGRESS_ report progress <br><br>
 
-                * _PREPARING_ the leg is in preparation  <br>
-                * _PREPARED_ the leg is ready to get started  <br>
-                * _STARTED_ leg has started  <br>
-                * _PAUSED_ leg is paused  <br>
-                * _RESUMED_ leg is resumed  <br>
-                * _ENDED_ leg is in finishing state  <br><br>
+            * _PREPARING_ the leg is in preparation  <br>
+            * _PREPARED_ the leg is ready to get started  <br>
+            * _STARTED_ leg has started  <br>
+            * _PAUSED_ leg is paused  <br>
+            * _RESUMED_ leg is resumed  <br>
+            * _ENDED_ leg is in finishing state  <br><br>
 
-                TO Process notifications<br>
-                When a call to the TO responds with a 202 (accepted), an asynchronous process starts<br>
-                and the TO will notify with SUCCESS or FAILURE to indicate that the process has been completed<br>
-                * _SUCCESS_ The requested process is completed (e.g. the purchase of a package, responding with HTTP code 202)<br>
-                   The links object must contain a link to retrieve the processed object (e.g. GET /collections/packages/items/34243)
-                * _FAILURE_ The requested process ended in a failure (e.g. payment processing incomplete)
-              enum:
-                [
-                  USER_ACTION,
-                  USER_NO_SHOW,
-                  ETA,
-                  USER_OUT_OF_LIMITS,
-                  OTHER,
+            TO Process notifications<br>
+            When a call to the TO responds with a 202 (accepted), an asynchronous process starts<br>
+            and the TO will notify with SUCCESS or FAILURE to indicate that the process has been completed<br>
+            * _SUCCESS_ The requested process is completed (e.g. the purchase of a package, responding with HTTP code 202)<br>
+                The links object must contain a link to retrieve the processed object (e.g. GET /collections/packages/items/34243)
+            * _FAILURE_ The requested process ended in a failure (e.g. payment processing incomplete)
+          enum:
+            [
+              USER_ACTION,
+              USER_NO_SHOW,
+              ETA,
+              USER_OUT_OF_LIMITS,
+              OTHER,
 
-                  LOCKED,
-                  UNLOCKED,
+              LOCKED,
+              UNLOCKED,
 
-                  PROGRESS,
-                                    
-                  PREPARING,
-                  PREPARED,
-                  STARTED,
-                  PAUSED,
-                  RESUMED,
-                  ENDED, 
+              PROGRESS,
+                                
+              PREPARING,
+              PREPARED,
+              STARTED,
+              PAUSED,
+              RESUMED,
+              ENDED, 
 
-                  SUCCESS,
-                  FAILURE
-                ]
-            location:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
-            # asset: in links
-            # product: in links
-            assetState:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetState"
-            distance:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/float"
-              description: the travelled distance, in km. Only if applicable.
-            distanceUnits:
-              type: string
-              enum: [KM, MILE]
-            duration:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/longInt"
-              description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
+              SUCCESS,
+              FAILURE
+            ]
+        location:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
+        # asset: in links
+        # product: in links
+        assetState:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetState"
+        distance:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/float"
+          description: the travelled distance, in km. Only if applicable.
+        distanceUnits:
+          type: string
+          enum: [KM, MILE]
+        duration:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/longInt"
+          description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.

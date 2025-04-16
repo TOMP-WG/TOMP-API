@@ -1,0 +1,70 @@
+{
+  "type": "OfferCollection",
+  "offers": [
+    {
+      "id": "723456e0-c97c-4efe-bc6c-27baa9c38309",
+      "properties": {
+        "type": "offer",
+        "price": {
+          "amount": 13.10,
+          "currencyCode": "EUR"
+        },
+        "legs": [
+          {
+            "from": "NL:CHB:StopPlace:34243",
+            "to": "NL:CHB:StopPlace:34223",
+            "startTime": "2025-04-16T09:10:08.327Z",
+            "endTime": "2025-04-16T09:10:08.327Z",
+            "type": "leg",
+            "mode": "TRAIN"
+          }
+        ],
+        "travellers": [
+          {
+            "requirements": {
+              "class": "FIRST_CLASS"
+            },
+            "type": "traveller",
+            "ageGroup": "ADULT"
+          }
+        ],
+        "products": [
+          {
+            "type": "product",
+            "id": "NL:NS:RETURN_TICKET",
+            "productName": "Return ticket"
+          }
+        ]
+      },
+      "links": [
+        {
+          "rel": "purchase-offer",
+          "href": "https://example.api.com/processes/purchase-offers/execute",
+          "type": "application/json",
+          "method": "POST",
+          "body": {
+            "inputs": {
+              "offers": [
+                "723456e0-c97c-4efe-bc6c-27baa9c38309"
+              ]
+            }
+          },
+          "hash": "473287F8298DBA7163A897908958F7C0EAE733E25D2E027992EA2EDC9BED2FA8",
+          "expires": "2025-04-16T09:10:08.327Z"
+        },
+        {
+          "rel": "details",
+          "href": "https://example.api.com/collections/offers/items?offerId=723456e0-c97c-4efe-bc6c-27baa9c38309",
+          "type": "application/json",
+          "method": "GET"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "type": "offers"
+  },
+  "numberMatched": 0,
+  "numberReturned": 0,
+  "links": []
+}

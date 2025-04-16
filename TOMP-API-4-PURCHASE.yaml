@@ -12,31 +12,24 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
+  x-modules:
+    - purchase
+    
 tags:
   - name: purchase
-    description: This part of the API facilitates to make a booking (aka purchase an offer).
+    description: This part of the API facilitates purchasing offer(s), a package, a product or start the usage of an asset.
 
 paths:
-  /processes/{purchaseOperation}-offer/execute/:
+  /processes/purchase-offers/execute/:
     post:
-      operationId: purchaseRequest
-      summary: "Perform an purchase of a package"
-      description: -|
-        ALL required details MUST be added to the offer (using the pre-sales module) before purchasing the offer.<br>
-
-        _PURCHASE_ - purchase an offered package<br>
-        _2_PHASE_PURCHASE_ - transactional purchase, requires COMMIT to confirm the purchase.<br>
-        _COMMIT_ - confirm the transactional (2-phase) purchase<br>
-        _RELEASE_ - release the offer, remove claims on resources<br>
-
-        The request COULD return a 202, making this an a-synchronous process.
+      operationId: purchaseOffersRequest
+      summary: "Perform an purchase of offer(s)"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "#/components/parameters/purchaseOperation"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/digest"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/publicKey"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -44,16 +37,10 @@ paths:
       tags:
         - purchase
       requestBody:
-        description: -|
-          <h2>Operations - inputs</h2>
-          - _PURCHASE_ - requires a defaultInput<br>
-          - _2_PHASE_PURCHASE_ - requires a defaultInput<br>
-          - _COMMIT_ - requires a defaultInput<br>
-          - _RELEASE_ - requires a defaultInput<br>
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/purchaseOfferRequest"
       responses:
         "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+          $ref: "#/components/responses/purchaseResponse"
         "202":
           description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
             the completion of the purchase.
@@ -63,6 +50,9 @@ paths:
         jobCompleted:
           '{$request.body#/subscriber/successUri}':
             post:
+              parameters:
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
               requestBody:
                 content:
                   application/json:
@@ -75,12 +65,13 @@ paths:
   /processes/purchase-package/execute/:
     post:
       operationId: purchasePackageRequest
-      summary: "Perform an purchase of a package, based on external data"
-      description: "Perform an purchase of a package, based on external data"
+      summary: "Perform an purchase of a package"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "#/components/parameters/purchaseOperation"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -88,13 +79,10 @@ paths:
       tags:
         - purchase
       requestBody:
-        description:
-          <h2>Operations - inputs</h2>
-          - _PURCHASE_PACKAGE_ - requires a purchasePackageInput<br>
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
         "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+          $ref: "#/components/responses/purchaseResponse"
         "202":
           description: whenever this is returned, notification URL will be used
         default:
@@ -103,6 +91,9 @@ paths:
         jobCompleted:
           '{$request.body#/subscriber/successUri}':
             post:
+              parameters:
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
               requestBody:
                 content:
                   application/json:
@@ -110,14 +101,12 @@ paths:
                       $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
               responses:
                 "200":
-                  description: Results received successfully
+                  description: Results received successfully  
 
-  /processes/extend-expiry-time/execute/:
+  /processes/purchase-product/execute/:
     post:
-      operationId: extendExpiryTimeRequest
-      summary: "Request additional time to complete the purchase"
-      description: 
-        _EXTEND_EXPIRY_TIME_ - request to extend the expiry time of a 2-phase purchase<br>
+      operationId: purchaseProductRequest
+      summary: "Perform an purchase of a product"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -128,19 +117,283 @@ paths:
       tags:
         - purchase
       requestBody:
-        description: 
-          <h2>Action - inputs</2>
-          - requires a extendExpiryTimeInput as `inputs`
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/purchaseProductRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/purchaseResponse"
+        "202":
+          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
+            the completion of the purchase.
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+      callbacks:
+        jobCompleted:
+          '{$request.body#/subscriber/successUri}':
+            post:
+              parameters:
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
+              responses:
+                "200":
+                  description: Results received successfully    
+
+  /processes/use-asset/execute/:
+    post:
+      operationId: useAsse6tRequest
+      summary: "Request to use an asset"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - purchase
+      requestBody:
+        $ref: "#/components/requestBodies/useAssetRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/purchaseResponse"
+        "202":
+          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
+            the completion of the purchase.
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+      callbacks:
+        jobCompleted:
+          '{$request.body#/subscriber/successUri}':
+            post:
+              parameters:
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
+              responses:
+                "200":
+                  description: Results received successfully        
+
+  /processes/rollback-purchase/execute/:
+    post:
+      operationId: rollbackPurchaseRequest
+      summary: "Rollback a purchase, before the rollbackExpiryTime has ended"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - purchase
+      requestBody:
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: whenever this is returned, notification URL will be used
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
+
+  /processes/confirm-purchase/execute/:
+    post:
+      operationId: confirmPurchaseRequest
+      summary: "Confirm the purchase, before the rollbackExpiryTime has ended"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - purchase
+      requestBody:
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
+
+  /processes/extend-expiry-time/execute/:
+    post:
+      operationId: extendExpiryTimeRequest
+      summary: "Request additional time to complete the purchase"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - purchase
+      requestBody:
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/travel-documents/items:
+    get:
+      operationId: getTravelDocuments
+      summary: "Retrieve travel documents"
+      description: Returns travel documents for a package or leg
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalLegId"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - after sales
+      responses:
+        "200":
+          $ref: "#/components/responses/travelDocumentsResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
 components:
+  requestBodies:
+    purchaseOfferRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  offers:
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+
+    purchaseProductRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+
+    useAssetRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+
+    extendExpiryTimeRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  reason:
+                    type: string
+                    description:
+                      in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
+                      _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
+                      _PAYMENT_PENDING_ - The customer is in the payment process<br>
+                      _OTHER_ - unspecified
+                    enum: ["PURCHASE_PENDING", "PAYMENT_PENDING", "OTHER"]
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+
   responses:
     purchaseResponse:
       description: A package was succesfully purchased (PURCHASED), or pending (PENDING, to be confirmed using the package operation CONFIRM).
@@ -148,66 +401,130 @@ components:
         application/json:
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody"
+        application/geo+json:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
         Content-Language:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-        Expires:
+        Rollback-Expires:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/expires"
+  
+    travelDocumentsResponse:
+      description: a response to obtain travel document (references)
+      headers:
+        Version:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/version'
+        Content-Language:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/contentLanguage'
+      content:
+        application/json:
+          schema:
+            $ref: "TOMP-API-4-PURCHASE.yaml#/components/schemas/travelDocuments"
 
   schemas:
-    purchasePackageInput:
-      allOf:
-        - $ref: "TOMP-API-2-OFFERS.yaml#/components/schemas/searchOfferInput"
-        - type: object
-          required:
-          - type
-          properties:
-            type:
-              type: string
-              enum: [ purchase_package ]
-
-    extendExpiryTimeInput:
-      allOf: 
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageInput"
-      - type: object
-        required:
+    travelDocuments:
+      type: object
+      required:
         - type
-        properties:
-          type:
-            type: string
-            pattern: "^(extend_expiry_time)"
-            enum: [extend_expiry_time]
-          extensionReason:
-            type: string
-            description:
-              in case operation is EXTEND_EXPIRY_TIME, the reason for extension must be supplied here.<br>
-              _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
-              _PAYMENT_PENDING_ - The customer is in the payment process<br>
-              _OTHER_ - unspecified
-            enum: ["PURCHASE_PENDING", "PAYMENT_PENDING", "OTHER"]
+      properties:
+        type:
+          type: string
+          enum: ["TravelDocumentCollection"]
+        travelDocuments:
+          type: array
+          items:
+            allOf: 
+            - $ref: "#/components/schemas/travelDocument"
 
-    # operations
-    purchaseOperation:
-      type: string
-      description:
-        _PURCHASE_ - purchase an offered package<br>
-        _2_PHASE_PURCHASE_ - transactional purchase, COMMIT to confirm the purchase<br>
-        _CONFIRM_ - commit the 2 phase purchase<br>
-        _RELEASE_ - rollback the 2 phase purchase<br>
-      enum:
-        [ 
-          purchase,
-          2-phase-purchase,
-          confirm,
-          release,
-        ]
+    binaryTicket:
+      x-tm: lacking
+      description: Binary information, like a image or certificate
+      type: object
+      required:
+        - contentType
+        - base64
+      properties:
+        contentType:
+          description: the media type (IANA)
+          type: string
+        base64:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
+          description: base 64 binary data
 
-  parameters:
-    purchaseOperation:
-      in: path
-      name: Accept-Language
-      required: true
-      schema:
-        $ref: "#/components/schemas/purchaseOperation"
+    externalDigitalTicket:
+      x-tm: TRAVEL DOCUMENT
+      description: External ticket, can be accessed using the links collection, with rel=ticket
+        the mediatype tells what it refers to.
+      type: object
+
+    eKey:
+      x-tm: TRAVEL DOCUMENT
+      description: Axa EKey information
+      type: object
+      required:
+        - ekey
+        - lock
+      properties:
+        ekey:
+          type: object
+          additionalProperties: false
+          properties:
+            key:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
+              description: certificate
+            passkey:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
+              description: one time pass key
+        lock:
+          type: object
+          additionalProperties: false
+          properties:
+            bdAddress:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
+              description: physical address
+            deviceName:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
+              description: how it advertises itself
+
+    otherAccessInfo:
+      x-tm: 
+      - concept: lacking
+      description: Generic travelDocument, non-standardized (yet)
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
+
+    travelDocument:
+      x-tm: TRAVEL DOCUMENT
+      type: object
+      required:
+        - validity
+        - travelDocumentType
+      properties:
+        validity:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTimeRange"
+        travelDocumentType:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/typeOfTravelDocument"
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link" 
+      oneOf:
+      - $ref: "#/components/schemas/externalDigitalTicket"
+      - $ref: "#/components/schemas/binaryTicket"
+      - $ref: "#/components/schemas/eKey"
+      - $ref: "#/components/schemas/otherAccessInfo"
+      discriminator:
+        propertyName: travelDocumentType
+        mapping:
+          LINK: "#/components/schemas/externalDigitalTicket"
+          BARCODE: "#/components/schemas/binaryTicket"
+          QRCODE: "#/components/schemas/binaryTicket"
+          AZTECCODE: "#/components/schemas/binaryTicket"
+          EKEY: "#/components/schemas/eKey"
+          OTHER: "#/components/schemas/otherAccessInfo"

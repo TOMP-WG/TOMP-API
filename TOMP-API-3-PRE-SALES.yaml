@@ -11,6 +11,8 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-modules:
+    - pre-sales
 
 tags:
   - name: pre sales
@@ -20,61 +22,27 @@ tags:
       The result of each of these endpoints (except for the release) must contain an expiry date in the header.
 
 paths:
-  /collections/products/items:
-    get:
-      operationId: requestProducts
-      summary: "Request the product catalogue, filter on a single parameter or package"
+  /processes/select-offers/execute/:
+    post:
+      operationId: selectOffersRequest
+      summary: "Select offer(s) into a package"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       security:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-        - OpenData: []
-      parameters:
-        - name: parameter
-          in: query
-          description: a single parameter
-          schema: 
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/parameter"
-          style: form
-          explode: true
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalPackageId"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"                   
       tags:
         - pre sales
+      requestBody:
+        $ref: "#/components/requestBodies/selectOffersRequest"
       responses:
         "200":
-          $ref: "#/components/responses/productsResponse"
-        default:
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-
-  /collections/fares/items:
-    get:
-      operationId: requestFares
-      summary: "Request the fare for a specific product, times, OD, a traveller 
-        and/or parameters"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
-        - OpenData: []
-      parameters:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/productId"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/traveller"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/parameter"
-      tags:
-        - pre sales
-      responses:
-        "200":
-          $ref: "#/components/responses/fareResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
+            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -90,12 +58,10 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalProductId"
       security:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-        - OpenData: []
       tags:
         - pre sales
       responses:
@@ -116,27 +82,24 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalProductId"
       security:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-        - OpenData: []
       tags:
         - pre sales
       responses:
         "200":
-          $ref: "#/components/responses/assetsResponse"
+          $ref: "#/components/responses/ancillariesResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/{travellerOperation}-traveller/execute/:
+  /processes/update-traveller/execute/:
     post:
-      operationId: travellerOperationRequest
+      operationId: travellerUpdateRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "#/components/parameters/travellerOperation"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -144,22 +107,19 @@ paths:
       tags:
         - pre sales
       requestBody:
-        description: -|
-          The `input` of the process request body must be of type '#/components/schemas/travellerInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/updateTravellerRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/change-times-{target}/execute/:
+  /processes/update-travel-specification/execute/:
     post:
-      operationId: changeTimesRequest
+      operationId: updateTravelSpecificationRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "#/components/parameters/target"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -167,32 +127,7 @@ paths:
       tags:
         - pre sales
       requestBody:
-        description: -|
-          The `input` of the process request body must be of type '#/components/schemas/changeTimesInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
-      responses:
-        "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        default:
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-
-  /processes/{productOperation}-product/execute/:
-    post:
-      operationId: productOperationRequest
-      parameters:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "#/components/parameters/productOperation"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
-      tags:
-        - pre sales
-      requestBody:
-        description: -|
-          The `input` of the process request body must be of type '#/components/schemas/productInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/updateTravelSpecificationRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
@@ -212,9 +147,7 @@ paths:
       tags:
         - pre sales
       requestBody:
-        description: -|
-          The `input` of the process request body must be of type '#/components/schemas/assignAssetInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/assignAssetRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
@@ -234,52 +167,188 @@ paths:
       tags:
         - pre sales
       requestBody:
-        description: -|
-          The `input` of the process request body must be of type '#/components/schemas/ancillaryInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/assignAncillaryRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"          
 
-  # /processes/update-customer/execute/ => customer registration module
-  # /processes/release-offer/execute/ => purchase module
+  /processes/release-package/execute/:
+    post:
+      operationId: releasePackageRequest
+      summary: "Release the complete package"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - pre sales
+      requestBody:
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
+            the completion of the purchase.
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/remove-offer/execute/:
+    post:
+      operationId: removeOfferRequest
+      summary: "Remove an offer from the package"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - pre sales
+      requestBody:
+        $ref: "#/components/requestBodies/removeOfferRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        "202":
+          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
+            the completion of the purchase.
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  # remove traveller: start again with search-offers
 
 components:
+  requestBodies:
+    selectOffersRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  offers:
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+
+    updateTravellerRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  traveller:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
+                  age:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
+                    description: Age of the traveler, may be approximate
+                  fullName:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
+                    description: the name of the traveller, can be used to validate against ID cards
+                  entitlements:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerSpecification"
+                    description: the COMPLETE set of entitlements, replaces the previous set of
+                      entitlements of this traveller
+
+    updateTravelSpecificationRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  startTime:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                    description: The intended departure time.
+                      If left out and no endTime is set, the current time should be assumed.
+                      If only the arrival time is specified, this is an implicit request for a guaranteed arrival at that time.
+                  endTime:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                    description: The intended arrival time, at the `to place`. When the **startTime** is not set, and **endTime** is set, it is an implicit request for an arrival time guarantee.
+
+    assignAssetRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  asset:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  replacesAsset:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  
+    assignAncillaryRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  ancillary:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
+                  replacesAncillary:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
+
+    removeOfferRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  offer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+
   responses:
-    productsResponse:
-      description: a list of products
-      headers:
-        Version:
-          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
-        Content-Language:
-          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-        Expires:
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
-          required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/productsResponseBody"
-
-    fareResponse:
-      description: a list of fares for a specific product and usage
-      headers:
-        Version:
-          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
-        Content-Language:
-          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-        Expires:
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
-          required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/fareResponseBody"
-
     assetsResponse:
       description: a list of assets
       headers:
@@ -294,9 +363,12 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/assetsResponseBody"
+            $ref: "#/components/schemas/assets"
+        application/geo+json:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
 
-    ancillaryResponse:
+    ancillariesResponse:
       description: a list of ancillaries
       headers:
         Version:
@@ -310,60 +382,69 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ancillaryResponseBody"
+            $ref: "#/components/schemas/ancillaries"
 
   schemas:
-    productsResponseBody:
-      description: a list of products. The main 'properties' field must be of type 'products'
-        each feature-properties field must be of type 'product'. The geometry must represent the
-        geographical validity parameter (=area where it can be used)
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+    assets:
+      description: a list of available assets.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [AssetCollection]
+        assets:
+          type: array
+          items:
+            allOf:
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/asset"
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [assets]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
 
-    fareResponseBody:
-      description: a list of products. The main 'properties' field must be of type 'fares'
-        each feature-properties field must be of type 'product'. The 'fare' field within the product is mandatory.
-        The geometry must represent the geographical validity parameter (=area where it can be used).
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
-
-    assetsResponseBody:
-      description: a list of assets. The main 'properties' field must be of type 'offers' (#/components/schemas/offerProperties),
-        each feature-properties field must be of type 'asset'.
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
-
-    ancillaryResponseBody:
-      description: a list of assets. The main 'properties' field must be of type 'offers' (#/components/schemas/offerProperties),
-        each feature-properties field must be of type 'ancillary'. 
-        The geometry-field within the features can be ignored (OGC API Records)
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
-
-  parameters:
-    travellerOperation:
-      name: operation
-      in: path
-      description: OPERATION to execute
-      required: true
-      schema:
-        type: string
-        enum: [add, remove, update]
-
-    target:
-      name: target
-      in: path
-      description: target of the operation 
-      required: true
-      schema:
-        type: string
-        enum: [package, leg]
-
-    productOperation:
-      name: operation
-      in: path
-      description: OPERATION to execute
-      required: true
-      schema:
-        type: string
-        enum: [add, remove]
+    ancillaries:
+      description: a list of available ancillaries.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [AncillaryCollection]
+        ancillaries:
+          type: array
+          items:
+            allOf:
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillary"
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [ancillaries]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"   

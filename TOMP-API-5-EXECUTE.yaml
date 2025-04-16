@@ -11,7 +11,9 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-
+  x-modules:
+    - execute
+    
 tags:
   - name: execute
     description: This part of the API facilitates changing operational parts of the trip, like starting, 
@@ -29,11 +31,17 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - name: legOperation
-          in: query
+          in: path
           description: OPERATION on a specified leg
-          required: false
+          required: true
           schema:
-            $ref: "#/components/schemas/legOperation"
+            type: string
+            description: the possible operations on a leg.
+            enum:
+            - start
+            - pause
+            - resume
+            - end
       security:
         - BearerAuth: []
         - OAuth: []
@@ -47,7 +55,39 @@ paths:
          - PAUSE - the `inputs` MUST be a legInput
          - RESUME - the `inputs` MUST be a legInput
          - END - the `inputs` MUST be a legInput
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/legRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/{assetOperation}-asset/execute:
+    post:
+      operationId: assetOperation
+      summary: "Perform an operation on a asset"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - name: assetOperation
+          in: path
+          description: OPERATION on a specified asset
+          required: true
+          schema:
+            type: string
+            description: Operations on an asset, the enlisted operations are default, you can extend (outside the TOMP-API).
+            # enum:
+            # - lock
+            # - unlock
+            # - open-trunk
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - execute
+      requestBody:
+        $ref: "#/components/requestBodies/assetRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
@@ -59,22 +99,23 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/{productExecutionOperation}-product/execute:
+  /processes/{productOperation}-product/execute:
     post:
-      operationId: productExecutionOperation
+      operationId: productOperation
       summary: "Perform an operation on a product"
-      description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
-        - name: productExecutionOperation
-          in: query
+        - name: productOperation
+          in: path
           description: OPERATION on a specified product
-          required: false
+          required: true
           schema:
-            $ref: "#/components/schemas/productExecutionOperation"
+            type: string
+            description: possible operations on a product
+            enum:
+              - activate
+              - initiate
       security:
         - BearerAuth: []
         - OAuth: []
@@ -82,56 +123,104 @@ paths:
       tags:
         - execute
       requestBody:
-        description: -|
-         <h2>Product operations</h2>
-         - ACTIVATE - defaultInput required
-         - INITIATE - defaultInput required, new leg is added to the package
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
-      responses:
-        "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        default:
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-
-  /processes/{assetOperation}-asset/execute/:
-    post:
-      operationId: assetExecutionRequest
-      parameters:
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-        - name: assetOperation
-          in: query
-          description: OPERATION on a specified asset
-          required: false
-          schema:
-            $ref: "#/components/schemas/assetOperation"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
-      tags:
-        - execute
-      requestBody:
-        description: -|
-          The `input` of the process request body must be of type 'assetInput'
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/processRequestBody"
+        $ref: "#/components/requestBodies/productRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  # Use Pre-sales module for:
-  #  /processes/{travellerOperation}-traveller/execute/
-  #  /processes/change-times-package/execute/
-  #  /processes/change-times-leg/execute/
-  #  /processes/{productOperation}-product/execute/
-  #  /processes/assign-asset/execute/
-  #  /processes/assign-ancillary/execute/
+  # in PRE-SALES:
+    # /collections/assets/items
+    # /processes/assign-asset/execute
+    # /collections/ancillaries/items
+    # /processes/assign-ancillary/execute
+    # /processes/update-traveller/execute
+    # /processes/update-travel-specification/execute to update start or end time of a leg
+
+  # IN PURCHASE:
+    # /collections/travel-documents/items
+
+  # IN AFTER-SALES:
+    # /collections/refund-options/items for a specific traveller
+    # /processes/claim-refund-option/execute
+    # /processes/confirm-refund-option/execute
 
 components:
+  requestBodies:
+    legRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - leg
+                properties:
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  location: 
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  evidence:
+                    type: array
+                    minItems: 1
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"                     
+
+    assetRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - asset
+                properties:
+                  asset:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  location: 
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+
+    productRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - asset
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  product:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+
   responses:
     retryErrorResponse:
       description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
@@ -155,28 +244,3 @@ components:
                 maxItems: 10
                 items:
                   $ref: "TOMP-API-1-CORE.yaml#/components/schemas/error"
-
-  schemas:
-    legOperation:
-      type: string
-      description: the possible operations on a leg.
-      enum:
-       - start
-       - pause
-       - resume
-       - end
-
-    productExecutionOperation:
-      type: string
-      description: possible operations on a product
-      enum:
-         - activate
-         - initiate
-
-    assetOperation:
-      type: string
-      description: Operations on an asset, the enlisted operations are default, you can extend (outside the TOMP-API).
-      # enum:
-      #   - lock
-      #   - unlock
-      #   - open-trunk
