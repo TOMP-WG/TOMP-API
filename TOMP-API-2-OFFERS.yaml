@@ -127,8 +127,8 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(search_offer)"
           enum: [search_offer]
+          pattern: "^(search_offer)"
         specification:
           oneOf:
           - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"

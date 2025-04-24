@@ -1,0 +1,42 @@
+{
+    "from": {}
+    ~> function() 
+    { $merge( 
+        [
+        $substring(inputs.specification.from,0,3) = 'GPS' ?  { "coordinates": { 
+        "lng": $number($split($substring(inputs.specification.from,4), ',')[0]),
+        "lat": $number($split($substring(inputs.specification.from,3), ',')[1]) } } 
+      : {},
+        $substring(inputs.specification.from,0,5) = 'local' ?  { "physicalAddress": inputs.places[placeId=inputs.specification.from] }
+      : {}
+        ])
+    },
+    "to": {}
+    ~> function() 
+    { $merge( 
+        [
+        $substring(inputs.specification.to,0,3) = 'GPS' ?  { "coordinates": { 
+        "lng": $number($split($substring(inputs.specification.to,4), ',')[0]),
+        "lat": $number($split($substring(inputs.specification.to,3), ',')[1]) } } 
+      : {},
+        $substring(inputs.specification.to,0,5) = 'local' 
+        ? { 
+            "physicalAddress": inputs.places[placeId='local:p2'] }          
+        : {} 
+        ])
+    },
+    "departureTime": inputs.specification.startTime,
+    "arrivalTime": inputs.specification.endTime,
+    "previousLegInfo": inputs.places.previousLegInfo,
+    "travelers": [
+        { "referenceNumber": inputs.travellers.id
+        , "cardTypes": $map(inputs.travellers.entitlements[type='card_type']
+            , function($c) {  { "type": $c.cardType, "subType": $c.subType, "acceptors": $c.transportOrganisations }  } ) 
+        , "licenseTypes": $map(inputs.travellers.entitlements[type='license_type']
+            , function($c) {  { "assetClass": $c.modes[0], "issuingCountry": $c.issuingCountry }  } )
+        , "requirements": []
+        }
+    ], 
+    "useAssets": [ inputs.travellers.requirements.asset ],
+    "useAssetTypes": [ inputs.travellers.requirements.product ]
+}

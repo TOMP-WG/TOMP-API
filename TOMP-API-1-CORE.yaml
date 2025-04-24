@@ -562,6 +562,9 @@ components:
       x-tm: TRAVEL SPECIFICATION
       type: object
       properties:
+        type:
+          type: string
+          enum: [ travel_specification ]
         from:
           $ref: "#/components/schemas/placeReference"
           description: use an ID contained in the **places** field, or from an external source, when using coordinates, please use the prefix 'gps:'
@@ -1067,8 +1070,10 @@ components:
 
         # x-tm: SEATING VALIDITY PARAMETERS
         # spot = asset
-        asset:
-          $ref: "#/components/schemas/assetReference"
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/assetReference"
 
         # x-tm: NETWORK VALIDITY PARAMETERS
         zones:
@@ -1118,9 +1123,10 @@ components:
           properties:
             encumbranceNeed:
               type: string
-              enum: [pushchair
+              enum: [ pushchair
                     , baggage_trolley, oversized_baggage, luggage_encumbrance
-                    , guide_dog, other_animal]
+                    , guide_dog, other_animal
+                    , bike ]
             medicalNeed:
               type: string
               enum: [heart_condition, other]
@@ -1505,6 +1511,15 @@ components:
         additionalInfo:
           $ref: "#/components/schemas/longString"
           description: additional information to find the address (f.x. just around the corner)
+        previousLegInfo:
+          type: object
+          properties:
+            operator:
+              $ref: "#/components/schemas/operatorReference"
+            product:
+              $ref: "#/components/schemas/productReference"
+            asset:
+              $ref: "#/components/schemas/assetReference"
 
     # app concepts
     appSupport:
