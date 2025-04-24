@@ -352,10 +352,14 @@ components:
               inputs:
                 type: object
                 properties:
+                  customer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
                   products:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+                  travellers:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"
               subscriber:
                 type: object
                 required:
@@ -382,10 +386,14 @@ components:
               inputs:
                 type: object
                 properties:
-                  products:
+                  customer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+                  assets:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  travellers:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"                      
               subscriber:
                 type: object
                 required:

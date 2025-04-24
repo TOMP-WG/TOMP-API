@@ -400,6 +400,10 @@ components:
               description: the final price of the leg
             mode:
               $ref: "#/components/schemas/mode"
+            travellers:
+              type: array
+              items:
+                $ref: "#/components/schemas/travellerReference"
             product:
               $ref: "#/components/schemas/productReference"
               description: The main product (v1.x 'asset type') used to execute this leg
@@ -594,37 +598,36 @@ components:
         $ref: "#/components/schemas/traveller"
 
     traveller:
-      allOf:
-      - type: object
-        required:
-        - type
-        - id
-        properties:
-          type:
-            type: string
-            enum: [traveller]
-            pattern: "^(traveller)"
-          id:
-            $ref: "#/components/schemas/travellerReference"
-          name:
-            $ref: "#/components/schemas/normalString"
-          entitlements:
-            $ref: "#/components/schemas/travellerSpecification"
-          requirements:
-            $ref: "#/components/schemas/travellerRequirements"
-          isValidated:
-            type: boolean
-            description: Whether this traveler's identity and properties have been verified by the MaaS provider
-          age:
-            $ref: "#/components/schemas/shortInt"
-            description: Age of the traveler, may be approximate
-          fullName:
-            $ref: "#/components/schemas/normalString"
-            description: the name of the traveller, can be used to validate against ID cards
-          customerReference:
-            $ref: "#/components/schemas/customerReference"
-          userProfile:
-            $ref: "#/components/schemas/userProfileReference"
+      type: object
+      required:
+      - type
+      - id
+      properties:
+        type:
+          type: string
+          enum: [traveller]
+          pattern: "^(traveller)"
+        id:
+          $ref: "#/components/schemas/travellerReference"
+        name:
+          $ref: "#/components/schemas/normalString"
+        entitlements:
+          $ref: "#/components/schemas/travellerSpecification"
+        requirements:
+          $ref: "#/components/schemas/travellerRequirements"
+        isValidated:
+          type: boolean
+          description: Whether this traveler's identity and properties have been verified by the MaaS provider
+        age:
+          $ref: "#/components/schemas/shortInt"
+          description: Age of the traveler, may be approximate
+        fullName:
+          $ref: "#/components/schemas/normalString"
+          description: the name of the traveller, can be used to validate against ID cards
+        customerReference:
+          $ref: "#/components/schemas/customerReference"
+        userProfile:
+          $ref: "#/components/schemas/userProfileReference"
 
     classOfUse:
       x-tm: CLASS OF USE
