@@ -266,6 +266,47 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
+  /collections/fares/items:
+    get:
+      operationId: getFare
+      summary: "Retrieve fare structure for a product (and traveller)"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/productId"
+        - in: query
+          name: user-profile
+          description: user profile name, as specified in the user profiles
+          required: false
+          explode: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+        - in: query
+          name: entitlement
+          description: entitlement id
+          required: false
+          explode: true
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/entitlementReference"
+        - in: query
+          name: card-type
+          description: card type
+          required: false
+          explode: true
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/cardTypeReference"
+      security:
+        - BearerAuth: []
+        - OAuth: []
+        - OAuthPKI: []
+      tags:
+        - purchase
+      responses:
+        "200":
+          $ref: "#/components/responses/fareCollectionResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
 components:
   requestBodies:
     purchaseOfferRequest:
@@ -283,6 +324,8 @@ components:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+                  travellers:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"
               subscriber:
                 type: object
                 required:
@@ -423,6 +466,27 @@ components:
         application/json:
           schema:
             $ref: "TOMP-API-4-PURCHASE.yaml#/components/schemas/travelDocuments"
+
+    fareCollectionResponse:
+      description: fares per user profile / entitlement
+      headers:
+        Version:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/version'
+        Content-Language:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/contentLanguage'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userProfile:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+              cardType:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/cardTypeReference"
+              entitlement:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/entitlementReference"
+              fare:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/fareStructure"
 
   schemas:
     travelDocuments:

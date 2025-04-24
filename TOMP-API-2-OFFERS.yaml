@@ -64,6 +64,7 @@ paths:
           $ref: "#/components/responses/offerResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+          
 components:
   requestBodies:
     searchOfferRequest:
@@ -92,7 +93,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/offers"
+            $ref: "#/components/schemas/offerCollection"
         application/geo+json:
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
@@ -167,7 +168,7 @@ components:
           travelDate:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/date"
 
-    offers:
+    offerCollection:
       description: a list of offers.
       type: object
       properties:
@@ -179,7 +180,7 @@ components:
           items:
             $ref: "#/components/schemas/offer"
         properties:
-          $ref: "#/components/schemas/offersProperties"
+          $ref: "#/components/schemas/offerCollectionProperties"
         numberMatched:
           type: number
         numberReturned:
@@ -203,9 +204,9 @@ components:
           properties:
             $ref: "#/components/schemas/offerProperties"          
 
-    offersProperties:
+    offerCollectionProperties:
       allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/collectionContainer"
       - type: object
         required:
         - type
@@ -224,26 +225,19 @@ components:
         type:
           type: string
           enum: [offer]
+        id:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
         price:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/amountOfMoney"
         legs:
           type: array
           items:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/leg"
-        travellers:
-          type: array
-          items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
         products:
           type: array
-          description: must be replaced by product descriptions
           items:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
-        assets:
+        guarantees:
           type: array
           items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
-        ancillaries:
-          type: array
-          items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/guarantee"

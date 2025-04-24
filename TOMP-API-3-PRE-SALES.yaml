@@ -363,7 +363,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/assets"
+            $ref: "#/components/schemas/assetCollection"
         application/geo+json:
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
@@ -382,10 +382,10 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ancillaries"
+            $ref: "#/components/schemas/ancillaryCollection"
 
   schemas:
-    assets:
+    assetCollection:
       description: a list of available assets.
       type: object
       properties:
@@ -417,7 +417,7 @@ components:
           items:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
 
-    ancillaries:
+    ancillaryCollection:
       description: a list of available ancillaries.
       type: object
       properties:

@@ -64,6 +64,57 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
+  /collections/entitlements/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getEntitlements
+      summary: "Retrieves all accepted entitlements"
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+      tags:
+        - generic
+      responses:
+        "200":
+          $ref: "#/components/responses/entitlementsResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /collections/card-types/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getCardTypes
+      summary: "Retrieves all accepted card types"
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+      tags:
+        - generic
+      responses:
+        "200":
+          $ref: "#/components/responses/cardTypesResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
+  /collections/user-profiles/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getUserProfiles
+      summary: "Retrieves all user profile definitions"
+      parameters:
+        - $ref: "#/components/parameters/acceptLanguage"
+        - $ref: "#/components/parameters/authorization"
+      tags:
+        - generic
+      responses:
+        "200":
+          $ref: "#/components/responses/userProfilesResponse"
+        default:
+          $ref: "#/components/responses/errorResponse"
+
 components:
   requestBodies:
     packageRequest:
@@ -153,6 +204,42 @@ components:
             items:
               $ref: "#/components/schemas/link"
 
+    userProfilesResponse:
+      description: a list of user profiles
+      headers:
+        Version:
+          $ref: "#/components/headers/version"
+        Content-Language:
+          $ref: "#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/userProfileCollection"
+
+    cardTypesResponse:
+      description: a list of accepted card types
+      headers:
+        Version:
+          $ref: "#/components/headers/version"
+        Content-Language:
+          $ref: "#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/cardTypeCollection"
+
+    entitlementsResponse:
+      description: a list of accepted entitlements
+      headers:
+        Version:
+          $ref: "#/components/headers/version"
+        Content-Language:
+          $ref: "#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema: 
+            $ref: "#/components/schemas/entitlementCollection"
+
   schemas:
     geojsonResponseBody:
       allOf:
@@ -223,6 +310,33 @@ components:
           type: string
           enum: [ "zone", "return_area", "return_station", "policy_zone", "geofence" ]
 
+    collectionContainer:
+      type: object
+      description: object containing all necessary collections for a package and a offerCollection
+        Both refer to objects in these collections.
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/product"
+        places:
+          description: Places that are not specified in an external data source (like a home address)
+          type: array
+          minItems: 0
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/place"
+        ancillaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ancillary"
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/asset"
+        travellers:
+          $ref: "#/components/schemas/travellers"
+
     package:
       x-tm: TRAVEL OFFER PACKAGE, CUSTOMER PURCHASE PACKAGE
       allOf:
@@ -248,35 +362,15 @@ components:
               $ref: "#/components/schemas/packageLabel"
           price:
             $ref: "#/components/schemas/amountOfMoney"
-          legs:
-            type: array
-            items:
-              $ref: "#/components/schemas/leg"
-          products:
-            type: array
-            items:
-              $ref: "#/components/schemas/product"
-          places:
-            description: Places that are not specified in an external data source (like a home address)
-            type: array
-            minItems: 0
-            maxItems: 5
-            items:
-              $ref: "#/components/schemas/place"
-          ancillaries:
-            type: array
-            items:
-              $ref: "#/components/schemas/ancillary"
-          assets:
-            type: array
-            items:
-              $ref: "#/components/schemas/asset"
-          travellers:
-            $ref: "#/components/schemas/travellers"
           offers:
             type: array
             items:
               $ref: "#/components/schemas/offerReference"
+          legs:
+            type: array
+            items:
+              $ref: "#/components/schemas/leg"
+      - $ref: "#/components/schemas/collectionContainer"
 
     leg:
       x-tm: LEG
@@ -319,8 +413,6 @@ components:
               items:
                 $ref: "#/components/schemas/assetReference"
               description: The physical asset(s) used for the execution of the leg
-            offer:
-              $ref: "#/components/schemas/offerReference"
             operatorId:
               $ref: "#/components/schemas/organisationReference"
             operatorName:
@@ -329,6 +421,8 @@ components:
               $ref: "#/components/schemas/longString"
             extraInfo:
               $ref: "#/components/schemas/customProperties"
+            validities:
+              $ref: "#/components/schemas/validities"
 
     product:
       x-tm: FARE PRODUCT
@@ -341,16 +435,10 @@ components:
           $ref: "#/components/schemas/productReference"
         productName:
           $ref: "#/components/schemas/normalString"
-        fare:
-          $ref: "#/components/schemas/fareStructure"
-          description: The fare (TARIFF) for the requested user/class/entitlements. 
-            The price of a leg can be calculated using all elements.
         guarantees:
           type: array
           items:
             $ref: "#/components/schemas/guarantee"
-        offer:
-          $ref: "#/components/schemas/offerReference"
 
     packageLabel:
       type: string
@@ -425,12 +513,14 @@ components:
       x-tm: USER PROFILE
       type: object
       required:
-      - id
+      - name
       - type
       properties:
         type:
           type: string
           enum: [user_profile]
+        name:
+          $ref: "#/components/schemas/userProfileReference"
         ageGroup:
           type: string
           enum: [anyone, infant, child, youth, adult, senior]
@@ -455,16 +545,17 @@ components:
       x-tm: ENTITLEMENT GIVEN, COMMERCIAL_PROFILE
       type: object
       required:
+        - id
         - type
-        - entitlementType
+        - description
       properties:
         id:
-          $ref: "#/components/schemas/shortString"
+          $ref: "#/components/schemas/entitlementReference"
           description: an ID for this entitlement or commercial profile.
         type:
           type: string
           enum: [entitlement, commercial_profile]
-        entitlementType:
+        description:
           $ref: "#/components/schemas/normalString"
 
     travelSpecification:
@@ -529,7 +620,8 @@ components:
             description: the name of the traveller, can be used to validate against ID cards
           customerReference:
             $ref: "#/components/schemas/customerReference"
-      - $ref: "#/components/schemas/userProfile"
+          userProfile:
+            $ref: "#/components/schemas/userProfileReference"
 
     classOfUse:
       x-tm: CLASS OF USE
@@ -1060,6 +1152,12 @@ components:
               items:
                 $ref: "#/components/schemas/lineReference"
 
+        validities:
+          $ref: "#/components/schemas/validities"
+
+    validities:
+      type: object
+      properties:
         # x-tm: DISTRIBUTION VALIDITY PARAMETERS
         distribution:
           type: object
@@ -1271,6 +1369,96 @@ components:
           description: the units is normally the same as the **interval.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.
           enum: [KM, MILE, HOUR, MINUTE, ZONE]
 
+    userProfileCollection:
+      description: a list of user profiles.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [UserProfileCollection]
+        userProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/userProfile"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [user_profiles]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "#/components/schemas/link"
+
+    cardTypeCollection:
+      description: a list of accepted card types.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [CardTypeCollection]
+        userProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/cardType"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [card_types]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "#/components/schemas/link"
+
+    entitlementCollection:
+      description: a list of accepted entitlements.
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [EntitlementCollection]
+        userProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/entitlementGiven"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [entitlements]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "#/components/schemas/link"
+
     # address concepts
     place:
       x-tm: POSTAL ADDRESS
@@ -1386,6 +1574,18 @@ components:
         - $ref: "#/components/schemas/normalString"
 
     productReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    userProfileReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    cardTypeReference:
+      allOf:
+        - $ref: "#/components/schemas/normalString"
+
+    entitlementReference:
       allOf:
         - $ref: "#/components/schemas/normalString"
 
