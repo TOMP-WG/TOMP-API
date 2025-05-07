@@ -2621,7 +2621,6 @@ components:
               format: date
             placeOfBirth:
               type: string
-              format: date
             countryOfBirth:
               $ref: "#/components/schemas/country"
             address:
