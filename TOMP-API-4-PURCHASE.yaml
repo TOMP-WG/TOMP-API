@@ -20,7 +20,7 @@ tags:
     description: This part of the API facilitates purchasing offer(s), a package, a product or start the usage of an asset.
 
 paths:
-  /processes/purchase-offers/execute/:
+  /processes/purchase-offers/execute:
     post:
       operationId: purchaseOffersRequest
       summary: "Perform an purchase of offer(s)"
@@ -62,7 +62,7 @@ paths:
                 "200":
                   description: Results received successfully          
 
-  /processes/purchase-package/execute/:
+  /processes/purchase-package/execute:
     post:
       operationId: purchasePackageRequest
       summary: "Perform an purchase of a package"
@@ -103,7 +103,7 @@ paths:
                 "200":
                   description: Results received successfully  
 
-  /processes/purchase-product/execute/:
+  /processes/purchase-product/execute:
     post:
       operationId: purchaseProductRequest
       summary: "Perform an purchase of a product"
@@ -142,7 +142,7 @@ paths:
                 "200":
                   description: Results received successfully    
 
-  /processes/use-asset/execute/:
+  /processes/use-asset/execute:
     post:
       operationId: useAsse6tRequest
       summary: "Request to use an asset"
@@ -181,7 +181,7 @@ paths:
                 "200":
                   description: Results received successfully        
 
-  /processes/rollback-purchase/execute/:
+  /processes/rollback-purchase/execute:
     post:
       operationId: rollbackPurchaseRequest
       summary: "Rollback a purchase, before the rollbackExpiryTime has ended"
@@ -202,7 +202,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
 
-  /processes/confirm-purchase/execute/:
+  /processes/confirm-purchase/execute:
     post:
       operationId: confirmPurchaseRequest
       summary: "Confirm the purchase, before the rollbackExpiryTime has ended"
@@ -223,7 +223,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
 
-  /processes/extend-expiry-time/execute/:
+  /processes/extend-expiry-time/execute:
     post:
       operationId: extendExpiryTimeRequest
       summary: "Request additional time to complete the purchase"

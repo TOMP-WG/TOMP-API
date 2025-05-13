@@ -22,7 +22,7 @@ tags:
       The result of each of these endpoints (except for the release) must contain an expiry date in the header.
 
 paths:
-  /processes/select-offers/execute/:
+  /processes/select-offers/execute:
     post:
       operationId: selectOffersRequest
       summary: "Select offer(s) into a package"
@@ -94,7 +94,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/update-traveller/execute/:
+  /processes/update-traveller/execute:
     post:
       operationId: travellerUpdateRequest
       parameters:
@@ -114,7 +114,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/update-travel-specification/execute/:
+  /processes/update-travel-specification/execute:
     post:
       operationId: updateTravelSpecificationRequest
       parameters:
@@ -134,7 +134,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/assign-asset/execute/:
+  /processes/assign-asset/execute:
     post:
       operationId: assignAssetRequest
       parameters:
@@ -154,7 +154,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/assign-ancillary/execute/:
+  /processes/assign-ancillary/execute:
     post:
       operationId: assignAncillaryRequest
       parameters:
@@ -174,7 +174,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"          
 
-  /processes/release-package/execute/:
+  /processes/release-package/execute:
     post:
       operationId: releasePackageRequest
       summary: "Release the complete package"
@@ -198,7 +198,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/remove-offer/execute/:
+  /processes/remove-offer/execute:
     post:
       operationId: removeOfferRequest
       summary: "Remove an offer from the package"
@@ -344,8 +344,10 @@ components:
                 type: object
                 properties:
                   package:
+                    description: reference to the package to remove the offer of
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
                   offer:
+                    description: reference to the offer to remove from the specified package
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
 
   responses:

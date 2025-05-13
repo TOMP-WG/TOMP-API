@@ -41,7 +41,7 @@ paths:
         default:
           $ref: "#/components/responses/errorResponse"
 
-  /collections/packages/items/:
+  /collections/packages/items:
     get:
       operationId: getPackage
       summary: "Get package details"
@@ -425,8 +425,8 @@ components:
               $ref: "#/components/schemas/longString"
             extraInfo:
               $ref: "#/components/schemas/customProperties"
-            validities:
-              $ref: "#/components/schemas/validities"
+            distribution:
+              $ref: "#/components/schemas/distribution"
 
     product:
       x-tm: FARE PRODUCT
@@ -1083,42 +1083,25 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/zoneReference"
-        # scheduledStopPoints: => from, to, via in travel specification
+
+        # x-tm: ROUTING VALIDITY PARAMETERS
         # lines: => in trip pattern
-
-        boarding:
+        # scheduledStopPoints/places: => when requested: in from, to, via in travel specification
+        avoid:
           type: object
           properties:
-            onboardStayDuration:
-              $ref: "#/components/schemas/duration"
-            delayedAlightingAllowed:
-              type: boolean
-            overnightStayAllowed:
-              type: boolean
-            earlyBoardingAllowed:
-              type: boolean
-
-        accomodation:
-          type: object
-          properties:
-            name:
-              $ref: "#/components/schemas/shortString"
-            accomodationClass:
-              $ref: "#/components/schemas/classOfUse"
-            accomodationGender:
-              type: string
-              enum: [M, F, X, U]
-            sleeper:
-              type: boolean
-            nuisances:
+            places:
               type: array
               items:
-                type: string
-                enum: [ no_smoking, smoking
-                      , mobile_phone_use_zone, mobile_phone_free_zone
-                      , family_area, breast_feeding_friendly, child_free_area
-                      , animals_allowed, no_animals
-                      ]
+                $ref: "#/components/schemas/zoneReference"
+            zones:
+              type: array
+              items:
+                $ref: "#/components/schemas/zoneReference"
+            lines:
+              type: array
+              items:
+                $ref: "#/components/schemas/lineReference"
 
         # x-tm: TYPE OF USER NEEDS
         prmNeeds:
@@ -1132,39 +1115,19 @@ components:
                     , bike ]
             medicalNeed:
               type: string
-              enum: [heart_condition, other]
+              enum: [ heart_condition, other ]
             mobilityNeed:
               type: string
-              enum: [wheelchair, assisted_wheelchair, motorized_wheelchair
+              enum: [ wheelchair, assisted_wheelchair, motorized_wheelchair
                     , mobility_scooter, road_mobility_scooter
-                    , walking_frame, restricted_mobility, other]
+                    , walking_frame, restricted_mobility, other ]
             psychoSensoryNeed:
               type: string
-              enum: [visual_impaired, auditory_impaired, cognitive_impaired
+              enum: [ visual_impaired, auditory_impaired, cognitive_impaired
                     , averse_to_lifts, averse_to_escalators, averse_to_confined_spaces, averse_to_crowds
-                    , other]
+                    , other ]
 
-        # x-tm: ROUTING VALIDITY PARAMETERS
-        avoid:
-          type: object
-          properties:
-            zones:
-              type: array
-              items:
-                $ref: "#/components/schemas/zoneReference"
-            places:
-              type: array
-              items:
-                $ref: "#/components/schemas/placeReference"
-            lines:
-              type: array
-              items:
-                $ref: "#/components/schemas/lineReference"
-
-        validities:
-          $ref: "#/components/schemas/validities"
-
-    validities:
+    distribution:
       type: object
       properties:
         # x-tm: DISTRIBUTION VALIDITY PARAMETERS
@@ -1236,6 +1199,40 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/equipmentReference"
+
+        boarding:
+          type: object
+          properties:
+            onboardStayDuration:
+              $ref: "#/components/schemas/duration"
+            delayedAlightingAllowed:
+              type: boolean
+            overnightStayAllowed:
+              type: boolean
+            earlyBoardingAllowed:
+              type: boolean
+
+        accomodation:
+          type: object
+          properties:
+            name:
+              $ref: "#/components/schemas/shortString"
+            accomodationClass:
+              $ref: "#/components/schemas/classOfUse"
+            accomodationGender:
+              type: string
+              enum: [M, F, X, U]
+            sleeper:
+              type: boolean
+            nuisances:
+              type: array
+              items:
+                type: string
+                enum: [ no_smoking, smoking
+                      , mobile_phone_use_zone, mobile_phone_free_zone
+                      , family_area, breast_feeding_friendly, child_free_area
+                      , animals_allowed, no_animals
+                      ]
 
     travellerSpecification:
       type: array

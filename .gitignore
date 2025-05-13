@@ -1,3 +1,4 @@
 .vscode/
 .venv/
 TOMP-API.yaml
+tools/create_meta_data/output/*

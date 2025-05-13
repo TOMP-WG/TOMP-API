@@ -18,7 +18,7 @@ tags:
     description: This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
 
 paths:
-  /collections/support-tickets/items/:
+  /collections/support-tickets/items:
     get:
       operationId: getSupportTickets
       summary: "Get for support tickets of a package/leg"

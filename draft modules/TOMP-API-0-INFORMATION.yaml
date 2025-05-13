@@ -21,7 +21,7 @@ tags:
     description: Traveller information that is not (yet) (completely) available in other standards
 
 paths:
-  /collections/user-profiles/items/:
+  /collections/user-profiles/items:
     get:
       operationId: getUserProfiles
       summary: "Get user profile overview"
