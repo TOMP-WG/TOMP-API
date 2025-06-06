@@ -144,7 +144,7 @@ paths:
 
   /processes/use-asset/execute:
     post:
-      operationId: useAsse6tRequest
+      operationId: useAssetRequest
       summary: "Request to use an asset"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
@@ -219,7 +219,7 @@ paths:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
         "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+          $ref: "#/components/responses/purchaseResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
 

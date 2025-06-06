@@ -1,0 +1,24 @@
+{
+    "searchOffers": "POST /v1/planning/offers/",
+
+    "purchasePackageRequest": "POST /v1/bookings/",
+    "purchaseOffersRequest": "POST /v1/bookings/",
+    "purchaseProductRequest": "POST /v1/bookings/one-stop/",
+    "useAssetRequest": "POST /v1/bookings/one-stop/",
+
+    "confirmPurchaseRequest": "POST /v1/bookings/{id}/events/",
+    "rollbackPurchaseRequest": "POST /v1/bookings/{id}/events/",
+    "extendExpiryTimeRequest": "POST /v1/bookings/{id}/events/",
+
+    "updateTraveller": "PUT /v1/bookings/{id}",
+    "updateTravelSpecification": "PUT /v1/bookings/{id}",
+    "assignAsset": "POST /v1/legs/{id}/events/",
+    "assignAncillary": "POST /v1/legs/{id}/ancillaries/{category}/{number}",
+
+    "legOperation-start": "POST /v1/legs/{leg}/events/",
+    "legOperation-end": "POST /v1/legs/{leg}/events/",
+    "legOperation-pause": "POST /v1/legs/{leg}/events/",
+    "legOperation-resume": "POST /v1/legs/{leg}/events/",
+
+    "requestSupport": "POST /v1/support/"
+}

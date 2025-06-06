@@ -71,9 +71,11 @@ ForEach ($arg in $drafts){
     }
 }
 
-#$join = -join($join, " ", ".\TOMP-API-CORE.yaml > .\TOMP-API.yaml" );
-$join = -join("yaml-merge ", $join, " .\TOMP-API-1-CORE.yaml > .\TOMP-API.yaml");
+$join = -join("yaml-merge ", $join, " .\TOMP-API-1-CORE.yaml > .\TOMP-API-BOM.yaml");
 Write-Host $join
 Invoke-Expression $join
+
+Get-Content .\TOMP-API-BOM.yaml | Out-File .\TOMP-API.yaml -Encoding utf8
+Remove-Item .\TOMP-API-BOM.yaml
 
 Remove-Item -LiteralPath $path -Recurse -Force -Confirm:$false

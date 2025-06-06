@@ -96,7 +96,7 @@ paths:
 
   /processes/update-traveller/execute:
     post:
-      operationId: travellerUpdateRequest
+      operationId: updateTravellerRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -252,6 +252,8 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - traveller
                 properties:
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
@@ -263,8 +265,8 @@ components:
                   fullName:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
                     description: the name of the traveller, can be used to validate against ID cards
-                  entitlements:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerSpecification"
+                  characteristics:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerCharacteristics"
                     description: the COMPLETE set of entitlements, replaces the previous set of
                       entitlements of this traveller
 
@@ -278,6 +280,8 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - package
                 properties:
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
@@ -302,6 +306,15 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - package
+                - leg
+                - asset
+                description: this can be used to assign an asset (/seat) to a leg, by
+                  using the field `asset`. If you want to replace an asset, fill the field
+                  `replacesAsset` with the asset to replace and `asset` with the new one.
+                  If you want to remove an assigned asset from a leg, fill `asset` with 'null' and
+                  fill `replacesAsset` with the asset to remove.
                 properties:
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
@@ -322,6 +335,15 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - package
+                - leg
+                - ancillary
+                description: this can be used to assign an ancillary to a leg, by
+                  using the field `ancillary`. If you want to replace an ancillary, fill the field
+                  `replacesAncillary` with the ancillary to replace and `ancillary` with the new one.
+                  If you want to remove an assigned ancillary from a leg, fill `ancillary` with 'null' and
+                  fill `replacesAncillary` with the ancillary to remove.
                 properties:
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"

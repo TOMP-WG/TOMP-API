@@ -5,6 +5,7 @@ $map(options, function($option) {
 {
       "type": "offer",
       "geometry": {
+        "type": "LineString",
         "coordinates": [
           [ $option.from.coordinates.lng, $option.from.coordinates.lat ],          
           [ $option.to.coordinates.lng, $option.to.coordinates.lat ]
@@ -14,13 +15,18 @@ $map(options, function($option) {
       , "properties": {
             "type": "offer",
             "id": $option.id,
-            "price": {
-                "amount": $option.pricing.parts[type='FIXED'].amount,
-                "currencyCode": $option.pricing.parts[type='FIXED'].currencyCode,
-                "vatCountryCode": $option.pricing.parts[type='FIXED'].vatCountryCode
-            }, 
+            "summary": {
+                "from": "GPS:" & $leg[0].from.coordinates.lng & "," & $leg[0].from.coordinates.lat
+              , "to": "GPS:" & $leg[0].to.coordinates.lng & "," & $leg[0].to.coordinates.lat
+              , "startTime": $leg[0].departureTime
+              , "endTime": $leg[0].arrivalTime,
+              , "price": { "amount": 3.56, "currency": "EUR" }
+              , "distribution": { "fulfilmentMethod": "e-ticket" }
+              , "refundable": true
+            }
             "legs": $map($option.legs, function($leg) { 
 { "type": "leg"
+, "id": $leg.id
 , "from": "GPS:" & $leg.from.coordinates.lng & "," & $leg.from.coordinates.lat
 , "to": "GPS:" & $leg.to.coordinates.lng & "," & $leg.to.coordinates.lat
 , "startTime": $leg.departureTime
@@ -29,12 +35,12 @@ $map(options, function($option) {
 , "sequenceNumber": $leg.legSequenceNumber
 , "state": $leg.state
 , "mode": $leg.assetType.assetClass
-, "product": $leg.assetType.id
-, "ancillaries": [ $map($leg.asset.overriddenProperties.ancillaries, function($anc){ $anc.category & '-' & $anc.number } ) ]
-, "assets": [ $map($leg.asset, function($asset){ $asset.id } ) ]
+, "usedProduct": $leg.assetType.id
+, "usedAncillaries": [ $map($leg.asset.overriddenProperties.ancillaries, function($anc){ $anc.category & '-' & $anc.number } ) ]
+, "usedAssets": [ $map($leg.asset, function($asset){ $asset.id } ) ]
 , "operatorId": $leg.suboperator.maasId
 , "operatorName": $leg.suboperator.name
-, "memo": $leg.memo }
+}
                     } ),
             "products":  $map($option.legs, function($leg) { $leg.assetType.id } )
       }, "links": []

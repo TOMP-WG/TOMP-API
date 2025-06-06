@@ -35,7 +35,7 @@ paths:
         - name: offerId
           in: query
           description: the offer with a guarantee
-          required: true
+          required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
         - name: guaranteeId

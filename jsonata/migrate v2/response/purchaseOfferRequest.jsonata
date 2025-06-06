@@ -1,0 +1,453 @@
+{
+  "type": "package",
+  "elements": [
+    {
+      "type": "leg",
+      "geometry": {
+        "coordinates": [
+          0,
+          0
+        ]
+      },
+      "properties": {
+        "type": "leg",
+        "from": "t:",
+        "via": [
+          "GPS:"
+        ],
+        "to": "P:",
+        "startTime": "2025-05-13T13:36:39.305Z",
+        "endTime": "2025-05-13T13:36:39.305Z",
+        "id": "string",
+        "sequenceNumber": 0,
+        "state": "NOT_STARTED",
+        "price": {
+          "amount": 0,
+          "taxPercentageUsed": 0,
+          "currencyCode": "oDe",
+          "vatCountryCode": "LF"
+        },
+        "mode": "AIR",
+        "travellers": [
+          "string"
+        ],
+        "product": "string",
+        "ancillaries": [
+          "string"
+        ],
+        "assets": [
+          "string"
+        ],
+        "operatorId": "string",
+        "operatorName": "string",
+        "memo": "string",
+        "extraInfo": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "validities": {
+          "distribution": {
+            "fulfilmentMethod": "string",
+            "distributionChannel": "string"
+          },
+          "cancellation": {
+            "allowed": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "qIc",
+              "vatCountryCode": "ZN"
+            },
+            "feePercentage": 100
+          },
+          "exchanging": {
+            "exchangeable": true,
+            "numberOfExchangesAllowed": 0
+          },
+          "refundable": true,
+          "transfer": {
+            "canTransfer": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "SOU",
+              "vatCountryCode": "QL"
+            },
+            "feePercentage": 100,
+            "maximumNumberOfNamedUsers": 0
+          },
+          "payment": {
+            "paymentType": "prepaid",
+            "deposit": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "VRo",
+              "vatCountryCode": "XQ"
+            }
+          },
+          "equipment": [
+            "string"
+          ],
+          "boarding": {
+            "onboardStayDuration": "/P414895522481448716774596370Y540857265845975149861355194245933601235301380942422180330012680017530946016205971805245143484753090MT729805930926154170217569504147152261259844295310H033682989859382714406326544563039690919037436S/",
+            "delayedAlightingAllowed": true,
+            "overnightStayAllowed": true,
+            "earlyBoardingAllowed": true
+          },
+          "accomodation": {
+            "name": "string",
+            "accomodationClass": "FIRST_CLASS",
+            "accomodationGender": "M",
+            "sleeper": true,
+            "nuisances": [
+              "no_smoking"
+            ]
+          }
+        }
+      },
+      "id": "string",
+      "links": [
+        {
+          "rel": "string",
+          "href": "string",
+          "type": "string",
+          "method": "POST",
+          "description": "string",
+          "body": {},
+          "headers": {
+            "additionalProp1": "string",
+            "additionalProp2": "string",
+            "additionalProp3": "string"
+          },
+          "isMandatory": true,
+          "hash": "string",
+          "expires": "2025-05-13T13:36:39.306Z"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "type": "package",
+    "from": "GPS:",
+    "via": [
+      "P:"
+    ],
+    "to": "P:",
+    "startTime": "2025-05-13T13:36:39.306Z",
+    "endTime": "2025-05-13T13:36:39.306Z",
+    "id": "d2f61c43-a19b-48d9-963c-0f4d5cf4745c",
+    "status": "PENDING",
+    "packageLabels": [
+    ],
+    "price": {
+      "amount": 0,
+      "taxPercentageUsed": 0,
+      "currencyCode": "DUr",
+      "vatCountryCode": "OA"
+    },
+    "offers": [],
+    "legs": [
+      {
+        "type": "leg",
+        "from": "GPS:4.342342,52.3423423",
+        "to": "VJ:StopPoint:3489234",
+        "startTime": "2025-05-13T13:36:39.306Z",
+        "endTime": "2025-05-13T15:36:39.306Z",
+        "id": "VJ:F342349-34924",
+        "state": "NOT_STARTED",
+        "mode": "TRAIN",
+        "travellers": [
+          "string"
+        ],
+        "product": "string",
+        "ancillaries": [
+          "string"
+        ],
+        "assets": [],
+        "operatorId": "VJ",
+        "operatorName": "string",
+        "validities": {
+          "distribution": {
+            "fulfilmentMethod": "string",
+            "distributionChannel": "string"
+          },
+          "cancellation": {
+            "allowed": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "VYL",
+              "vatCountryCode": "EF"
+            },
+            "feePercentage": 100
+          },
+          "exchanging": {
+            "exchangeable": true,
+            "numberOfExchangesAllowed": 0
+          },
+          "refundable": true,
+          "transfer": {
+            "canTransfer": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "XQv",
+              "vatCountryCode": "MN"
+            },
+            "feePercentage": 100,
+            "maximumNumberOfNamedUsers": 0
+          },
+          "payment": {
+            "paymentType": "prepaid",
+            "deposit": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "fKR",
+              "vatCountryCode": "WH"
+            }
+          },
+          "equipment": [
+            "string"
+          ],
+          "boarding": {
+            "onboardStayDuration": "/-P439158984211985374003901281447234908772Y081047701928810296506500245MT2509077867164103H425680871518667352102230209003557302535060899596161034498093805998M98118731740459873718036379489394237669.218818494559339631988638529132304202360566121058321251188371874153163599310703S/",
+            "delayedAlightingAllowed": true,
+            "overnightStayAllowed": true,
+            "earlyBoardingAllowed": true
+          },
+          "accomodation": {
+            "name": "string",
+            "accomodationClass": "FIRST_CLASS",
+            "accomodationGender": "M",
+            "sleeper": true,
+            "nuisances": [
+              "no_smoking"
+            ]
+          }
+        }
+      }
+    ],
+    "products": [
+      {
+        "type": "product",
+        "id": "string",
+        "productName": "string",
+        "guarantees": [
+          {
+            "id": "string",
+            "name": "string",
+            "organisation": "string",
+            "type": "ALTERNATIVE_JOURNEY"
+          }
+        ]
+      }
+    ],
+    "places": [
+      {
+        "placeId": "P:",
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "street": "string",
+        "houseNumber": 0,
+        "houseNumberAddition": "string",
+        "postalCode": "string",
+        "city": "string",
+        "province": "string",
+        "state": "string",
+        "country": "MQ",
+        "additionalInfo": "string",
+        "previousLegInfo": {
+          "operator": "string",
+          "product": "string",
+          "asset": "string"
+        }
+      }
+    ],
+    "ancillaries": [
+      {
+        "type": "ancillary",
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "product": "string",
+        "image": "string"
+      }
+    ],
+    "assets": [
+      {
+        "type": "asset",
+        "id": "string",
+        "visualId": "string",
+        "product": "string",
+        "mode": "AIR",
+        "subMode": "string",
+        "eco": {
+          "energyLabel": "A",
+          "ecoLabel": [
+            {
+              "ecoSticker": "string",
+              "countryCode": "XO"
+            }
+          ],
+          "co2Emission": 0
+        },
+        "cargo": {
+          "description": "string",
+          "volume": 0,
+          "weight": 0
+        },
+        "appSupport": {
+          "displayName": "string",
+          "description": "string",
+          "image": "string",
+          "icon": "string",
+          "accessMethods": [
+            "LINK"
+          ]
+        },
+        "equipment": [
+          "string"
+        ],
+        "extraInfo": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        }
+      }
+    ],
+    "travellers": [
+      {
+        "type": "traveller",
+        "id": "string",
+        "name": "string",
+        "entitlements": [
+          {
+            "id": "string",
+            "type": "entitlement",
+            "description": "string"
+          },
+          {
+            "id": "string",
+            "type": "card_type",
+            "cardType": "DISCOUNT",
+            "subType": "string",
+            "relatedProduct": "string",
+            "transportOrganisations": [
+              "string"
+            ],
+            "additionalProp1": {}
+          },
+          {
+            "id": "string",
+            "type": "card_type",
+            "cardType": "DISCOUNT",
+            "subType": "string",
+            "relatedProduct": "string",
+            "transportOrganisations": [
+              "string"
+            ],
+            "cardNumber": "string",
+            "description": "string",
+            "additionalNumber": "string",
+            "endValidity": "string",
+            "country": "HJ",
+            "additionalProp1": {}
+          },
+          {
+            "type": "license_type",
+            "modes": [
+              "AIR"
+            ],
+            "licenseCode": "string",
+            "issuingCountry": "FV",
+            "additionalProp1": {}
+          },
+          {
+            "type": "license_type",
+            "modes": [
+              "AIR"
+            ],
+            "licenseCode": "string",
+            "issuingCountry": "JL",
+            "licenseNumber": "string",
+            "endValidity": "string",
+            "additionalProp1": {}
+          },
+          {
+            "type": "used_asset",
+            "asset": "string"
+          }
+        ],
+        "requirements": {
+          "mode": "AIR",
+          "subMode": "string",
+          "class": "FIRST_CLASS",
+          "operators": [
+            "string"
+          ],
+          "product": "string",
+          "assets": [
+            "string"
+          ],
+          "zones": [
+            "string"
+          ],
+          "prmNeeds": {
+            "encumbranceNeed": "pushchair",
+            "medicalNeed": "heart_condition",
+            "mobilityNeed": "wheelchair",
+            "psychoSensoryNeed": "visual_impaired"
+          },
+          "avoid": {
+            "zones": [
+              "string"
+            ],
+            "places": [
+              "P:"
+            ],
+            "lines": [
+              "string"
+            ]
+          },
+          "additionalProp1": {}
+        },
+        "isValidated": true,
+        "age": 0,
+        "fullName": "string",
+        "customerReference": "string",
+        "userProfile": "string"
+      }
+    ]
+  },
+  "links": [
+    {
+      "rel": "confirm",
+      "href": "/processes/confirm-package/execute",
+      "type": "application/json",
+      "method": "POST",
+      "description": "Confirm the purchase of this pending package. When not confirmed, it will automatically be released.",
+      "body": { "inputs": { "package": "d2f61c43-a19b-48d9-963c-0f4d5cf4745c" } },
+      "headers": {
+        "authorisation": "Bearer [JWT]",
+        "digest": "W5phRjz5FeO4jKYkUHoY8iKmA5XpTZYfqO7ZHZMAM9M="
+      },
+      "isMandatory": true,
+      "hash": "9f2a3b17f850a9e4d2744c0186c7e2ef1e6352cf96b3f1550c43740fae2b9981",
+      "expires": "2025-05-13T13:36:39.308Z"
+    },
+    {
+      "rel": "rollback",
+      "href": "/processes/rollback-package/execute",
+      "type": "application/json",
+      "method": "POST",
+      "description": "Rollback the purchase of this pending package",
+      "body": { "inputs": { "package": "d2f61c43-a19b-48d9-963c-0f4d5cf4745c" } },
+      "headers": {
+        "authorisation": "Bearer [JWT]"
+      },
+      "isMandatory": false,
+      "expires": "2025-05-13T13:36:39.308Z"
+    }
+  ]
+}

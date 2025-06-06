@@ -257,7 +257,7 @@ components:
           items:
             $ref: "#/components/schemas/packageElement"
         properties:
-          $ref: "#/components/schemas/package"
+          $ref: "#/components/schemas/packageProperties"
         links:
           type: array
           description:
@@ -274,17 +274,17 @@ components:
       properties:
         type:
           type: string
-          enum: ["leg", "zone", "return_area", "return_station", "policy_zone", "geofence"]
+          enum: [ "leg", "zone", "return_area", "return_station", "policy_zone", "geofence" ]
         geometry:
           $ref: "#/components/schemas/geojsonGeometry"
         properties:
           oneOf:
-          - $ref: "#/components/schemas/leg"
+          - $ref: "#/components/schemas/legProperties"
           - $ref: "#/components/schemas/externalPackageElement"
           discriminator:
             propertyName: type
             mapping:
-              leg: "#/components/schemas/leg"
+              leg: "#/components/schemas/legProperties"
               zone: "#/components/schemas/externalPackageElement" 
               return_area: "#/components/schemas/externalPackageElement" 
               return_station: "#/components/schemas/externalPackageElement" 
@@ -310,7 +310,7 @@ components:
           type: string
           enum: [ "zone", "return_area", "return_station", "policy_zone", "geofence" ]
 
-    collectionContainer:
+    travelCollections:
       type: object
       description: object containing all necessary collections for a package and a offerCollection
         Both refer to objects in these collections.
@@ -337,7 +337,7 @@ components:
         travellers:
           $ref: "#/components/schemas/travellers"
 
-    package:
+    packageProperties:
       x-tm: TRAVEL OFFER PACKAGE, CUSTOMER PURCHASE PACKAGE
       allOf:
       - $ref: "#/components/schemas/travelSpecification"
@@ -366,67 +366,59 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/offerReference"
-          legs:
-            type: array
-            items:
-              $ref: "#/components/schemas/leg"
-      - $ref: "#/components/schemas/collectionContainer"
+          # legs are in the elements
+          # legs:
+          #   type: array
+          #   items:
+          #     $ref: "#/components/schemas/leg"
+      - $ref: "#/components/schemas/travelCollections"
 
-    leg:
+    legProperties:
       x-tm: LEG
-      allOf:
-        - $ref: "#/components/schemas/travelSpecification"        
-        - type: object
-          description: A (planned) consumption of a product within a package
-          required:
-            - id
-            - type
-          properties:
-            id:
-              $ref: "#/components/schemas/legReference"
-              description:
-                The unique identifier (TO) of this leg. Must always the same as applied in the request URL.
-                And when there are not additional legs in the offered or purchased package, the same **id** as the package id.
-            type:
-              type: string
-              enum: [ leg ]
-            sequenceNumber:
-              $ref: "#/components/schemas/shortInt"
-              description: The order of the leg within the package. Mandatory, if there are multiple legs in the package. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one package.
-            state:
-              $ref: "#/components/schemas/legStatus"
-            price:
-              $ref: "#/components/schemas/amountOfMoney"
-              description: the final price of the leg
-            mode:
-              $ref: "#/components/schemas/mode"
-            travellers:
-              type: array
-              items:
-                $ref: "#/components/schemas/travellerReference"
-            product:
-              $ref: "#/components/schemas/productReference"
-              description: The main product (v1.x 'asset type') used to execute this leg
-            ancillaries:
-              type: array
-              items:
-                $ref: "#/components/schemas/ancillaryReference"
-              description: additional products that can be assigned to this leg
-            assets:
-              type: array
-              items:
-                $ref: "#/components/schemas/assetReference"
-              description: The physical asset(s) used for the execution of the leg
-            operatorId:
-              $ref: "#/components/schemas/organisationReference"
-            operatorName:
-              $ref: "#/components/schemas/normalString"
-            memo:
-              $ref: "#/components/schemas/longString"
-            extraInfo:
-              $ref: "#/components/schemas/customProperties"
-            distribution:
-              $ref: "#/components/schemas/distribution"
+      type: object
+      description: A (planned) consumption of a product within a package
+      required:
+        - id
+        - type
+      properties:
+        type:
+          type: string
+          enum: [ leg ]
+        id:
+          $ref: "#/components/schemas/legReference"
+          description:
+            The unique identifier (TO) of this leg. Must always the same as applied in the request URL.
+            And when there are not additional legs in the offered or purchased package, the same **id** as the package id.
+        sequenceNumber:
+          $ref: "#/components/schemas/shortInt"
+          description: The order of the leg within the package. Mandatory, if there are multiple legs in the package. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one package.
+        mode:
+          $ref: "#/components/schemas/mode"
+        state:
+          $ref: "#/components/schemas/legStatus"
+        travellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/travellerReference"
+        usedProduct:
+          $ref: "#/components/schemas/productReference"
+          description: The main product (v1.x 'asset type') used to execute this leg
+        usedAncillaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ancillaryReference"
+          description: additional products that can be assigned to this leg
+        usedAssets:
+          type: array
+          items:
+            $ref: "#/components/schemas/assetReference"
+          description: The physical asset(s) used for the execution of the leg
+        operatorId:
+          $ref: "#/components/schemas/organisationReference"
+        operatorName:
+          $ref: "#/components/schemas/normalString"
+        summary:
+          $ref: "#/components/schemas/summary"
 
     product:
       x-tm: FARE PRODUCT
@@ -456,7 +448,10 @@ components:
           SHORTEST,
           REFUNDABLE,
           EXCHANGABLE,
-          CANCELLABLE
+          CANCELLABLE,
+          TRANSFERABLE,
+          DEPOSIT_REQUIRED,
+          ANCILLARIES_INCLUDED
         ]
 
     packageStatus:
@@ -611,8 +606,8 @@ components:
           $ref: "#/components/schemas/travellerReference"
         name:
           $ref: "#/components/schemas/normalString"
-        entitlements:
-          $ref: "#/components/schemas/travellerSpecification"
+        characteristics:
+          $ref: "#/components/schemas/travellerCharacteristics"
         requirements:
           $ref: "#/components/schemas/travellerRequirements"
         isValidated:
@@ -1084,6 +1079,11 @@ components:
           items:
             $ref: "#/components/schemas/zoneReference"
 
+        distribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/distribution"
+
         # x-tm: ROUTING VALIDITY PARAMETERS
         # lines: => in trip pattern
         # scheduledStopPoints/places: => when requested: in from, to, via in travel specification
@@ -1125,116 +1125,124 @@ components:
               type: string
               enum: [ visual_impaired, auditory_impaired, cognitive_impaired
                     , averse_to_lifts, averse_to_escalators, averse_to_confined_spaces, averse_to_crowds
-                    , other ]
+                    , other ]          
 
     distribution:
       type: object
       properties:
-        # x-tm: DISTRIBUTION VALIDITY PARAMETERS
-        distribution:
-          type: object
-          properties:
-            fulfilmentMethod:
-              $ref: "#/components/schemas/normalString"
-            distributionChannel:
-              $ref: "#/components/schemas/normalString"
+        fulfilmentMethod:
+          $ref: "#/components/schemas/normalString"
+        distributionChannel:
+          $ref: "#/components/schemas/normalString"
 
-        # x-tm: CANCELLING
-        cancellation:
-          type: object
-          properties:
-            allowed:
-              type: boolean
-              description: is it possible to cancel this package?
-            fee:
-              description: amount of money you have to pay when you cancel this purchased package
-              $ref: "#/components/schemas/amountOfMoney"
-            feePercentage:
-              description: percentage of the offered price you have to pay when you cancel this purchased package
-              type: number
-              minimum: 0
-              maximum: 100
+    summary:
+      allOf:
+      - $ref: "#/components/schemas/travelSpecification"
+      - type: object
+        properties:
+          price:
+            $ref: "#/components/schemas/amountOfMoney"
 
-        # x-tm: EXCHANGING
-        exchanging:
-          type: object
-          properties:
-            exchangeable:
-              type: boolean
-            numberOfExchangesAllowed:
-              type: integer
+          # x-tm: DISTRIBUTION VALIDITY PARAMETERS
+          distribution:
+            $ref: "#/components/schemas/distribution"
 
-        # x-tm: REFUNDING
-        refundable:
-          type: boolean
+          # x-tm: CANCELLING
+          cancellation:
+            type: object
+            properties:
+              allowed:
+                type: boolean
+                description: is it possible to cancel this package?
+              fee:
+                description: amount of money you have to pay when you cancel this purchased package
+                $ref: "#/components/schemas/amountOfMoney"
+              feePercentage:
+                description: percentage of the offered price you have to pay when you cancel this purchased package
+                type: number
+                minimum: 0
+                maximum: 100
 
-        # x-tm: TRANSFERABILITY
-        transfer:
-          type: object
-          properties:
-            canTransfer:
-              type: boolean
-            fee:
-              $ref: "#/components/schemas/amountOfMoney"
-            feePercentage:
-              type: number
-              minimum: 0
-              maximum: 100
-            maximumNumberOfNamedUsers:
-              type: integer
+          # x-tm: EXCHANGING
+          exchanging:
+            type: object
+            properties:
+              exchangeable:
+                type: boolean
+              numberOfExchangesAllowed:
+                type: integer
 
-        # payment
-        payment:
-          type: object
-          properties:
-            paymentType:
-              type: string
-              enum: [prepaid, pay_when_finished, subscription_only]
-            deposit:
-              $ref: "#/components/schemas/amountOfMoney"
-              description: the amount of money to pay as a deposit.
+          # x-tm: REFUNDING
+          refundable:
+            type: boolean
 
-        # equipment
-        equipment:
-          type: array
-          items:
-            $ref: "#/components/schemas/equipmentReference"
+          # x-tm: TRANSFERABILITY
+          transfer:
+            type: object
+            properties:
+              canTransfer:
+                type: boolean
+              fee:
+                $ref: "#/components/schemas/amountOfMoney"
+              feePercentage:
+                type: number
+                minimum: 0
+                maximum: 100
+              maximumNumberOfNamedUsers:
+                type: integer
 
-        boarding:
-          type: object
-          properties:
-            onboardStayDuration:
-              $ref: "#/components/schemas/duration"
-            delayedAlightingAllowed:
-              type: boolean
-            overnightStayAllowed:
-              type: boolean
-            earlyBoardingAllowed:
-              type: boolean
-
-        accomodation:
-          type: object
-          properties:
-            name:
-              $ref: "#/components/schemas/shortString"
-            accomodationClass:
-              $ref: "#/components/schemas/classOfUse"
-            accomodationGender:
-              type: string
-              enum: [M, F, X, U]
-            sleeper:
-              type: boolean
-            nuisances:
-              type: array
-              items:
+          # payment
+          payment:
+            type: object
+            properties:
+              paymentType:
                 type: string
-                enum: [ no_smoking, smoking
-                      , mobile_phone_use_zone, mobile_phone_free_zone
-                      , family_area, breast_feeding_friendly, child_free_area
-                      , animals_allowed, no_animals
-                      ]
+                enum: [prepaid, pay_when_finished, subscription_only]
+              deposit:
+                $ref: "#/components/schemas/amountOfMoney"
+                description: the amount of money to pay as a deposit.
 
-    travellerSpecification:
+          # equipment
+          equipment:
+            type: array
+            items:
+              $ref: "#/components/schemas/equipmentReference"
+
+          boarding:
+            type: object
+            properties:
+              onboardStayDuration:
+                $ref: "#/components/schemas/duration"
+              delayedAlightingAllowed:
+                type: boolean
+              overnightStayAllowed:
+                type: boolean
+              earlyBoardingAllowed:
+                type: boolean
+
+          accomodation:
+            type: object
+            properties:
+              name:
+                $ref: "#/components/schemas/shortString"
+              accomodationClass:
+                $ref: "#/components/schemas/classOfUse"
+              accomodationGender:
+                type: string
+                enum: [M, F, X, U]
+              sleeper:
+                type: boolean
+              nuisances:
+                type: array
+                items:
+                  type: string
+                  enum: [ no_smoking, smoking
+                        , mobile_phone_use_zone, mobile_phone_free_zone
+                        , family_area, breast_feeding_friendly, child_free_area
+                        , animals_allowed, no_animals
+                        ]
+
+    travellerCharacteristics:
       type: array
       items:
         oneOf:
@@ -1718,16 +1726,19 @@ components:
 
     geojsonFeature:
       type: object
+      required:
+      - type
+      - properties
       properties:
         type:
           type: string
           enum: ["Feature"]
+        id:
+          $ref: "#/components/schemas/shortString"
         geometry:
           $ref: "#/components/schemas/geojsonGeometry"
         properties:
           type: object
-        id:
-          $ref: "#/components/schemas/shortString"
         links:
           type: array
           items:

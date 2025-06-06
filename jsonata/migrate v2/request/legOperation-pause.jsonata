@@ -1,0 +1,9 @@
+{
+  "time": "2025-05-14T07:18:59.425Z",
+  "event": "PAUSE",
+  "userLocation": {
+    "coordinates": {
+        "lng": $number($split($substring(inputs.location,4), ',')[0]),
+        "lat": $number($split($substring(inputs.location,3), ',')[1]) } 
+  }
+}

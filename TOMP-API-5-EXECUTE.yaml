@@ -42,6 +42,8 @@ paths:
             - pause
             - resume
             - end
+            - extend
+            - postpone
       security:
         - BearerAuth: []
         - OAuth: []
@@ -49,12 +51,6 @@ paths:
       tags:
         - execute
       requestBody:
-        description: -|
-         <h2>Leg operations</h2>
-         - START - the `inputs` MUST be a legInput
-         - PAUSE - the `inputs` MUST be a legInput
-         - RESUME - the `inputs` MUST be a legInput
-         - END - the `inputs` MUST be a legInput
         $ref: "#/components/requestBodies/legRequest"
       responses:
         "200":
@@ -161,10 +157,15 @@ components:
                 required:
                 - leg
                 properties:
+                  timestamp:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
                   leg:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
                   location: 
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  time:
+                    description: time to extend or postpone
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/duration"
                   evidence:
                     type: array
                     minItems: 1

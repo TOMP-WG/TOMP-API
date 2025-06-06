@@ -2,3 +2,6 @@
 .venv/
 TOMP-API.yaml
 tools/create_meta_data/output/*
+jsonata/node_modules/*
+jsonata/node_modules/.package-lock.json
+jsonata/package-lock.json

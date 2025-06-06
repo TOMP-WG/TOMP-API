@@ -15,6 +15,10 @@ Reference implementation of the [JSONata query and transformation language](http
 ## Installation
 
 - `npm install jsonata`
+- `npm install express jsonata body-parser yamljs`
+- `npm install @apidevtools/swagger-parser`
+- `npm install openapi-sampler`
+- `npm install axios`
 
 ## Quick start
 
