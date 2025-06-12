@@ -1,9 +1,20 @@
 openapi: 3.0.0
 info:
-  title: Transport Operator MaaS Provider API
-  description: "<h2>Context</h2>
-    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
-    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  title: TOMP-API
+  description: >-
+    <h3>Technical interface between Transport Operators & MaaS Providers</h3>
+    <hr>
+    The TOMP-API facilitates (bi-directional) communication between
+    Transport Operators (TO) and MaaS providers (MP, and other resellers), to
+    fulfill a complete MaaS user journey.<br><hr> 
+    More information: <ul><li><a
+    href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>Wiki pages
+    </a></li><li><a
+    href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding
+    conventions</a></li></ul>
+    <hr>
+    <img src="https://github.com/TOMP-WG/TOMP-API/blob/master/documents/TOMP-flows.png">
+    <hr>
   version: "2.0.0"
   contact:
     name: TOMP working group
@@ -46,6 +57,7 @@ paths:
       operationId: getPackage
       summary: "Get package details"
       description: Retrieves package details
+      x-corom: TRAVEL PACKAGE QUERY
       security:
         - BearerAuth: []
         - OAuth: []
@@ -61,57 +73,6 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/packageResponse"
-        default:
-          $ref: "#/components/responses/errorResponse"
-
-  /collections/entitlements/items:
-    get:
-      security:
-      - OpenData: []
-      operationId: getEntitlements
-      summary: "Retrieves all accepted entitlements"
-      parameters:
-        - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
-      tags:
-        - generic
-      responses:
-        "200":
-          $ref: "#/components/responses/entitlementsResponse"
-        default:
-          $ref: "#/components/responses/errorResponse"
-
-  /collections/card-types/items:
-    get:
-      security:
-      - OpenData: []
-      operationId: getCardTypes
-      summary: "Retrieves all accepted card types"
-      parameters:
-        - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
-      tags:
-        - generic
-      responses:
-        "200":
-          $ref: "#/components/responses/cardTypesResponse"
-        default:
-          $ref: "#/components/responses/errorResponse"
-
-  /collections/user-profiles/items:
-    get:
-      security:
-      - OpenData: []
-      operationId: getUserProfiles
-      summary: "Retrieves all user profile definitions"
-      parameters:
-        - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
-      tags:
-        - generic
-      responses:
-        "200":
-          $ref: "#/components/responses/userProfilesResponse"
         default:
           $ref: "#/components/responses/errorResponse"
 
@@ -203,42 +164,6 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/link"
-
-    userProfilesResponse:
-      description: a list of user profiles
-      headers:
-        Version:
-          $ref: "#/components/headers/version"
-        Content-Language:
-          $ref: "#/components/headers/contentLanguage"
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/userProfileCollection"
-
-    cardTypesResponse:
-      description: a list of accepted card types
-      headers:
-        Version:
-          $ref: "#/components/headers/version"
-        Content-Language:
-          $ref: "#/components/headers/contentLanguage"
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/cardTypeCollection"
-
-    entitlementsResponse:
-      description: a list of accepted entitlements
-      headers:
-        Version:
-          $ref: "#/components/headers/version"
-        Content-Language:
-          $ref: "#/components/headers/contentLanguage"
-      content:
-        application/json:
-          schema: 
-            $ref: "#/components/schemas/entitlementCollection"
 
   schemas:
     geojsonResponseBody:
@@ -765,6 +690,8 @@ components:
             $ref: "#/components/schemas/equipmentReference"
         extraInfo:
           $ref: "#/components/schemas/customProperties"
+        fee:
+          $ref: "#/components/schemas/fareStructure"
 
     assetState:
       x-tm: lacking
@@ -1382,96 +1309,6 @@ components:
           type: string
           description: the units is normally the same as the **interval.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.
           enum: [KM, MILE, HOUR, MINUTE, ZONE]
-
-    userProfileCollection:
-      description: a list of user profiles.
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [UserProfileCollection]
-        userProfiles:
-          type: array
-          items:
-            $ref: "#/components/schemas/userProfile"
-        properties:
-          type: object
-          additionalProperties: true
-          properties:
-            type:
-              type: string
-              enum: [user_profiles]
-        numberMatched:
-          type: number
-        numberReturned:
-          type: number
-        links:
-          type: array
-          description:
-            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
-            In case it is an alternative, specify clearly in the description what the financial consequences are.
-          items:
-            $ref: "#/components/schemas/link"
-
-    cardTypeCollection:
-      description: a list of accepted card types.
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [CardTypeCollection]
-        userProfiles:
-          type: array
-          items:
-            $ref: "#/components/schemas/cardType"
-        properties:
-          type: object
-          additionalProperties: true
-          properties:
-            type:
-              type: string
-              enum: [card_types]
-        numberMatched:
-          type: number
-        numberReturned:
-          type: number
-        links:
-          type: array
-          description:
-            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
-            In case it is an alternative, specify clearly in the description what the financial consequences are.
-          items:
-            $ref: "#/components/schemas/link"
-
-    entitlementCollection:
-      description: a list of accepted entitlements.
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [EntitlementCollection]
-        userProfiles:
-          type: array
-          items:
-            $ref: "#/components/schemas/entitlementGiven"
-        properties:
-          type: object
-          additionalProperties: true
-          properties:
-            type:
-              type: string
-              enum: [entitlements]
-        numberMatched:
-          type: number
-        numberReturned:
-          type: number
-        links:
-          type: array
-          description:
-            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
-            In case it is an alternative, specify clearly in the description what the financial consequences are.
-          items:
-            $ref: "#/components/schemas/link"
 
     # address concepts
     place:

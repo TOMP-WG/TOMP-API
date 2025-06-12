@@ -35,6 +35,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-tm: 
+        - TRAVEL PACKAGE CREATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/selectOffersRequest"
       responses:
@@ -50,6 +52,8 @@ paths:
     get:
       operationId: requestAssets
       summary: "Request the assets available for a leg"
+      x-tm: 
+        - TRAVEL PACKAGE SPOT AVAILABILITY QUERY
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -88,6 +92,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-tm:
+        - TRAVEL PACKAGE ANCILLARY AVAILABILITY QUERY (?)
       responses:
         "200":
           $ref: "#/components/responses/ancillariesResponse"
@@ -106,6 +112,7 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-corom: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/updateTravellerRequest"
       responses:
@@ -126,6 +133,7 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-corom: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/updateTravelSpecificationRequest"
       responses:
@@ -146,6 +154,10 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-tm: 
+        - TRAVEL PACKAGE SPOT RESERVATION QUERY
+        - TRAVEL PACKAGE SPOT CANCELLATION QUERY
+        - TRAVEL PACKAGE ALTERATION QUERY 
       requestBody:
         $ref: "#/components/requestBodies/assignAssetRequest"
       responses:
@@ -166,6 +178,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-tm: 
+        - TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/assignAncillaryRequest"
       responses:
@@ -187,6 +201,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-tm:
+        - lacking
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
@@ -211,6 +227,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
+      x-corom: 
+        - TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/removeOfferRequest"
       responses:

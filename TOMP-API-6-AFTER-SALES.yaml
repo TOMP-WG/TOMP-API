@@ -62,6 +62,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
+      x-tm:
+        - REFUND QUERY
       responses:
         "200":
           $ref: "#/components/responses/refundResponse"
@@ -81,6 +83,9 @@ paths:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
+      x-tm:
+        - TRAVEL PACKAGE REVOKE FULFILMENT QUERY
+        - TRAVEL PACKAGE SPOT CANCELLATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/refundOptionRequest"
       responses:
@@ -102,6 +107,8 @@ paths:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
+      x-tm:
+        - lacking
       requestBody:
         $ref: "#/components/requestBodies/refundOptionRequest"
       responses:
@@ -123,6 +130,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
+      x-tm:
+        - lacking
       requestBody:
         $ref: "#/components/requestBodies/refundDepositRequest"        
       responses:
@@ -175,6 +184,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
+      x-tm:
+        - lacking
       responses:
         "200":
           $ref: "#/components/responses/paymentResponse"
@@ -195,6 +206,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
+      x-tm:
+        - lacking
       requestBody:
         $ref: "#/components/requestBodies/confirmPaymentRequest"
       responses:
@@ -222,6 +235,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
+      x-tm:
+        - TRAVEL PACKAGE CANCELLATION QUERY
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:

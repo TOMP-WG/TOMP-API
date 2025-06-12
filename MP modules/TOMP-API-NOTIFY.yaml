@@ -106,6 +106,7 @@ components:
             * _UNLOCKED_ asset is unlocked  <br><br>
 
             * _PROGRESS_ report progress <br><br>
+            * _SUPPORT_ report support progress <br><br>
 
             * _PREPARING_ the leg is in preparation  <br>
             * _PREPARED_ the leg is ready to get started  <br>
@@ -132,6 +133,7 @@ components:
               UNLOCKED,
 
               PROGRESS,
+              SUPPORT,
                                 
               PREPARING,
               PREPARED,
@@ -144,7 +146,7 @@ components:
               FAILURE
             ]
         location:
-          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/externalReference"
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
         # asset: in links
         # product: in links
         assetState:
@@ -158,3 +160,5 @@ components:
         duration:
           $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/longInt"
           description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
+        message:
+          type: string

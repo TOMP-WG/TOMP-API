@@ -25,6 +25,7 @@ paths:
       operationId: searchOffers
       summary: "Search for offers"
       description: Returns offers based on travel specification, trip pattern, location, asset, product and user preferences.
+      x-corom: (STOP / COMMON / SINGLE / REPEATED) FARE QUERY
       security:
         - BearerAuth: []
         - OAuth: []
@@ -49,6 +50,7 @@ paths:
     get:
       operationId: requestOffer
       summary: "Get offer details"
+      x-corom: TRAVEL PACKAGE QUERY (?)
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
