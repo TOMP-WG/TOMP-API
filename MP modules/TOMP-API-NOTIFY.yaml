@@ -100,6 +100,8 @@ components:
             * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
             * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
             * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
+            * _INFORMATION_ information to the user, e.g. the asset is ready for pickup. Text is in **comment**<br>
+            * _WARNING_ warning to the user, e.g. it is almost time to return the asset. Text is in **comment**<br>
             * _OTHER_ unspecified. Text is in **comment**<br>
 
             * _LOCKED_ asset is locked  <br>
@@ -127,6 +129,8 @@ components:
               USER_NO_SHOW,
               ETA,
               USER_OUT_OF_LIMITS,
+              WARNING,
+              INFORMATION,
               OTHER,
 
               LOCKED,

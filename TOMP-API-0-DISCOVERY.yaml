@@ -202,8 +202,8 @@ paths:
           - request-support
           - cancel-package
           - cancel-leg
-          - claim-refund-option
-          - confirm-refund-option
+          - claim-redress-option
+          - confirm-redress-option
           - refund-deposit
           - confirm-payment
       responses:
@@ -681,43 +681,30 @@ components:
             - object
             - string
           not:
-            oneOf:
-            - $ref: '#/components/schemas/schema'
-            - $ref: '#/components/schemas/reference'
+            $ref: '#/components/schemas/schema'
           allOf:
             type: array
             items:
-              oneOf:
-              - $ref: '#/components/schemas/schema'
-              - $ref: '#/components/schemas/reference'
+              $ref: '#/components/schemas/schema'
           oneOf:
             type: array
             items:
-              oneOf:
-              - $ref: '#/components/schemas/schema'
-              - $ref: '#/components/schemas/reference'
+              $ref: '#/components/schemas/schema'
           anyOf:
             type: array
             items:
-              oneOf:
-              - $ref: '#/components/schemas/schema'
-              - $ref: '#/components/schemas/reference'
+              $ref: '#/components/schemas/schema'
           items:
-            oneOf:
-            - $ref: '#/components/schemas/schema'
-            - $ref: '#/components/schemas/reference'
+            $ref: '#/components/schemas/schema'
           properties:
             type: object
             additionalProperties:
-              oneOf:
-              - $ref: '#/components/schemas/schema'
-              - $ref: '#/components/schemas/reference'
+              $ref: '#/components/schemas/schema'
           additionalProperties:
             oneOf:
             - $ref: '#/components/schemas/schema'
-            - $ref: '#/components/schemas/reference'
             - type: boolean
-            default: true
+              default: true
           description:
             type: string
           format:
@@ -748,9 +735,9 @@ components:
 
     reference:
       required:
-      - $ref
+      - "$ref"
       type: object
       properties:
-        $ref:
+        "$ref":
           type: string
           format: uri-reference

@@ -11,9 +11,9 @@ info:
     href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>Wiki pages
     </a></li><li><a
     href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding
-    conventions</a></li></ul>
-    <hr>
-    <img src="https://github.com/TOMP-WG/TOMP-API/blob/master/documents/TOMP-flows.png">
+    conventions</a></li>
+    <li><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/documents/TOMP-flows.png">High-level sequence diagrams</a></li>
+    </ul>
     <hr>
   version: "2.0.0"
   contact:
@@ -167,20 +167,23 @@ components:
 
   schemas:
     geojsonResponseBody:
-      allOf:
-      - $ref: "#/components/schemas/geojson"
+      $ref: "#/components/schemas/geojson"
 
     packageResponseBody:
       description: a package response is simular to geojson.
       type: object
+      required:
+      - type
+      - properties
+      - links
       properties:
         type:
           type: string
-          enum: [package]
-        elements:
+          enum: [ package, offer ]
+        legs:
           type: array
           items:
-            $ref: "#/components/schemas/packageElement"
+            $ref: "#/components/schemas/leg"
         properties:
           $ref: "#/components/schemas/packageProperties"
         links:
@@ -191,7 +194,7 @@ components:
           items:
             $ref: "#/components/schemas/link"
 
-    packageElement:
+    featureProperties:
       type: object
       required:
       - type
@@ -199,22 +202,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ "leg", "zone", "return_area", "return_station", "policy_zone", "geofence" ]
-        geometry:
-          $ref: "#/components/schemas/geojsonGeometry"
-        properties:
-          oneOf:
-          - $ref: "#/components/schemas/legProperties"
-          - $ref: "#/components/schemas/externalPackageElement"
-          discriminator:
-            propertyName: type
-            mapping:
-              leg: "#/components/schemas/legProperties"
-              zone: "#/components/schemas/externalPackageElement" 
-              return_area: "#/components/schemas/externalPackageElement" 
-              return_station: "#/components/schemas/externalPackageElement" 
-              policy_zone: "#/components/schemas/externalPackageElement"
-              geofence: "#/components/schemas/externalPackageElement"
+          enum: [ "leg", "station", "stop_place", "start_location", "end_location", "zone", "return_area", "return_station", "policy_zone", "geofence" ]
         id:
           $ref: "#/components/schemas/shortString"
         links:
@@ -222,20 +210,7 @@ components:
           items:
             $ref: "#/components/schemas/link"
 
-    externalPackageElement:
-      type: object
-      required:
-        - id
-        - type
-      properties:
-        id:
-          $ref: "#/components/schemas/shortString"
-          description: a reference to an external datasource, like a GBFS station, a NeTEx zone or an MDS policy policy (geography)
-        type:
-          type: string
-          enum: [ "zone", "return_area", "return_station", "policy_zone", "geofence" ]
-
-    travelCollections:
+    definitions:
       type: object
       description: object containing all necessary collections for a package and a offerCollection
         Both refer to objects in these collections.
@@ -243,7 +218,7 @@ components:
         products:
           type: array
           items:
-            $ref: "#/components/schemas/product"
+            $ref: "#/components/schemas/productProperties"
         places:
           description: Places that are not specified in an external data source (like a home address)
           type: array
@@ -260,43 +235,112 @@ components:
           items:
             $ref: "#/components/schemas/asset"
         travellers:
-          $ref: "#/components/schemas/travellers"
+          type: array
+          items:
+            $ref: "#/components/schemas/traveller"
 
-    packageProperties:
-      x-tm: TRAVEL OFFER PACKAGE, CUSTOMER PURCHASE PACKAGE
+    offerProperties:
+      x-tm: SALES OFFER PACKAGE
       allOf:
       - $ref: "#/components/schemas/travelSpecification"
+      - type: object
+        required:
+          - type
+          - status
+        properties:
+          type:
+            type: string
+            enum: [ offer ]
+          id:
+            $ref: "#/components/schemas/offerReference"
+          status:
+            $ref: "#/components/schemas/packageStatus"
+          summary:
+            $ref: "#/components/schemas/summary"
+          price:
+            $ref: "#/components/schemas/amountOfMoney"
+      - $ref: "#/components/schemas/definitions"
+
+    packageProperties:
+      x-tm: CUSTOMER PURCHASE PACKAGE
+      allOf:
+      - $ref: "#/components/schemas/offerProperties"
       - type: object
         description: a purchased package is a registration of an agreement between end user and TO, 
           to execute a package (=set of legs) according a specification, including all conditions
         required:
           - type
-          - status
-          - price
         properties:
           type:
             type: string
-            enum: [ package ]
+            enum: [ package, offer ]
           id:
-            type: string
-          status:
-            $ref: "#/components/schemas/packageStatus"
-          packageLabels:
-            type: array
-            items:
-              $ref: "#/components/schemas/packageLabel"
-          price:
-            $ref: "#/components/schemas/amountOfMoney"
+            $ref: "#/components/schemas/packageReference"
           offers:
+            description: contains offered packages. When a package only contains
+              one offer, this property should be neglected. All references in the offers
+              refer to the legs and products in the 'definition' part of the packageProperties.
             type: array
             items:
-              $ref: "#/components/schemas/offerReference"
-          # legs are in the elements
-          # legs:
-          #   type: array
-          #   items:
-          #     $ref: "#/components/schemas/leg"
-      - $ref: "#/components/schemas/travelCollections"
+              $ref: "#/components/schemas/offerPart"
+
+    offerPart:
+      type: object
+      properties:
+        id: 
+          $ref: "#/components/schemas/offerReference"
+        legs:
+          type: array
+          items:
+            $ref: "#/components/schemas/legReference"
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/productReference"
+
+    productProperties:
+      x-tm: FARE PRODUCT
+      type: object
+      description: a product within a package
+      required:
+        - id
+        - type
+      properties:
+        type:
+          type: string
+          enum: [ product ]
+        id:
+          $ref: "#/components/schemas/productReference"
+        name:
+          $ref: "#/components/schemas/normalString"
+        description:
+          $ref: "#/components/schemas/longString"
+        parts:
+          type: array
+          description: to be used for composed products.
+          items:
+            $ref: "#/components/schemas/productReference"
+        fare:
+          $ref: "#/components/schemas/fareStructure"
+        conditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/condition"
+        guarantees:
+          type: array
+          items: 
+            $ref: "#/components/schemas/guarantee"
+
+    leg:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/legReference"
+        type:
+          type: string
+          enum: [ leg ]
+        properties:
+          $ref: "#/components/schemas/legProperties"
 
     legProperties:
       x-tm: LEG
@@ -325,15 +369,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/travellerReference"
-        usedProduct:
-          $ref: "#/components/schemas/productReference"
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/productReference"
           description: The main product (v1.x 'asset type') used to execute this leg
-        usedAncillaries:
+        ancillaries:
           type: array
           items:
             $ref: "#/components/schemas/ancillaryReference"
           description: additional products that can be assigned to this leg
-        usedAssets:
+        assets:
           type: array
           items:
             $ref: "#/components/schemas/assetReference"
@@ -342,35 +388,18 @@ components:
           $ref: "#/components/schemas/organisationReference"
         operatorName:
           $ref: "#/components/schemas/normalString"
-        summary:
-          $ref: "#/components/schemas/summary"
-
-    product:
-      x-tm: FARE PRODUCT
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [ product ]
-        id: 
-          $ref: "#/components/schemas/productReference"
-        productName:
-          $ref: "#/components/schemas/normalString"
-        guarantees:
+        returnStations:
           type: array
           items:
-            $ref: "#/components/schemas/guarantee"
+            $ref: "#/components/schemas/placeReference"
 
     packageLabel:
       type: string
       enum:
         [
-          CHEAPEST,
           MOST_FLEXIBLE,
           NON_FLEXIBLE,
           MOST_ECO_FRIENDLY,
-          FASTEST,
-          SHORTEST,
           REFUNDABLE,
           EXCHANGABLE,
           CANCELLABLE,
@@ -388,7 +417,7 @@ components:
         _PENDING_ the purchase of the package is not confirmed (the end user has shown intentions to purchase this offer), must be finalized with the package-confirm operation (purchase)<br>
         _CONFIRMED_ a purchased package. Both parties agreed to deliver services in return of payment<br>
         _CANCELLED_ the package is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br>
-        _ROLLBACK_ the package is purchased, but within rollback-expiry-time rollbacked, therefore no financial consequences<br>
+        _ROLLBACK_ the package is purchased, but before the Rollback-Expires timestamp has passed, therefore no financial consequences<br>
         _EXPIRED_ the MP didn't respond on time, the package offer has been expired<br>
         _STARTED_ the package is started, the <u>trip execution</u> module is needed now to manage the execution of the package<br>
         _ENDED_ the package has ended, the trip has been executed<br>
@@ -511,12 +540,6 @@ components:
           $ref: "#/components/schemas/dateTime"
           description: The intended arrival time, at the `to place`. When the **startTime** is not set, and **endTime** is set, it is an implicit request for an arrival time guarantee.
 
-    travellers:
-      type: array
-      minItems: 1
-      items:
-        $ref: "#/components/schemas/traveller"
-
     traveller:
       type: object
       required:
@@ -529,25 +552,32 @@ components:
           pattern: "^(traveller)"
         id:
           $ref: "#/components/schemas/travellerReference"
-        name:
-          $ref: "#/components/schemas/normalString"
         characteristics:
           $ref: "#/components/schemas/travellerCharacteristics"
         requirements:
           $ref: "#/components/schemas/travellerRequirements"
+        userProfile:
+          $ref: "#/components/schemas/userProfileReference"
+        groupSize:
+          description: in case of a travelling party, specify the (sub)group size with equivalent attributes
+          type: number
+
         isValidated:
           type: boolean
           description: Whether this traveler's identity and properties have been verified by the MaaS provider
+
+        # in case of not-anonymous travellers (INDIVIDUAL TRAVELLER)
+        name:
+          $ref: "#/components/schemas/normalString"
         age:
           $ref: "#/components/schemas/shortInt"
+          minimum: 0
           description: Age of the traveler, may be approximate
         fullName:
           $ref: "#/components/schemas/normalString"
           description: the name of the traveller, can be used to validate against ID cards
         customerReference:
           $ref: "#/components/schemas/customerReference"
-        userProfile:
-          $ref: "#/components/schemas/userProfileReference"
 
     classOfUse:
       x-tm: CLASS OF USE
@@ -567,6 +597,17 @@ components:
           UNKNOWN,
         ]
 
+    condition:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/shortString"
+        name:
+          $ref: "#/components/schemas/normalString"
+        type:
+          type: string
+          enum: [ external_condition, return_station, return_area ]
+
     guarantee:
       x-tm: TRAVEL GUARANTEE
       type: object
@@ -574,7 +615,7 @@ components:
         id:
           $ref: "#/components/schemas/uuid"
         name:
-          type: string
+          $ref: "#/components/schemas/normalString"
         organisation:
           description: guaranteeing organisation
           $ref: "#/components/schemas/organisationReference"
@@ -638,7 +679,7 @@ components:
       properties:
         type: 
           type: string
-          enum: [ancillary]
+          enum: [ ancillary ]
         id:
           $ref: "#/components/schemas/ancillaryReference"
         name: 
@@ -650,6 +691,8 @@ components:
         image:
           $ref: "#/components/schemas/url"
           description: Link to an image of the ancillary
+        fee:
+          $ref: "#/components/schemas/fareStructure"
 
     asset:
       x-tm: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING EQUIPMENT
@@ -659,7 +702,7 @@ components:
       properties:
         type:
           type: string
-          enum: [asset]
+          enum: [ asset ]
         id:
           $ref: "#/components/schemas/assetReference"
           description: Identifier of an asset. Can be an external reference, but also a (internal) ID
@@ -818,31 +861,33 @@ components:
 
     card:
       x-tm: CUSTOMER PAYMENT MEANS, MEDIUM APPLICATION INSTANCE
-      allOf:
-      - $ref: "#/components/schemas/cardType"
-      - type: object
-        description: Any kind of card that isn't a license, only provide the cards that are required
-        required:
-          - type
-          - cardNumber
-        properties:
-          type:
-            type: string
-            enum: [card]
-          cardNumber:
-            $ref: "#/components/schemas/shortString"
-            description: number of the card, like ID number, credit card or bank account number
-          description:
-            $ref: "#/components/schemas/shortString"
-            description: description of the card
-          additionalNumber:
-            $ref: "#/components/schemas/shortString"
-            description: additional number, like CVC code or IBAN code
-          endValidity:
-            $ref: "#/components/schemas/date"
-            description: this card is valid until this date
-          country:
-            $ref: "#/components/schemas/country"
+      type: object
+      description: Any kind of card that isn't a license, only provide the cards that are required
+      required:
+        - type
+        - cardType
+        - cardNumber
+      properties:
+        type:
+          type: string
+          enum: [card]
+        cardType:
+          $ref: "#/components/schemas/cardType"
+          description: the type of card, like a credit card, ID card, etc.
+        cardNumber:
+          $ref: "#/components/schemas/shortString"
+          description: number of the card, like ID number, credit card or bank account number
+        description:
+          $ref: "#/components/schemas/shortString"
+          description: description of the card
+        additionalNumber:
+          $ref: "#/components/schemas/shortString"
+          description: additional number, like CVC code or IBAN code
+        endValidity:
+          $ref: "#/components/schemas/date"
+          description: this card is valid until this date
+        country:
+          $ref: "#/components/schemas/country"
 
     cardType:
       x-tm: TYPE OF PAYMENT METHOD, MEDIUM ACCESS DEVICE
@@ -933,21 +978,22 @@ components:
 
     license:
       x-tm: ACCEPTED DRIVER PERMIT
-      allOf:
-        - $ref: "#/components/schemas/licenseType"
-        - type: object
-          description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
-          required:
-            - number
-            - type
-          properties:
-            type:
-              type: string
-              enum: [license]
-            licenseNumber:
-              $ref: "#/components/schemas/shortString"
-            endValidity:
-              $ref: "#/components/schemas/date"
+      type: object
+      description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
+      required:
+        - number
+        - type
+      properties:
+        type:
+          type: string
+          enum: [license]
+        licenseType:
+          description: the type of license, like a driver license, or a license to operate a
+          $ref: "#/components/schemas/licenseType"
+        licenseNumber:
+          $ref: "#/components/schemas/shortString"
+        endValidity:
+          $ref: "#/components/schemas/date"
 
     licenseType:
       x-tm: TYPE OF DRIVER PERMIT
@@ -1070,6 +1116,32 @@ components:
           price:
             $ref: "#/components/schemas/amountOfMoney"
 
+          products:
+            type: array
+            description: product names
+            items:
+              type: string
+
+          legs:
+            type: array
+            items:
+              type: object
+              required:
+              - mode
+              - name
+              properties:
+                mode:
+                  $ref: "#/components/schemas/mode"
+                name:
+                  type: string
+                icon:
+                  $ref: "#/components/schemas/url"
+
+          labels:
+            type: array
+            items:
+              $ref: "#/components/schemas/packageLabel"
+
           # x-tm: DISTRIBUTION VALIDITY PARAMETERS
           distribution:
             $ref: "#/components/schemas/distribution"
@@ -1096,12 +1168,14 @@ components:
             properties:
               exchangeable:
                 type: boolean
+                default: true
               numberOfExchangesAllowed:
                 type: integer
 
           # x-tm: REFUNDING
           refundable:
             type: boolean
+            default: true
 
           # x-tm: TRANSFERABILITY
           transfer:
@@ -1109,6 +1183,7 @@ components:
             properties:
               canTransfer:
                 type: boolean
+                default: true
               fee:
                 $ref: "#/components/schemas/amountOfMoney"
               feePercentage:
@@ -1192,24 +1267,24 @@ components:
     fareStructure:
       x-tm: TARIFF
       allOf:
-        - $ref: "#/components/schemas/amountOfMoney"
-        - type: object
-          description: the total fare is the sum of all parts, except for the 'MAX' fareStructureElement. This one descripes the maximum price for the complete leg.
-          additionalProperties: true
-          required:
-            - elements
-          properties:
-            estimated:
-              type: boolean
-              description: is this fare an estimation?
-            description:
-              $ref: "#/components/schemas/normalString"
-              description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
-            elements:
-              type: array
-              maxItems: 25
-              items:
-                $ref: "#/components/schemas/fareStructureElement"
+      - $ref: "#/components/schemas/amountOfMoney"
+      - type: object
+        description: the total fare is the sum of all parts, except for the 'MAX' fareStructureElement. This one descripes the maximum price for the complete leg.
+        additionalProperties: true
+        required:
+          - elements
+        properties:
+          estimated:
+            type: boolean
+            description: is this fare an estimation?
+          description:
+            $ref: "#/components/schemas/normalString"
+            description: user friendly description of the fare (e.g. 'full fare'), should match Content-Language
+          elements:
+            type: array
+            maxItems: 25
+            items:
+              $ref: "#/components/schemas/fareStructureElement"
 
     fareStructureElement:
       x-tm: 
@@ -1224,68 +1299,68 @@ components:
         The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay
         EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer).
       allOf:
-        - $ref: "#/components/schemas/amountOfMoney"
-        - type: object
-          required:
-            - type
-          properties:
-            type:
-              type: string
-              description:
-                type of fare structure element. If there is only one fare structure elements and this field is missing, it should
-                be assumed it is 'FIXED'. In all other situations this field is mandatory.<br>
-                _FIXED_ fixed element, independend on the duration or distance traveled.
-                _FLEX_ flex element, dependend on the duration or distance of the package. Can be tiered.
-                _YIELD_ yield price. Dependend on external factors the price will be determined. The amount of money can fluctuate
-                _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX elements, cap it using this rule. Max 1 per fare structure.
-              enum: [FIXED, FLEX, YIELD, MAX]
-            priceLevel:
-              type: string
-              description:
-                is this the default price or is this an additional part (discount, price surge). <br>
-                _DEFAULT_ the default price for this price part<br>
-                _DISCOUNT_ the amount must always be negative <br>
-                _SURGE_ the amount must always be positive <br>
-                This also means, that when you're working with discounts or surges, you have to deliver 2 fare structure elements, one for the default price and one for the discount/surge. This can be used in combination with as
-                well the fixed price parts as with the flex price parts.
-              enum: [DEFAULT, DISCOUNT, SURGE]
-            units:
-              type: string
-              description: in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR
-              enum: [KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE, ZONE]
-            amountOfUnits:
-              $ref: "#/components/schemas/float"
-              description:
-                the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise
-                not allowed. In case of 0.5 EUR per 15 MINUTES, the amount is 0.5, the `amountOfUnits` must contain 15 and `units` MINUTES.
-            interval:
-              $ref: "#/components/schemas/interval"
-            validity:
-              $ref: "#/components/schemas/dateTimeRange"
-            name:
-              $ref: "#/components/schemas/normalString"
-              description: an optional description of this fare structure element.
-            class:
-              type: string
-              description:
-                class of this fare structure element. Could be FARE or ANCILLARY<br>
-                _FARE_ this fare structure element is related to the distance or time of usage.<br>
-                _ANCILLARY_ this fare structure element is related to the rental of one or more ancillaries.
-              default: "FARE"
-              enum: [FARE, ANCILLARY]
-            minimumPrice:
-              $ref: "#/components/schemas/float"
-              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
-            maximumPrice:
-              $ref: "#/components/schemas/float"
-              description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
-            assetState:
-              type: string
-              description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
-              enum: [IN_USE, PAUSED]
-              default: IN_USE
-            extraInfo:
-              $ref: "#/components/schemas/customProperties"
+      - $ref: "#/components/schemas/amountOfMoney"
+      - type: object
+        required:
+          - type
+        properties:
+          type:
+            type: string
+            description:
+              type of fare structure element. If there is only one fare structure elements and this field is missing, it should
+              be assumed it is 'FIXED'. In all other situations this field is mandatory.<br>
+              _FIXED_ fixed element, independend on the duration or distance traveled.
+              _FLEX_ flex element, dependend on the duration or distance of the package. Can be tiered.
+              _YIELD_ yield price. Dependend on external factors the price will be determined. The amount of money can fluctuate
+              _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX elements, cap it using this rule. Max 1 per fare structure.
+            enum: [FIXED, FLEX, YIELD, MAX]
+          priceLevel:
+            type: string
+            description:
+              is this the default price or is this an additional part (discount, price surge). <br>
+              _DEFAULT_ the default price for this price part<br>
+              _DISCOUNT_ the amount must always be negative <br>
+              _SURGE_ the amount must always be positive <br>
+              This also means, that when you're working with discounts or surges, you have to deliver 2 fare structure elements, one for the default price and one for the discount/surge. This can be used in combination with as
+              well the fixed price parts as with the flex price parts.
+            enum: [DEFAULT, DISCOUNT, SURGE]
+          units:
+            type: string
+            description: in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR
+            enum: [KM, SECOND, MINUTE, HOUR, MILE, PERCENTAGE, ZONE]
+          amountOfUnits:
+            $ref: "#/components/schemas/float"
+            description:
+              the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise
+              not allowed. In case of 0.5 EUR per 15 MINUTES, the amount is 0.5, the `amountOfUnits` must contain 15 and `units` MINUTES.
+          interval:
+            $ref: "#/components/schemas/interval"
+          validity:
+            $ref: "#/components/schemas/dateTimeRange"
+          name:
+            $ref: "#/components/schemas/normalString"
+            description: an optional description of this fare structure element.
+          class:
+            type: string
+            description:
+              class of this fare structure element. Could be FARE or ANCILLARY<br>
+              _FARE_ this fare structure element is related to the distance or time of usage.<br>
+              _ANCILLARY_ this fare structure element is related to the rental of one or more ancillaries.
+            default: "FARE"
+            enum: [FARE, ANCILLARY]
+          minimumPrice:
+            $ref: "#/components/schemas/float"
+            description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
+          maximumPrice:
+            $ref: "#/components/schemas/float"
+            description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
+          assetState:
+            type: string
+            description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
+            enum: [IN_USE, PAUSED]
+            default: IN_USE
+          extraInfo:
+            $ref: "#/components/schemas/customProperties"
 
     interval:
       x-tm: TIME INTERVAL (in case UNITS = minutes or hours)
@@ -1317,11 +1392,14 @@ components:
       description: address parts, where addressLine1 and 2 should contain the complete address, matches Content-Language
       additionalProperties: false
       required:
-        - placeId
+        - id
         - addressLine1
       properties:
-        placeId:
+        id:
           $ref: "#/components/schemas/placeReference"
+        type:
+          type: string
+          enum: [ place ]
         addressLine1:
           $ref: "#/components/schemas/longString"
           description: contains street, housenumber & additions
@@ -1403,8 +1481,7 @@ components:
         ]
 
     organisationReference:
-      allOf:
-      - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     placeReference:
       type: string
@@ -1418,68 +1495,52 @@ components:
       pattern: "^(GPS:|[datasource]:|P:)"
 
     customerReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     travellerReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     operatorReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     zoneReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     productReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     userProfileReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     cardTypeReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     entitlementReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     packageReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     offerReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     legReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     lineReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     assetReference:
-      allOf: 
-      - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
         
     ancillaryReference:
-      allOf: 
-      - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
       
     equipmentReference:
-      allOf:
-      - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     serviceJourneyReference:
-      allOf:
-        - $ref: "#/components/schemas/normalString"
+      $ref: "#/components/schemas/normalString"
 
     # GeoJSON specs, in contradiction to the convention starting with a capital. Reason: compatibility with GeoJSON specification (types are named this way)
     basePoint:
@@ -1575,7 +1636,7 @@ components:
         geometry:
           $ref: "#/components/schemas/geojsonGeometry"
         properties:
-          type: object
+          $ref: "#/components/schemas/featureProperties"
         links:
           type: array
           items:

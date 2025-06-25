@@ -138,9 +138,9 @@ paths:
     # /collections/travel-documents/items
 
   # IN AFTER-SALES:
-    # /collections/refund-options/items for a specific traveller
-    # /processes/claim-refund-option/execute
-    # /processes/confirm-refund-option/execute
+    # /collections/redress-options/items for a specific traveller
+    # /processes/claim-redress-option/execute
+    # /processes/confirm-redress-option/execute
 
 components:
   requestBodies:

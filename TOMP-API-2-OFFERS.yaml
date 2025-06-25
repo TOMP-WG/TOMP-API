@@ -63,7 +63,7 @@ paths:
         - offer
       responses:
         "200":
-          $ref: "#/components/responses/offerResponse"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
           
@@ -142,10 +142,12 @@ components:
             mapping:
               travel_specification: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
               trip_pattern: "#/components/schemas/tripPattern"
-        groupRequirements:
+        requirements:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerRequirements"
         travellers:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"
+          type: array
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/traveller"
         places:
           description: Places that are not specified in an external data source (like a home address)
           type: array
@@ -212,7 +214,7 @@ components:
             type: string
             enum: [ offer ]
           properties:
-            $ref: "#/components/schemas/offerProperties"          
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageProperties"          
 
     offerCollectionProperties:
       allOf:
@@ -224,7 +226,7 @@ components:
           type:
             type: string
             enum: [ offers ]
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelCollections"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/definitions"
 
     offerProperties:
       type: object
@@ -239,28 +241,6 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
         summary:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/summary"
-        legSummary:
-          type: array
-          items:
-            type: object
-            required:
-            - mode
-            - name
-            properties:
-              mode:
-                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/mode"
-              name:
-                type: string
-              icon:
-                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/url"
-        legs:
-          type: array
-          items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legProperties"
-        products:
-          type: array
-          items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
         guarantees:
           type: array
           items:

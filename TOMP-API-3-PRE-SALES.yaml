@@ -356,7 +356,6 @@ components:
                 required:
                 - package
                 - leg
-                - ancillary
                 description: this can be used to assign an ancillary to a leg, by
                   using the field `ancillary`. If you want to replace an ancillary, fill the field
                   `replacesAncillary` with the ancillary to replace and `ancillary` with the new one.

@@ -282,6 +282,8 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
+  # /processes/release-package/execute is described in the PRE-SALES
+
 components:
   requestBodies:
     purchaseOfferRequest:
@@ -300,7 +302,9 @@ components:
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
                   travellers:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/traveller"
               subscriber:
                 type: object
                 required:
@@ -333,8 +337,10 @@ components:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
-                  travellers:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"
+                  traveller:
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/traveller"
               subscriber:
                 type: object
                 required:
@@ -368,7 +374,9 @@ components:
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
                   travellers:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellers"                      
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/traveller"                      
               subscriber:
                 type: object
                 required:
@@ -435,7 +443,7 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
         Content-Language:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-        Rollback-Expires:
+        Expiry-date:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/expires"
   
     travelDocumentsResponse:
@@ -462,8 +470,7 @@ components:
         travelDocuments:
           type: array
           items:
-            allOf: 
-            - $ref: "#/components/schemas/travelDocument"
+            $ref: "#/components/schemas/travelDocument"
 
     binaryTicket:
       x-tm: lacking
@@ -479,6 +486,10 @@ components:
         base64:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
           description: base 64 binary data
+
+    otherAccessInfo:
+      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
+      description: Generic travelDocument, non-standardized (yet)
 
     externalDigitalTicket:
       x-tm: TRAVEL DOCUMENT
@@ -514,13 +525,6 @@ components:
             deviceName:
               $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
               description: how it advertises itself
-
-    otherAccessInfo:
-      x-tm: 
-      - concept: lacking
-      description: Generic travelDocument, non-standardized (yet)
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
 
     travelDocument:
       x-tm: TRAVEL DOCUMENT

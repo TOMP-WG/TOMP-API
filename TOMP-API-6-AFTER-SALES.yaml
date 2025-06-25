@@ -18,11 +18,11 @@ tags:
     description: This part of the API describes how the financial settlement should be done. All kinds of fares, fees, debits, and credits are described.
 
 paths:
-  /collections/refund-options/items:
+  /collections/redress-options/items:
     get:
-      operationId: getRefundOptions
-      summary: "Retrieve refund options for a guarantee"
-      description: Returns possible refund options for a guarantee
+      operationId: getRedressOptions
+      summary: "Retrieve redress options for a guarantee"
+      description: Returns possible refund or replacement options for a guarantee
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -38,21 +38,27 @@ paths:
           required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+        - name: legId
+          in: query
+          description: the offer with a guarantee
+          required: false
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
         - name: guaranteeId
           in: query
           description: the guarantee that haven't been met
           required: false
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
         - name: travellerId
           in: query
-          description: to request refunds for a single traveller
+          description: to request redresses for a single traveller
           required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
         - name: ancillaryId
           in: query
-          description: to request refunds for a not-used ancillary or ancillary to remove
+          description: to request redresses for a not-used ancillary or ancillary to remove
           required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
@@ -66,14 +72,14 @@ paths:
         - REFUND QUERY
       responses:
         "200":
-          $ref: "#/components/responses/refundResponse"
+          $ref: "#/components/responses/redressResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/claim-refund-option/execute:
+  /processes/claim-redress-option/execute:
     post:
-      operationId: refundOptionRequest
-      description: refund options must be claimed & confirmed
+      operationId: redressOptionRequest
+      description: redress options must be claimed & confirmed
       tags:
         - after sales
       parameters:
@@ -87,17 +93,17 @@ paths:
         - TRAVEL PACKAGE REVOKE FULFILMENT QUERY
         - TRAVEL PACKAGE SPOT CANCELLATION QUERY
       requestBody:
-        $ref: "#/components/requestBodies/refundOptionRequest"
+        $ref: "#/components/requestBodies/redressOptionRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/confirm-refund-option/execute:
+  /processes/confirm-redress-option/execute:
     post:
-      operationId: confirmRefundOptionRequest
-      description: confirm the claimed refund option
+      operationId: confirmRedressOptionRequest
+      description: confirm the claimed redress option
       tags:
         - after sales
       parameters:
@@ -110,14 +116,14 @@ paths:
       x-tm:
         - lacking
       requestBody:
-        $ref: "#/components/requestBodies/refundOptionRequest"
+        $ref: "#/components/requestBodies/redressOptionRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/refund-deposit/execute:
+  /processes/redress-deposit/execute:
     post:
       operationId: refundDepositRequest
       summary: "Request to refund a deposit"
@@ -222,7 +228,7 @@ paths:
       summary: "Cancel a package in confirmed state for (technical issues)."
       description: 
         Cancel this package. This endpoint is only there to correct (technical) issues.<br>
-        Normally, after purchase, you have to request refund options, claim it and confirm the claim.<br>
+        Normally, after purchase, you have to request redress options, claim it and confirm the claim.<br>
         <br>
         Before purchase you release a package.<br>
         During the purchase you rollback a package.<br>
@@ -249,7 +255,7 @@ paths:
 
 components:
   requestBodies:
-    refundOptionRequest:
+    redressOptionRequest:
      content:
         application/json:
           schema:    
@@ -261,7 +267,6 @@ components:
                 type: object
                 required:
                 - package
-                - offer
                 - guarantee
                 - option
                 properties:
@@ -305,8 +310,8 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"                    
 
   responses:
-    refundResponse:
-      description: a list of refund options
+    redressResponse:
+      description: a list of redress options
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
@@ -319,7 +324,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/refundOptions"
+            $ref: "#/components/schemas/redressOptions"
 
     paymentResponse:
       description: journal entries
@@ -334,14 +339,14 @@ components:
             $ref: "#/components/schemas/payments"    
 
   schemas:
-    refundOptions:
+    redressOptions:
       type: object
       required:
         - type
       properties:
         type:
           type: string
-          enum: [RefundOptions]
+          enum: [RedressOptions]
         options:
           type: array
           items:
@@ -350,7 +355,7 @@ components:
               id: 
                 $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
               properties:
-                $ref: "#/components/schemas/refundOption"
+                $ref: "#/components/schemas/redressOption"
               links:
                 type: array
                 items:
@@ -360,7 +365,7 @@ components:
           properties:
             type: 
               type: string
-              enum: [refundOptions]
+              enum: [redressOptions]
             package:
               $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
             offer:
@@ -379,28 +384,33 @@ components:
           items:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link" 
 
-    refundOption:
+    redressOption:
       type: object
       properties:
         type:
           type: string
-          enum: [ refund_option ]
+          enum: [RedressOption]
         id:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
         packageState:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageStatus"
-        refundType:
+        redressType:
           type: string
           enum: [ package_refund
                 , offer_refund
-                , remove_traveller
-                , remove_ancillary 
-                , unused_ancillary
-                ]
-        consequences:
+                , leg_refund
+                , ancillary_refund
+                , replacement ]
+        reason:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/guarantee"
+        compensations:
           type: array
           items:
             $ref: "#/components/schemas/financialDetail"
+        replacements:
+          type: array
+          items: 
+            $ref: "TOMP-API-2-OFFERS.yaml#/components/schemas/offer"
 
     paymentCategory:
       type: string
