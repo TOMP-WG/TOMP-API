@@ -37,13 +37,12 @@ paths:
           schema:
             type: string
             description: the possible operations on a leg.
-            enum:
-            - start
-            - pause
-            - resume
-            - end
-            - extend
-            - postpone
+            enum: [ start,
+                    pause,
+                    resume,
+                    end,
+                    extend,
+                    postpone ]
       security:
         - BearerAuth: []
         - OAuth: []
@@ -72,10 +71,10 @@ paths:
           schema:
             type: string
             description: Operations on an asset, the enlisted operations are default, you can extend (outside the TOMP-API).
-            # enum:
-            # - lock
-            # - unlock
-            # - open-trunk
+            x-enum:
+             - lock
+             - unlock
+             - open-trunk
       security:
         - BearerAuth: []
         - OAuth: []
@@ -109,9 +108,7 @@ paths:
           schema:
             type: string
             description: possible operations on a product
-            enum:
-              - activate
-              - initiate
+            enum: [ activate, initiate ]
       security:
         - BearerAuth: []
         - OAuth: []
@@ -145,6 +142,8 @@ paths:
 components:
   requestBodies:
     legRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -173,6 +172,8 @@ components:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"                     
 
     assetRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -205,6 +206,8 @@ components:
                     format: uri
 
     productRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -215,7 +218,8 @@ components:
               inputs:
                 type: object
                 required:
-                - asset
+                - package
+                - product
                 properties:
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
@@ -224,6 +228,8 @@ components:
 
   responses:
     retryErrorResponse:
+      x-semantics:
+      - transmodel: none
       description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
       headers:
         Version:

@@ -68,8 +68,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
-      x-tm:
-        - REFUND QUERY
+      x-semantics:
+      - transmodel: REFUND QUERY
       responses:
         "200":
           $ref: "#/components/responses/redressResponse"
@@ -89,9 +89,8 @@ paths:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-      x-tm:
-        - TRAVEL PACKAGE REVOKE FULFILMENT QUERY
-        - TRAVEL PACKAGE SPOT CANCELLATION QUERY
+      x-semantics:
+      - transmodel: REDRESS QUERY
       requestBody:
         $ref: "#/components/requestBodies/redressOptionRequest"
       responses:
@@ -113,8 +112,6 @@ paths:
         - BearerAuth: []
         - OAuth: []
         - OAuthPKI: []
-      x-tm:
-        - lacking
       requestBody:
         $ref: "#/components/requestBodies/redressOptionRequest"
       responses:
@@ -136,8 +133,6 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
-      x-tm:
-        - lacking
       requestBody:
         $ref: "#/components/requestBodies/refundDepositRequest"        
       responses:
@@ -190,8 +185,6 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
-      x-tm:
-        - lacking
       responses:
         "200":
           $ref: "#/components/responses/paymentResponse"
@@ -212,8 +205,6 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
-      x-tm:
-        - lacking
       requestBody:
         $ref: "#/components/requestBodies/confirmPaymentRequest"
       responses:
@@ -241,8 +232,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
-      x-tm:
-        - TRAVEL PACKAGE CANCELLATION QUERY
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE CANCELLATION QUERY
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
@@ -256,7 +247,9 @@ paths:
 components:
   requestBodies:
     redressOptionRequest:
-     content:
+      x-semantics:
+      - transmodel: none
+      content:
         application/json:
           schema:    
             type: object
@@ -280,6 +273,8 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
 
     refundDepositRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -296,6 +291,8 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
 
     confirmPaymentRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -311,6 +308,8 @@ components:
 
   responses:
     redressResponse:
+      x-semantics:
+      - transmodel: none
       description: a list of redress options
       headers:
         Version:
@@ -327,6 +326,8 @@ components:
             $ref: "#/components/schemas/redressOptions"
 
     paymentResponse:
+      x-semantics:
+      - transmodel: none
       description: journal entries
       headers:
         Content-Language:
@@ -340,13 +341,15 @@ components:
 
   schemas:
     redressOptions:
+      x-semantics:
+      - transmodel: TRAVEL REDRESSes
       type: object
       required:
         - type
       properties:
         type:
           type: string
-          enum: [RedressOptions]
+          pattern: "^(RedressOptions)$"
         options:
           type: array
           items:
@@ -365,7 +368,7 @@ components:
           properties:
             type: 
               type: string
-              enum: [redressOptions]
+              pattern: "^(RedressOptions)$"
             package:
               $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
             offer:
@@ -385,22 +388,24 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link" 
 
     redressOption:
+      x-semantics:
+      - transmodel: TRAVEL REDRESS
       type: object
       properties:
         type:
           type: string
-          enum: [RedressOption]
+          pattern: "^(RedressOption)$"
         id:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
         packageState:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageStatus"
         redressType:
           type: string
-          enum: [ package_refund
-                , offer_refund
-                , leg_refund
-                , ancillary_refund
-                , replacement ]
+          enum: [ PACKAGE_REFUND,
+                OFFER_REFUND,
+                LEG_REFUND,
+                ANCILLARY_REFUND,
+                REPLACEMENT ]
         reason:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/guarantee"
         compensations:
@@ -413,6 +418,8 @@ components:
             $ref: "TOMP-API-2-OFFERS.yaml#/components/schemas/offer"
 
     paymentCategory:
+      x-semantics:
+      - transmodel: none
       type: string
       description: The category of the journalled item <br>
         _ALL_ - for filtering purposes only<br>
@@ -434,30 +441,28 @@ components:
         _REFUND_ - refund of the deposit or upfront paid fare<br>
         _REBATE_ - (partial) rebate of the fare<br>
         _REIMBURSEMENT_ - reimbursement of the fare<br>
-      enum:
-        [
-          ALL,
-          DAMAGE,
-          LOSS,
-          STOLEN,
-          EXTRA_USAGE,
-          REFUND,
-          REBATE,
-          REIMBURSEMENT,
-          FINE,
-          OTHER_ASSET_USED,
-          CREDIT,
-          VOUCHER,
-          DEPOSIT,
-          OTHER,
-          FARE,
-        ]
+      enum: [ ALL,
+              DAMAGE,
+              LOSS,
+              STOLEN,
+              EXTRA_USAGE,
+              REFUND,
+              REBATE,
+              REIMBURSEMENT,
+              FINE,
+              OTHER_ASSET_USED,
+              CREDIT,
+              VOUCHER,
+              DEPOSIT,
+              OTHER,
+              FARE ]
 
     financialDetail:
+      x-semantics:
+      - transmodel: none
       allOf:
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/amountOfMoney"
       - type: object
-        additionalProperties: true
         properties:
           id:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
@@ -502,19 +507,25 @@ components:
           bankAccount:
             $ref: "#/components/schemas/bankAccount"
             description: this account will be used
+          customFields:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
 
     paymentState:
+      x-semantics:
+      - transmodel: none
       type: string
       description: the state of the payment detail
       enum: [TO_INVOICE, INVOICING, INVOICED]
 
     payments:
+      x-semantics:
+      - transmodel: none
       description: a list of offers.
       type: object
       properties:
         type:
           type: string
-          enum: [PaymentCollection]
+          pattern: "^(PaymentCollection)$"
         offers:
           type: array
           items:
@@ -525,11 +536,11 @@ components:
           properties:
             type:
               type: string
-              enum: [payments]
+              pattern: "^(payments)$"
             limit:
-              $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
+              type: integer
             offset:
-              $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
+              type: integer
             startTime:
               $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
             endTime:
@@ -553,6 +564,8 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
 
     bankAccount:
+      x-semantics:
+      - transmodel: none
       type: object
       description: bank account
       additionalProperties: false

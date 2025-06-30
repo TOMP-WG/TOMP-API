@@ -35,8 +35,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-tm: 
-        - TRAVEL PACKAGE CREATION QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE CREATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/selectOffersRequest"
       responses:
@@ -52,8 +52,8 @@ paths:
     get:
       operationId: requestAssets
       summary: "Request the assets available for a leg"
-      x-tm: 
-        - TRAVEL PACKAGE SPOT AVAILABILITY QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE SPOT AVAILABILITY QUERY
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -92,8 +92,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-tm:
-        - TRAVEL PACKAGE ANCILLARY AVAILABILITY QUERY (?)
+      x-semantics: 
+      - transmodel:TRAVEL PACKAGE ANCILLARY AVAILABILITY QUERY (?)
       responses:
         "200":
           $ref: "#/components/responses/ancillariesResponse"
@@ -112,7 +112,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-corom: TRAVEL PACKAGE ALTERATION QUERY
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/updateTravellerRequest"
       responses:
@@ -133,7 +134,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-corom: TRAVEL PACKAGE ALTERATION QUERY
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/updateTravelSpecificationRequest"
       responses:
@@ -154,10 +156,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-tm: 
-        - TRAVEL PACKAGE SPOT RESERVATION QUERY
-        - TRAVEL PACKAGE SPOT CANCELLATION QUERY
-        - TRAVEL PACKAGE ALTERATION QUERY 
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE SPOT RESERVATION QUERY, TRAVEL PACKAGE SPOT CANCELLATION QUERY, TRAVEL PACKAGE ALTERATION QUERY 
       requestBody:
         $ref: "#/components/requestBodies/assignAssetRequest"
       responses:
@@ -178,8 +178,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-tm: 
-        - TRAVEL PACKAGE ALTERATION QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/assignAncillaryRequest"
       responses:
@@ -201,8 +201,6 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-tm:
-        - lacking
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
@@ -227,8 +225,8 @@ paths:
         - OAuthPKI: []
       tags:
         - pre sales
-      x-corom: 
-        - TRAVEL PACKAGE ALTERATION QUERY
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
         $ref: "#/components/requestBodies/removeOfferRequest"
       responses:
@@ -245,6 +243,8 @@ paths:
 components:
   requestBodies:
     selectOffersRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE CREATION REQUEST
       content:
         application/json:
           schema:    
@@ -261,6 +261,8 @@ components:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
 
     updateTravellerRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
       content:
         application/json:
           schema:    
@@ -289,6 +291,8 @@ components:
                       entitlements of this traveller
 
     updateTravelSpecificationRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
       content:
         application/json:
           schema:    
@@ -315,6 +319,8 @@ components:
                     description: The intended arrival time, at the `to place`. When the **startTime** is not set, and **endTime** is set, it is an implicit request for an arrival time guarantee.
 
     assignAssetRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE SPOT RESERVATION REQUEST, TRAVEL PACKAGE SPOT CANCELLATION REQUEST, TRAVEL PACKAGE ALTERATION REQUEST
       content:
         application/json:
           schema:    
@@ -344,6 +350,8 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
                   
     assignAncillaryRequest:
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
       content:
         application/json:
           schema:    
@@ -372,6 +380,8 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
 
     removeOfferRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST, TRAVEL PACKAGE SPOT CANCELLATION REQUEST
       content:
         application/json:
           schema:    
@@ -391,6 +401,8 @@ components:
 
   responses:
     assetsResponse:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE SPOT AVAILABILITY DELIVERY
       description: a list of assets
       headers:
         Version:
@@ -407,10 +419,12 @@ components:
             $ref: "#/components/schemas/assetCollection"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
 
     ancillariesResponse:
       description: a list of ancillaries
+      x-semantics:
+      - transmodel: none
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
@@ -428,11 +442,13 @@ components:
   schemas:
     assetCollection:
       description: a list of available assets.
+      x-semantics:
+      - transmodel: VEHICLEs, SPOTs, PARKING BAYs, RECHARGING STATIONs
       type: object
       properties:
         type:
           type: string
-          enum: [AssetCollection]
+          pattern: "^(AssetCollection)$"
         assets:
           type: array
           items:
@@ -445,7 +461,7 @@ components:
           properties:
             type:
               type: string
-              enum: [assets]
+              pattern: "^(assets)$"
         numberMatched:
           type: number
         numberReturned:
@@ -460,11 +476,13 @@ components:
 
     ancillaryCollection:
       description: a list of available ancillaries.
+      x-semantics:
+      - transmodel: ANCILLARY PRODUCTs
       type: object
       properties:
         type:
           type: string
-          enum: [AncillaryCollection]
+          pattern: "^(AncillaryCollection)$"
         ancillaries:
           type: array
           items:
@@ -477,7 +495,7 @@ components:
           properties:
             type:
               type: string
-              enum: [ancillaries]
+              pattern: "^(ancillaries)$"
         numberMatched:
           type: number
         numberReturned:

@@ -74,6 +74,8 @@ paths:
 components:
   requestBodies:
     supportRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -86,6 +88,8 @@ components:
 
   responses:
     ticketsResponse:
+      x-semantics:
+      - transmodel: none
       description: a list of tickets
       headers:
         Version:
@@ -99,7 +103,7 @@ components:
             properties:
               type:
                 type: string
-                enum: ["TicketCollection"]
+                pattern: "^(TicketCollection)$"
               tickets:
                 type: array
                 items:
@@ -114,6 +118,8 @@ components:
   
   parameters:
     supportTicketStatus:
+      x-semantics:
+      - transmodel: none
       name: supportTicketStatus
       in: query
       required: false
@@ -122,6 +128,8 @@ components:
 
   schemas:
     supportTicket:
+      x-semantics:
+      - transmodel: none
       type: object
       required:
         - supportType
@@ -134,7 +142,7 @@ components:
           description: ticketID, to be provided when created. Mandatory when status != REQUESTED
         type:
           type: string
-          enum: [support_ticket]
+          pattern: "^(supportTicket)$"
         status:
           $ref: "#/components/schemas/supportTicketStatus"
         supportType:
@@ -150,19 +158,17 @@ components:
             _ACCIDENT_ Accident occurred<br>
             _OTHER_ unspecified<br>
             _REPORT_DAMAGE_ Oeps. Photo sent with slight damage
-          enum:
-            [
-              BROKEN_DOWN,
-              NOT_AT_LOCATION,
-              MISSING_AFTER_PAUSE,
-              NOT_CLEAN,
-              NOT_AVAILABLE,
-              UNABLE_TO_OPEN,
-              UNABLE_TO_CLOSE,
-              ACCIDENT,
-              OTHER,
-              REPORT_DAMAGE,
-            ]
+          enum: [ BROKEN_DOWN,
+                  NOT_AT_LOCATION,
+                  MISSING_AFTER_PAUSE,
+                  NOT_CLEAN,
+                  NOT_AVAILABLE,
+                  UNABLE_TO_OPEN,
+                  UNABLE_TO_CLOSE,
+                  ACCIDENT,
+                  OTHER,
+                  REPORT_DAMAGE,
+                ]
         location:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
         timestamp:
@@ -171,14 +177,11 @@ components:
         priority:
           type: string
           description: the priority of the support request.
-          enum:
-            [
-              ERROR_CANNOT_CONTINUE,
-              ERROR_CAN_CONTINUE,
-              DISTURBING_ISSUE,
-              QUESTION,
-              OTHER,
-            ]
+          enum: [ ERROR_CANNOT_CONTINUE,
+                  ERROR_CAN_CONTINUE,
+                  DISTURBING_ISSUE,
+                  QUESTION,
+                  OTHER ]
         contactInformationEndUser:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
           description: contact information of the end user in case of direct response requests, like phone number
@@ -203,6 +206,8 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
           
     supportTicketStatus:
+      x-semantics:
+      - transmodel: none
       type: string
       description:
         _ISSUE_REQUESTED_ the ticket is new, to be processed by the TO<br>
@@ -210,11 +215,8 @@ components:
         _ISSUE_UPDATE_REQUESTED_ we're waiting on a response of the traveler(s)<br>
         _ISSUE_RESOLVED_ Issue succesfully closed<br>
         _ISSUE_REVOKED_ Issue revoked<br>
-      enum:
-        [
-          ISSUE_REQUESTED,
-          ISSUE_OPEN,
-          ISSUE_UPDATE_REQUESTED,
-          ISSUE_RESOLVED,
-          ISSUE_REVOKED,
-        ]
+      enum: [ ISSUE_REQUESTED,
+              ISSUE_OPEN,
+              ISSUE_UPDATE_REQUESTED,
+              ISSUE_RESOLVED,
+              ISSUE_REVOKED ]

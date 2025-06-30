@@ -36,8 +36,8 @@ paths:
         - OAuthPKI: []
       tags:
         - purchase
-      x-tm:
-        - TRAVEL PACKAGE PURCHASE QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE PURCHASE QUERY
       requestBody:
         $ref: "#/components/requestBodies/purchaseOfferRequest"
       responses:
@@ -59,7 +59,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
               responses:
                 "200":
                   description: Results received successfully          
@@ -82,8 +82,8 @@ paths:
         - purchase
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
-      x-tm:
-        - TRAVEL PACKAGE PURCHASE QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE PURCHASE QUERY
       responses:
         "200":
           $ref: "#/components/responses/purchaseResponse"
@@ -102,7 +102,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
               responses:
                 "200":
                   description: Results received successfully  
@@ -120,8 +120,8 @@ paths:
         - OAuthPKI: []
       tags:
         - purchase
-      x-tm:
-        - TRAVEL PACKAGE PURCHASE QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE PURCHASE QUERY
       requestBody:
         $ref: "#/components/requestBodies/purchaseProductRequest"
       responses:
@@ -143,7 +143,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
               responses:
                 "200":
                   description: Results received successfully    
@@ -161,8 +161,8 @@ paths:
         - OAuthPKI: []
       tags:
         - purchase
-      x-tm:
-        - TRAVEL PACKAGE PURCHASE QUERY
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE PURCHASE QUERY
       requestBody:
         $ref: "#/components/requestBodies/useAssetRequest"
       responses:
@@ -184,7 +184,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody'
+                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
               responses:
                 "200":
                   description: Results received successfully        
@@ -202,8 +202,6 @@ paths:
         - OAuthPKI: []
       tags:
         - purchase
-      x-tm:
-        - lacking
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
@@ -225,8 +223,6 @@ paths:
         - OAuthPKI: []
       tags:
         - purchase
-      x-tm:
-        - lacking
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
@@ -248,8 +244,6 @@ paths:
         - OAuthPKI: []
       tags:
         - purchase
-      x-tm:
-        - lacking
       requestBody:
         $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
       responses:
@@ -274,8 +268,8 @@ paths:
         - OAuthPKI: []
       tags:
         - after sales
-      x-tm: 
-        - FULFILMENT QUERY
+      x-semantics: 
+      - transmodel: FULFILMENT QUERY
       responses:
         "200":
           $ref: "#/components/responses/travelDocumentsResponse"
@@ -287,6 +281,8 @@ paths:
 components:
   requestBodies:
     purchaseOfferRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE PURCHASE REQUEST (?)
       content:
         application/json:
           schema:    
@@ -321,6 +317,8 @@ components:
                     format: uri
 
     purchaseProductRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE PURCHASE REQUEST (?)
       content:
         application/json:
           schema:    
@@ -357,6 +355,8 @@ components:
                     format: uri
 
     useAssetRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -393,6 +393,8 @@ components:
                     format: uri
 
     extendExpiryTimeRequest:
+      x-semantics:
+      - transmodel: none
       content:
         application/json:
           schema:    
@@ -412,7 +414,7 @@ components:
                       _PURCHASE_PENDING_ - The internal purchase process on the MP side is not yet finished<br>
                       _PAYMENT_PENDING_ - The customer is in the payment process<br>
                       _OTHER_ - unspecified
-                    enum: ["PURCHASE_PENDING", "PAYMENT_PENDING", "OTHER"]
+                    enum: [ PURCHASE_PENDING, PAYMENT_PENDING, OTHER ]
               subscriber:
                 type: object
                 required:
@@ -430,14 +432,16 @@ components:
 
   responses:
     purchaseResponse:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE PURCHASE DELIVERY
       description: A package was succesfully purchased (PURCHASED), or pending (PENDING, to be confirmed using the package operation CONFIRM).
       content:
         application/json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
@@ -447,6 +451,8 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/expires"
   
     travelDocumentsResponse:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE DOCUMENT FULFILMENT DELIVERY
       description: a response to obtain travel document (references)
       headers:
         Version:
@@ -460,20 +466,23 @@ components:
 
   schemas:
     travelDocuments:
+      x-semantics:
+      - transmodel: TRAVEL DOCUMENTs
       type: object
       required:
         - type
       properties:
         type:
           type: string
-          enum: ["TravelDocumentCollection"]
+          pattern: "^(TravelDocumentCollection)$"
         travelDocuments:
           type: array
           items:
             $ref: "#/components/schemas/travelDocument"
 
     binaryTicket:
-      x-tm: lacking
+      x-semantics:
+      - transmodel: none
       description: Binary information, like a image or certificate
       type: object
       required:
@@ -488,17 +497,26 @@ components:
           description: base 64 binary data
 
     otherAccessInfo:
-      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
-      description: Generic travelDocument, non-standardized (yet)
+      x-semantics:
+      - transmodel: none
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
+        description: Generic travelDocument, non-standardized (yet)
 
     externalDigitalTicket:
-      x-tm: TRAVEL DOCUMENT
+      x-semantics: 
+      - transmodel: none
       description: External ticket, can be accessed using the links collection, with rel=ticket
         the mediatype tells what it refers to.
       type: object
+      properties:
+        customFields:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
+          description: Generic travelDocument, non-standardized (yet)
 
     eKey:
-      x-tm: TRAVEL DOCUMENT
+      x-semantics:
+      - transmodel: none
       description: Axa EKey information
       type: object
       required:
@@ -527,7 +545,8 @@ components:
               description: how it advertises itself
 
     travelDocument:
-      x-tm: TRAVEL DOCUMENT
+      x-semantics:
+      - transmodel: TRAVEL DOCUMENT
       type: object
       required:
         - validity

@@ -57,7 +57,8 @@ paths:
       operationId: getPackage
       summary: "Get package details"
       description: Retrieves package details
-      x-corom: TRAVEL PACKAGE QUERY
+      x-semantics: 
+      - transmodel: "TRAVEL PACKAGE REQUEST"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -79,6 +80,8 @@ paths:
 components:
   requestBodies:
     packageRequest:
+      x-semantics: 
+        class: "transmodel:TRAVEL PACKAGE REQUEST"
       content:
         application/json:
           schema:    
@@ -127,6 +130,8 @@ components:
 
     packageResponse:
       description: a single instance of a package
+      x-semantics: 
+      - transmodel: "TRAVEL PACKAGE DELIVERY"
       headers:
         Version:
           $ref: "#/components/headers/version"
@@ -146,13 +151,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/packageResponseBody"
+            $ref: "#/components/schemas/package"
         application/geo+json:
           schema:
-            $ref: "#/components/schemas/geojsonResponseBody"
+            $ref: "#/components/schemas/geojson"
 
     dataSourceResponse:
-      description: a list of datasources
+      description: a list of datasources, the 'rel' contains the prefix to use in data (to create a URN), 
+        like 'gps:' for coordinates ('gps' is always allowed).
+        when referring to an external datasource, the 'href' should be used to retrieve the related data.
       headers:
         Version:
           $ref: "#/components/headers/version"
@@ -164,29 +171,45 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/link"
+          example:
+          - rel: "donkey:station"
+            href: "https://stables.donkey.bike/api/public/gbfs/2/donkey_am/nl/station_information.json"
+            description: "A datasource that contains all Donkey bike stations in Amsterdam, Netherlands. 
+              It allows you to refer to a station by its ID, like 'donkey:station:1234'."
+          - rel: "ARR:ScheduledStopPoint"
+            href: "https://data.ndovloket.nl/netex/arr/NeTEx_ARR_NL_20250626_20250627_1402.xml.gz"
+            description: "A datasource that contains all scheduled stop points in the Netherlands used by Arriva, 
+              it allows you to refer to a stop point by its ID, like 'ARR:ScheduledStopPoint:1234'."
 
   schemas:
-    geojsonResponseBody:
-      $ref: "#/components/schemas/geojson"
-
-    packageResponseBody:
-      description: a package response is simular to geojson.
+    package:
+      description: a package to execute a trip
+      x-semantics:
+      - transmodel[package]: TRAVEL PACKAGE / CUSTOMER PURCHASE PACKAGE 
+      - transmodel[offer]: SALES OFFER PACKAGE 
       type: object
       required:
       - type
       - properties
       - links
       properties:
+        id:
+          $ref: "#/components/schemas/packageReference"
+          description: the unique identifier of this package
         type:
           type: string
-          enum: [ package, offer ]
+          pattern: "^(package|offer)$" 
         legs:
+          x-semantics:
+          - transmodel: TRAVEL SPECIFICATION, TRIP PATTERN
           type: array
           items:
             $ref: "#/components/schemas/leg"
         properties:
           $ref: "#/components/schemas/packageProperties"
         links:
+          x-semantics:
+          - transmodel: none (SALES TRANSACTION ?)
           type: array
           description:
             actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
@@ -194,75 +217,9 @@ components:
           items:
             $ref: "#/components/schemas/link"
 
-    featureProperties:
-      type: object
-      required:
-      - type
-      - properties
-      properties:
-        type:
-          type: string
-          enum: [ "leg", "station", "stop_place", "start_location", "end_location", "zone", "return_area", "return_station", "policy_zone", "geofence" ]
-        id:
-          $ref: "#/components/schemas/shortString"
-        links:
-          type: array
-          items:
-            $ref: "#/components/schemas/link"
-
-    definitions:
-      type: object
-      description: object containing all necessary collections for a package and a offerCollection
-        Both refer to objects in these collections.
-      properties:
-        products:
-          type: array
-          items:
-            $ref: "#/components/schemas/productProperties"
-        places:
-          description: Places that are not specified in an external data source (like a home address)
-          type: array
-          minItems: 0
-          maxItems: 5
-          items:
-            $ref: "#/components/schemas/place"
-        ancillaries:
-          type: array
-          items:
-            $ref: "#/components/schemas/ancillary"
-        assets:
-          type: array
-          items:
-            $ref: "#/components/schemas/asset"
-        travellers:
-          type: array
-          items:
-            $ref: "#/components/schemas/traveller"
-
-    offerProperties:
-      x-tm: SALES OFFER PACKAGE
-      allOf:
-      - $ref: "#/components/schemas/travelSpecification"
-      - type: object
-        required:
-          - type
-          - status
-        properties:
-          type:
-            type: string
-            enum: [ offer ]
-          id:
-            $ref: "#/components/schemas/offerReference"
-          status:
-            $ref: "#/components/schemas/packageStatus"
-          summary:
-            $ref: "#/components/schemas/summary"
-          price:
-            $ref: "#/components/schemas/amountOfMoney"
-      - $ref: "#/components/schemas/definitions"
-
     packageProperties:
-      x-tm: CUSTOMER PURCHASE PACKAGE
+      x-semantics:
+      - transmodel: CUSTOMER PURCHASE PACKAGE
       allOf:
       - $ref: "#/components/schemas/offerProperties"
       - type: object
@@ -273,7 +230,7 @@ components:
         properties:
           type:
             type: string
-            enum: [ package, offer ]
+            pattern: "^(package|offer)$"
           id:
             $ref: "#/components/schemas/packageReference"
           offers:
@@ -282,10 +239,12 @@ components:
               refer to the legs and products in the 'definition' part of the packageProperties.
             type: array
             items:
-              $ref: "#/components/schemas/offerPart"
+              $ref: "#/components/schemas/offer"
 
-    offerPart:
+    offer:
       type: object
+      x-semantics:
+      - transmodel: SALES OFFER PACKAGE
       properties:
         id: 
           $ref: "#/components/schemas/offerReference"
@@ -298,8 +257,32 @@ components:
           items:
             $ref: "#/components/schemas/productReference"
 
+    offerProperties:
+      x-semantics:
+      - transmodel: SALES OFFER PACKAGE
+      allOf:
+      - $ref: "#/components/schemas/travelSpecification"
+      - type: object
+        required:
+          - type
+          - status
+        properties:
+          type:
+            type: string
+            pattern: "^(offer)$"
+          id:
+            $ref: "#/components/schemas/offerReference"
+          status:
+            $ref: "#/components/schemas/packageStatus"
+          summary:
+            $ref: "#/components/schemas/summary"
+          price:
+            $ref: "#/components/schemas/amountOfMoney"
+      - $ref: "#/components/schemas/definitions"
+
     productProperties:
-      x-tm: FARE PRODUCT
+      x-semantics:
+      - transmodel: FARE PRODUCT
       type: object
       description: a product within a package
       required:
@@ -308,7 +291,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ product ]
+          pattern: "^(product)$"
         id:
           $ref: "#/components/schemas/productReference"
         name:
@@ -333,17 +316,20 @@ components:
 
     leg:
       type: object
+      x-semantics:
+      - transmodel: LEG
       properties:
         id:
           $ref: "#/components/schemas/legReference"
         type:
           type: string
-          enum: [ leg ]
+          pattern: "^(leg)$"
         properties:
           $ref: "#/components/schemas/legProperties"
 
     legProperties:
-      x-tm: LEG
+      x-semantics:
+      - transmodel: LEG
       type: object
       description: A (planned) consumption of a product within a package
       required:
@@ -352,7 +338,7 @@ components:
       properties:
         type:
           type: string
-          enum: [ leg ]
+          pattern: "^(leg)$"
         id:
           $ref: "#/components/schemas/legReference"
           description:
@@ -393,23 +379,66 @@ components:
           items:
             $ref: "#/components/schemas/placeReference"
 
+    featureProperties:
+      type: object
+      required:
+      - type
+      - properties
+      properties:
+        type:
+          type: string
+          pattern: "^(leg|station|stop_place|start_location|end_location|zone|return_area|return_station|policy_zone|geofence)$"
+        id:
+          $ref: "#/components/schemas/shortString"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/link"
+
+    definitions:
+      type: object
+      description: object containing all necessary collections for a package and a offerCollection
+        Both refer to objects in these collections.
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/productProperties"
+        places:
+          description: Places that are not specified in an external data source (like a home address)
+          type: array
+          minItems: 0
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/place"
+        ancillaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ancillary"
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/asset"
+        travellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/traveller"
+
     packageLabel:
       type: string
-      enum:
-        [
-          MOST_FLEXIBLE,
-          NON_FLEXIBLE,
-          MOST_ECO_FRIENDLY,
-          REFUNDABLE,
-          EXCHANGABLE,
-          CANCELLABLE,
-          TRANSFERABLE,
-          DEPOSIT_REQUIRED,
-          ANCILLARIES_INCLUDED
-        ]
+      enum: [ MOST_FLEXIBLE,
+              NON_FLEXIBLE,
+              MOST_ECO_FRIENDLY,
+              REFUNDABLE,
+              EXCHANGABLE,
+              CANCELLABLE,
+              TRANSFERABLE,
+              DEPOSIT_REQUIRED,
+              ANCILLARIES_INCLUDED ]
 
     packageStatus:
-      x-tm: CUSTOMER PURCHASE STATUS
+      x-semantics:
+      - transmodel: CUSTOMER PURCHASE STATUS
       type: string
       description:
         The life-cycle state of the package<br>
@@ -423,22 +452,21 @@ components:
         _ENDED_ the package has ended, the trip has been executed<br>
         _RELEASED_ for internal archiving, the package has not been purchased.<br>
         _SETTLED_ final exit state, services delivered & financial settlement succeeded.
-      enum:
-        [
-          OFFERED,
-          PENDING,
-          CONFIRMED,
-          ROLLBACK,
-          RELEASED,
-          EXPIRED,
-          CANCELLED,
-          STARTED,
-          ENDED,
-          SETTLED
-        ]
+      enum: [ OFFERED,
+              PENDING,
+              CONFIRMED,
+              ROLLBACK,
+              RELEASED,
+              EXPIRED,
+              CANCELLED,
+              STARTED,
+              ENDED,
+              SETTLED ]
 
     legStatus:
       type: string
+      x-semantics:
+      - transmodel: none
       description: status of a leg<br>
         _NOT_STARTED_ the leg is not started, initial state<br>
         _PREPARING_ the _PREPARE_ operation has been received<br>
@@ -449,21 +477,19 @@ components:
         _ISSUE_REPORTED_ due to an issue, there is (temporarily) no progress to report, when the issue isn't solved, this is a final state<br>
         _CANCELLED_ the leg has been cancelled, before execution<br>
         _ABENDED_ the leg is abnormally ended (e.g. due to an issue)
-      enum:
-        [
-          NOT_STARTED,
-          PREPARING,
-          PREPARED,
-          IN_USE,
-          PAUSED,
-          ENDED,
-          ISSUE_REPORTED,
-          CANCELLED,
-          ABENDED
-        ]
+      enum: [ NOT_STARTED,
+              PREPARING,
+              PREPARED,
+              IN_USE,
+              PAUSED,
+              ENDED,
+              ISSUE_REPORTED,
+              CANCELLED,
+              ABENDED]
 
     userProfile:
-      x-tm: USER PROFILE
+      x-semantics:
+      - transmodel: USER PROFILE
       type: object
       required:
       - name
@@ -471,12 +497,13 @@ components:
       properties:
         type:
           type: string
-          enum: [user_profile]
+          pattern: "^(userProfile)$"
         name:
           $ref: "#/components/schemas/userProfileReference"
         ageGroup:
           type: string
-          enum: [anyone, infant, child, youth, adult, senior]
+          enum: [ ANYONE, INFANT, CHILD, YOUTH, ADULT, SENIOR ]
+          description: The age group of the user profile, used to determine applicable fares and discounts.
         age:
           $ref: "#/components/schemas/range"
         length:
@@ -489,13 +516,14 @@ components:
           type: boolean
         genderLimitation:
           type: string
-          enum: [same_sex, female_only, male_only, both]
+          enum: [SAME_SEX, FEMALE_ONLY, MALE_ONLY, BOTH]
         discountBasis:
           type: string
-          enum: [discount, free, full_rate]
+          enum: [DISCOUNT, FREE, FULL_RATE]
 
     entitlementGiven:
-      x-tm: ENTITLEMENT GIVEN, COMMERCIAL_PROFILE
+      x-semantics:
+      - transmodel: ENTITLEMENT GIVEN, COMMERCIAL_PROFILE
       type: object
       required:
         - id
@@ -507,17 +535,18 @@ components:
           description: an ID for this entitlement or commercial profile.
         type:
           type: string
-          enum: [entitlement, commercial_profile]
+          pattern: "^(entitlement|commercialProfile)$"
         description:
           $ref: "#/components/schemas/normalString"
 
     travelSpecification:
-      x-tm: TRAVEL SPECIFICATION
+      x-semantics:
+      - transmodel: TRAVEL SPECIFICATION
       type: object
       properties:
         type:
           type: string
-          enum: [ travel_specification ]
+          pattern: "^(travelSpecification)$"
         from:
           $ref: "#/components/schemas/placeReference"
           description: use an ID contained in the **places** field, or from an external source, when using coordinates, please use the prefix 'gps:'
@@ -542,14 +571,15 @@ components:
 
     traveller:
       type: object
+      x-semantics:
+      - transmodel: INDIVIDUAL TRAVELLER
       required:
       - type
       - id
       properties:
         type:
           type: string
-          enum: [traveller]
-          pattern: "^(traveller)"
+          pattern: "^(traveller)$"
         id:
           $ref: "#/components/schemas/travellerReference"
         characteristics:
@@ -580,25 +610,25 @@ components:
           $ref: "#/components/schemas/customerReference"
 
     classOfUse:
-      x-tm: CLASS OF USE
+      x-semantics:
+      - transmodel: CLASS OF USE
       type: string
       description: A classification of fare and other service classes by category of user entitled to use them.
-      enum:
-        [
-          FIRST_CLASS,
-          SECOND_CLASS,
-          THIRD_CLASS,
-          ECONOMY_CLASS,
-          BUSINESS_CLASS,
-          TURISTA,
-          PREFERENTE,
-          PREMIUM_CLASS,
-          ANY,
-          UNKNOWN,
-        ]
+      enum: [ FIRST_CLASS,
+              SECOND_CLASS,
+              THIRD_CLASS,
+              ECONOMY_CLASS,
+              BUSINESS_CLASS,
+              TURISTA,
+              PREFERENTE,
+              PREMIUM_CLASS,
+              ANY,
+              UNKNOWN ]
 
     condition:
       type: object
+      x-semantics:
+      - transmodel: OFFER RULE
       properties:
         id:
           $ref: "#/components/schemas/shortString"
@@ -606,10 +636,11 @@ components:
           $ref: "#/components/schemas/normalString"
         type:
           type: string
-          enum: [ external_condition, return_station, return_area ]
+          pattern: "^(externalCondition|returnStation|returnArea)$"
 
     guarantee:
-      x-tm: TRAVEL GUARANTEE
+      x-semantics:
+      - transmodel: TRAVEL GUARANTEE
       type: object
       properties:
         id:
@@ -654,32 +685,31 @@ components:
             _MEDIA_REPLACEMENT_ - An OTHER GUARANTEE that a replacement media will be provided if the original becomes unusable.
             _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded
             _REFUND_WHEN_CANCELLED_ - when cancelled before start, a refund will be scheduled
-          enum:
-            [
-              ALTERNATIVE_JOURNEY,
-              HOME_LEG,
-              RETURN_TO_ORIGIN,
-              ON_TIME_TRAVEL,
-              TRIP_ON_TIME,
-              FACILITIES_AVAILABLE,
-              MOBILITY_ACCOMODATION,
-              MOBILITY_ASSISTANCE,
-              PASSENGER_SUPPORT,
-              DISRUPTION_INFORMATION,
-              REDRESS_INFORMATION,
-              BEST_FARE_INFORMATION,
-              GENERAL_TRAVEL,
-              MEDIA_REPLACEMENT,
-              REFUND_UNUSED_ANCILLARIES,
-              REFUND_WHEN_CANCELLED
-            ]
+          enum: [ ALTERNATIVE_JOURNEY,
+                  HOME_LEG,
+                  RETURN_TO_ORIGIN,
+                  ON_TIME_TRAVEL,
+                  TRIP_ON_TIME,
+                  FACILITIES_AVAILABLE,
+                  MOBILITY_ACCOMODATION,
+                  MOBILITY_ASSISTANCE,
+                  PASSENGER_SUPPORT,
+                  DISRUPTION_INFORMATION,
+                  REDRESS_INFORMATION,
+                  BEST_FARE_INFORMATION,
+                  GENERAL_TRAVEL,
+                  MEDIA_REPLACEMENT,
+                  REFUND_UNUSED_ANCILLARIES,
+                  REFUND_WHEN_CANCELLED ]
 
     ancillary:
       type: object
+      x-semantics:
+      - transmodel: ANCILLARY PRODUCT (?)
       properties:
         type: 
           type: string
-          enum: [ ancillary ]
+          pattern: "^(ancillary)$"
         id:
           $ref: "#/components/schemas/ancillaryReference"
         name: 
@@ -695,14 +725,15 @@ components:
           $ref: "#/components/schemas/fareStructure"
 
     asset:
-      x-tm: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING EQUIPMENT
+      x-semantics:
+      - transmodel: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING EQUIPMENT
       description: the asset that can by applied to execute a leg.
       required:
       - id
       properties:
         type:
           type: string
-          enum: [ asset ]
+          pattern: "^(asset)$"
         id:
           $ref: "#/components/schemas/assetReference"
           description: Identifier of an asset. Can be an external reference, but also a (internal) ID
@@ -719,8 +750,12 @@ components:
           description:
             a more precise classification of the asset, like 'cargo bike', 'public bus', 'coach bus', 'office bus', 'water taxi',  'segway'.
             This is mandatory when using 'OTHER' as class.
-        eco:
-          $ref: "#/components/schemas/ecoValues"
+        damages:
+          type: array
+          description: list of damages that are reported for this asset
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/damage"
         cargo:
           $ref: "#/components/schemas/cargoLimits"
         appSupport:
@@ -736,24 +771,9 @@ components:
         fee:
           $ref: "#/components/schemas/fareStructure"
 
-    assetState:
-      x-tm: lacking
-      type: object
-      description: the state of the asset, where is it, etc
-      additionalProperties: false
-      properties:
-        mileage:
-          $ref: "#/components/schemas/float"
-          description: the current mileage of the asset, in km
-        stateOfCharge:
-          $ref: "#/components/schemas/shortInt"
-          description: percentage of charge available / fuel level (battery, petrol tank)
-        maxRange:
-          $ref: "#/components/schemas/float"
-          description: maximum range in meters
-
     cargoLimits:
-      x-tm: LUGGAGE ALLOWANCE
+      x-semantics:
+      - transmodel: LUGGAGE ALLOWANCE
       type: object
       description: applicable properties to specify cargo space/loads
       properties:
@@ -768,8 +788,9 @@ components:
           description: the weight in kilograms of the cargo
 
     damage:
-      x-tm: lacking
       type: object
+      x-semantics:
+      - transmodel: none
       description: A damage of the asset.
       additionalProperties: false
       required:
@@ -779,19 +800,16 @@ components:
         assetComponent:
           type: string
           description: Part/Component of the asset affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.<br>
-          enum:
-            [
-              FRONT,
-              REAR,
-              LEFT,
-              RIGHT,
-              TOP,
-              BOTTOM,
-              INTERIOR,
-              TIRE,
-              ANCILLARY,
-              OTHER,
-            ]
+          enum: [ FRONT,
+                  REAR,
+                  LEFT,
+                  RIGHT,
+                  TOP,
+                  BOTTOM,
+                  INTERIOR,
+                  TIRE,
+                  ANCILLARY,
+                  OTHER ]
         description:
           $ref: "#/components/schemas/longString"
           description: Description of the damage.
@@ -802,65 +820,39 @@ components:
           items:
             $ref: "#/components/schemas/url"
 
-    ecoValues:
-      x-tm: lacking
-      type: object
-      description: applicable properties to specify ecological/environmental aspects. Derived from GBFS.
-      properties:
-        energyLabel:
-          type: string
-          description: Energy efficiency label
-          enum: [A, B, C, D, E]
-        ecoLabel:
-          type: array
-          description: see https://github.com/MobilityData/gbfs/blob/v2.3/gbfs.md
-          maxItems: 3
-          items:
-            type: object
-            properties:
-              ecoSticker:
-                $ref: "#/components/schemas/shortString"
-              countryCode:
-                $ref: "#/components/schemas/country"
-        co2Emission:
-          $ref: "#/components/schemas/float"
-          description: the emission of grammes CO2 per km
-
     mode:
-      x-tm: 
-      - concept: MODE
+      x-semantics:
+      - transmodel: MODE
       type: string
       description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.
-      enum:
-        [
-          AIR,
-          BUS,
-          TROLLEYBUS,
-          TRAM,
-          COACH,
-          RAIL,
-          INTERCITYRAIL,
-          URBANRAIL,
-          METRO,
-          WATER,
-          CABLEWAY,
-          FUNICULAR,
-          TAXI,
-          SELFDRIVE,
-          FOOT,
-          BICYCLE,
-          MOTORCYCLE,
-          CAR,
-          SHUTTLE,
-          OTHER,
-          PARKING,
-          MOPED,
-          STEP,
-          FERRY,
-        ]
+      enum: [ AIR,
+              BUS,
+              TROLLEYBUS,
+              TRAM,
+              COACH,
+              RAIL,
+              INTERCITYRAIL,
+              URBANRAIL,
+              METRO,
+              WATER,
+              CABLEWAY,
+              FUNICULAR,
+              TAXI,
+              SELFDRIVE,
+              FOOT,
+              BICYCLE,
+              MOTORCYCLE,
+              CAR,
+              SHUTTLE,
+              OTHER,
+              PARKING,
+              MOPED,
+              STEP,
+              FERRY ]
 
     card:
-      x-tm: CUSTOMER PAYMENT MEANS, MEDIUM APPLICATION INSTANCE
+      x-semantics:
+      - transmodel: CUSTOMER PAYMENT MEANS, MEDIUM APPLICATION INSTANCE
       type: object
       description: Any kind of card that isn't a license, only provide the cards that are required
       required:
@@ -870,7 +862,7 @@ components:
       properties:
         type:
           type: string
-          enum: [card]
+          pattern: "^(card)$"
         cardType:
           $ref: "#/components/schemas/cardType"
           description: the type of card, like a credit card, ID card, etc.
@@ -890,20 +882,20 @@ components:
           $ref: "#/components/schemas/country"
 
     cardType:
-      x-tm: TYPE OF PAYMENT METHOD, MEDIUM ACCESS DEVICE
+      x-semantics:
+      - transmodel: TYPE OF PAYMENT METHOD, MEDIUM ACCESS DEVICE
       type: object
       description: A generic description of a CARD
-      additionalProperties: true
       required:
         - type
         - id
       properties:
         id:
-          $ref: "#/components/schemas/shortString"
+          $ref: "#/components/schemas/cardTypeReference"
           description: external reference to address the card used.
         type:
           type: string
-          enum: [card_type]
+          pattern: "^(cardType)$"
         cardType:
           type: string
           description: The broad category of card<br>
@@ -926,58 +918,12 @@ components:
           description: references to accepting parties, only if applicable
           items:
             $ref: "#/components/schemas/organisationReference"
-
-    customer:
-      x-tm: CUSTOMER
-      description: A MaaS user that wishes to purchase a package, only use the fields required by purchase conditions
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          $ref: "#/components/schemas/customerReference"
-          description: The identifier the MP uses to identify the customer. Could be an external referenced ID, like a ABT account number
-        initials:
-          $ref: "#/components/schemas/tinyString"
-          description: Initials of the customer
-        firstName:
-          $ref: "#/components/schemas/shortString"
-          description: First name of the customer
-        lastName:
-          $ref: "#/components/schemas/shortString"
-          description: Last name of the customer
-        middleName:
-          $ref: "#/components/schemas/tinyString"
-          description: Middle name of the customer
-        prefix:
-          $ref: "#/components/schemas/tinyString"
-          description: prefix of the customer, like titles
-        postfix:
-          $ref: "#/components/schemas/tinyString"
-          description: postfix of the customer, like titles
-        phoneNumber:
-          $ref: "#/components/schemas/normalString"
-        email:
-          $ref: "#/components/schemas/normalString"
-          description: the email address of the customer
-        dateOfBirth:
-          $ref: "#/components/schemas/date"
-        placeOfBirth:
-          $ref: "#/components/schemas/shortString"
-        countryOfBirth:
-          $ref: "#/components/schemas/shortString"
-        address:
-          $ref: "#/components/schemas/place"
-        photo:
-          type: string
-          maxLength: 10000
-          description: base64 encoded
-          x-format: byte-array
-        extraInfo:
+        customFields:
           $ref: "#/components/schemas/customProperties"
 
     license:
-      x-tm: ACCEPTED DRIVER PERMIT
+      x-semantics:
+      - transmodel: ACCEPTED DRIVER PERMIT
       type: object
       description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
       required:
@@ -986,7 +932,7 @@ components:
       properties:
         type:
           type: string
-          enum: [license]
+          pattern: "^(license)$"
         licenseType:
           description: the type of license, like a driver license, or a license to operate a
           $ref: "#/components/schemas/licenseType"
@@ -996,17 +942,17 @@ components:
           $ref: "#/components/schemas/date"
 
     licenseType:
-      x-tm: TYPE OF DRIVER PERMIT
+      x-semantics:
+      - transmodel: TYPE OF DRIVER PERMIT
       type: object
       description: A category of license to use a certain asset class
-      additionalProperties: true
       required:
         - mode
         - type
       properties:
         type:
           type: string
-          enum: [license_type]
+          pattern: "^(licenseType)$"
         modes:
           type: array
           items:
@@ -1016,10 +962,11 @@ components:
           description: in most countries a driver license has also a code. As TO you can exactly verify, based on this code if the license allows to operate it's assets, if the assetType too generic.
         issuingCountry:
           $ref: "#/components/schemas/country"
+        customFields:
+          $ref: "#/components/schemas/customProperties"
 
     travellerRequirements:
       type: object
-      additionalProperties: true
       properties:
         mode: 
           $ref: "#/components/schemas/mode"
@@ -1028,39 +975,45 @@ components:
         class:
           $ref: "#/components/schemas/classOfUse"
 
-        # x-tm: ORGANISATIONAL VALIDITY PARAMETERS
         operators:
+          x-semantics:
+          - transmodel: ORGANISATIONAL VALIDITY PARAMETERS
           type: array
           items:
             $ref: "#/components/schemas/operatorReference"
 
-        # x-tm: SERVICE VALIDITY PARAMETERS
-        # x-tm: TYPE OF PRODUCT CATEGORY
-        product:
-          $ref: "#/components/schemas/productReference"
+        products:
+          x-semantics:
+          - transmodel: SERVICE VALIDITY PARAMETERS
+          type: array
+          items:
+            $ref: "#/components/schemas/productReference"
 
-        # x-tm: SEATING VALIDITY PARAMETERS
-        # spot = asset
         assets:
+          x-semantics:
+          - transmodel: SEATING VALIDITY PARAMETERS (where spot = asset)
           type: array
           items:
             $ref: "#/components/schemas/assetReference"
 
-        # x-tm: NETWORK VALIDITY PARAMETERS
         zones:
+          x-semantics:
+          - transmodel: NETWORK VALIDITY PARAMETERS
           type: array
           items:
             $ref: "#/components/schemas/zoneReference"
 
         distribution:
+          x-semantics:
+          - transmodel: DISTRIBUTION VALIDITY PARAMETERS  
           type: array
           items:
             $ref: "#/components/schemas/distribution"
 
-        # x-tm: ROUTING VALIDITY PARAMETERS
-        # lines: => in trip pattern
         # scheduledStopPoints/places: => when requested: in from, to, via in travel specification
         avoid:
+          x-semantics:
+          - transmodel: ROUTING VALIDITY PARAMETERS
           type: object
           properties:
             places:
@@ -1076,32 +1029,42 @@ components:
               items:
                 $ref: "#/components/schemas/lineReference"
 
-        # x-tm: TYPE OF USER NEEDS
         prmNeeds:
-          type: object
-          properties:
-            encumbranceNeed:
-              type: string
-              enum: [ pushchair
-                    , baggage_trolley, oversized_baggage, luggage_encumbrance
-                    , guide_dog, other_animal
-                    , bike ]
-            medicalNeed:
-              type: string
-              enum: [ heart_condition, other ]
-            mobilityNeed:
-              type: string
-              enum: [ wheelchair, assisted_wheelchair, motorized_wheelchair
-                    , mobility_scooter, road_mobility_scooter
-                    , walking_frame, restricted_mobility, other ]
-            psychoSensoryNeed:
-              type: string
-              enum: [ visual_impaired, auditory_impaired, cognitive_impaired
-                    , averse_to_lifts, averse_to_escalators, averse_to_confined_spaces, averse_to_crowds
-                    , other ]          
+          x-semantics:
+          - transmodel: TYPE OF USER NEEDS
+          type: array
+          items:
+            $ref: "#/components/schemas/prmNeeds"
+
+    prmNeeds:
+      type: object
+      x-semantics:
+      - transmodel: TYPE OF USER NEEDS
+      properties:
+        encumbranceNeed:
+          type: string
+          enum: [ pushchair
+                , baggage_trolley, oversized_baggage, luggage_encumbrance
+                , guide_dog, other_animal
+                , bike ]
+        medicalNeed:
+          type: string
+          enum: [ heart_condition, other ]
+        mobilityNeed:
+          type: string
+          enum: [ wheelchair, assisted_wheelchair, motorized_wheelchair
+                , mobility_scooter, road_mobility_scooter
+                , walking_frame, restricted_mobility, other ]
+        psychoSensoryNeed:
+          type: string
+          enum: [ visual_impaired, auditory_impaired, cognitive_impaired
+                , averse_to_lifts, averse_to_escalators, averse_to_confined_spaces, averse_to_crowds
+                , other ]
 
     distribution:
       type: object
+      x-semantics:
+      - transmodel: DISTRIBUTION VALIDITY PARAMETERS
       properties:
         fulfilmentMethod:
           $ref: "#/components/schemas/normalString"
@@ -1142,12 +1105,14 @@ components:
             items:
               $ref: "#/components/schemas/packageLabel"
 
-          # x-tm: DISTRIBUTION VALIDITY PARAMETERS
           distribution:
+            x-semantics:
+            - transmodel: DISTRIBUTION VALIDITY PARAMETERS
             $ref: "#/components/schemas/distribution"
 
-          # x-tm: CANCELLING
           cancellation:
+            x-semantics:
+            - transmodel: CANCELLING
             type: object
             properties:
               allowed:
@@ -1162,8 +1127,9 @@ components:
                 minimum: 0
                 maximum: 100
 
-          # x-tm: EXCHANGING
           exchanging:
+            x-semantics:
+            - transmodel: EXCHANGING
             type: object
             properties:
               exchangeable:
@@ -1172,13 +1138,15 @@ components:
               numberOfExchangesAllowed:
                 type: integer
 
-          # x-tm: REFUNDING
           refundable:
+            x-semantics:
+            - transmodel: REFUNDING
             type: boolean
             default: true
 
-          # x-tm: TRANSFERABILITY
           transfer:
+            x-semantics:
+            - transmodel: TRANSFERABILITY
             type: object
             properties:
               canTransfer:
@@ -1199,7 +1167,7 @@ components:
             properties:
               paymentType:
                 type: string
-                enum: [prepaid, pay_when_finished, subscription_only]
+                enum: [ PREPAID, PAY_WHEN_FINISHED, SUBSCRIPTION_ONLY ]
               deposit:
                 $ref: "#/components/schemas/amountOfMoney"
                 description: the amount of money to pay as a deposit.
@@ -1245,32 +1213,46 @@ components:
                         ]
 
     travellerCharacteristics:
-      type: array
-      items:
-        oneOf:
-        - $ref: "#/components/schemas/entitlementGiven"
-        - $ref: "#/components/schemas/cardType"
-        - $ref: "#/components/schemas/card"
-        - $ref: "#/components/schemas/licenseType"
-        - $ref: "#/components/schemas/license"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [used_asset]
-            asset:
-              description: visual ID (like license plate)
-              $ref: "#/components/schemas/shortString"
-        discriminator:
-          propertyName: type
+      type: object
+      properties:
+        entitlements:
+          type: array
+          description: entitlements or commercial profiles that are applicable to this traveller
+          items:
+            $ref: "#/components/schemas/entitlementGiven"
+        cardTypes:
+          type: array
+          description: card types that are applicable to this traveller
+          items:
+            $ref: "#/components/schemas/cardType"
+        cards:
+          type: array
+          description: cards that are applicable to this traveller
+          items:
+            $ref: "#/components/schemas/card"
+        licenseTypes:
+          type: array
+          description: license types that are applicable to this traveller
+          items:
+            $ref: "#/components/schemas/licenseType"
+        licenses:
+          type: array
+          description: licenses that are applicable to this traveller
+          items:
+            $ref: "#/components/schemas/license"
+        assets:
+          type: array
+          items:
+            description: visual ID (like license plate) of the asset that is used by this traveller
+            $ref: "#/components/schemas/assetReference"
 
     fareStructure:
-      x-tm: TARIFF
+      x-semantics:
+        - transmodel: TARIFF
       allOf:
       - $ref: "#/components/schemas/amountOfMoney"
       - type: object
         description: the total fare is the sum of all parts, except for the 'MAX' fareStructureElement. This one descripes the maximum price for the complete leg.
-        additionalProperties: true
         required:
           - elements
         properties:
@@ -1287,11 +1269,8 @@ components:
               $ref: "#/components/schemas/fareStructureElement"
 
     fareStructureElement:
-      x-tm: 
-      - concept: TIME INTERVAL PRICE, TIME UNIT PRICE, GEOGRAPHICAL UNIT PRICE, GEOGRAPHICAL INTERVAL PRICE, LIMITING RULE
-      - priceLevel: lacking
-      - minimumPrice: LIMITING RULE.MinimumPrice
-      - maximumPrice: LIMITING RULE.MaximumPrice
+      x-semantics:
+      - transmodel: TIME INTERVAL PRICE, TIME UNIT PRICE, GEOGRAPHICAL UNIT PRICE, GEOGRAPHICAL INTERVAL PRICE, LIMITING RULE
       description:
         this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed)
         or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are
@@ -1363,7 +1342,8 @@ components:
             $ref: "#/components/schemas/customProperties"
 
     interval:
-      x-tm: TIME INTERVAL (in case UNITS = minutes or hours)
+      x-semantics:
+      - transmodel: TIME INTERVAL (in case UNITS = minutes or hours)
       type: object
       required:
         - from
@@ -1387,7 +1367,8 @@ components:
 
     # address concepts
     place:
-      x-tm: POSTAL ADDRESS
+      x-semantics:
+      - transmodel: POSTAL ADDRESS
       type: object
       description: address parts, where addressLine1 and 2 should contain the complete address, matches Content-Language
       additionalProperties: false
@@ -1399,7 +1380,7 @@ components:
           $ref: "#/components/schemas/placeReference"
         type:
           type: string
-          enum: [ place ]
+          pattern: "^(place)$"
         addressLine1:
           $ref: "#/components/schemas/longString"
           description: contains street, housenumber & additions
@@ -1446,8 +1427,9 @@ components:
 
     # app concepts
     appSupport:
-      x-tm: lacking
       type: object
+      x-semantics:
+      - transmodel: none
       description: attributes to display/use in an external app.
       properties:
         displayName:
@@ -1469,16 +1451,14 @@ components:
           description: how this asset can be opened
 
     typeOfTravelDocument:
-      x-tm:
-      - concept: TYPE OF TRAVEL DOCUMENT
+      x-semantics:
+      - transmodel: TYPE OF TRAVEL DOCUMENT
       type: string
-      description: how this type is implemented?<br>
-      enum: [
-          LINK,
-          BARCODE,
-          QRCODE,
-          AZTECCODE
-        ]
+      description: how this type is implemented?
+      enum: [ LINK,
+              BARCODE,
+              QRCODE,
+              AZTECCODE ]
 
     organisationReference:
       $ref: "#/components/schemas/normalString"
@@ -1492,7 +1472,7 @@ components:
         address to the **places** list of the request/offer/package.
       maxLength: 200
       x-example-format: "^(GPS:|GBFS:stations:)"
-      pattern: "^(GPS:|[datasource]:|P:)"
+      pattern: "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
 
     customerReference:
       $ref: "#/components/schemas/normalString"
@@ -1608,7 +1588,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["Point", "LineString", "Polygon", "MultiPolygon"]
+          pattern: "^(Point|LineString|Polygon|MultiPolygon)$"
       oneOf:
       - $ref: "#/components/schemas/geojsonPoint"
       - $ref: "#/components/schemas/geojsonLine"
@@ -1630,7 +1610,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["Feature"]
+          pattern: "^(Feature)$"
         id:
           $ref: "#/components/schemas/shortString"
         geometry:
@@ -1647,7 +1627,7 @@ components:
       properties:
         type:
           type: string
-          enum: ["FeatureCollection"]
+          pattern: "^(FeatureCollection)$"
         features:
           type: array
           items:
@@ -1722,8 +1702,8 @@ components:
     # complex data types
     amountOfMoney:
       type: object
-      x-tm:
-      - concept: FARE PRICE
+      x-semantics:
+      - transmodel: FARE PRICE
       description: an amount of money, usable in fares, fare calculations or in extra costs.
       required:
         - amount
@@ -1742,6 +1722,8 @@ components:
 
     country:
       type: string
+      x-semantics:
+      - transmodel: COUNTRY
       description: two-letter country codes according to ISO 3166-1
       maxLength: 2
       minLength: 2
@@ -1749,6 +1731,8 @@ components:
 
     currencyCode:
       type: string
+      x-semantics:
+      - transmodel: PRICE UNIT
       description: ISO 4217 currency code
       minLength: 3
       maxLength: 3
@@ -1808,11 +1792,6 @@ components:
       x-pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
       description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)
 
-    day:
-      x-tm: DAY OF WEEK
-      type: string
-      enum: [MON, TUE, WED, THU, FRI, SAT, SUN]
-
     float:
       type: number
       description: the travelled distance. Only if applicable.
@@ -1826,12 +1805,6 @@ components:
       x-externalDocs:
         url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
         description: http-date
-
-    longInt:
-      type: integer
-      description: long number, for distances etc. (>1.000)
-      default: 0
-      minimum: 0
 
     longString:
       type: string
@@ -1881,12 +1854,6 @@ components:
       description: short string, display names (length 0-75)
       maxLength: 75
 
-    time:
-      type: string
-      x-format: partial-time
-      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, partial-time ("23:59:59.3498")
-      # pattern: "^[0-9]{2}:[0-9]{2}:[0-9]{2}('.'[0-9]+)?$"
-
     tinyInt:
       type: integer
       description: for really small numbers (0-10)
@@ -1922,9 +1889,7 @@ components:
       required: false
       schema:
         default: json
-        enum:
-          - json
-          - html
+        enum: [ json, html ]
         type: string
       style: form
 
@@ -1995,8 +1960,8 @@ components:
         $ref: "#/components/schemas/uuid"
 
     limit:
-      name: limit
       in: query
+      name: limit
       description: |-
         The optional limit parameter limits the number of items that are presented in the response document.
 
@@ -2122,6 +2087,8 @@ components:
 
     version:
       description: the version used to format the response
+      x-context:
+      - { "@id": "http://schema.org/version", "@type": "xsd:string"}
       schema:
         type: string
       required: true

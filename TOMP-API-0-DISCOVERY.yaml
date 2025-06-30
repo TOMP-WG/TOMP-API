@@ -29,19 +29,7 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/f"
       responses:
         "200":
-          description: successful operation
-          headers:
-            Content-Language:
-              $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
-            Version:
-              $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/responses/landingPageResponse"
-            text/html:
-              schema:
-                type: string
+          $ref: "#/components/responses/landingPageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -240,6 +228,9 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/landingPage"
+        text/html:
+          schema:
+            type: string
 
     conformanceDeclarationResponse:
       description: |-
@@ -425,8 +416,7 @@ components:
                 minItems: 2
                 maxItems: 2
                 items:
-                  type: string
-                  format: date-time
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
             trs:
               description: |-
                 Coordinate reference system of the coordinates in the temporal extent
@@ -509,7 +499,7 @@ components:
               enum:
               - unbounded
           schema:
-            $ref: '#/components/schemas/schema'
+            type: object
 
     processSummary:
       allOf:
@@ -544,7 +534,7 @@ components:
         type: object
         properties:
           schema:
-            $ref: '#/components/schemas/schema'
+            type: object
 
     jobControlOptions:
       type: string
@@ -593,6 +583,7 @@ components:
           type: string
         href:
           type: string
+
     additionalParameter:
       required:
       - name
@@ -612,132 +603,3 @@ components:
               items:
                 type: object
             - type: object
-    schema:
-      oneOf:
-      - $ref: '#/components/schemas/reference'
-      - type: object
-        properties:
-          title:
-            type: string
-          multipleOf:
-            minimum: 0
-            type: number
-          maximum:
-            type: number
-          exclusiveMaximum:
-            type: boolean
-            default: false
-          minimum:
-            type: number
-          exclusiveMinimum:
-            type: boolean
-            default: false
-          maxLength:
-            minimum: 0
-            type: integer
-          minLength:
-            minimum: 0
-            type: integer
-            default: 0
-          pattern:
-            type: string
-            format: regex
-          maxItems:
-            minimum: 0
-            type: integer
-          minItems:
-            minimum: 0
-            type: integer
-            default: 0
-          uniqueItems:
-            type: boolean
-            default: false
-          maxProperties:
-            minimum: 0
-            type: integer
-          minProperties:
-            minimum: 0
-            type: integer
-            default: 0
-          required:
-            minItems: 1
-            uniqueItems: true
-            type: array
-            items:
-              type: string
-          enum:
-            minItems: 1
-            uniqueItems: false
-            type: array
-            items:
-              type: object
-          type:
-            type: string
-            enum:
-            - array
-            - boolean
-            - integer
-            - number
-            - object
-            - string
-          not:
-            $ref: '#/components/schemas/schema'
-          allOf:
-            type: array
-            items:
-              $ref: '#/components/schemas/schema'
-          oneOf:
-            type: array
-            items:
-              $ref: '#/components/schemas/schema'
-          anyOf:
-            type: array
-            items:
-              $ref: '#/components/schemas/schema'
-          items:
-            $ref: '#/components/schemas/schema'
-          properties:
-            type: object
-            additionalProperties:
-              $ref: '#/components/schemas/schema'
-          additionalProperties:
-            oneOf:
-            - $ref: '#/components/schemas/schema'
-            - type: boolean
-              default: true
-          description:
-            type: string
-          format:
-            type: string
-          default:
-            type: object
-          nullable:
-            type: boolean
-            default: false
-          readOnly:
-            type: boolean
-            default: false
-          writeOnly:
-            type: boolean
-            default: false
-          example:
-            type: object
-          deprecated:
-            type: boolean
-            default: false
-          contentMediaType:
-            type: string
-          contentEncoding:
-            type: string
-          contentSchema:
-            type: string
-        additionalProperties: false
-
-    reference:
-      required:
-      - "$ref"
-      type: object
-      properties:
-        "$ref":
-          type: string
-          format: uri-reference

@@ -35,7 +35,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/customerAccount"
+              $ref: "#/components/schemas/customer"
       responses:
         "201":
           $ref: "#/components/responses/customerResponse"
@@ -76,7 +76,7 @@ paths:
           application/merge-patch+json:
             schema:
               description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
-              $ref: "#/components/schemas/customerAccount"
+              $ref: "#/components/schemas/customer"
       responses:
         "200":
           $ref: "#/components/responses/customerResponse"
@@ -101,6 +101,8 @@ components:
   responses:
     customerResponse:
       description: Customer Account
+      x-semantics:
+      - transmodel: none
       headers:
         Content-Language:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
@@ -113,11 +115,13 @@ components:
 
   schemas:
     customerAccount:
+      x-semantics:
+      - transmodel: CUSTOMER ACCOUNT
       description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
       type: object
       properties:
         id:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+          $ref: "#/components/schemas/customer"
         creationDate:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
           description: The date in which the CUSTOMER ACCOUNT has been created
@@ -129,6 +133,8 @@ components:
           description: The status of the CUSTOMER ACCOUNT
 
     customerAccountStatus:
+      x-semantics:
+      - transmodel: CUSTOMER ACCOUNT . status
       type: string
       description: status of a CUSTOMER ACCOUNT<br>
         _CREATED_ the customer account has been created but is not ready to create a purchase yet<br>
@@ -137,3 +143,53 @@ components:
         _ACTIVE_ the customer account is active and can continue to purchase offers<br>
         _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
       enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]
+
+    customer:
+      x-semantics:
+      - transmodel: TRANSPORT CUSTOMER
+      description: A MaaS user that wishes to purchase a package, only use the fields required by purchase conditions
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+          description: The identifier the MP uses to identify the customer. Could be an external referenced ID, like a ABT account number
+        initials:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
+          description: Initials of the customer
+        firstName:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
+          description: First name of the customer
+        lastName:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
+          description: Last name of the customer
+        middleName:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
+          description: Middle name of the customer
+        prefix:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
+          description: prefix of the customer, like titles
+        postfix:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
+          description: postfix of the customer, like titles
+        phoneNumber:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
+        email:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
+          description: the email address of the customer
+        dateOfBirth:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/date"
+        placeOfBirth:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
+        countryOfBirth:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
+        address:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/place"
+        photo:
+          type: string
+          maxLength: 10000
+          description: base64 encoded
+          x-format: byte-array
+        extraInfo:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"

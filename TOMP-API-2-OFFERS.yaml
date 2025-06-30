@@ -25,7 +25,8 @@ paths:
       operationId: searchOffers
       summary: "Search for offers"
       description: Returns offers based on travel specification, trip pattern, location, asset, product and user preferences.
-      x-corom: (STOP / COMMON / SINGLE / REPEATED) FARE QUERY
+      x-semantics: 
+      - transmodel: STOP, COMMON, SINGLE, REPEATED FARE QUERY
       security:
         - BearerAuth: []
         - OAuth: []
@@ -50,7 +51,8 @@ paths:
     get:
       operationId: requestOffer
       summary: "Get offer details"
-      x-corom: TRAVEL PACKAGE QUERY (?)
+      x-semantics:
+      - transmodel: SALES OFFER PACKAGE QUERY
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -63,14 +65,15 @@ paths:
         - offer
       responses:
         "200":
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageResponseBody"
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
           
 components:
   requestBodies:
     searchOfferRequest:
-      x-tm: TRIP REQUEST
+      x-semantics:
+      - transmodel: TRIP REQUEST
       content:
         application/json:
           schema:    
@@ -99,10 +102,10 @@ components:
             $ref: "#/components/schemas/offerCollection"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
     
     offerResponse:
-      description: a list of offers
+      description: a single offer
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
@@ -118,12 +121,13 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageProperties"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonResponseBody"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
 
   schemas:
     searchOfferRequest:
       type: object
-      x-tm: TRIP REQUEST FILTER
+      x-semantics:
+      - transmodel: TRIP REQUEST
       required:
       - type
       - specification
@@ -131,8 +135,7 @@ components:
       properties:
         type:
           type: string
-          enum: [search_offer]
-          pattern: "^(search_offer)"
+          pattern: "^(search_offer)$"
         specification:
           oneOf:
           - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
@@ -159,15 +162,15 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
 
     tripPattern:
-      x-tm: TRIP PATTERN
+      x-semantics:
+      - transmodel: TRIP PATTERN
       allOf:
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
       - type: object
         properties:
           type:
             type: string
-            enum: [ trip_pattern ]
-            pattern: "^(trip_pattern)"
+            pattern: "^(tripPattern)$"
           serviceJourneys:
             type: array
             items:
@@ -177,12 +180,13 @@ components:
 
     offerCollection:
       description: a list of offers.
-      x-tm: TRIP DELIVERY
+      x-semantics:
+      - transmodel: TRIP DELIVERY
       type: object
       properties:
         type:
           type: string
-          enum: [OfferCollection]
+          pattern: "^(OfferCollection)$"
         offers:
           type: array
           items:
@@ -202,6 +206,8 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
 
     offer:
+      x-semantics:
+      - transmodel: SALES OFFER PACKAGE
       required:
       - type
       - id
@@ -212,7 +218,7 @@ components:
         properties:
           type:
             type: string
-            enum: [ offer ]
+            pattern: "^(offer)$"
           properties:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageProperties"          
 
@@ -221,22 +227,22 @@ components:
       - type: object
         required:
         - type
-        additionalProperties: true
         properties:
           type:
             type: string
-            enum: [ offers ]
+            pattern: "^(offers)$"
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/definitions"
 
     offerProperties:
       type: object
-      additionalProperties: true
+      x-semantics:
+      - transmodel: SALES OFFER PACKAGE
       required:
       - type
       properties:
         type:
           type: string
-          enum: [ offer ]
+          pattern: "^(offer)$"
         id:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
         summary:
@@ -245,3 +251,5 @@ components:
           type: array
           items:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/guarantee"
+        customFields:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
