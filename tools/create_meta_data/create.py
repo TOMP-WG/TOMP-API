@@ -3,6 +3,8 @@ import json
 import sys
 from pathlib import Path
 
+registered_types = []
+
 def resolve_schema(schema, components):
     """Recursief resolven van $ref, integreren van `allOf`, en verwerken van `required`, inclusief referenties in arrays."""
     if isinstance(schema, dict):
@@ -56,6 +58,8 @@ def resolve_schema(schema, components):
             for prop_name, prop_schema in resolved_schema['properties'].items():
                 s = resolve_schema(prop_schema, components)
                 resolved_schema['properties'][prop_name] = s
+                if( prop_name == 'amount'):
+                    print(prop_name)
 
         # Verwerk de 'required' eigenschap op objectniveau (zonder duplicaten)
         if 'required' in schema:
@@ -72,7 +76,7 @@ def resolve_schema(schema, components):
 
 def extract_endpoints_from_openapi(openapi_file):
     # Lees de originele OpenAPI specificatie
-    with open(openapi_file, 'r', encoding='UTF-16') as file:
+    with open(openapi_file, 'r', encoding='UTF-8') as file:
         openapi_spec = yaml.safe_load(file)
 
     collections_json = {}
