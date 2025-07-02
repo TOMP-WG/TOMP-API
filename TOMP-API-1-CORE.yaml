@@ -224,7 +224,7 @@ components:
       - $ref: "#/components/schemas/offerProperties"
       - type: object
         description: a purchased package is a registration of an agreement between end user and TO, 
-          to execute a package (=set of legs) according a specification, including all conditions
+          to execute a package (=set of legs) according a specification, including all conditions (labels)
         required:
           - type
         properties:
@@ -319,7 +319,7 @@ components:
         conditions:
           type: array
           items:
-            $ref: "#/components/schemas/condition"
+            $ref: "#/components/schemas/label"
         guarantees:
           type: array
           items: 
@@ -388,7 +388,7 @@ components:
         labels:
           type: array
           items:
-            $ref: "#/components/schemas/packageLabel"
+            $ref: "#/components/schemas/label"
         returnLocations:
           type: array
           items:
@@ -436,7 +436,7 @@ components:
           items:
             $ref: "#/components/schemas/traveller"
 
-    packageLabel:
+    label:
       type: string
       enum: [ MOST_FLEXIBLE,
               NON_FLEXIBLE,
@@ -613,19 +613,6 @@ components:
               PREMIUM_CLASS,
               ANY,
               UNKNOWN ]
-
-    condition:
-      type: object
-      x-semantics:
-      - transmodel: OFFER RULE
-      properties:
-        id:
-          $ref: "#/components/schemas/shortString"
-        name:
-          $ref: "#/components/schemas/normalString"
-        type:
-          type: string
-          pattern: "^(externalCondition|returnStation|returnArea)$"
 
     guarantee:
       x-semantics:
@@ -1108,7 +1095,7 @@ components:
           labels:
             type: array
             items:
-              $ref: "#/components/schemas/packageLabel"
+              $ref: "#/components/schemas/label"
 
           distribution:
             x-semantics:

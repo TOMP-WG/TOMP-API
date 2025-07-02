@@ -8,31 +8,40 @@ info:
 tags:
   - name: planning
     description: in V2.0 we use the terminology 'search for offers' instead of 'planning'.<br>
+    x-2: offers
 
   - name: booking
     description: in V2.0 we use the terminology 'purchase' instead of 'booking'.<br>
       and introduced purchase-offer, purchase-product (for e.g. tickets & daycards), use-asset (immediate use) and purchase-package (advanced).<br>
+    x-2: purchase
 
   - name: trip execution
     description: supports the complete trip execution process. It contains f.i. getting an available asset, assigning the asset to the leg, starting, pausing, finishing a leg (all by using the POST /legs/{id}/events) or updating an execution (not the state!).
+    x-2: execution
 
   - name: operator information
     description: gives information about systems, stations, operating hours [from GBFS]
+    x-2: external
 
   - name: payment
     description: reports financial overview for legs
+    x-2: after sales
 
   - name: support
     description: support for the user while the leg is ongoing
+    x-2: support
 
   - name: general
     description: general operations (e.g. notifications)
+    x-2: MP Notification
 
   - name: customer management
     description: customer management
+    x-2: customer management
 
   - name: booking [optional]
     description: endpoints that can faciliate processes in the booking process, but are not necessary for a minimal viable product. You can think of getting information, updating (parts of) a booking (not the state!), adding and removing subscriptions (webhook), etc.
+    x-2: purchase
 
 # security. Allowed methods basic (in header: Authorization: Basic ZGVtbzpwQDU1dzByZA==),
 #                           bearer (in header: Authorization: Bearer <token>)
@@ -59,6 +68,7 @@ paths:
       - $ref: "#/components/parameters/addressedTo"
     post:
       summary: POST /processes/search-offers/execute, source data or trip planner      
+      x-2: POST /processes/search-offers/execute
       tags:
         - planning
       requestBody:
@@ -92,6 +102,7 @@ paths:
       - $ref: "#/components/parameters/addressedTo"
     post:
       summary: POST /processes/search-offers/execute
+      x-2: POST /processes/search-offers/execute
       tags:
         - planning
       requestBody:
@@ -126,6 +137,11 @@ paths:
     post:
       summary: replaced by various endpoints
       description: POST /processes/use-asset/execute - start using e.g. a bike on the street / map <br>
+        POST /processes/purchase-offers/execute - to purchase an offer <br>
+        POST /processes/purchase-product/execute - to purchase a product from an external data source, like a day card <br>        
+        POST /processes/purchase-package/execute - select offer(s) into a package, modify/complete them, purchase it <br>
+      x-2: >-
+        POST /processes/use-asset/execute - start using e.g. a bike on the street / map <br>
         POST /processes/purchase-offers/execute - to purchase an offer <br>
         POST /processes/purchase-product/execute - to purchase a product from an external data source, like a day card <br>        
         POST /processes/purchase-package/execute - select offer(s) into a package, modify/complete them, purchase it <br>
@@ -167,6 +183,7 @@ paths:
           $ref: "#/components/responses/428PreconditionRequired"
     get:
       summary: removed.
+      x-2: none
       description: Optional - Returns bookings that has been created earlier, selected on state.
       tags:
         - booking [optional]
@@ -243,6 +260,8 @@ paths:
         and MUST have an expiry time to indicate the time window to 'rollback-purchase'. <br>
         POST /processes/purchase-product/execute<br>
         POST /processes/use-asset/execute
+      x-2: POST /processes/purchase-product/execute<br>
+        POST /processes/use-asset/execute
       tags:
         - booking
       requestBody:
@@ -295,6 +314,14 @@ paths:
         <br>
         DENY - MP module Notifications. POST /processes/notification/execute, with `notificationType` NOT_ACCEPTED<br>
         COMMIT - MP module Notifications. POST /processes/notification/execute, with `notificationType` ACCEPTED
+      x-2: >-
+        CANCEL - POST /processes/rollback-purchase/execute (roll back the purchase before the expiry time)<br>
+        CANCEL - POST /processes/release-package/execute (when the package is not yet purchased, but selected to modify)<br>
+        CANCEL - POST /processes/cancel-package/execute (in case of incorrect bookings, due to technical errors)<br>
+        COMMIT - POST /processes/confirm-purchase/execute (only needed when the package is in a PENDING state, before expiry time)<br>
+        EXTEND_EXPIRY_TIME - POST /processes/extend-expiry-time/execute <br>
+        DENY - MP module Notifications. POST /processes/notification/execute, with `notificationType` NOT_ACCEPTED<br>
+        COMMIT - MP module Notifications. POST /processes/notification/execute, with `notificationType` ACCEPTED
       tags:
         - booking
       requestBody:
@@ -341,6 +368,7 @@ paths:
           type: string
     get:
       summary: GET /collections/packages/items?packageId={id}
+      x-2: GET /collections/packages/items?packageId={id}
       description: return a single package (aka booking)
       tags:
         - booking
@@ -363,6 +391,12 @@ paths:
     put:
       summary: various, more specific endpoints replace this one
       description: >-
+        POST /processes/update-traveller/execute - modify or complete a traveller<br>
+        POST /processes/assign-asset/execute - assign, replace a seat or physical asset to a leg, also allows to remove one<br>
+        POST /processes/assign-ancillary/execute - assign, replace an ancillary      <br>
+        POST /processes/remove-offer/execute - remove an offer from a package<br>
+        POST /processes/update-travel-specification/execute - modify the start and/or end times
+      x-2: >-
         POST /processes/update-traveller/execute - modify or complete a traveller<br>
         POST /processes/assign-asset/execute - assign, replace a seat or physical asset to a leg, also allows to remove one<br>
         POST /processes/assign-ancillary/execute - assign, replace an ancillary      <br>
@@ -416,6 +450,7 @@ paths:
           type: string
     post:
       summary: removed
+      x-2: none
       description: removed. No implementations known so far. Similar functionality can be found in the Notification Module (MP side)
       tags:
         - booking [optional]
@@ -448,6 +483,7 @@ paths:
                   description: operation ok
     delete:
       summary: removed.
+      x-2: none
       tags:
         - booking [optional]
       responses:
@@ -485,6 +521,7 @@ paths:
           type: string
     get:
       summary: removed.
+      x-2: none
       description: removed, no known implementations.
       tags:
         - general
@@ -513,6 +550,7 @@ paths:
           $ref: "#/components/responses/410Gone"
     post:
       summary: MP Notification module - POST /processes/notification/execute
+      x-2: MP Notification module - POST /processes/notification/execute
       tags:
         - general
       requestBody:
@@ -548,7 +586,8 @@ paths:
         schema:
           type: string
     get:
-      summary: GET /collections/assets/items?legId={id}
+      summary: GET /collections/assets/items
+      x-2: GET /collections/assets/items?packageId={packageId}&legId={id}
       description: Returns a list of available assets for the given leg.
       tags:
         - trip execution
@@ -603,7 +642,8 @@ paths:
         schema:
           type: string
     get:
-      summary: if needed, can be replace by GET /collections/packages/items?packageId={packageId}&legId={id}
+      summary: if needed, can be replace by GET /collections/packages/items
+      x-2: GET /collections/packages/items?packageId={packageId}&legId={id}
       description: returns the leg within the package context.
       tags:
         - trip execution
@@ -622,15 +662,31 @@ paths:
           $ref: "#/components/responses/404NotFound"
     put:
       summary: Replaced by various endpoints
+      x-2: >-
+        GET /collections/redress-options/items?packageId={packageId}&legId={id} with:<br>
+        &nbsp;POST /processes/claim-redress-option/execute<br>
+        &nbsp;POST /processes/confirm-redress-option/execute<br><br>
+
+        POST /processes/postpone-leg/execute (execution)<br>
+        POST /processes/extend-leg/execute (execution)<br><br>
+
+        GET /collections/ancillaries/items?packageId={packageId}&legId={id} with:<br>
+        &nbsp; POST /processes/assign-ancillary/execute<br><br>
+
+        GET /collections/assets/items?packageId={packageId}&legId={id} with:<br>
+        &nbsp; POST /processes/assign-asset/execute<br><br>
+
       description: A leg can be changed using<br>
-        POST /processes/update-travel-specification/execute<br>
         POST /processes/claim-redress-option/execute<br>
         POST /processes/confirm-redress-option/execute<br><br>
 
+        POST /processes/postpone-leg/execute (execution)<br>
+        POST /processes/extend-leg/execute (execution)<br><br>
+
         Or ancillaries/assets can be assigned (or replaced/removed) during the trip execution phase as well. <br>
         This will probably be reflected in the price; additional fees can be applied. The available assets or <br>
-        ancillaries can again be retrieved by the GET /collections/assets/items?packageId={packageId}&legId={id} or <br>
-        GET /collections/ancillaries/items?packageId={packageId}&legId={id}
+        ancillaries can again be retrieved by the GET /collections/assets/items or <br>
+        GET /collections/ancillaries/items
       tags:
         - trip execution
       requestBody:
@@ -679,6 +735,7 @@ paths:
           type: string
     post:
       summary: POST /processes/assign-ancillary/execute
+      x-2: POST /processes/assign-ancillary/execute
       description: a new ancillary is added to the leg.
       tags:
         - trip execution
@@ -701,6 +758,7 @@ paths:
           $ref: "#/components/responses/404NotFound"
     delete:
       summary: POST /processes/assign-ancillary/execute
+      x-2: POST /processes/assign-ancillary/execute
       description: without `ancillary`, and in `replacedAncillary` the ancillary to remove
       tags:
         - trip execution
@@ -737,6 +795,18 @@ paths:
           type: string
     post:
       summary: replaced by various, more specific endpoints
+      x-2: >-
+        POST /processes/start-leg/execute<br>
+        POST /processes/assign-asset/execute<br>
+        POST /processes/resume-leg/execute<br>
+        POST /processes/pause-leg/execute<br>
+        POST /processes/postpone-leg/execute<br>
+        POST /processes/extend-leg/execute<br>
+        POST /processes/end-leg/execute<br>
+
+        POST /processes/open-trunk-asset/execute<br>
+        POST /processes/lock-asset/execute<br>
+        POST /processes/unlock-asset/execute<br>
       description: >- 
         PREPARE - removed. The POST /processes/start-leg/execute must be used, the returned leg CAN have the status 'PREPARING'.<br>
         You have to wait until the notification module is used POST /processes/notification/execute with notificationType 'PREPARED'<br><br>
@@ -745,12 +815,12 @@ paths:
         SET_IN_USE - POST /processes/start-leg/execute (first start) <br>
         SET_IN_USE - POST /processes/resume-leg/execute (resume after pause)<br><br>
 
-        TIME_EXTEND - POST /processes/update-travel-specification/execute<br>
-        TIME_POSTPONE - POST /processes/update-travel-specification/execute<br><br>
+        TIME_EXTEND - POST /processes/extend-leg/execute<br>
+        TIME_POSTPONE - POST /processes/postpone-let/execute<br><br>
 
         PAUSE - POST /processes/pause-leg/execute<br><br>
 
-        OPEN_TRUNK - POST /processes/open-trunk/execute (custom, peer-2-peer)<br><br>
+        OPEN_TRUNK - POST /processes/open-trunk-asset/execute (custom, peer-2-peer)<br><br>
 
         START_FINISHING - POST /processes/end-leg/execute, will return a leg with status 'FINISHING'<br>
         You have to wait until the notification module is used (notificationType 'ENDED') <br>
@@ -802,7 +872,8 @@ paths:
         schema:
           type: string
     get:
-      summary: GET /collections/packages/items?package={packageId}&legId={id}&f=geojson
+      summary: GET /collections/packages/items
+      x-2: GET /collections/packages/items?package={packageId}&legId={id}&f=geojson
       description: in the geojson format, it is possible to exchange additional, supportive information about
         the leg
       tags:
@@ -826,6 +897,7 @@ paths:
         "404":
           $ref: "#/components/responses/404NotFound"
     post:
+      x-2: POST /processes/notification/execute (MP side)
       summary: MP Notification module - POST /processes/notification/execute with notificationType PROGRESS
       description: Monitors the current location of the asset and duration & distance of the leg
       tags:
@@ -852,6 +924,7 @@ paths:
       - $ref: "#/components/parameters/acceptLanguage"
     get:
       summary: GET /health
+      x-2: GET /health
       tags:
         - operator information
       description: This is a healthcheck endpoint to see if the TO is up and running perfectly. 
@@ -875,6 +948,7 @@ paths:
         schema:
           type: string
     post:
+      x-2: POST /processes/request-confirmation/execute (MP Side)
       summary: MP Notification module - POST /processes/request-confirmation/execute
       description: The TO can request confirmation for certain actions from the MP.
       tags:
@@ -905,6 +979,13 @@ paths:
       summary: replaced by various endpoints (OGC common, OGC Process common, OGC Records common)
       tags:
         - operator information
+      x-2: GET / - intro page <br>
+        GET /api - OpenAPI definition <br>
+        GET /conformance - conforms to these standards <br>
+        GET /collections - contains these collections <br>
+        GET /processes - contains these processes <br>
+        GET /collections/{collectionId} - details about each collection <br>
+        GET /processes/{processId} - details about each process <br>
       description: GET / - intro page <br>
         GET /api - OpenAPI definition <br>
         GET /conformance - conforms to these standards <br>
@@ -933,7 +1014,8 @@ paths:
       - $ref: "#/components/parameters/maasId"
       - $ref: "#/components/parameters/addressedTo"
     get:
-      summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      summary: removed
+      x-2: optionally in the 'geojson'-request in the GET /collections/packages/items?f=geojson
       deprecated: true
       tags:
         - operator information
@@ -1009,6 +1091,7 @@ paths:
       - $ref: "#/components/parameters/maasId"
       - $ref: "#/components/parameters/addressedTo"
     get:
+      x-2: none
       summary: removed, can be found in referenced data (GET /collections/datasources/items)
       deprecated: true
       description: Returns a list of available assets.
@@ -1087,6 +1170,7 @@ paths:
       tags:
         - operator information
       summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      x-2: none / GET /collections/datasources/items
       deprecated: true
       description: This feed is intended to inform customers about changes to the system that do not fall within the normal system operations. For example, system closures due to weather would be listed here, but a system that only operated for part of the year would have that schedule listed in the system-calendar.json feed. This file is an array of alert objects defined as below. Obsolete alerts should be removed so the client application can safely present to the end user everything present in the feed. The consumer could use the start/end information to determine if this is a past, ongoing or future alert and adjust the presentation accordingly. [from GBFS]
       parameters:
@@ -1145,6 +1229,7 @@ paths:
       tags:
         - operator information
       summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      x-2: none, GET /collections/datasources/items
       deprecated: true
       parameters:
         - name: regionId
@@ -1187,6 +1272,7 @@ paths:
       tags:
         - operator information
       summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      x-2: none, GET /collections/datasources/items
       deprecated: true
       description: Describes the hours of operation of all available systems of the transport operator [from GBFS]
       parameters:
@@ -1230,6 +1316,7 @@ paths:
       tags:
         - operator information
       summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      x-2: none, GET /collections/datasources/items
       deprecated: true
       description: Describes the system including System operator, System location, year implemented, URLs, contact info, time zone. [from GBFS]
       responses:
@@ -1258,6 +1345,7 @@ paths:
       tags:
         - operator information
       summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      x-2: none, GET /collections/datasources/items
       deprecated: true
       description: Describes pricing of systems or assets [from GBFS]
       parameters:
@@ -1302,7 +1390,8 @@ paths:
     get:
       tags:
         - operator information
-      summary: removed, can be found in referenced data (GET /collections/datasources/items)
+      summary: removed
+      x-2: optionally in the 'geojson'-request in the GET /collections/packages/items?f=geojson
       deprecated: true
       parameters:
         - name: offset
@@ -1346,6 +1435,7 @@ paths:
         - payment
       description: Returns all the journal entries that should be paid per leg
       summary: GET /collections/payments/items
+      x-2: GET /collections/payments/items
       parameters:
         - name: from
           in: query
@@ -1421,7 +1511,8 @@ paths:
     post:
       tags:
         - payment
-      summary: GET /processes/request-payment/execute
+      summary: POST /processes/request-payment/execute
+      x-2: POST /processes/request-payment/execute (MP implementation), with a confirm-payment from the MP side
       description: extra costs that the TO has to charge to the MP. The MP can respond with a POST /processes/confirm-payment/execute
       parameters:
         - name: id
@@ -1462,6 +1553,7 @@ paths:
       - $ref: "#/components/parameters/addressedTo"
     post:
       summary: POST /processes/request-support/execute
+      x-2: POST /processes/request-support/execute
       description: creates a request for support from end user via MP
       tags:
         - support
@@ -1498,6 +1590,7 @@ paths:
       - $ref: "#/components/parameters/addressedTo"
     get:
       summary: GET /collections/support-tickets/items
+      x-2: GET /collections/support-tickets/items
       description: Gets the status report of the support request. Last status (highest order number) is the current status
       tags:
         - support
@@ -1535,6 +1628,7 @@ paths:
       - $ref: "#/components/parameters/callbackUrl"
     post:
       summary: POST /collections/customers/items
+      x-2: POST /collections/customers/items
       description: Creates or links a CUSTOMER ACCOUNT that can be later used for purchasing a trip. If the customer is already registered with this TO it's the TO descision whether to link to the existing acount or to create a seperate account.
       tags:
         - customer management
@@ -1563,6 +1657,7 @@ paths:
       - $ref: "#/components/parameters/customerId"
     patch:
       summary: PATCH /collections/customers/items/{customerId}
+      x-2: PATCH /collections/customers/items/{customerId}
       description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
         When during CREATE CUSTOMER ACCOUNT step the customer status is _OTP_REQUIRED_ this request
         can be used to send the OTP from the customer to the TO by using extraFields.otp in the Customer object.
@@ -1590,6 +1685,7 @@ paths:
           $ref: "#/components/responses/errorResponse"
     get:
       summary: GET /collections/customers/items/{customerId}
+      x-2: GET /collections/customers/items/{customerId}
       tags:
         - customer management
       responses:
@@ -2301,7 +2397,7 @@ components:
         extraInfo:
           description: dictionary for extra fields (bilatural agreements)
           type: object
-          x-2: -
+          x-2: none
           additionalProperties: true
 
     bookingState:
@@ -2433,19 +2529,19 @@ components:
 
     conditionDeposit:
       description: in case the TO demands a deposit before usage. Requesting and refunding should be done using the /payment/claim-extra-costs endpoint.
-      x-2: packageLabel[DEPOSIT_REQUIRED]
+      x-2: label[DEPOSIT_REQUIRED]
       allOf:
         - $ref: "#/components/schemas/condition"
         - $ref: "#/components/schemas/amountOfMoney"
 
     conditionPayWhenFinished:
       description: in case the TO demands a direct payment after usage.
-      x-2: packageLabel[PAY_WHEN_FINISHED]
+      x-2: label[PAY_WHEN_FINISHED]
       allOf:
         - $ref: "#/components/schemas/condition"
 
     conditionPostponedCommit:
-      x-2: packageLabel[PURCHASE_TO_BE_CONFIRMED]
+      x-2: label[PURCHASE_TO_BE_CONFIRMED]
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2457,7 +2553,7 @@ components:
               format: date-time
 
     conditionRequireBookingData:
-      x-2: packageLabel[REQUIRES_PERSONAL_DATA]
+      x-2: label[REQUIRES_PERSONAL_DATA]
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2503,7 +2599,7 @@ components:
                 type: string
 
     conditionRequireEvidence:
-      x-2: -
+      x-2: none
       description: use this condition to specify the evidence you require as TO in the off-boarding process. It can be used in addition with the 
         static process identifier 'OFF_BOARDING_REQUIRED'. The evidence should be delivered in the /legs/{id}/events object (legEvent), in the `url` array
         This construct is deprecated since v1.5. Please migrate it to conditionRequireOffboardingSteps
@@ -2525,7 +2621,7 @@ components:
                 ]
 
     conditionRequireOnboardingSteps:
-      x-2: packageLabel[MANDATORY_ENTRY_INSTRUCTIONS]
+      x-2: label[MANDATORY_ENTRY_INSTRUCTIONS]
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2538,7 +2634,7 @@ components:
                 $ref: "#/components/schemas/onBoardingStep"                
 
     conditionRequireOffboardingSteps:
-      x-2: packageLabel[MANDATORY_EXIT_INSTRUCTIONS]
+      x-2: label[MANDATORY_EXIT_INSTRUCTIONS]
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2551,7 +2647,7 @@ components:
                 $ref: "#/components/schemas/offBoardingStep"
 
     conditionRequirePausingSteps:
-      x-2: -
+      x-2: label[MANDATORY_PAUSING_INSTRUCTIONS]
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2564,7 +2660,7 @@ components:
                 $ref: "#/components/schemas/pausingStep"
 
     conditionRequireResumingSteps:
-      x-2: -
+      x-2: label[MANDATORY_ENTRY_INSTRUCTIONS]
       allOf:
         - $ref: "#/components/schemas/condition"
         - type: object
@@ -2577,7 +2673,7 @@ components:
                 $ref: "#/components/schemas/resumingStep"
 
     conditionReturnArea:
-      x-2: packageLabels[ROUND_TRIP]
+      x-2: label[ROUND_TRIP]
       description: a return area. In the condition list there can be multiple return area's.
       allOf:
         - $ref: "#/components/schemas/condition"
@@ -2598,7 +2694,7 @@ components:
                 $ref: "#/components/schemas/systemHours"
 
     conditionUpfrontPayment:
-      x-2: packageLabels[UPFRONT_PAYMENT]
+      x-2: label[UPFRONT_PAYMENT]
       description: in case the TO demands a upfront payment before usage. The payment should be made in the booking phase.
       allOf:
         - $ref: "#/components/schemas/condition"
@@ -2619,7 +2715,7 @@ components:
 
     connectedLegInfo:
       type: object
-      x-2: travellerRequirements.connectTo
+      x-2: travellerRequirements.previousLeg
       description: this object describes the previous leg. It can contain f.x. a flight number, a used parking to get a discount, etc.
       properties:
         provider:
