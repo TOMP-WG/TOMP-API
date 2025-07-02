@@ -265,6 +265,7 @@ components:
       - type: object
         required:
           - type
+          - id
           - status
         properties:
           type:
@@ -278,6 +279,16 @@ components:
             $ref: "#/components/schemas/summary"
           price:
             $ref: "#/components/schemas/amountOfMoney"
+          guarantees:
+            type: array
+            items:
+              $ref: "#/components/schemas/guarantee"
+          legs:
+            type: array
+            items:
+              $ref: "#/components/schemas/legReference"
+          customFields:
+            $ref: "#/components/schemas/customProperties"
       - $ref: "#/components/schemas/definitions"
 
     productProperties:
@@ -374,7 +385,11 @@ components:
           $ref: "#/components/schemas/organisationReference"
         operatorName:
           $ref: "#/components/schemas/normalString"
-        returnStations:
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/packageLabel"
+        returnLocations:
           type: array
           items:
             $ref: "#/components/schemas/placeReference"
@@ -383,17 +398,14 @@ components:
       type: object
       required:
       - type
-      - properties
+      - id
+      additionalProperties: true
       properties:
         type:
           type: string
-          pattern: "^(leg|station|stop_place|start_location|end_location|zone|return_area|return_station|policy_zone|geofence)$"
+          pattern: "^(leg|station|stop_place|start_location|end_location|zone|return_area|return_station|policy_zone|geofence|progress)$"
         id:
           $ref: "#/components/schemas/shortString"
-        links:
-          type: array
-          items:
-            $ref: "#/components/schemas/link"
 
     definitions:
       type: object
@@ -434,7 +446,17 @@ components:
               CANCELLABLE,
               TRANSFERABLE,
               DEPOSIT_REQUIRED,
-              ANCILLARIES_INCLUDED ]
+              ANCILLARIES_INCLUDED,
+              ANCILLARIES_REQUIRED,
+              PAY_WHEN_FINISHED,
+              PURCHASE_TO_BE_CONFIRMED,
+              REQUIRES_PERSONAL_DATA,
+              MANDATORY_ENTRY_INSTRUCTIONS,
+              MANDATORY_EXIT_INSTRUCTIONS,
+              MANDATORY_PAUSING_INSTRUCTIONS,
+              ROUND_TRIP,
+              UPFRONT_PAYMENT
+            ]
 
     packageStatus:
       x-semantics:
@@ -473,7 +495,8 @@ components:
         _PREPARED_ the leg is ready to use<br>
         _IN_USE_ the travelers are on their way<br>
         _PAUSED_ the asset is paused<br>
-        _ENDED_ the travelers have arrived at their destination<br>
+        _ENDING_ the end-leg request is received, the offboarding process has is started<br>
+        _ENDED_ the travelers have arrived at their destination, leg is final<br>
         _ISSUE_REPORTED_ due to an issue, there is (temporarily) no progress to report, when the issue isn't solved, this is a final state<br>
         _CANCELLED_ the leg has been cancelled, before execution<br>
         _ABENDED_ the leg is abnormally ended (e.g. due to an issue)
@@ -485,41 +508,7 @@ components:
               ENDED,
               ISSUE_REPORTED,
               CANCELLED,
-              ABENDED]
-
-    userProfile:
-      x-semantics:
-      - transmodel: USER PROFILE
-      type: object
-      required:
-      - name
-      - type
-      properties:
-        type:
-          type: string
-          pattern: "^(userProfile)$"
-        name:
-          $ref: "#/components/schemas/userProfileReference"
-        ageGroup:
-          type: string
-          enum: [ ANYONE, INFANT, CHILD, YOUTH, ADULT, SENIOR ]
-          description: The age group of the user profile, used to determine applicable fares and discounts.
-        age:
-          $ref: "#/components/schemas/range"
-        length:
-          $ref: "#/components/schemas/range"
-        weight:
-          $ref: "#/components/schemas/range"
-        monthDayOnWhichAgeApplies:
-          $ref: "#/components/schemas/shortInt"
-        localResident:
-          type: boolean
-        genderLimitation:
-          type: string
-          enum: [SAME_SEX, FEMALE_ONLY, MALE_ONLY, BOTH]
-        discountBasis:
-          type: string
-          enum: [DISCOUNT, FREE, FULL_RATE]
+              ABENDED ]
 
     entitlementGiven:
       x-semantics:
@@ -766,7 +755,7 @@ components:
           maxItems: 100
           items:
             $ref: "#/components/schemas/equipmentReference"
-        extraInfo:
+        customFields:
           $ref: "#/components/schemas/customProperties"
         fee:
           $ref: "#/components/schemas/fareStructure"
@@ -910,6 +899,8 @@ components:
         subType:
           $ref: "#/components/schemas/shortString"
           description: For use in case of OTHER. Can be used in bilateral agreements.
+        assetClass:
+          $ref: "#/components/schemas/mode"
         relatedProduct:
           $ref: "#/components/schemas/productReference"
         transportOrganisations:
@@ -1019,7 +1010,7 @@ components:
             places:
               type: array
               items:
-                $ref: "#/components/schemas/zoneReference"
+                $ref: "#/components/schemas/placeReference"
             zones:
               type: array
               items:
@@ -1028,6 +1019,20 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/lineReference"
+
+        previousLeg:
+          $ref: "#/components/schemas/legReference"
+
+        estimatedUsage:
+          type: object
+          properties:
+            time:
+              $ref: "#/components/schemas/duration"
+            distanceType:
+              type: string
+              enum: [KM, MILE]
+            distance:
+              $ref: "#/components/schemas/float"              
 
         prmNeeds:
           x-semantics:
@@ -1338,7 +1343,7 @@ components:
             description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
             enum: [IN_USE, PAUSED]
             default: IN_USE
-          extraInfo:
+          customFields:
             $ref: "#/components/schemas/customProperties"
 
     interval:
@@ -1817,13 +1822,6 @@ components:
       default: 0
       minimum: 0
       maximum: 1000
-
-    range:
-      type: array
-      minItems: 2
-      maxItems: 2
-      items:
-        type: number
 
     dateTimeRange:
       type: array

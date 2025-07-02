@@ -158,13 +158,26 @@ components:
                 properties:
                   timestamp:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
                   leg:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
-                  location: 
+                  assetLocation: 
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  userLocation: 
+                    description: This field might lead to GDPR issues. Be aware, use it with caution.
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  currentCharge:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                    description: percentage of charge available
                   time:
                     description: time to extend or postpone
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/duration"
+                  comment:
+                    type: string
+                    description: free text, should match Content-Language
                   evidence:
                     type: array
                     minItems: 1

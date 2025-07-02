@@ -160,6 +160,8 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/place"
         packageToExchange:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+        customFields:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
 
     tripPattern:
       x-semantics:
@@ -190,7 +192,7 @@ components:
         offers:
           type: array
           items:
-            $ref: "#/components/schemas/offer"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerProperties"
         properties:
           $ref: "#/components/schemas/offerCollectionProperties"
         numberMatched:
@@ -215,24 +217,3 @@ components:
             type: string
             pattern: "^(offers)$"
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/definitions"
-
-    offerProperties:
-      type: object
-      x-semantics:
-      - transmodel: SALES OFFER PACKAGE
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          pattern: "^(offer)$"
-        id:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
-        summary:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/summary"
-        guarantees:
-          type: array
-          items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/guarantee"
-        customFields:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"

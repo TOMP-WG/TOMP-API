@@ -183,7 +183,7 @@ components:
         userProfiles:
           type: array
           items:
-            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfile"
+            $ref: "#/components/schemas/userProfile"
         properties:
           type: object
           additionalProperties: true
@@ -202,6 +202,47 @@ components:
             In case it is an alternative, specify clearly in the description what the financial consequences are.
           items:
             $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+    userProfile:
+      x-semantics:
+      - transmodel: USER PROFILE
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        type:
+          type: string
+          pattern: "^(userProfile)$"
+        name:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+        ageGroup:
+          type: string
+          enum: [ ANYONE, INFANT, CHILD, YOUTH, ADULT, SENIOR ]
+          description: The age group of the user profile, used to determine applicable fares and discounts.
+        age:
+          $ref: "#/components/schemas/range"
+        length:
+          $ref: "#/components/schemas/range"
+        weight:
+          $ref: "#/components/schemas/range"
+        monthDayOnWhichAgeApplies:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
+        localResident:
+          type: boolean
+        genderLimitation:
+          type: string
+          enum: [SAME_SEX, FEMALE_ONLY, MALE_ONLY, BOTH]
+        discountBasis:
+          type: string
+          enum: [DISCOUNT, FREE, FULL_RATE]
+
+    range:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: number
 
     cardTypeCollection:
       description: a list of accepted card types.

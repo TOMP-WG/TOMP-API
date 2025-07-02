@@ -121,6 +121,8 @@ components:
       type: object
       properties:
         id:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+        customer:
           $ref: "#/components/schemas/customer"
         creationDate:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
@@ -191,5 +193,5 @@ components:
           maxLength: 10000
           description: base64 encoded
           x-format: byte-array
-        extraInfo:
+        customFields:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"

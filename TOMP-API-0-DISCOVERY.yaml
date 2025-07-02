@@ -163,33 +163,25 @@ paths:
           type: string
           enum: 
           - search-offers
-          - add-traveller
-          - remove-traveller
           - update-traveller
-          - change-times-package
-          - change-times-leg
-          - add-product
-          - remove-product
+          - update-travel-specification
+          - remove-offer
           - assign-asset
           - assign-ancillary
           - purchase-offer
-          - 2-phase-purchase-offer
-          - confirm-offer
-          - release-offer
+          - release-package
           - purchase-package
+          - confirm-purchase
+          - rollback-purchase
           - extend-expiry-time
           - start-leg
           - pause-leg
           - resume-leg
           - end-leg
-          - activate-product
-          - initiate-product
-          - lock-asset
-          - unlock-asset
-          - open-trunk-asset
+          - postpone-leg
+          - extend-leg
           - request-support
           - cancel-package
-          - cancel-leg
           - claim-redress-option
           - confirm-redress-option
           - refund-deposit

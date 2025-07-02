@@ -169,6 +169,19 @@ components:
                   OTHER,
                   REPORT_DAMAGE,
                 ]
+                
+        context:
+          type: object
+          properties:
+            asset:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"    
+            leg:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"    
+            product:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"    
+            package:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+        
         location:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
         timestamp:
@@ -199,6 +212,8 @@ components:
         timeToResolution:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
           description: time in minutes to the expected resolution of support request
+        damage:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/damage"
         sequence:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyInt"
           description: the sequence number of the status of tickets on this issue

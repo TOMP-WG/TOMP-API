@@ -120,7 +120,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/redress-deposit/execute:
+  /processes/refund-deposit/execute:
     post:
       operationId: refundDepositRequest
       summary: "Request to refund a deposit"
@@ -415,7 +415,7 @@ components:
         replacements:
           type: array
           items: 
-            $ref: "TOMP-API-2-OFFERS.yaml#/components/schemas/offer"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerProperties"
 
     paymentCategory:
       x-semantics:

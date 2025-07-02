@@ -33,6 +33,25 @@ paths:
         default:
           $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
+  /processes/request-confirmation/execute:
+    post:
+      operationId: postConfirmation
+      summary: "Confirmation endpoint"
+      description: "Confirmation endpoint. Requesting confirmations from TO to MP will be done using this endpoint"
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - notifications
+      requestBody:
+        $ref: "#/components/requestBodies/notificationRequest"
+      responses:
+        "204":
+          description: Postive response on the request
+        default:
+          description: Negative response on the request, details in the error object
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"          
+
   /processes/request-payment/execute:
     post:
       operationId: paymentRequest
@@ -62,6 +81,17 @@ components:
             properties:
               inputs:
                 $ref: "#/components/schemas/notificationInput"
+    
+    confirmationRequest:
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: "#/components/schemas/confirmationInput"
 
     paymentRequest:
       content:
@@ -87,7 +117,9 @@ components:
             In case this field is missing, it must be assumed that the MP is requesting the operations.<br>
             _TO_ the TO requests this operation<br>
             _DRIVER_ the driver triggered this request<br>
-            _OTHER_ unknown source
+            _OTHER_ unknown source<br>
+            <br>
+            <b>IMPORTANT</b> The messages send should be in the requested language of the purchase!
           enum: [TO, DRIVER, OTHER]
         destination:
           type: string
@@ -100,6 +132,7 @@ components:
             * _USER_NO_SHOW_ The traveler didn't show up on the departure location & time  <br>
             * _ETA_ Estimated time of arrival at the departure location [others] at the destination location. User friendly message is in **comment**  <br>
             * _USER_OUT_OF_LIMITS_ indication to signal to the driver/traveler(s) they are (about to get) out of limits. Text is in **comment**  <br>
+
             * _INFORMATION_ information to the user, e.g. the asset is ready for pickup. Text is in **comment**<br>
             * _WARNING_ warning to the user, e.g. it is almost time to return the asset. Text is in **comment**<br>
             * _OTHER_ unspecified. Text is in **comment**<br>
@@ -121,8 +154,11 @@ components:
             When a call to the TO responds with a 202 (accepted), an asynchronous process starts<br>
             and the TO will notify with SUCCESS or FAILURE to indicate that the process has been completed<br>
             * _SUCCESS_ The requested process is completed (e.g. the purchase of a package, responding with HTTP code 202)<br>
-                The links object must contain a link to retrieve the processed object (e.g. GET /collections/packages/items/34243)
-            * _FAILURE_ The requested process ended in a failure (e.g. payment processing incomplete)
+                The links object must contain a link to retrieve the processed object (e.g. GET /collections/packages/items/34243)<br>
+            * _FAILURE_ The requested process ended in a failure (e.g. payment processing incomplete)<br><br>
+
+            * _ACCEPTED_ <br>
+            * _NOT_ACCEPTED_ In case of an a-sync purchase, the TO can respond to the MP wether the purchase has been accepted or not<br>
           enum:
             [
               USER_ACTION,
@@ -147,22 +183,72 @@ components:
               ENDED, 
 
               SUCCESS,
-              FAILURE
+              FAILURE,
+
+              ACCEPTED,
+              NOT_ACCEPTED
             ]
-        location:
-          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
-        # asset: in links
-        # product: in links
-        assetState:
-          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetState"
-        distance:
-          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/float"
-          description: the travelled distance, in km. Only if applicable.
-        distanceUnits:
-          type: string
-          enum: [KM, MILE]
-        duration:
-          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/longInt"
-          description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
+            
+        context:
+          type: object
+          properties:
+            asset:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetReference"    
+            leg:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/legReference"    
+            product:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/productReference"    
+            package:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+
+        assetInfo:
+          type: object
+          properties:
+            location:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+            assetState:
+              type: string
+              description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
+              enum: [IN_USE, PAUSED]
+              default: IN_USE
+            distance:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/float"
+              description: the travelled distance, in km. Only if applicable.
+            distanceUnits:
+              type: string
+              enum: [KM, MILE]
+            duration:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/normalInt"
+              description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
+            currentCharge:
+              type: integer
+              minimum: 0
+              maximum: 100
+              description: percentage of charge available
+
+        links:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
         message:
           type: string
+
+    confirmationInput:
+      type: object
+      required:
+        - confirmationType
+      properties:
+        confirmationType:
+          type: string
+          enum:
+            [ REPLACE_ASSET, START_LEG ]
+            
+        context:
+          type: object
+          properties:
+            asset:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetReference"    
+            leg:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/legReference"    
+            product:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/productReference"    
+            package:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/packageReference"

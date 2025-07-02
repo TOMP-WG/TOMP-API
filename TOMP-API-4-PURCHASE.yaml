@@ -245,7 +245,7 @@ paths:
       tags:
         - purchase
       requestBody:
-        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
+        $ref: "#/components/requestBodies/extendExpiryTimeRequest"
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
@@ -293,10 +293,16 @@ components:
               inputs:
                 type: object
                 properties:
+                  customer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
                   offers:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+                  start:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  end:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
                   travellers:
                     type: array
                     items:
@@ -415,6 +421,12 @@ components:
                       _PAYMENT_PENDING_ - The customer is in the payment process<br>
                       _OTHER_ - unspecified
                     enum: [ PURCHASE_PENDING, PAYMENT_PENDING, OTHER ]
+                  origin:
+                    type: string
+                    description: This operation can be done on behalf of another party. The MP can act on behalf of the END_USER (cancel this booking for me); 
+                      to override the default origin. In case this field is missing, it must be assumed that the events the MP is sending, this field should 
+                      contain "MP". And in case the TO is sending, "TO".
+                    enum: [TO, MP, END_USER, OTHER]
               subscriber:
                 type: object
                 required:
