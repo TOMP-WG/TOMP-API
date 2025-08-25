@@ -51,7 +51,6 @@ To begin implementing TOMP-API:
 3. **Wiki**: Explore the [TOMP-API Wiki](https://github.com/TOMP-WG/TOMP-API/wiki/) for implementation guidance.
 4. **code-snippets**: there are some code snippets (mostly Python available to speed up your implementation).
 5. **static output**: we already prepared all static output from some endpoints (meta-data).
-6. **process descriptions**: to validate your output, you can use the JSONSchema files in this folder.
 
 ## Community and Support
 
