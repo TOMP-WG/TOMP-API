@@ -23,12 +23,13 @@ Functional extensions:
 Additional supportive extensions:
 
 1. **Discovery**: to become OGC compliant, you need to implement these endpoints.
-2. **Customer Management**: Handles user-related information and preferences (draft). 
+2. **Customer Management**: Handles user-related information and preferences. 
 3. **Data spaces**: technical part of the API, easing the technical integration into eco-systems (draft).
+4. **Information**: data exhange that is not yet standardized yet (like user profiles, license and card types).
 
 MP Module:
 
-1. **Notify**: the part of the API that must be implemented by the reseller/MP, to cope with messages sent by the TO or driver.
+1. **Notify**: the part of the API that must be implemented by the reseller/MP, to cope with messages sent by the TO or driver. It contains also confirmation and payment requests.
 
 These modules work together to provide a comprehensive framework for MaaS integration.
 
@@ -45,8 +46,8 @@ These updates aim to improve user experience and broaden the applicability of th
 
 To begin implementing TOMP-API:
 
-1. **Documentation**: The latest version of the API is available on [SwaggerHub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/).
-2. **Blueprint**: Refer to the [Blueprint for a TOMP-API](https://github.com/TOMP-WG/TOMP-API/tree/master/documents) for detailed insights.
+1. **Documentation**: The latest version of the API is available on [SwaggerHub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/). 
+2. **Blueprint**: We've written new ones for v2, per mode: [Blue print v2](https://github.com/TOMP-WG/TOMP-API/tree/master/documents)
 3. **Wiki**: Explore the [TOMP-API Wiki](https://github.com/TOMP-WG/TOMP-API/wiki/) for implementation guidance.
 4. **code-snippets**: there are some code snippets (mostly Python available to speed up your implementation).
 5. **static output**: we already prepared all static output from some endpoints (meta-data).
