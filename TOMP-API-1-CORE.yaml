@@ -15,21 +15,32 @@ info:
     <li><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/documents/TOMP-flows.png">High-level sequence diagrams</a></li>
     </ul>
     <hr>
+    This version is released together with the founding of the House Of TOMP. 
+    If you want to use the TOMP, become member of this cooperation, 
+    help us establishing a uniform language between transport operators and resellers/MaaS providers, 
+    creating a more sustainable world together.
   version: "2.0.0"
   contact:
     name: TOMP working group
     url: https://github.com/TOMP-WG/TOMP-API
+    email: TOMP-Secretary@maas-alliance.eu
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-working-team-1:
+    - Matthias Wirtz (Hacon)
+    - Alberto Capponi (Nord-com)
+    - Marcus Rosland Goplen (Entur)
+    - Bas Matthee (Mobiliteitsfabriek)
+    - Edwin van den Belt - SDG! (Goudappel/Dat.mobility)
 
 servers:
   - url: https://example.to.eu/tomp/v2
     description: example url
 
 tags:
-  - name: generic
-    description: Generic functions, like authentication or requesting a package
+  - name: core
+    description: Core functions, used in multiple modules
   - name: discovery
     description: URLS to comply to OGC, to describe the interface
 
@@ -45,7 +56,7 @@ paths:
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
       tags:
-        - generic
+        - core
       responses:
         "200":
           $ref: "#/components/responses/dataSourceResponse"
@@ -70,7 +81,7 @@ paths:
         - $ref: "#/components/parameters/optionalLegId"
         - $ref: "#/components/parameters/optionalProductId"
       tags:
-        - generic
+        - core
       responses:
         "200":
           $ref: "#/components/responses/packageResponse"
@@ -149,12 +160,9 @@ components:
         signedDigest:
           $ref: "#/components/headers/signedDigest"
       content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/package"
         application/geo+json:
           schema:
-            $ref: "#/components/schemas/geojson"
+            $ref: "#/components/schemas/package"
 
     dataSourceResponse:
       description: a list of datasources, the 'rel' contains the prefix to use in data (to create a URN), 
@@ -185,43 +193,42 @@ components:
     package:
       description: a package to execute a trip
       x-semantics:
-      - transmodel[package]: TRAVEL PACKAGE / CUSTOMER PURCHASE PACKAGE 
-      - transmodel[offer]: SALES OFFER PACKAGE 
-      type: object
+      - transmodel[type=package]: TRAVEL PACKAGE / CUSTOMER PURCHASE PACKAGE 
+      - transmodel[type=offer]: SALES OFFER PACKAGE 
       required:
       - type
       - properties
       - links
       properties:
-        id:
-          $ref: "#/components/schemas/packageReference"
-          description: the unique identifier of this package
         type:
           type: string
-          pattern: "^(package|offer)$" 
-        legs:
-          x-semantics:
-          - transmodel: TRAVEL SPECIFICATION, TRIP PATTERN
+          pattern: "^(FeatureCollection)$"
+        features:
           type: array
           items:
-            $ref: "#/components/schemas/leg"
+            oneOf:
+            - $ref: "#/components/schemas/legFeature"
+            - $ref: "#/components/schemas/geojsonFeature"
         properties:
           $ref: "#/components/schemas/packageProperties"
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
         links:
-          x-semantics:
-          - transmodel: none (SALES TRANSACTION ?)
           type: array
           description:
             actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
             In case it is an alternative, specify clearly in the description what the financial consequences are.
           items:
-            $ref: "#/components/schemas/link"
+            $ref: "#/components/schemas/link"      
 
     packageProperties:
       x-semantics:
       - transmodel: CUSTOMER PURCHASE PACKAGE
       allOf:
       - $ref: "#/components/schemas/offerProperties"
+      - $ref: "#/components/schemas/definitions"
       - type: object
         description: a purchased package is a registration of an agreement between end user and TO, 
           to execute a package (=set of legs) according a specification, including all conditions (labels)
@@ -234,28 +241,21 @@ components:
           id:
             $ref: "#/components/schemas/packageReference"
           offers:
-            description: contains offered packages. When a package only contains
-              one offer, this property should be neglected. All references in the offers
-              refer to the legs and products in the 'definition' part of the packageProperties.
+            description: contains offered packages, so it is only applicable when the type is package. 
+              When a package only contains one offer, this property should be neglected. All references in the offers
+              refer to the products the packageProperties.
+              The offers can be retrieved using the /collections/offers/items?offerId={reference} endpoint.
             type: array
             items:
-              $ref: "#/components/schemas/offer"
+              $ref: "#/components/schemas/offerReference"
 
-    offer:
-      type: object
-      x-semantics:
-      - transmodel: SALES OFFER PACKAGE
-      properties:
-        id: 
-          $ref: "#/components/schemas/offerReference"
-        legs:
-          type: array
-          items:
-            $ref: "#/components/schemas/legReference"
-        products:
-          type: array
-          items:
-            $ref: "#/components/schemas/productReference"
+    offerFeature:
+      allOf:
+      - $ref: "#/components/schemas/geojsonFeature"
+      - type: object
+        properties:
+          properties:
+            $ref: "#/components/schemas/offerProperties"
 
     offerProperties:
       x-semantics:
@@ -278,18 +278,21 @@ components:
           summary:
             $ref: "#/components/schemas/summary"
           price:
-            $ref: "#/components/schemas/amountOfMoney"
+            $ref: "#/components/schemas/fareStructure"
           guarantees:
             type: array
             items:
               $ref: "#/components/schemas/guarantee"
+          products:
+            type: array
+            items:
+              $ref: "#/components/schemas/productReference"
           legs:
             type: array
             items:
-              $ref: "#/components/schemas/legReference"
+              $ref: "#/components/schemas/legProperties"
           customFields:
             $ref: "#/components/schemas/customProperties"
-      - $ref: "#/components/schemas/definitions"
 
     productProperties:
       x-semantics:
@@ -325,74 +328,75 @@ components:
           items: 
             $ref: "#/components/schemas/guarantee"
 
-    leg:
-      type: object
+    legFeature:
       x-semantics:
       - transmodel: LEG
-      properties:
-        id:
-          $ref: "#/components/schemas/legReference"
-        type:
-          type: string
-          pattern: "^(leg)$"
+      allOf: 
+      - $ref: "#/components/schemas/geojsonFeature"
+      - type: object
         properties:
-          $ref: "#/components/schemas/legProperties"
+          id:
+            $ref: "#/components/schemas/legReference"
+          properties:
+            $ref: "#/components/schemas/legProperties"
 
     legProperties:
       x-semantics:
       - transmodel: LEG
-      type: object
-      description: A (planned) consumption of a product within a package
-      required:
-        - id
-        - type
-      properties:
-        type:
-          type: string
-          pattern: "^(leg)$"
-        id:
-          $ref: "#/components/schemas/legReference"
-          description:
-            The unique identifier (TO) of this leg. Must always the same as applied in the request URL.
-            And when there are not additional legs in the offered or purchased package, the same **id** as the package id.
-        sequenceNumber:
-          $ref: "#/components/schemas/shortInt"
-          description: The order of the leg within the package. Mandatory, if there are multiple legs in the package. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one package.
-        mode:
-          $ref: "#/components/schemas/mode"
-        state:
-          $ref: "#/components/schemas/legStatus"
-        travellers:
-          type: array
-          items:
-            $ref: "#/components/schemas/travellerReference"
-        products:
-          type: array
-          items:
-            $ref: "#/components/schemas/productReference"
-          description: The main product (v1.x 'asset type') used to execute this leg
-        ancillaries:
-          type: array
-          items:
-            $ref: "#/components/schemas/ancillaryReference"
-          description: additional products that can be assigned to this leg
-        assets:
-          type: array
-          items:
-            $ref: "#/components/schemas/assetReference"
-          description: The physical asset(s) used for the execution of the leg
-        operatorId:
-          $ref: "#/components/schemas/organisationReference"
-        operatorName:
-          $ref: "#/components/schemas/normalString"
-        labels:
-          type: array
-          items:
-            $ref: "#/components/schemas/label"
-        returnLocations:
-          type: array
-          items:
-            $ref: "#/components/schemas/placeReference"
+      allOf:
+      - $ref: "#/components/schemas/travelSpecification" 
+      - type: object
+        description: A (planned) consumption of a product within a package
+        required:
+          - id
+          - type
+        properties:
+          type:
+            type: string
+            pattern: "^(leg)$"
+          id:
+            $ref: "#/components/schemas/legReference"
+            description:
+              The unique identifier (TO) of this leg. Must always the same as applied in the request URL.
+              And when there are not additional legs in the offered or purchased package, the same **id** as the package id.
+          sequenceNumber:
+            $ref: "#/components/schemas/shortInt"
+            description: The order of the leg within the package. Mandatory, if there are multiple legs in the package. If there are parallel legs (eg. using parking lot and a renting a bike), it can be the same within one package.
+          mode:
+            $ref: "#/components/schemas/mode"
+          state:
+            $ref: "#/components/schemas/legStatus"
+          travellers:
+            type: array
+            items:
+              $ref: "#/components/schemas/travellerReference"
+          products:
+            type: array
+            items:
+              $ref: "#/components/schemas/productReference"
+            description: The main product (v1.x 'asset type') used to execute this leg
+          ancillaries:
+            type: array
+            items:
+              $ref: "#/components/schemas/ancillaryReference"
+            description: additional products that can be assigned to this leg
+          assets:
+            type: array
+            items:
+              $ref: "#/components/schemas/assetReference"
+            description: The physical asset(s) used for the execution of the leg
+          operatorId:
+            $ref: "#/components/schemas/organisationReference"
+          operatorName:
+            $ref: "#/components/schemas/normalString"
+          labels:
+            type: array
+            items:
+              $ref: "#/components/schemas/label"
+          returnLocations:
+            type: array
+            items:
+              $ref: "#/components/schemas/placeReference"
 
     featureProperties:
       type: object
@@ -403,7 +407,7 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(leg|station|stop_place|start_location|end_location|zone|return_area|return_station|policy_zone|geofence|progress)$"
+          pattern: "^(station|stopPlace|startLocation|endLocation|zone|returnArea|returnStation|policyZone|geofence|progress)$"
         id:
           $ref: "#/components/schemas/shortString"
 
@@ -492,7 +496,7 @@ components:
       description: status of a leg<br>
         _NOT_STARTED_ the leg is not started, initial state<br>
         _PREPARING_ the _PREPARE_ operation has been received<br>
-        _PREPARED_ the leg is ready to use<br>
+        _READY_TO_USE_ the leg is ready to use<br>
         _IN_USE_ the travelers are on their way<br>
         _PAUSED_ the asset is paused<br>
         _ENDING_ the end-leg request is received, the offboarding process has is started<br>
@@ -502,7 +506,7 @@ components:
         _ABENDED_ the leg is abnormally ended (e.g. due to an issue)
       enum: [ NOT_STARTED,
               PREPARING,
-              PREPARED,
+              READY_TO_USE,
               IN_USE,
               PAUSED,
               ENDED,
@@ -704,6 +708,7 @@ components:
       x-semantics:
       - transmodel: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING EQUIPMENT
       description: the asset that can by applied to execute a leg.
+      type: object
       required:
       - id
       properties:
@@ -1285,7 +1290,7 @@ components:
               _YIELD_ yield price. Dependend on external factors the price will be determined. The amount of money can fluctuate
               _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX elements, cap it using this rule. Max 1 per fare structure.
             enum: [FIXED, FLEX, YIELD, MAX]
-          priceLevel:
+          priceCondition:
             type: string
             description:
               is this the default price or is this an additional part (discount, price surge). <br>
@@ -1304,14 +1309,19 @@ components:
             description:
               the number of km, seconds etc. Mandatory when the type is 'FLEX', otherwise
               not allowed. In case of 0.5 EUR per 15 MINUTES, the amount is 0.5, the `amountOfUnits` must contain 15 and `units` MINUTES.
-          interval:
+          scale:
+            description: in case scales apply, this field can be used. E.g. when the 0.5 EUR/15 minutes only applies on the first hour,
+              the scale should contain 0..60 minutes
             $ref: "#/components/schemas/interval"
-          validity:
+          priceInterval:
+            description: The price range (min/max price), in the same currency as amount. Place in `amount` the most likely value.
+            $ref: "#/components/schemas/interval"
+          temporalValidity:
             $ref: "#/components/schemas/dateTimeRange"
           name:
             $ref: "#/components/schemas/normalString"
             description: an optional description of this fare structure element.
-          class:
+          appliesTo:
             type: string
             description:
               class of this fare structure element. Could be FARE or ANCILLARY<br>
@@ -1319,12 +1329,6 @@ components:
               _ANCILLARY_ this fare structure element is related to the rental of one or more ancillaries.
             default: "FARE"
             enum: [FARE, ANCILLARY]
-          minimumPrice:
-            $ref: "#/components/schemas/float"
-            description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
-          maximumPrice:
-            $ref: "#/components/schemas/float"
-            description: The minimum price, in the same currency as amount. Place in `amount` the most likely value.
           assetState:
             type: string
             description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
@@ -1340,6 +1344,7 @@ components:
       required:
         - from
         - to
+        - units
       properties:
         from:
           $ref: "#/components/schemas/float"
@@ -1407,15 +1412,6 @@ components:
         additionalInfo:
           $ref: "#/components/schemas/longString"
           description: additional information to find the address (f.x. just around the corner)
-        previousLegInfo:
-          type: object
-          properties:
-            operator:
-              $ref: "#/components/schemas/operatorReference"
-            product:
-              $ref: "#/components/schemas/productReference"
-            asset:
-              $ref: "#/components/schemas/assetReference"
 
     # app concepts
     appSupport:
@@ -1446,11 +1442,20 @@ components:
       x-semantics:
       - transmodel: TYPE OF TRAVEL DOCUMENT
       type: string
-      description: how this type is implemented?
-      enum: [ LINK,
-              BARCODE,
+      description: A way to open/access the asset. <br><br>
+        _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br>
+        _QRCODE_ a QR code can be retrieved from the links<br>
+        _AZTECCODE_ an Aztec code can be retrieved from the links<br>
+        _REMOTE_ the /processes/start-leg/execute must be used to open the asset<br>
+        _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br>
+        _KEY_ a physical key must be obtained (see instructions) to open the asset<br>
+      enum: [ BARCODE,
               QRCODE,
-              AZTECCODE ]
+              AZTECCODE,
+              REMOTE,
+              DEEP_LINK,
+              KEY,
+              OTHER ]
 
     organisationReference:
       $ref: "#/components/schemas/normalString"
@@ -2051,7 +2056,7 @@ components:
     signedDigest:
       name: signedDigest
       in: header
-      description: the signed hash of the offer (or package), using the private key, SHA-256 base64 encoded
+      description: the signed hash of complete response, using the private key, SHA-256 base64 encoded
       schema:
         type: string
       required: false

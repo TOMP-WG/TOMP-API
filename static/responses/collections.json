@@ -8,7 +8,7 @@
           {
             "rel": "detail",
             "href": "/collections/packages/items",
-            "type": "application/json"
+            "type": "application/geo+json"
           }
         ]
       },
@@ -103,7 +103,7 @@
         "links": [
           {
             "rel": "detail",
-            "href": "/collections/redresses/items",
+            "href": "/collections/redress-options/items",
             "type": "application/json"
           }
         ]

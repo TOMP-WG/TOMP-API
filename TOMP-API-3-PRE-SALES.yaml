@@ -42,9 +42,6 @@ paths:
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -206,9 +203,6 @@ paths:
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -232,9 +226,6 @@ paths:
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -414,12 +405,9 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
           required: true
       content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/assetCollection"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+            $ref: "#/components/schemas/assetCollection"
 
     ancillariesResponse:
       description: a list of ancillaries
@@ -448,20 +436,23 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(AssetCollection)$"
-        assets:
+          pattern: "^(FeatureCollection)$"
+        features:
           type: array
           items:
             allOf:
-            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/asset"
-            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeature"
+            - type: object
+              properties:
+                properties:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/asset"
         properties:
           type: object
           additionalProperties: true
           properties:
             type:
               type: string
-              pattern: "^(assets)$"
+              pattern: "^(assetCollection)$"
         numberMatched:
           type: number
         numberReturned:
@@ -482,20 +473,23 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(AncillaryCollection)$"
-        ancillaries:
+          pattern: "^(FeatureCollection)$"
+        features:
           type: array
           items:
             allOf:
-            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillary"
-            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/links"
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeature"
+            - type: object
+              properties:
+                properties:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillary"
         properties:
           type: object
           additionalProperties: true
           properties:
             type:
               type: string
-              pattern: "^(ancillaries)$"
+              pattern: "^(ancillaryCollection)$"
         numberMatched:
           type: number
         numberReturned:

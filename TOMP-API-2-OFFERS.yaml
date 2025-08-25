@@ -97,12 +97,9 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
           required: true
       content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/offerCollection"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+            $ref: "#/components/schemas/offerCollection"
     
     offerResponse:
       description: a single offer
@@ -116,12 +113,9 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
           required: true
       content:
-        application/json:
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageProperties"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
 
   schemas:
     searchOfferRequest:
@@ -135,7 +129,7 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(search_offer)$"
+          pattern: "^(searchOffer)$"
         specification:
           oneOf:
           - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
@@ -160,6 +154,15 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/place"
         packageToExchange:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+        previousLeg:
+          type: object
+          properties:
+            operator:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/operatorReference"
+            product:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+            asset:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
         customFields:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
 
@@ -188,11 +191,11 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(OfferCollection)$"
-        offers:
+          pattern: "^(FeatureCollection)$"
+        features:
           type: array
           items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerProperties"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerFeature"
         properties:
           $ref: "#/components/schemas/offerCollectionProperties"
         numberMatched:
@@ -215,5 +218,5 @@ components:
         properties:
           type:
             type: string
-            pattern: "^(offers)$"
+            pattern: "^(OfferCollection)$"
       - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/definitions"

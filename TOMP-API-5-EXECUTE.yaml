@@ -86,8 +86,6 @@ paths:
       responses:
         "200":
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
-        "202":
-          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
         "503":
           description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
           $ref: "#/components/responses/retryErrorResponse"

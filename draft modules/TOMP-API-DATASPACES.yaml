@@ -10,10 +10,6 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-tags:
-  - name: dataspaces
-    description: required functions to act in dataspaces
-
 paths:
   /capabilities:
     get:
@@ -21,7 +17,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/dateTime"
       tags:
-        - dataspaces
+        - tech
       summary: data spaces capabilities check
       description: data space compliancy
       responses:
@@ -37,7 +33,7 @@ paths:
       summary: Request an access token      
       description: request an JWT token to use in a dataspace context
       tags:
-        - dataspaces
+        - tech
       requestBody:
         content:
           application/json:

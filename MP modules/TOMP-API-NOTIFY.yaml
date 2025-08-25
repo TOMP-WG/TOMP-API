@@ -163,6 +163,8 @@ components:
             [
               USER_ACTION,
               USER_NO_SHOW,
+              VEHICLE_ARRIVED,
+              VEHICLE_NO_SHOW,
               ETA,
               USER_OUT_OF_LIMITS,
               WARNING,

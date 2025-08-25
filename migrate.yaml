@@ -4827,7 +4827,7 @@ components:
         $ref: "#/components/schemas/token"
 
     tokenData:
-      type: otherAccessInfo
+      type: object
       x-2: travelDocument
       additionalProperties: true
       required:

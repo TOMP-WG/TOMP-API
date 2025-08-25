@@ -56,7 +56,6 @@ paths:
       tags:
         - support
       requestBody:
-        description: The 'input' of the process request body must be of type '#/components/schemas/supportInput'
         $ref: "#/components/requestBodies/supportRequest"
       responses:
         "200":
@@ -103,11 +102,19 @@ components:
             properties:
               type:
                 type: string
-                pattern: "^(TicketCollection)$"
-              tickets:
+                pattern: "^(FeatureCollection)$"
+              features:
                 type: array
                 items:
-                  $ref: "#/components/schemas/supportTicket"
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      pattern: "^(Feature)$"
+                    id:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+                    properties:
+                       $ref: "#/components/schemas/supportTicket"                 
               links:
                 type: array
                 description:
@@ -157,7 +164,8 @@ components:
             _UNABLE_TO_CLOSE_ The asset cannot be closed (malfunctioning)<br>
             _ACCIDENT_ Accident occurred<br>
             _OTHER_ unspecified<br>
-            _REPORT_DAMAGE_ Oeps. Photo sent with slight damage
+            _REPORT_DAMAGE_ Oeps. Photo sent with slight damage<br>
+            _VEHICLE_NO_SHOW_ The vehicle didn't show up at the departure location & time<br>
           enum: [ BROKEN_DOWN,
                   NOT_AT_LOCATION,
                   MISSING_AFTER_PAUSE,
@@ -168,6 +176,7 @@ components:
                   ACCIDENT,
                   OTHER,
                   REPORT_DAMAGE,
+                  VEHICLE_NO_SHOW
                 ]
                 
         context:

@@ -14,12 +14,16 @@ info:
   x-modules:
     - tech
 
+tags:
+  - name: tech
+    description: technical functions of the API, also used in dataspaces
+
 paths:
   /health:
     get:
       operationId: ping
       tags:
-        - generic
+        - tech
       summary: "is the API up and running?"
       description: "This is a healthcheck ENDPOINT"
       responses:
@@ -37,7 +41,7 @@ paths:
     post:
       summary: "Token Endpoint"
       tags:
-      - generic
+      - tech
       description: This endpoint is used to obtain an access token and optionally an ID token 
         through different OAuth 2.0 grant types, including Client Credentials Flow.
         Whenever the mTLS flow is taken, the properties will be ignored, and the access token 

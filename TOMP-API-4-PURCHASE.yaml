@@ -43,26 +43,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/purchaseResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-      callbacks:
-        jobCompleted:
-          '{$request.body#/subscriber/successUri}':
-            post:
-              parameters:
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
-              requestBody:
-                content:
-                  application/json:
-                    schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
-              responses:
-                "200":
-                  description: Results received successfully          
 
   /processes/purchase-package/execute:
     post:
@@ -87,25 +69,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/purchaseResponse"
-        "202":
-          description: whenever this is returned, notification URL will be used
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-      callbacks:
-        jobCompleted:
-          '{$request.body#/subscriber/successUri}':
-            post:
-              parameters:
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
-              requestBody:
-                content:
-                  application/json:
-                    schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
-              responses:
-                "200":
-                  description: Results received successfully  
 
   /processes/purchase-product/execute:
     post:
@@ -127,26 +92,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/purchaseResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
-      callbacks:
-        jobCompleted:
-          '{$request.body#/subscriber/successUri}':
-            post:
-              parameters:
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
-              requestBody:
-                content:
-                  application/json:
-                    schema:
-                      $ref: 'TOMP-API-1-CORE.yaml#/components/schemas/package'
-              responses:
-                "200":
-                  description: Results received successfully    
 
   /processes/use-asset/execute:
     post:
@@ -168,9 +115,6 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/purchaseResponse"
-        "202":
-          description: whenever this is returned, URLs in the 'subscriber' will be used to inform about 
-            the completion of the purchase.
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
       callbacks:
@@ -448,12 +392,9 @@ components:
       - transmodel: TRAVEL PACKAGE PURCHASE DELIVERY
       description: A package was succesfully purchased (PURCHASED), or pending (PENDING, to be confirmed using the package operation CONFIRM).
       content:
-        application/json:
-          schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
         application/geo+json:
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
       headers:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
@@ -461,6 +402,12 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
         Expiry-date:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/expires"
+        Digest:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/digest'
+        PublicKey:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/publicKey'
+        SignedDigest:
+          $ref: 'TOMP-API-1-CORE.yaml#/components/headers/signedDigest'
   
     travelDocumentsResponse:
       x-semantics:
@@ -486,11 +433,19 @@ components:
       properties:
         type:
           type: string
-          pattern: "^(TravelDocumentCollection)$"
-        travelDocuments:
+          pattern: "^(FeatureCollection)$"
+        features:
           type: array
           items:
-            $ref: "#/components/schemas/travelDocument"
+            type: object
+            properties:
+              type:
+                type: string
+                pattern: "^(Feature)$"
+              id:
+                $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+              properties:
+                $ref: "#/components/schemas/travelDocument"
 
     binaryTicket:
       x-semantics:
@@ -507,13 +462,6 @@ components:
         base64:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
           description: base 64 binary data
-
-    otherAccessInfo:
-      x-semantics:
-      - transmodel: none
-      allOf:
-      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
-        description: Generic travelDocument, non-standardized (yet)
 
     externalDigitalTicket:
       x-semantics: 
@@ -564,6 +512,9 @@ components:
         - validity
         - travelDocumentType
       properties:
+        type:
+          type: string
+          pattern: "^(travelDocument)$"
         validity:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTimeRange"
         travelDocumentType:
@@ -579,7 +530,7 @@ components:
       - $ref: "#/components/schemas/externalDigitalTicket"
       - $ref: "#/components/schemas/binaryTicket"
       - $ref: "#/components/schemas/eKey"
-      - $ref: "#/components/schemas/otherAccessInfo"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
       discriminator:
         propertyName: travelDocumentType
         mapping:
@@ -588,4 +539,4 @@ components:
           QRCODE: "#/components/schemas/binaryTicket"
           AZTECCODE: "#/components/schemas/binaryTicket"
           EKEY: "#/components/schemas/eKey"
-          OTHER: "#/components/schemas/otherAccessInfo"
+          OTHER: "#/components/schemas/customProperties"
