@@ -236,17 +236,17 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - offer
                 properties:
                   customer:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
-                  offers:
-                    type: array
-                    items:
-                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
-                  start:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
-                  end:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  offer:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  paymentMethod:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/typeOfPaymentMethod"
+                  distribution:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/distribution"
                   travellers:
                     type: array
                     items:
@@ -285,6 +285,8 @@ components:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+                  distribution:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/distribution"
                   traveller:
                     type: array
                     items:
@@ -323,6 +325,10 @@ components:
                     type: array
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  distribution:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/distribution"
+                  paymentMethod:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/typeOfPaymentMethod"
                   travellers:
                     type: array
                     items:
@@ -421,7 +427,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "TOMP-API-4-PURCHASE.yaml#/components/schemas/travelDocuments"
+            $ref: "#/components/schemas/travelDocuments"
 
   schemas:
     travelDocuments:
@@ -446,6 +452,10 @@ components:
                 $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
               properties:
                 $ref: "#/components/schemas/travelDocument"
+              links:
+                type: array
+                items:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
 
     binaryTicket:
       x-semantics:
@@ -512,6 +522,8 @@ components:
         - validity
         - travelDocumentType
       properties:
+        id:
+          type: string
         type:
           type: string
           pattern: "^(travelDocument)$"
@@ -519,13 +531,6 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTimeRange"
         travelDocumentType:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/typeOfTravelDocument"
-        links:
-          type: array
-          description:
-            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
-            In case it is an alternative, specify clearly in the description what the financial consequences are.
-          items:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link" 
       oneOf:
       - $ref: "#/components/schemas/externalDigitalTicket"
       - $ref: "#/components/schemas/binaryTicket"

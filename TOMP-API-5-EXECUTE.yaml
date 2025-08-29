@@ -106,7 +106,7 @@ paths:
           schema:
             type: string
             description: possible operations on a product
-            enum: [ activate, initiate ]
+            enum: [ activate, initiate_leg ]
       security:
         - BearerAuth: []
         - OAuth: []
@@ -197,6 +197,12 @@ components:
                 required:
                 - asset
                 properties:
+                  timestamp:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
                   asset:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
                   location: 
@@ -232,6 +238,10 @@ components:
                 - package
                 - product
                 properties:
+                  timestamp:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                  location: 
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
                   product:

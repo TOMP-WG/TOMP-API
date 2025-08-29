@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate OGC data</title>
+    <style>
+        .code-container {
+            position: relative;
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+        }
+
+        .input {
+            position: absolute;
+            left: 150px;
+        }
+
+        .url-input {
+            position: absolute;
+            left: 150px;
+            width: 500px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .collapsible h3 {
+            cursor: pointer;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .content {
+            position: relative;
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+            /* Verberg inhoud standaard */
+        }
+
+        .content.show {
+            display: block;
+        }
+
+        .arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+            font-size: 12pt;
+            margin-left: 10px;
+            margin-bottom: 2px;
+        }
+
+        .rotate {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="code-container">
+        <label for="name">Organisation code</label><input type="text" id="name"
+            onchange="updateJsonOutput()" class="input"></input><br>
+        <label for="url">Base URL</label><input type="text" id="url" value="https://"
+            onchange="updateJsonOutput()" class="url-input"></input>
+    </div>
+    <div id="questions"></div>
+    <h3>Collections</h3>
+    <div class="code-container">
+        <button class="copy-btn" onclick="copyToClipboard('collectionOutput')">Copy</button>
+        <pre id="collectionOutput">
+        </pre>
+    </div>
+    <h3>Processes</h3>
+    <div class="code-container">
+        <button class="copy-btn" onclick="copyToClipboard('processOutput')">Copy</button>
+        <pre id="processOutput">
+        </pre>
+    </div>
+
+    <script src="./collections.js"></script>
+
+    <script>
+        const questionsDiv = document.getElementById('questions');
+        const collectionOutput = document.getElementById('collectionOutput');
+        const processOutput = document.getElementById('processOutput');
+        catDiv = null
+
+        category = '';
+
+        collections.forEach((item, index) => {
+            if (category != item.category) {
+                category = item.category;
+                catDiv = document.createElement('div');
+                catDiv.className = 'collapsable';
+
+                const categoryHeader = document.createElement('h2');
+                categoryHeader.innerText = category.charAt(0).toUpperCase() + category.slice(1);
+                catDiv.appendChild(categoryHeader);
+                questionsDiv.appendChild(catDiv);
+
+                const button = document.createElement('span');
+                button.className = 'arrow';
+                button.innerHTML = '&#9660;'; // Pijl-omlaag symbool
+                categoryHeader.appendChild(button);
+
+                const catContentDiv = document.createElement('div');
+                catContentDiv.className = 'content';
+                catDiv.appendChild(catContentDiv);
+                catDiv = catContentDiv;
+
+                categoryHeader.addEventListener('click', function () {
+                    var content = this.nextElementSibling;
+                    content.classList.toggle('show');
+                    button.classList.toggle('rotate');
+                });
+            }
+
+            // Maak een checkbox en label
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `question${index}`;
+            checkbox.onchange = updateJsonOutput;
+
+            const label = document.createElement('label');
+            label.htmlFor = `question${index}`;
+            label.innerText = item.question;
+
+            // Voeg de checkbox en label toe aan de vragenlijst
+            catDiv.appendChild(checkbox);
+            catDiv.appendChild(label);
+            catDiv.appendChild(document.createElement('br'));
+        });
+
+        function updateJsonOutput() {
+            let combinedJson = [{
+                "rel": "datasources",
+                "href": "[your base url]/tomp/v2/collections/datasources"
+            }];
+            collections.forEach((item, index) => {
+                const checkbox = document.getElementById(`question${index}`);
+                if (checkbox.checked) {
+                    item.json.forEach(element => {
+                        if (!combinedJson.includes(element)) {
+                            combinedJson.push(element);
+                        }
+                    });
+                }
+            });
+            // Toon de gecombineerde JSON-output
+            collectionOutput.textContent = JSON.stringify(combinedJson, null, 2)
+                .replace(/\[your base url\]/g, document.getElementById('url').value)
+                .replace(/\[code\]/g, document.getElementById('name').value)
+                ;
+        }
+
+        function copyToClipboard(elt) {
+            // Verkrijg de code van het pre-element
+            const codeBlock = document.getElementById(elt);
+
+            // Creëer een tijdelijk input-element
+            const tempInput = document.createElement("textarea");
+            tempInput.value = codeBlock.textContent;
+            document.body.appendChild(tempInput);
+
+            // Selecteer en kopieer de tekst binnen het input-element
+            tempInput.select();
+            document.execCommand("copy");
+
+            // Verwijder het tijdelijke input-element
+            document.body.removeChild(tempInput);
+
+            // Optioneel: Geef gebruikersfeedback
+            alert("Copied!");
+        }
+    </script>
+</body>
+
+</html>

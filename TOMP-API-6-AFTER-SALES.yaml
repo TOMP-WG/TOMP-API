@@ -416,7 +416,7 @@ components:
         replacements:
           type: array
           items: 
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerProperties"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageProperties"
 
     paymentCategory:
       x-semantics:
