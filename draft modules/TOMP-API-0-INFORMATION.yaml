@@ -124,8 +124,6 @@ paths:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/bbox"
       security:
         - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
         - OpenData: []
       tags:
         - travel information

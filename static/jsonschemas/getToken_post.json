@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "access_token": {
+      "type": "string",
+      "description": "The issued access token."
+    },
+    "refresh_token": {
+      "type": "string",
+      "description": "The optional refresh token."
+    },
+    "token_type": {
+      "type": "string",
+      "description": "The type of the token.",
+      "default": "Bearer"
+    },
+    "expires_in": {
+      "type": "integer",
+      "description": "The lifetime of the access token in seconds."
+    }
+  }
+}

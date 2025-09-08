@@ -46,7 +46,6 @@ paths:
       security:
         - BearerAuth: []
         - OAuth: []
-        - OAuthPKI: []
       tags:
         - execute
       requestBody:
@@ -78,7 +77,6 @@ paths:
       security:
         - BearerAuth: []
         - OAuth: []
-        - OAuthPKI: []
       tags:
         - execute
       requestBody:
@@ -106,11 +104,10 @@ paths:
           schema:
             type: string
             description: possible operations on a product
-            enum: [ activate, initiate_leg ]
+            enum: [ activate, initiate-leg ]
       security:
         - BearerAuth: []
         - OAuth: []
-        - OAuthPKI: []
       tags:
         - execute
       requestBody:

@@ -5,3 +5,5 @@ tools/create_meta_data/output/*
 jsonata/node_modules/*
 jsonata/node_modules/.package-lock.json
 jsonata/package-lock.json
+tools/create_endpoint_jsonschema/Lib/*
+tools/create_endpoint_jsonschema/Scripts/*

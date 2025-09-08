@@ -40,8 +40,14 @@ paths:
   /oauth/token:
     post:
       summary: "Token Endpoint"
+      operationId: getToken
       tags:
       - tech
+      security:
+        - BasicAuth: [] # username/password
+        - BearerAuth: [] # fixed JWT token
+        - OAuth: [] # OAuth2 client credential flow
+        - OAuthPKI: [] # mTLS
       description: This endpoint is used to obtain an access token and optionally an ID token 
         through different OAuth 2.0 grant types, including Client Credentials Flow.
         Whenever the mTLS flow is taken, the properties will be ignored, and the access token 
@@ -76,13 +82,12 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - access_token
                 properties:
                   access_token:
                     type: string
                     description: "The issued access token."
-                  refresh_token:
-                    type: string
-                    description: "The optional refresh token."
                   token_type:
                     type: string
                     description: "The type of the token."

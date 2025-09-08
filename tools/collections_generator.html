@@ -86,6 +86,18 @@
 </head>
 
 <body>
+    <script>function click_arrow(elt){
+        if (elt.target != null && elt.target.nodeName != 'H3') {
+            elt = elt.target.parentElement;
+        }
+        var content = elt.nextElementSibling;
+        if (content == null) {
+            content = elt.target.parentElement.nextElementSibling;
+        }
+        content.classList.toggle('show');
+        elt.childNodes[1].classList.toggle('rotate');
+    }</script>
+
     <div class="code-container">
         <label for="name">Organisation code</label><input type="text" id="name"
             onchange="updateJsonOutput()" class="input"></input><br>
@@ -93,36 +105,51 @@
             onchange="updateJsonOutput()" class="url-input"></input>
     </div>
     <div id="questions"></div>
-    <h3>Collections</h3>
-    <div class="code-container">
-        <button class="copy-btn" onclick="copyToClipboard('collectionOutput')">Copy</button>
-        <pre id="collectionOutput">
-        </pre>
+    <div class="collapsable">
+        <h3 onclick="click_arrow(this)">GET /collections <span class="arrow">&#9660;</span></h3>
+        <div class="code-container content">
+            <button class="copy-btn" onclick="copyToClipboard('collectionOutput')">Copy</button>
+            <pre id="collectionOutput">
+            </pre>
+        </div>
+    <div>
+
+    <div class="collapsable">
+        <h3 onclick="click_arrow(this)">GET /processes <span class="arrow">&#9660;</span></h3>
+        <div class="code-container content">
+            <button class="copy-btn" onclick="copyToClipboard('processOutput')">Copy</button>
+            <pre id="processOutput">
+            </pre>
+        </div>
     </div>
-    <h3>Processes</h3>
-    <div class="code-container">
-        <button class="copy-btn" onclick="copyToClipboard('processOutput')">Copy</button>
-        <pre id="processOutput">
-        </pre>
+    
+    <div class="collapsable">
+        <h3 onclick="click_arrow(this)">GET /collections/datasources/items <span class="arrow">&#9660;</span></h3>
+        <div class="code-container content">
+            <button class="copy-btn" onclick="copyToClipboard('datasourcesOutput')">Copy</button>
+            <pre id="datasourcesOutput">
+            </pre>
+        </div>
     </div>
 
     <script src="./collections.js"></script>
+    <script src="./use_cases.js"></script>
 
     <script>
         const questionsDiv = document.getElementById('questions');
         const collectionOutput = document.getElementById('collectionOutput');
         const processOutput = document.getElementById('processOutput');
-        catDiv = null
+        const datasourcesOutput = document.getElementById('datasourcesOutput');
+        catDiv = null;
 
         category = '';
-
-        collections.forEach((item, index) => {
+        use_cases.forEach((item, index) => {
             if (category != item.category) {
                 category = item.category;
                 catDiv = document.createElement('div');
                 catDiv.className = 'collapsable';
 
-                const categoryHeader = document.createElement('h2');
+                const categoryHeader = document.createElement('h3');
                 categoryHeader.innerText = category.charAt(0).toUpperCase() + category.slice(1);
                 catDiv.appendChild(categoryHeader);
                 questionsDiv.appendChild(catDiv);
@@ -137,11 +164,7 @@
                 catDiv.appendChild(catContentDiv);
                 catDiv = catContentDiv;
 
-                categoryHeader.addEventListener('click', function () {
-                    var content = this.nextElementSibling;
-                    content.classList.toggle('show');
-                    button.classList.toggle('rotate');
-                });
+                categoryHeader.addEventListener('click', click_arrow);
             }
 
             // Maak een checkbox en label
@@ -150,9 +173,10 @@
             checkbox.id = `question${index}`;
             checkbox.onchange = updateJsonOutput;
 
-            const label = document.createElement('label');
+            const label = document.createElement('id');
             label.htmlFor = `question${index}`;
-            label.innerText = item.question;
+            // label.innerText = `As a ${item.asA} I want to ${item.iWantTo} in order to ${item.inOrderTo}`;
+            label.innerText = `${item.question}`;
 
             // Voeg de checkbox en label toe aan de vragenlijst
             catDiv.appendChild(checkbox);
@@ -161,22 +185,44 @@
         });
 
         function updateJsonOutput() {
-            let combinedJson = [{
+            let combinedCollections = [{
                 "rel": "datasources",
                 "href": "[your base url]/tomp/v2/collections/datasources"
             }];
-            collections.forEach((item, index) => {
+            let combinedProcesses = [];
+            let combinedDatasources = [];
+            use_cases.forEach((item, index) => {
                 const checkbox = document.getElementById(`question${index}`);
                 if (checkbox.checked) {
-                    item.json.forEach(element => {
-                        if (!combinedJson.includes(element)) {
-                            combinedJson.push(element);
+                    item.collections.forEach(element => {
+                        if (!combinedCollections.includes(element)) {
+                            combinedCollections.push(element);
                         }
                     });
+                    item.processes.forEach(element => {
+                        if (!combinedProcesses.includes(element)) {
+                            combinedProcesses.push(element);
+                        }
+                    })
+                    if (item.datasources != null) {
+                        item.datasources.forEach(element => {
+                            if (!combinedDatasources.includes(element)) {
+                                combinedDatasources.push(element);
+                            }
+                        });
+                    }
                 }
             });
             // Toon de gecombineerde JSON-output
-            collectionOutput.textContent = JSON.stringify(combinedJson, null, 2)
+            collectionOutput.textContent = JSON.stringify(combinedCollections, null, 2)
+                .replace(/\[your base url\]/g, document.getElementById('url').value)
+                .replace(/\[code\]/g, document.getElementById('name').value)
+                ;
+            processOutput.textContent = JSON.stringify(combinedProcesses, null, 2)
+                .replace(/\[your base url\]/g, document.getElementById('url').value)
+                .replace(/\[code\]/g, document.getElementById('name').value)
+                ;
+            datasourcesOutput.textContent = JSON.stringify(combinedDatasources, null, 2)
                 .replace(/\[your base url\]/g, document.getElementById('url').value)
                 .replace(/\[code\]/g, document.getElementById('name').value)
                 ;

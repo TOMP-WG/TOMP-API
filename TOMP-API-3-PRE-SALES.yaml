@@ -29,10 +29,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics: 
@@ -59,10 +55,6 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       responses:
@@ -83,10 +75,6 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics: 
@@ -103,10 +91,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics:
@@ -125,10 +109,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics:
@@ -147,10 +127,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics: 
@@ -169,10 +145,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics: 
@@ -192,10 +164,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       requestBody:
@@ -213,10 +181,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - pre sales
       x-semantics:
@@ -423,7 +387,7 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
           required: true
       content:
-        application/json:
+        application/geo+json:
           schema:
             $ref: "#/components/schemas/ancillaryCollection"
 

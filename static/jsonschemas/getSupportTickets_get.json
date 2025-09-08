@@ -1,0 +1,367 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^(FeatureCollection)$"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "pattern": "^(Feature)$"
+          },
+          "id": {
+            "type": "string",
+            "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+          },
+          "properties": {
+            "x-semantics": [
+              {
+                "transmodel": "none"
+              }
+            ],
+            "type": "object",
+            "required": [
+              "supportType",
+              "type",
+              "location",
+              "timestamp"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+              },
+              "type": {
+                "type": "string",
+                "pattern": "^(supportTicket)$"
+              },
+              "status": {
+                "x-semantics": [
+                  {
+                    "transmodel": "none"
+                  }
+                ],
+                "type": "string",
+                "description": "_ISSUE_REQUESTED_ the ticket is new, to be processed by the TO<br> _ISSUE_OPEN_ the ticket is open, we're on our way<br> _ISSUE_UPDATE_REQUESTED_ we're waiting on a response of the traveler(s)<br> _ISSUE_RESOLVED_ Issue succesfully closed<br> _ISSUE_REVOKED_ Issue revoked<br>",
+                "enum": [
+                  "ISSUE_REQUESTED",
+                  "ISSUE_OPEN",
+                  "ISSUE_UPDATE_REQUESTED",
+                  "ISSUE_RESOLVED",
+                  "ISSUE_REVOKED"
+                ]
+              },
+              "supportType": {
+                "type": "string",
+                "description": "these are the currently enlisted support requests<br> _BROKEN_DOWN_ The asset doesn't work anymore<br> _NOT_AT_LOCATION_ The asset isn't available at the specified time/location<br> _MISSING_AFTER_PAUSE_ The asset is missing (stolen?)<br> _NOT_CLEAN_ The asset is not clean<br> _NOT_AVAILABLE_ The asset is at the location, but unreachable<br> _UNABLE_TO_OPEN_ The asset cannot be unlocked (malfunctioning)<br> _UNABLE_TO_CLOSE_ The asset cannot be closed (malfunctioning)<br> _ACCIDENT_ Accident occurred<br> _OTHER_ unspecified<br> _REPORT_DAMAGE_ Oeps. Photo sent with slight damage<br>",
+                "enum": [
+                  "BROKEN_DOWN",
+                  "NOT_AT_LOCATION",
+                  "MISSING_AFTER_PAUSE",
+                  "NOT_CLEAN",
+                  "NOT_AVAILABLE",
+                  "UNABLE_TO_OPEN",
+                  "UNABLE_TO_CLOSE",
+                  "ACCIDENT",
+                  "OTHER",
+                  "REPORT_DAMAGE"
+                ]
+              },
+              "context": {
+                "type": "object",
+                "properties": {
+                  "asset": {
+                    "type": "string",
+                    "description": "default string, full names etc (length 0-200)",
+                    "maxLength": 200
+                  },
+                  "leg": {
+                    "type": "string",
+                    "description": "default string, full names etc (length 0-200)",
+                    "maxLength": 200
+                  },
+                  "product": {
+                    "type": "string",
+                    "description": "default string, full names etc (length 0-200)",
+                    "maxLength": 200
+                  },
+                  "package": {
+                    "type": "string",
+                    "description": "default string, full names etc (length 0-200)",
+                    "maxLength": 200
+                  }
+                }
+              },
+              "location": {
+                "type": "string",
+                "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                "maxLength": 200,
+                "x-example-format": "^(GPS:|GBFS:stations:)",
+                "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+              },
+              "priority": {
+                "type": "string",
+                "description": "the priority of the support request.",
+                "enum": [
+                  "ERROR_CANNOT_CONTINUE",
+                  "ERROR_CAN_CONTINUE",
+                  "DISTURBING_ISSUE",
+                  "QUESTION",
+                  "OTHER"
+                ]
+              },
+              "contactInformationEndUser": {
+                "type": "string",
+                "description": "default string, full names etc (length 0-200)",
+                "maxLength": 200
+              },
+              "comment": {
+                "type": "string",
+                "description": "long string, memos etc (length 0-10.000)",
+                "maxLength": 10000
+              },
+              "urls": {
+                "type": "array",
+                "description": "urls to clarify the support request e.g. pictures showing damage",
+                "maxItems": 10,
+                "items": {
+                  "type": "string",
+                  "description": "valid URL",
+                  "format": "uri"
+                }
+              },
+              "requestedResponseTime": {
+                "type": "integer",
+                "description": "a bit short integer (0-100)",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 100
+              },
+              "timeToResolution": {
+                "type": "integer",
+                "description": "a bit short integer (0-100)",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 100
+              },
+              "damage": {
+                "type": "object",
+                "x-semantics": [
+                  {
+                    "transmodel": "none"
+                  }
+                ],
+                "description": "A damage of the asset.",
+                "additionalProperties": false,
+                "required": [
+                  "assetComponent",
+                  "description"
+                ],
+                "properties": {
+                  "assetComponent": {
+                    "type": "string",
+                    "description": "Part/Component of the asset affected. If OTHER is specified the description needs to provide more detail as to what part/component is affected.<br>",
+                    "enum": [
+                      "FRONT",
+                      "REAR",
+                      "LEFT",
+                      "RIGHT",
+                      "TOP",
+                      "BOTTOM",
+                      "INTERIOR",
+                      "TIRE",
+                      "ANCILLARY",
+                      "OTHER"
+                    ]
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "long string, memos etc (length 0-10.000)",
+                    "maxLength": 10000
+                  },
+                  "pictures": {
+                    "type": "array",
+                    "description": "URL where pictures of the damage can be accessed. Any special characters in the URL must be correctly escaped.",
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "description": "valid URL",
+                      "format": "uri"
+                    }
+                  }
+                }
+              },
+              "sequence": {
+                "type": "integer",
+                "description": "for really small numbers (0-10)",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 10
+              },
+              "links": {
+                "type": "object",
+                "x-externalDocs": {
+                  "url": "https://en.wikipedia.org/wiki/Hypertext_Application_Language"
+                },
+                "properties": {
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "x-externalDocs": {
+                        "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+                      },
+                      "required": [
+                        "href",
+                        "rel"
+                      ],
+                      "properties": {
+                        "rel": {
+                          "type": "string",
+                          "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+                        },
+                        "href": {
+                          "type": "string",
+                          "description": "valid URL",
+                          "format": "uri"
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "short string, display names (length 0-75)",
+                          "maxLength": 75
+                        },
+                        "method": {
+                          "type": "string",
+                          "description": "to indicate the http method.",
+                          "default": "GET",
+                          "enum": [
+                            "POST",
+                            "GET",
+                            "DELETE",
+                            "PATCH"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "the description of the external data source"
+                        },
+                        "body": {
+                          "type": "object",
+                          "description": "the (prefilled) body for the request"
+                        },
+                        "headers": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        },
+                        "mandatory": {
+                          "description": "is this link informative, or must it be used?",
+                          "type": "boolean"
+                        },
+                        "hash": {
+                          "description": "to validate that the content of the link hasn't been changed.",
+                          "type": "string"
+                        },
+                        "expires": {
+                          "type": "string",
+                          "format": "date-time",
+                          "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                          "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "description": "actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources In case it is an alternative, specify clearly in the description what the financial consequences are.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-externalDocs": {
+          "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+        },
+        "required": [
+          "href",
+          "rel"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+          },
+          "href": {
+            "type": "string",
+            "description": "valid URL",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "description": "short string, display names (length 0-75)",
+            "maxLength": 75
+          },
+          "method": {
+            "type": "string",
+            "description": "to indicate the http method.",
+            "default": "GET",
+            "enum": [
+              "POST",
+              "GET",
+              "DELETE",
+              "PATCH"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "the description of the external data source"
+          },
+          "body": {
+            "type": "object",
+            "description": "the (prefilled) body for the request"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "mandatory": {
+            "description": "is this link informative, or must it be used?",
+            "type": "boolean"
+          },
+          "hash": {
+            "description": "to validate that the content of the link hasn't been changed.",
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time",
+            "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+            "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+          }
+        }
+      }
+    }
+  }
+}

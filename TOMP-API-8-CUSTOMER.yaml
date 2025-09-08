@@ -24,20 +24,22 @@ paths:
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
     post:
       summary: "Create a TO CUSTOMER ACCOUNT for the customer"
+      operationId: createCustomer
       description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - customer management
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/customer"
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
       responses:
         "201":
+          description: a new customer is created.
+          $ref: "#/components/responses/customerResponse"
+        "200":
+          description: this IS NOT THE DEFAULT response. Only to return if the customer already existed on the TO side,
+            based on email address, phone number or other supplied details.
           $ref: "#/components/responses/customerResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
@@ -51,12 +53,9 @@ paths:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
     get:
       summary: "Get the customer account from the TO system"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - customer management
+      operationId: getCustomer
       responses:
         "200":
           $ref: "#/components/responses/customerResponse"
@@ -65,18 +64,15 @@ paths:
     patch:
       summary: "Update the CUSTOMER ACCOUNT on the TO system"
       description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - customer management
+      operationId: updateCustomer
       requestBody:
         content:
           application/merge-patch+json:
             schema:
               description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
-              $ref: "#/components/schemas/customer"
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
       responses:
         "200":
           $ref: "#/components/responses/customerResponse"
@@ -85,12 +81,9 @@ paths:
     delete:
       summary: "Delete the CUSTOMER ACCOUNT from the TO system."
       description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - customer management
+      operationId: deleteCustomer
       responses:
         "200":
           description:  CUSTOMER ACCOUNT deleted successfully
@@ -123,7 +116,7 @@ components:
         id:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
         customer:
-          $ref: "#/components/schemas/customer"
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
         creationDate:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
           description: The date in which the CUSTOMER ACCOUNT has been created
@@ -145,53 +138,3 @@ components:
         _ACTIVE_ the customer account is active and can continue to purchase offers<br>
         _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
       enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]
-
-    customer:
-      x-semantics:
-      - transmodel: TRANSPORT CUSTOMER
-      description: A MaaS user that wishes to purchase a package, only use the fields required by purchase conditions
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
-          description: The identifier the MP uses to identify the customer. Could be an external referenced ID, like a ABT account number
-        initials:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
-          description: Initials of the customer
-        firstName:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
-          description: First name of the customer
-        lastName:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
-          description: Last name of the customer
-        middleName:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
-          description: Middle name of the customer
-        prefix:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
-          description: prefix of the customer, like titles
-        postfix:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/tinyString"
-          description: postfix of the customer, like titles
-        phoneNumber:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
-        email:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
-          description: the email address of the customer
-        dateOfBirth:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/date"
-        placeOfBirth:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
-        countryOfBirth:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
-        address:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/place"
-        photo:
-          type: string
-          maxLength: 10000
-          description: base64 encoded
-          x-format: byte-array
-        customFields:
-          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"

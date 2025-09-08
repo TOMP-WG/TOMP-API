@@ -29,15 +29,11 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
         - $ref: "#/components/parameters/supportTicketStatus"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - support
       responses:
         "200":
-         $ref: "#/components/responses/ticketsResponse"
+          $ref: "#/components/responses/ticketsResponse"
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
@@ -49,10 +45,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - support
       requestBody:
@@ -96,7 +88,7 @@ components:
         Content-Language:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
       content:
-        application/json:
+        application/geo+json:
           schema:
             type: object
             properties:
@@ -165,7 +157,7 @@ components:
             _ACCIDENT_ Accident occurred<br>
             _OTHER_ unspecified<br>
             _REPORT_DAMAGE_ Oeps. Photo sent with slight damage<br>
-            _VEHICLE_NO_SHOW_ The vehicle didn't show up at the departure location & time<br>
+            _EVIDENCE_ Send evidence to the TO for redress functions<br>
           enum: [ BROKEN_DOWN,
                   NOT_AT_LOCATION,
                   MISSING_AFTER_PAUSE,
@@ -176,7 +168,7 @@ components:
                   ACCIDENT,
                   OTHER,
                   REPORT_DAMAGE,
-                  VEHICLE_NO_SHOW
+                  EVIDENCE
                 ]
                 
         context:
@@ -211,7 +203,7 @@ components:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/longString"
         urls:
           type: array
-          description: urls to clarify the support request e.g. pictures showing damage
+          description: urls to clarify the support request e.g. pictures showing damage or digital scans with evidence documents
           maxItems: 10
           items:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/url"

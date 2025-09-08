@@ -1,0 +1,217 @@
+{
+  "description": "a list of accepted card types.",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^(FeatureCollection)$"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "pattern": "^(Feature)$"
+          },
+          "id": {
+            "type": "string"
+          },
+          "properties": {
+            "x-semantics": [
+              {
+                "transmodel": "TYPE OF PAYMENT METHOD, MEDIUM ACCESS DEVICE"
+              }
+            ],
+            "type": "object",
+            "description": "A generic description of a CARD",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "default string, full names etc (length 0-200)",
+                "maxLength": 200
+              },
+              "type": {
+                "type": "string",
+                "pattern": "^(cardType)$"
+              },
+              "cardCategory": {
+                "type": "string",
+                "description": "The broad category of card<br> DISCOUNT - discount card, can be applied in the purchase process to get rebate<br> TRAVEL - (external) travel card, possibly paid for in other context, but also monthly, weekly or day-cards<br> BANK - bank card<br> CREDIT - credit card<br> ID - identification card, like an ID card<br> PASSPORT - passport to identify yourself<br> OTHER - unspecified",
+                "enum": [
+                  "DISCOUNT",
+                  "TRAVEL",
+                  "BANK",
+                  "CREDIT",
+                  "ID",
+                  "PASSPORT",
+                  "OTHER"
+                ]
+              },
+              "subType": {
+                "type": "string",
+                "description": "short string, display names (length 0-75)",
+                "maxLength": 75
+              },
+              "modes": {
+                "type": "array",
+                "description": "modes for which this card can be used, when empty, all modes are allowed",
+                "items": {
+                  "x-semantics": [
+                    {
+                      "transmodel": "MODE"
+                    }
+                  ],
+                  "type": "string",
+                  "description": "These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.",
+                  "enum": [
+                    "AIR",
+                    "BUS",
+                    "TROLLEYBUS",
+                    "TRAM",
+                    "COACH",
+                    "RAIL",
+                    "INTERCITYRAIL",
+                    "URBANRAIL",
+                    "METRO",
+                    "WATER",
+                    "CABLEWAY",
+                    "FUNICULAR",
+                    "TAXI",
+                    "SELFDRIVE",
+                    "FOOT",
+                    "BICYCLE",
+                    "MOTORCYCLE",
+                    "CAR",
+                    "SHUTTLE",
+                    "OTHER",
+                    "PARKING",
+                    "MOPED",
+                    "STEP",
+                    "FERRY"
+                  ]
+                }
+              },
+              "relatedProduct": {
+                "type": "string",
+                "description": "default string, full names etc (length 0-200)",
+                "maxLength": 200
+              },
+              "transportOrganisations": {
+                "type": "array",
+                "maxItems": 15,
+                "description": "references to accepting parties, only if applicable",
+                "items": {
+                  "type": "string",
+                  "description": "default string, full names etc (length 0-200)",
+                  "maxLength": 200
+                }
+              },
+              "customFields": {
+                "type": "object",
+                "description": "dictionary for extra fields (bilatural agreements)",
+                "additionalProperties": {
+                  "maxLength": 1000,
+                  "maxProperties": 20
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "card_types"
+          ]
+        }
+      }
+    },
+    "numberMatched": {
+      "type": "number"
+    },
+    "numberReturned": {
+      "type": "number"
+    },
+    "links": {
+      "type": "array",
+      "description": "actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources In case it is an alternative, specify clearly in the description what the financial consequences are.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-externalDocs": {
+          "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+        },
+        "required": [
+          "href",
+          "rel"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+          },
+          "href": {
+            "type": "string",
+            "description": "valid URL",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "description": "short string, display names (length 0-75)",
+            "maxLength": 75
+          },
+          "method": {
+            "type": "string",
+            "description": "to indicate the http method.",
+            "default": "GET",
+            "enum": [
+              "POST",
+              "GET",
+              "DELETE",
+              "PATCH"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "the description of the external data source"
+          },
+          "body": {
+            "type": "object",
+            "description": "the (prefilled) body for the request"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "mandatory": {
+            "description": "is this link informative, or must it be used?",
+            "type": "boolean"
+          },
+          "hash": {
+            "description": "to validate that the content of the link hasn't been changed.",
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time",
+            "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+            "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+          }
+        }
+      }
+    }
+  }
+}

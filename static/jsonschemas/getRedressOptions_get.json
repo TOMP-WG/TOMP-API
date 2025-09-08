@@ -1,0 +1,2381 @@
+{
+  "x-semantics": [
+    {
+      "transmodel": "TRAVEL REDRESSes"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^(FeatureCollection)$"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+          },
+          "type": {
+            "type": "string",
+            "pattern": "^(Feature)$"
+          },
+          "properties": {
+            "x-semantics": [
+              {
+                "transmodel": "TRAVEL REDRESS"
+              }
+            ],
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "^(RedressOption)$"
+              },
+              "id": {
+                "type": "string",
+                "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+              },
+              "packageState": {
+                "x-semantics": [
+                  {
+                    "transmodel": "CUSTOMER PURCHASE STATUS"
+                  }
+                ],
+                "type": "string",
+                "description": "The life-cycle state of the package<br> _OFFERED_ the package is offered (pre-sales) <br> _PENDING_ the purchase of the package is not confirmed (the end user has shown intentions to purchase this offer), must be finalized with the package-confirm operation (purchase)<br> _CONFIRMED_ a purchased package. Both parties agreed to deliver services in return of payment<br> _CANCELLED_ the package is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br> _ROLLBACK_ the package is purchased, but before the Rollback-Expires timestamp has passed, therefore no financial consequences<br> _EXPIRED_ the MP didn't respond on time, the package offer has been expired<br> _STARTED_ the package is started, the <u>trip execution</u> module is needed now to manage the execution of the package<br> _ENDED_ the package has ended, the trip has been executed<br> _RELEASED_ for internal archiving, the package has not been purchased.<br> _SETTLED_ final exit state, services delivered & financial settlement succeeded.",
+                "enum": [
+                  "OFFERED",
+                  "PENDING",
+                  "CONFIRMED",
+                  "ROLLBACK",
+                  "RELEASED",
+                  "EXPIRED",
+                  "CANCELLED",
+                  "STARTED",
+                  "ENDED",
+                  "SETTLED"
+                ]
+              },
+              "redressType": {
+                "type": "string",
+                "enum": [
+                  "PACKAGE_REFUND",
+                  "OFFER_REFUND",
+                  "LEG_REFUND",
+                  "ANCILLARY_REFUND",
+                  "REPLACEMENT"
+                ]
+              },
+              "reason": {
+                "x-semantics": [
+                  {
+                    "transmodel": "TRAVEL GUARANTEE"
+                  }
+                ],
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                    "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "default string, full names etc (length 0-200)",
+                    "maxLength": 200
+                  },
+                  "organisation": {
+                    "type": "string",
+                    "description": "default string, full names etc (length 0-200)",
+                    "maxLength": 200
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "_ALTERNATIVE_JOURNEY_ - A TRIP REPAIR GUARANTEE that if a designated SERVICE JOURNEY is not available then alternative SERVICE JOURNEY will be provided. -| (EASEMENT_REDRESS, PRODUCT EXCHANGE REDRESS) _HOME_LEG_ - A TRIP REPAIR GUARANTEE that if a the passenger is unable to reach their destination by public transport because of a delay in services, a taxi to their destination will be provided. -| (TAXI HOME REDRESS) _RETURN_TO_ORIGIN_ - A TRIP REPAIR GUARANTEE that if a designated SERVICE JOURNEY cannot be completed, then the passenger will be returned to their origin stop. -| (RETURN TO ORIGIN REDRESS)\n_ON_TIME_TRAVEL_ - A TRAVEL QUALITY GUARANTEE that compensation will be offered if repeated travel within a certain TIME INTERVAL fails to meet certain performance targets as to arrival times. -| (ALL REDRESSES, needs TEMPORAL PARAMETER) _TRIP_ON_TIME_ - A TRAVEL QUALITY GUARANTEE that compensation will be offered if a trip fails to meet certain performance targets as to arrival times. -| (ALL REDRESSES, needs TEMPORAL PARAMETER) _FACILITIES_AVAILABLE_ - A TRAVEL QUALITY GUARANTEE that compensation will be offered if a facility or service (e.g. WIFI, Meal, seat reservation, etc) is not available or fails to meet a specified quality. -| (ALL REDRESSES, needs SERVICE PARAMETER) _MOBILITY_ACCOMODATION_ - A TRAVEL QUALITY GUARANTEE that special accommodation will be provided in the event of severe disruption. -| (ALL REDRESSES, needs SERVICE PARAMETER) _MOBILITY_ASSISTANCE_ - A TRAVEL QUALITY GUARANTEE that mobility assistance will be provided. -| (ALL REDRESSES, needs SERVICE PARAMETER) _PASSENGER_SUPPORT_ - A TRAVEL QUALITY GUARANTEE that assistance will be provided, for example, if a disruption occurs or a that stations are staffed. (ALL REDRESSES)\n_DISRUPTION_INFORMATION_ - An INFORMATION QUALITY GUARANTEE that information on disruptions will be made available. (ALL REDRESSES) _REDRESS_INFORMATION_ - An INFORMATION QUALITY GUARANTEE that information on available compensation or other statutory and discretionary redress options will be made available to the passenger. (ALL REDRESSES) _BEST_FARE_INFORMATION_ - An INFORMATION QUALITY GUARANTEE that information on the best value fares will be made available (ALL REDRESSES)\n_GENERAL_TRAVEL_ - An arbitrary OTHER TRAVEL GUARANTEE describing some special guarantee not covered by the normal categories (ALL REDRESSES) _MEDIA_REPLACEMENT_ - An OTHER GUARANTEE that a replacement media will be provided if the original becomes unusable. _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded _REFUND_WHEN_CANCELLED_ - when cancelled before start, a refund will be scheduled",
+                    "enum": [
+                      "ALTERNATIVE_JOURNEY",
+                      "HOME_LEG",
+                      "RETURN_TO_ORIGIN",
+                      "ON_TIME_TRAVEL",
+                      "TRIP_ON_TIME",
+                      "FACILITIES_AVAILABLE",
+                      "MOBILITY_ACCOMODATION",
+                      "MOBILITY_ASSISTANCE",
+                      "PASSENGER_SUPPORT",
+                      "DISRUPTION_INFORMATION",
+                      "REDRESS_INFORMATION",
+                      "BEST_FARE_INFORMATION",
+                      "GENERAL_TRAVEL",
+                      "MEDIA_REPLACEMENT",
+                      "REFUND_UNUSED_ANCILLARIES",
+                      "REFUND_WHEN_CANCELLED"
+                    ]
+                  }
+                }
+              },
+              "compensations": {
+                "type": "array",
+                "items": {
+                  "x-semantics": [
+                    {
+                      "transmodel": "none"
+                    }
+                  ],
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "x-semantics": [
+                        {
+                          "transmodel": "FARE PRICE"
+                        }
+                      ],
+                      "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                      "required": [
+                        "amount"
+                      ],
+                      "properties": {
+                        "amount": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                        },
+                        "taxPercentageUsed": {
+                          "type": "number",
+                          "description": "the travelled distance. Only if applicable.",
+                          "format": "float",
+                          "minimum": 0
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "x-semantics": [
+                            {
+                              "transmodel": "PRICE UNIT"
+                            }
+                          ],
+                          "description": "ISO 4217 currency code",
+                          "minLength": 3,
+                          "maxLength": 3,
+                          "pattern": "[a-zA-Z]{3}"
+                        },
+                        "vatCountryCode": {
+                          "type": "string",
+                          "x-semantics": [
+                            {
+                              "transmodel": "COUNTRY"
+                            }
+                          ],
+                          "description": "two-letter country codes according to ISO 3166-1",
+                          "maxLength": 2,
+                          "minLength": 2,
+                          "pattern": "[A-Z]{2}"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                          "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+                        },
+                        "category": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "none"
+                            }
+                          ],
+                          "type": "string",
+                          "description": "The category of the journalled item <br> _ALL_ - for filtering purposes only<br>\n<h2>TO initiated payments </h2> To request these payments, use the notifications, send a notification containing the payment confirmation.<br> _DEPOSIT_ - a deposit, to refund, use _REFUND_<br> _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br> _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br> _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br> _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br> _FINE_ - a fine that arrived later on<br> _OTHER_ASSET_USED_ - additional costs for a replaced asset<br> _FARE_ - the normal costs of the purchased and executed leg(s)<br> _OTHER_ - unspecified<br>\n_CREDIT_ - generic CREDIT, e.g. for kick-backs <br> _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br> _REFUND_ - refund of the deposit or upfront paid fare<br> _REBATE_ - (partial) rebate of the fare<br> _REIMBURSEMENT_ - reimbursement of the fare<br>",
+                          "enum": [
+                            "ALL",
+                            "DAMAGE",
+                            "LOSS",
+                            "STOLEN",
+                            "EXTRA_USAGE",
+                            "REFUND",
+                            "REBATE",
+                            "REIMBURSEMENT",
+                            "FINE",
+                            "OTHER_ASSET_USED",
+                            "CREDIT",
+                            "VOUCHER",
+                            "DEPOSIT",
+                            "OTHER",
+                            "FARE"
+                          ]
+                        },
+                        "state": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "none"
+                            }
+                          ],
+                          "type": "string",
+                          "description": "the state of the payment detail",
+                          "enum": [
+                            "TO_INVOICE",
+                            "INVOICING",
+                            "INVOICED"
+                          ]
+                        },
+                        "expirationDate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                          "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                        },
+                        "sequenceId": {
+                          "type": "integer",
+                          "description": "for really small numbers (0-10)",
+                          "default": 0,
+                          "minimum": 0,
+                          "maximum": 10
+                        },
+                        "invoiceId": {
+                          "type": "string",
+                          "description": "short string, display names (length 0-75)",
+                          "maxLength": 75
+                        },
+                        "invoiceDate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                          "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                        },
+                        "comment": {
+                          "type": "string",
+                          "description": "long string, memos etc (length 0-10.000)",
+                          "maxLength": 10000
+                        },
+                        "units": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "unitCategory": {
+                                "type": "string",
+                                "enum": [
+                                  "DISTANCE",
+                                  "DURATION",
+                                  "USAGE",
+                                  "OTHER"
+                                ]
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "unit": {
+                                "type": "string",
+                                "enum": [
+                                  "KM",
+                                  "MILE",
+                                  "HOURS",
+                                  "MINUTES",
+                                  "DAYS",
+                                  "LITER",
+                                  "KILOWATTHOUR",
+                                  "CO2_COMPENSATION",
+                                  "OTHER"
+                                ]
+                              },
+                              "amount": {
+                                "type": "number",
+                                "description": "the travelled distance. Only if applicable.",
+                                "format": "float",
+                                "minimum": 0
+                              }
+                            }
+                          }
+                        },
+                        "vatNumber": {
+                          "type": "string",
+                          "description": "short string, display names (length 0-75)",
+                          "maxLength": 75
+                        },
+                        "bankAccount": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "none"
+                            }
+                          ],
+                          "type": "object",
+                          "description": "bank account",
+                          "additionalProperties": false,
+                          "required": [
+                            "name",
+                            "number"
+                          ],
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "short string, display names (length 0-75)",
+                              "maxLength": 75
+                            },
+                            "number": {
+                              "type": "string",
+                              "description": "short string, display names (length 0-75)",
+                              "maxLength": 75
+                            },
+                            "country": {
+                              "type": "string",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "COUNTRY"
+                                }
+                              ],
+                              "description": "two-letter country codes according to ISO 3166-1",
+                              "maxLength": 2,
+                              "minLength": 2,
+                              "pattern": "[A-Z]{2}"
+                            },
+                            "bankIdentification": {
+                              "type": "string",
+                              "description": "short string, display names (length 0-75)",
+                              "maxLength": 75
+                            }
+                          }
+                        },
+                        "customFields": {
+                          "type": "object",
+                          "description": "dictionary for extra fields (bilatural agreements)",
+                          "additionalProperties": {
+                            "maxLength": 1000,
+                            "maxProperties": 20
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "replacements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "x-semantics": [
+                    {
+                      "transmodel[type!=offer]": "TRAVEL PACKAGE / CUSTOMER PURCHASE PACKAGE"
+                    },
+                    {
+                      "transmodel[type==offer]": "SALES OFFER PACKAGE"
+                    }
+                  ],
+                  "description": "a purchased package is a registration of an agreement between end user and TO, to execute a package (=set of legs) according a specification, including all conditions (labels)",
+                  "required": [
+                    "type",
+                    "id",
+                    "status"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "pattern": "^(offer|package)$"
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "default string, full names etc (length 0-200)",
+                      "maxLength": 200
+                    },
+                    "status": {
+                      "x-semantics": [
+                        {
+                          "transmodel": "CUSTOMER PURCHASE STATUS"
+                        }
+                      ],
+                      "type": "string",
+                      "description": "The life-cycle state of the package<br> _OFFERED_ the package is offered (pre-sales) <br> _PENDING_ the purchase of the package is not confirmed (the end user has shown intentions to purchase this offer), must be finalized with the package-confirm operation (purchase)<br> _CONFIRMED_ a purchased package. Both parties agreed to deliver services in return of payment<br> _CANCELLED_ the package is cancelled before it is executed. The agreement will specify whether there is a refund, or under which conditions<br> _ROLLBACK_ the package is purchased, but before the Rollback-Expires timestamp has passed, therefore no financial consequences<br> _EXPIRED_ the MP didn't respond on time, the package offer has been expired<br> _STARTED_ the package is started, the <u>trip execution</u> module is needed now to manage the execution of the package<br> _ENDED_ the package has ended, the trip has been executed<br> _RELEASED_ for internal archiving, the package has not been purchased.<br> _SETTLED_ final exit state, services delivered & financial settlement succeeded.",
+                      "enum": [
+                        "OFFERED",
+                        "PENDING",
+                        "CONFIRMED",
+                        "ROLLBACK",
+                        "RELEASED",
+                        "EXPIRED",
+                        "CANCELLED",
+                        "STARTED",
+                        "ENDED",
+                        "SETTLED"
+                      ]
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "default string, full names etc (length 0-200)",
+                          "maxLength": 200
+                        },
+                        "specification": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "TRAVEL SPECIFICATION"
+                            }
+                          ],
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "pattern": "^(travelSpecification)$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                              "maxLength": 200,
+                              "x-example-format": "^(GPS:|GBFS:stations:)",
+                              "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                            },
+                            "via": {
+                              "type": "array",
+                              "description": "use an ID contained in the **places** field, or from an external source, when using coordinates, please use the prefix 'gps:'",
+                              "minItems": 0,
+                              "maxItems": 3,
+                              "items": {
+                                "type": "string",
+                                "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                "maxLength": 200,
+                                "x-example-format": "^(GPS:|GBFS:stations:)",
+                                "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                              }
+                            },
+                            "to": {
+                              "type": "string",
+                              "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                              "maxLength": 200,
+                              "x-example-format": "^(GPS:|GBFS:stations:)",
+                              "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                            },
+                            "startTime": {
+                              "type": "string",
+                              "format": "date-time",
+                              "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                              "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                            },
+                            "endTime": {
+                              "type": "string",
+                              "format": "date-time",
+                              "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                              "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                            }
+                          }
+                        },
+                        "price": {
+                          "type": "object",
+                          "x-semantics": [
+                            {
+                              "transmodel": "FARE PRICE"
+                            }
+                          ],
+                          "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                          "required": [
+                            "amount"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "format": "float",
+                              "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                            },
+                            "taxPercentageUsed": {
+                              "type": "number",
+                              "description": "the travelled distance. Only if applicable.",
+                              "format": "float",
+                              "minimum": 0
+                            },
+                            "currencyCode": {
+                              "type": "string",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "PRICE UNIT"
+                                }
+                              ],
+                              "description": "ISO 4217 currency code",
+                              "minLength": 3,
+                              "maxLength": 3,
+                              "pattern": "[a-zA-Z]{3}"
+                            },
+                            "vatCountryCode": {
+                              "type": "string",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "COUNTRY"
+                                }
+                              ],
+                              "description": "two-letter country codes according to ISO 3166-1",
+                              "maxLength": 2,
+                              "minLength": 2,
+                              "pattern": "[A-Z]{2}"
+                            }
+                          }
+                        },
+                        "products": {
+                          "type": "array",
+                          "description": "product names",
+                          "items": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          }
+                        },
+                        "legs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "mode",
+                              "name"
+                            ],
+                            "properties": {
+                              "mode": {
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "MODE"
+                                  }
+                                ],
+                                "type": "string",
+                                "description": "These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.",
+                                "enum": [
+                                  "AIR",
+                                  "BUS",
+                                  "TROLLEYBUS",
+                                  "TRAM",
+                                  "COACH",
+                                  "RAIL",
+                                  "INTERCITYRAIL",
+                                  "URBANRAIL",
+                                  "METRO",
+                                  "WATER",
+                                  "CABLEWAY",
+                                  "FUNICULAR",
+                                  "TAXI",
+                                  "SELFDRIVE",
+                                  "FOOT",
+                                  "BICYCLE",
+                                  "MOTORCYCLE",
+                                  "CAR",
+                                  "SHUTTLE",
+                                  "OTHER",
+                                  "PARKING",
+                                  "MOPED",
+                                  "STEP",
+                                  "FERRY"
+                                ]
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "icon": {
+                                "type": "string",
+                                "description": "valid URL",
+                                "format": "uri"
+                              },
+                              "destination": {
+                                "type": "string",
+                                "description": "default string, full names etc (length 0-200)",
+                                "maxLength": 200
+                              },
+                              "travellers": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "description": "default string, full names etc (length 0-200)",
+                                  "maxLength": 200
+                                }
+                              },
+                              "equipment": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "description": "default string, full names etc (length 0-200)",
+                                  "maxLength": 200
+                                }
+                              },
+                              "boarding": {
+                                "type": "object",
+                                "properties": {
+                                  "onboardStayDuration": {
+                                    "description": "duration, ISO 8601 compliant",
+                                    "type": "string",
+                                    "pattern": "/^(-?)P(?=\\d|T\\d)(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)([DW]))?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?)?$/"
+                                  },
+                                  "delayedAlightingAllowed": {
+                                    "type": "boolean"
+                                  },
+                                  "overnightStayAllowed": {
+                                    "type": "boolean"
+                                  },
+                                  "earlyBoardingAllowed": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              },
+                              "accomodation": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "short string, display names (length 0-75)",
+                                    "maxLength": 75
+                                  },
+                                  "accomodationClass": {
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "CLASS OF USE"
+                                      }
+                                    ],
+                                    "type": "string",
+                                    "description": "A classification of fare and other service classes by category of user entitled to use them.",
+                                    "enum": [
+                                      "FIRST_CLASS",
+                                      "SECOND_CLASS",
+                                      "THIRD_CLASS",
+                                      "ECONOMY_CLASS",
+                                      "BUSINESS_CLASS",
+                                      "TURISTA",
+                                      "PREFERENTE",
+                                      "PREMIUM_CLASS",
+                                      "ANY",
+                                      "UNKNOWN"
+                                    ]
+                                  },
+                                  "accomodationGender": {
+                                    "type": "string",
+                                    "enum": [
+                                      "M",
+                                      "F",
+                                      "X",
+                                      "U"
+                                    ]
+                                  },
+                                  "sleeper": {
+                                    "type": "boolean"
+                                  },
+                                  "nuisances": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "enum": [
+                                        "no_smoking",
+                                        "smoking",
+                                        "mobile_phone_use_zone",
+                                        "mobile_phone_free_zone",
+                                        "family_area",
+                                        "breast_feeding_friendly",
+                                        "child_free_area",
+                                        "animals_allowed",
+                                        "no_animals"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "labels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "MOST_FLEXIBLE",
+                              "NON_FLEXIBLE",
+                              "MOST_ECO_FRIENDLY"
+                            ]
+                          }
+                        },
+                        "distribution": {
+                          "type": "object",
+                          "x-semantics": [
+                            {
+                              "transmodel": "DISTRIBUTION VALIDITY PARAMETERS"
+                            }
+                          ],
+                          "properties": {
+                            "fulfilmentMethod": {
+                              "x-semantics": [
+                                {
+                                  "transmodel": "TYPE OF TRAVEL DOCUMENT"
+                                }
+                              ],
+                              "type": "string",
+                              "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execute must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
+                              "enum": [
+                                "BARCODE",
+                                "QRCODE",
+                                "AZTECCODE",
+                                "REMOTE",
+                                "DEEP_LINK",
+                                "KEY",
+                                "OTHER"
+                              ]
+                            },
+                            "distributionChannel": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            }
+                          }
+                        },
+                        "cancellation": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "CANCELLING"
+                            }
+                          ],
+                          "type": "object",
+                          "properties": {
+                            "cancellable": {
+                              "type": "boolean",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "allowed"
+                                }
+                              ],
+                              "description": "is it possible to cancel this package?"
+                            },
+                            "fee": {
+                              "type": "object",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "FARE PRICE"
+                                }
+                              ],
+                              "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                              "required": [
+                                "amount"
+                              ],
+                              "properties": {
+                                "amount": {
+                                  "type": "number",
+                                  "format": "float",
+                                  "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                },
+                                "taxPercentageUsed": {
+                                  "type": "number",
+                                  "description": "the travelled distance. Only if applicable.",
+                                  "format": "float",
+                                  "minimum": 0
+                                },
+                                "currencyCode": {
+                                  "type": "string",
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "PRICE UNIT"
+                                    }
+                                  ],
+                                  "description": "ISO 4217 currency code",
+                                  "minLength": 3,
+                                  "maxLength": 3,
+                                  "pattern": "[a-zA-Z]{3}"
+                                },
+                                "vatCountryCode": {
+                                  "type": "string",
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "COUNTRY"
+                                    }
+                                  ],
+                                  "description": "two-letter country codes according to ISO 3166-1",
+                                  "maxLength": 2,
+                                  "minLength": 2,
+                                  "pattern": "[A-Z]{2}"
+                                }
+                              }
+                            },
+                            "feePercentage": {
+                              "description": "percentage of the offered price you have to pay when you cancel this purchased package",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            }
+                          }
+                        },
+                        "exchangeable": {
+                          "type": "boolean",
+                          "default": true,
+                          "x-semantics": [
+                            {
+                              "transmodel": "EXCHANGING.exchangeable"
+                            }
+                          ]
+                        },
+                        "exchanging": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "EXCHANGING"
+                            }
+                          ],
+                          "type": "object",
+                          "properties": {
+                            "numberOfExchangesAllowed": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "refundable": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "REFUNDING"
+                            }
+                          ],
+                          "type": "boolean",
+                          "default": true
+                        },
+                        "transferrable": {
+                          "type": "boolean",
+                          "x-semantics": [
+                            {
+                              "transmodel": "TRANSFERABILITY.canTransfer"
+                            }
+                          ],
+                          "default": true
+                        },
+                        "transfer": {
+                          "x-semantics": [
+                            {
+                              "transmodel": "TRANSFERABILITY"
+                            }
+                          ],
+                          "type": "object",
+                          "properties": {
+                            "fee": {
+                              "type": "object",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "FARE PRICE"
+                                }
+                              ],
+                              "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                              "required": [
+                                "amount"
+                              ],
+                              "properties": {
+                                "amount": {
+                                  "type": "number",
+                                  "format": "float",
+                                  "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                },
+                                "taxPercentageUsed": {
+                                  "type": "number",
+                                  "description": "the travelled distance. Only if applicable.",
+                                  "format": "float",
+                                  "minimum": 0
+                                },
+                                "currencyCode": {
+                                  "type": "string",
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "PRICE UNIT"
+                                    }
+                                  ],
+                                  "description": "ISO 4217 currency code",
+                                  "minLength": 3,
+                                  "maxLength": 3,
+                                  "pattern": "[a-zA-Z]{3}"
+                                },
+                                "vatCountryCode": {
+                                  "type": "string",
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "COUNTRY"
+                                    }
+                                  ],
+                                  "description": "two-letter country codes according to ISO 3166-1",
+                                  "maxLength": 2,
+                                  "minLength": 2,
+                                  "pattern": "[A-Z]{2}"
+                                }
+                              }
+                            },
+                            "feePercentage": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "maximumNumberOfNamedUsers": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "paymentMethod": {
+                          "type": "object",
+                          "properties": {
+                            "paymentType": {
+                              "type": "string",
+                              "enum": [
+                                "PREPAID",
+                                "PAY_WHEN_FINISHED",
+                                "SUBSCRIPTION_ONLY"
+                              ]
+                            },
+                            "deposit": {
+                              "type": "object",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "FARE PRICE"
+                                }
+                              ],
+                              "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                              "required": [
+                                "amount"
+                              ],
+                              "properties": {
+                                "amount": {
+                                  "type": "number",
+                                  "format": "float",
+                                  "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                },
+                                "taxPercentageUsed": {
+                                  "type": "number",
+                                  "description": "the travelled distance. Only if applicable.",
+                                  "format": "float",
+                                  "minimum": 0
+                                },
+                                "currencyCode": {
+                                  "type": "string",
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "PRICE UNIT"
+                                    }
+                                  ],
+                                  "description": "ISO 4217 currency code",
+                                  "minLength": 3,
+                                  "maxLength": 3,
+                                  "pattern": "[a-zA-Z]{3}"
+                                },
+                                "vatCountryCode": {
+                                  "type": "string",
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "COUNTRY"
+                                    }
+                                  ],
+                                  "description": "two-letter country codes according to ISO 3166-1",
+                                  "maxLength": 2,
+                                  "minLength": 2,
+                                  "pattern": "[A-Z]{2}"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "price": {
+                      "x-semantics": [
+                        {
+                          "transmodel": "TARIFF"
+                        }
+                      ],
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "x-semantics": [
+                            {
+                              "transmodel": "FARE PRICE"
+                            }
+                          ],
+                          "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                          "required": [
+                            "amount"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": "number",
+                              "format": "float",
+                              "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                            },
+                            "taxPercentageUsed": {
+                              "type": "number",
+                              "description": "the travelled distance. Only if applicable.",
+                              "format": "float",
+                              "minimum": 0
+                            },
+                            "currencyCode": {
+                              "type": "string",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "PRICE UNIT"
+                                }
+                              ],
+                              "description": "ISO 4217 currency code",
+                              "minLength": 3,
+                              "maxLength": 3,
+                              "pattern": "[a-zA-Z]{3}"
+                            },
+                            "vatCountryCode": {
+                              "type": "string",
+                              "x-semantics": [
+                                {
+                                  "transmodel": "COUNTRY"
+                                }
+                              ],
+                              "description": "two-letter country codes according to ISO 3166-1",
+                              "maxLength": 2,
+                              "minLength": 2,
+                              "pattern": "[A-Z]{2}"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "description": "the total fare is the sum of all parts, except for the 'MAX' fareStructureElement. This one descripes the maximum price for the complete leg.",
+                          "required": [
+                            "elements"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            },
+                            "estimated": {
+                              "type": "boolean",
+                              "description": "is this fare an estimation?"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            },
+                            "userProfiles": {
+                              "type": "array",
+                              "description": "references to applicable user profiles",
+                              "items": {
+                                "type": "string",
+                                "description": "default string, full names etc (length 0-200)",
+                                "maxLength": 200
+                              }
+                            },
+                            "temporalValidity": {
+                              "type": "array",
+                              "minItems": 2,
+                              "maxItems": 2,
+                              "items": {
+                                "type": "string",
+                                "format": "date-time",
+                                "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                                "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                              }
+                            },
+                            "yieldPriceUrl": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "x-externalDocs": {
+                                "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+                              },
+                              "required": [
+                                "href",
+                                "rel"
+                              ],
+                              "properties": {
+                                "rel": {
+                                  "type": "string",
+                                  "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+                                },
+                                "href": {
+                                  "type": "string",
+                                  "description": "valid URL",
+                                  "format": "uri"
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "description": "short string, display names (length 0-75)",
+                                  "maxLength": 75
+                                },
+                                "method": {
+                                  "type": "string",
+                                  "description": "to indicate the http method.",
+                                  "default": "GET",
+                                  "enum": [
+                                    "POST",
+                                    "GET",
+                                    "DELETE",
+                                    "PATCH"
+                                  ]
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "description": "the description of the external data source"
+                                },
+                                "body": {
+                                  "type": "object",
+                                  "description": "the (prefilled) body for the request"
+                                },
+                                "headers": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  }
+                                },
+                                "mandatory": {
+                                  "description": "is this link informative, or must it be used?",
+                                  "type": "boolean"
+                                },
+                                "hash": {
+                                  "description": "to validate that the content of the link hasn't been changed.",
+                                  "type": "string"
+                                },
+                                "expires": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                                  "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                                }
+                              }
+                            },
+                            "elements": {
+                              "type": "array",
+                              "maxItems": 25,
+                              "items": {
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "TIME INTERVAL PRICE, TIME UNIT PRICE, GEOGRAPHICAL UNIT PRICE, GEOGRAPHICAL INTERVAL PRICE, LIMITING RULE"
+                                  }
+                                ],
+                                "description": "this describes a part of the fare (or discount). It contains a for instance the startup costs (fixed) or the flex part (e.g. 1.25 EUR per 2.0 MILES). The amount is tax included. In case of discounts, the values are negative. With 'MAX' you can specify e.g. a maximum of 15 euro per day. Percentage is mainly added for discounts. The `scale` properties create the ability to communicate scales (e.g. the first 4 kilometers you've to pay EUR 0.35 per kilometer, the kilometers 4 until 8 EUR 0.50 and above it EUR 0.80 per kilometer).",
+                                "allOf": [
+                                  {
+                                    "type": "object",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "FARE PRICE"
+                                      }
+                                    ],
+                                    "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                                    "required": [
+                                      "amount"
+                                    ],
+                                    "properties": {
+                                      "amount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                      },
+                                      "taxPercentageUsed": {
+                                        "type": "number",
+                                        "description": "the travelled distance. Only if applicable.",
+                                        "format": "float",
+                                        "minimum": 0
+                                      },
+                                      "currencyCode": {
+                                        "type": "string",
+                                        "x-semantics": [
+                                          {
+                                            "transmodel": "PRICE UNIT"
+                                          }
+                                        ],
+                                        "description": "ISO 4217 currency code",
+                                        "minLength": 3,
+                                        "maxLength": 3,
+                                        "pattern": "[a-zA-Z]{3}"
+                                      },
+                                      "vatCountryCode": {
+                                        "type": "string",
+                                        "x-semantics": [
+                                          {
+                                            "transmodel": "COUNTRY"
+                                          }
+                                        ],
+                                        "description": "two-letter country codes according to ISO 3166-1",
+                                        "maxLength": 2,
+                                        "minLength": 2,
+                                        "pattern": "[A-Z]{2}"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "required": [
+                                      "type"
+                                    ],
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "description": "type of fare structure element. If there is only one fare structure elements and this field is missing, it should be assumed it is 'FIXED'. In all other situations this field is mandatory.<br> _FIXED_ fixed element, independend on the duration or distance traveled. _FLEX_ flex element, dependend on the duration or distance of the package. Can be tiered. _MAX_ capping mechanism. Calculate the price using the sum of the FIXED and FLEX elements, cap it using this rule. Max 1 per fare structure.",
+                                        "enum": [
+                                          "FIXED",
+                                          "FLEX",
+                                          "MAX"
+                                        ]
+                                      },
+                                      "priceCondition": {
+                                        "type": "string",
+                                        "description": "is this the default price or is this an additional part (discount, price surge). <br> _DEFAULT_ the default price for this price part<br> _DISCOUNT_ the amount must always be negative <br> _SURGE_ the amount must always be positive <br> This also means, that when you're working with discounts or surges, you have to deliver 2 fare structure elements, one for the default price and one for the discount/surge. This can be used in combination with as well the fixed price parts as with the flex price parts.",
+                                        "enum": [
+                                          "DEFAULT",
+                                          "DISCOUNT",
+                                          "SURGE"
+                                        ]
+                                      },
+                                      "units": {
+                                        "type": "string",
+                                        "description": "in case of 'FLEX' mandatory, otherwise not allowed. E.g. 0.5 EUR per HOUR",
+                                        "enum": [
+                                          "KM",
+                                          "SECOND",
+                                          "MINUTE",
+                                          "HOUR",
+                                          "MILE",
+                                          "PERCENTAGE",
+                                          "ZONE"
+                                        ]
+                                      },
+                                      "amountOfUnits": {
+                                        "type": "number",
+                                        "description": "the travelled distance. Only if applicable.",
+                                        "format": "float",
+                                        "minimum": 0
+                                      },
+                                      "scale": {
+                                        "x-semantics": [
+                                          {
+                                            "transmodel": "TIME INTERVAL (in case UNITS = minutes or hours)"
+                                          }
+                                        ],
+                                        "type": "object",
+                                        "required": [
+                                          "from",
+                                          "to",
+                                          "units"
+                                        ],
+                                        "properties": {
+                                          "from": {
+                                            "type": "number",
+                                            "description": "the travelled distance. Only if applicable.",
+                                            "format": "float",
+                                            "minimum": 0
+                                          },
+                                          "to": {
+                                            "type": "number",
+                                            "description": "the travelled distance. Only if applicable.",
+                                            "format": "float",
+                                            "minimum": 0
+                                          },
+                                          "units": {
+                                            "type": "string",
+                                            "description": "the units is normally the same as the **interval.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.",
+                                            "enum": [
+                                              "KM",
+                                              "MILE",
+                                              "HOUR",
+                                              "MINUTE",
+                                              "ZONE",
+                                              "CURRENCY"
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "priceInterval": {
+                                        "x-semantics": [
+                                          {
+                                            "transmodel": "TIME INTERVAL (in case UNITS = minutes or hours)"
+                                          }
+                                        ],
+                                        "type": "object",
+                                        "required": [
+                                          "from",
+                                          "to",
+                                          "units"
+                                        ],
+                                        "properties": {
+                                          "from": {
+                                            "type": "number",
+                                            "description": "the travelled distance. Only if applicable.",
+                                            "format": "float",
+                                            "minimum": 0
+                                          },
+                                          "to": {
+                                            "type": "number",
+                                            "description": "the travelled distance. Only if applicable.",
+                                            "format": "float",
+                                            "minimum": 0
+                                          },
+                                          "units": {
+                                            "type": "string",
+                                            "description": "the units is normally the same as the **interval.units**, but it doesn't have to be. For instance, you could pay 1 EUR per kilometer for the first hour.",
+                                            "enum": [
+                                              "KM",
+                                              "MILE",
+                                              "HOUR",
+                                              "MINUTE",
+                                              "ZONE",
+                                              "CURRENCY"
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "name": {
+                                        "type": "string",
+                                        "description": "default string, full names etc (length 0-200)",
+                                        "maxLength": 200
+                                      },
+                                      "appliesTo": {
+                                        "type": "string",
+                                        "description": "class of this fare structure element. Could be FARE or ANCILLARY<br> _FARE_ this fare structure element is related to the distance or time of usage.<br> _ANCILLARY_ this fare structure element is related to the rental of one or more ancillaries.",
+                                        "default": "FARE",
+                                        "enum": [
+                                          "FARE",
+                                          "ANCILLARY"
+                                        ]
+                                      },
+                                      "assetCondition": {
+                                        "type": "string",
+                                        "description": "in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE",
+                                        "enum": [
+                                          "IN_USE",
+                                          "PAUSED"
+                                        ],
+                                        "default": "IN_USE"
+                                      },
+                                      "customFields": {
+                                        "type": "object",
+                                        "description": "dictionary for extra fields (bilatural agreements)",
+                                        "additionalProperties": {
+                                          "maxLength": 1000,
+                                          "maxProperties": 20
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "guarantees": {
+                      "type": "array",
+                      "items": {
+                        "x-semantics": [
+                          {
+                            "transmodel": "TRAVEL GUARANTEE"
+                          }
+                        ],
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                            "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          },
+                          "organisation": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "_ALTERNATIVE_JOURNEY_ - A TRIP REPAIR GUARANTEE that if a designated SERVICE JOURNEY is not available then alternative SERVICE JOURNEY will be provided. -| (EASEMENT_REDRESS, PRODUCT EXCHANGE REDRESS) _HOME_LEG_ - A TRIP REPAIR GUARANTEE that if a the passenger is unable to reach their destination by public transport because of a delay in services, a taxi to their destination will be provided. -| (TAXI HOME REDRESS) _RETURN_TO_ORIGIN_ - A TRIP REPAIR GUARANTEE that if a designated SERVICE JOURNEY cannot be completed, then the passenger will be returned to their origin stop. -| (RETURN TO ORIGIN REDRESS)\n_ON_TIME_TRAVEL_ - A TRAVEL QUALITY GUARANTEE that compensation will be offered if repeated travel within a certain TIME INTERVAL fails to meet certain performance targets as to arrival times. -| (ALL REDRESSES, needs TEMPORAL PARAMETER) _TRIP_ON_TIME_ - A TRAVEL QUALITY GUARANTEE that compensation will be offered if a trip fails to meet certain performance targets as to arrival times. -| (ALL REDRESSES, needs TEMPORAL PARAMETER) _FACILITIES_AVAILABLE_ - A TRAVEL QUALITY GUARANTEE that compensation will be offered if a facility or service (e.g. WIFI, Meal, seat reservation, etc) is not available or fails to meet a specified quality. -| (ALL REDRESSES, needs SERVICE PARAMETER) _MOBILITY_ACCOMODATION_ - A TRAVEL QUALITY GUARANTEE that special accommodation will be provided in the event of severe disruption. -| (ALL REDRESSES, needs SERVICE PARAMETER) _MOBILITY_ASSISTANCE_ - A TRAVEL QUALITY GUARANTEE that mobility assistance will be provided. -| (ALL REDRESSES, needs SERVICE PARAMETER) _PASSENGER_SUPPORT_ - A TRAVEL QUALITY GUARANTEE that assistance will be provided, for example, if a disruption occurs or a that stations are staffed. (ALL REDRESSES)\n_DISRUPTION_INFORMATION_ - An INFORMATION QUALITY GUARANTEE that information on disruptions will be made available. (ALL REDRESSES) _REDRESS_INFORMATION_ - An INFORMATION QUALITY GUARANTEE that information on available compensation or other statutory and discretionary redress options will be made available to the passenger. (ALL REDRESSES) _BEST_FARE_INFORMATION_ - An INFORMATION QUALITY GUARANTEE that information on the best value fares will be made available (ALL REDRESSES)\n_GENERAL_TRAVEL_ - An arbitrary OTHER TRAVEL GUARANTEE describing some special guarantee not covered by the normal categories (ALL REDRESSES) _MEDIA_REPLACEMENT_ - An OTHER GUARANTEE that a replacement media will be provided if the original becomes unusable. _REFUND_UNUSED_ANCILLARIES_ - unused ancillaries will be refunded _REFUND_WHEN_CANCELLED_ - when cancelled before start, a refund will be scheduled",
+                            "enum": [
+                              "ALTERNATIVE_JOURNEY",
+                              "HOME_LEG",
+                              "RETURN_TO_ORIGIN",
+                              "ON_TIME_TRAVEL",
+                              "TRIP_ON_TIME",
+                              "FACILITIES_AVAILABLE",
+                              "MOBILITY_ACCOMODATION",
+                              "MOBILITY_ASSISTANCE",
+                              "PASSENGER_SUPPORT",
+                              "DISRUPTION_INFORMATION",
+                              "REDRESS_INFORMATION",
+                              "BEST_FARE_INFORMATION",
+                              "GENERAL_TRAVEL",
+                              "MEDIA_REPLACEMENT",
+                              "REFUND_UNUSED_ANCILLARIES",
+                              "REFUND_WHEN_CANCELLED"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "legs": {
+                      "type": "array",
+                      "items": {
+                        "x-semantics": [
+                          {
+                            "transmodel": "LEG"
+                          }
+                        ],
+                        "type": "object",
+                        "description": "A (planned) consumption of a product within a package",
+                        "required": [
+                          "id",
+                          "type",
+                          "specification"
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "pattern": "^(leg)$"
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          },
+                          "specification": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "TRAVEL SPECIFICATION"
+                              }
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "pattern": "^(travelSpecification)$"
+                              },
+                              "from": {
+                                "type": "string",
+                                "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                "maxLength": 200,
+                                "x-example-format": "^(GPS:|GBFS:stations:)",
+                                "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                              },
+                              "via": {
+                                "type": "array",
+                                "description": "use an ID contained in the **places** field, or from an external source, when using coordinates, please use the prefix 'gps:'",
+                                "minItems": 0,
+                                "maxItems": 3,
+                                "items": {
+                                  "type": "string",
+                                  "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                  "maxLength": 200,
+                                  "x-example-format": "^(GPS:|GBFS:stations:)",
+                                  "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                                }
+                              },
+                              "to": {
+                                "type": "string",
+                                "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                "maxLength": 200,
+                                "x-example-format": "^(GPS:|GBFS:stations:)",
+                                "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                              },
+                              "startTime": {
+                                "type": "string",
+                                "format": "date-time",
+                                "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                                "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                              },
+                              "endTime": {
+                                "type": "string",
+                                "format": "date-time",
+                                "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                                "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                              }
+                            }
+                          },
+                          "sequenceNumber": {
+                            "type": "integer",
+                            "description": "a bit short integer (0-100)",
+                            "default": 0,
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "mode": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "MODE"
+                              }
+                            ],
+                            "type": "string",
+                            "description": "These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.",
+                            "enum": [
+                              "AIR",
+                              "BUS",
+                              "TROLLEYBUS",
+                              "TRAM",
+                              "COACH",
+                              "RAIL",
+                              "INTERCITYRAIL",
+                              "URBANRAIL",
+                              "METRO",
+                              "WATER",
+                              "CABLEWAY",
+                              "FUNICULAR",
+                              "TAXI",
+                              "SELFDRIVE",
+                              "FOOT",
+                              "BICYCLE",
+                              "MOTORCYCLE",
+                              "CAR",
+                              "SHUTTLE",
+                              "OTHER",
+                              "PARKING",
+                              "MOPED",
+                              "STEP",
+                              "FERRY"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "x-semantics": [
+                              {
+                                "transmodel": "none"
+                              }
+                            ],
+                            "description": "status of a leg<br> _NOT_STARTED_ the leg is not started, initial state<br> _PREPARING_ the _PREPARE_ operation has been received<br> _READY_TO_USE_ the leg is ready to use<br> _IN_USE_ the travelers are on their way<br> _PAUSED_ the asset is paused<br> _ENDING_ the end-leg request is received, the offboarding process has is started<br> _ENDED_ the travelers have arrived at their destination, leg is final<br> _ISSUE_REPORTED_ due to an issue, there is (temporarily) no progress to report, when the issue isn't solved, this is a final state<br> _CANCELLED_ the leg has been cancelled, before execution<br> _ABENDED_ the leg is abnormally ended (e.g. due to an issue)",
+                            "enum": [
+                              "NOT_STARTED",
+                              "PREPARING",
+                              "READY_TO_USE",
+                              "IN_USE",
+                              "PAUSED",
+                              "ENDED",
+                              "ISSUE_REPORTED",
+                              "CANCELLED",
+                              "ABENDED"
+                            ]
+                          },
+                          "travellers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            }
+                          },
+                          "products": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            },
+                            "description": "The main product (v1.x 'asset type') used to execute this leg"
+                          },
+                          "ancillaries": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            },
+                            "description": "additional products that can be assigned to this leg"
+                          },
+                          "assets": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            },
+                            "description": "The physical asset(s) used for the execution of the leg"
+                          },
+                          "operatorId": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          },
+                          "operatorName": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          },
+                          "labels": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "REFUNDABLE",
+                                "EXCHANGABLE",
+                                "CANCELLABLE",
+                                "TRANSFERABLE",
+                                "DEPOSIT_REQUIRED",
+                                "ANCILLARIES_INCLUDED",
+                                "ANCILLARIES_REQUIRED",
+                                "PAY_WHEN_FINISHED",
+                                "PURCHASE_TO_BE_CONFIRMED",
+                                "REQUIRES_PERSONAL_DATA",
+                                "MANDATORY_ENTRY_INSTRUCTIONS",
+                                "MANDATORY_EXIT_INSTRUCTIONS",
+                                "MANDATORY_PAUSING_INSTRUCTIONS",
+                                "ROUND_TRIP",
+                                "UPFRONT_PAYMENT"
+                              ]
+                            }
+                          },
+                          "returnLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                              "maxLength": 200,
+                              "x-example-format": "^(GPS:|GBFS:stations:)",
+                              "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "offers": {
+                      "description": "contains offered packages, so it is only applicable when the type is package. When a package only contains one offer, this property should be neglected. All references in the offers refer to the products the packageProperties. The offers can be retrieved using the /collections/offers/items?offerId={reference} endpoint.",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "default string, full names etc (length 0-200)",
+                            "maxLength": 200
+                          },
+                          "specification": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "TRAVEL SPECIFICATION"
+                              }
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "pattern": "^(travelSpecification)$"
+                              },
+                              "from": {
+                                "type": "string",
+                                "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                "maxLength": 200,
+                                "x-example-format": "^(GPS:|GBFS:stations:)",
+                                "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                              },
+                              "via": {
+                                "type": "array",
+                                "description": "use an ID contained in the **places** field, or from an external source, when using coordinates, please use the prefix 'gps:'",
+                                "minItems": 0,
+                                "maxItems": 3,
+                                "items": {
+                                  "type": "string",
+                                  "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                  "maxLength": 200,
+                                  "x-example-format": "^(GPS:|GBFS:stations:)",
+                                  "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                                }
+                              },
+                              "to": {
+                                "type": "string",
+                                "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+                                "maxLength": 200,
+                                "x-example-format": "^(GPS:|GBFS:stations:)",
+                                "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+                              },
+                              "startTime": {
+                                "type": "string",
+                                "format": "date-time",
+                                "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                                "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                              },
+                              "endTime": {
+                                "type": "string",
+                                "format": "date-time",
+                                "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                                "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                              }
+                            }
+                          },
+                          "price": {
+                            "type": "object",
+                            "x-semantics": [
+                              {
+                                "transmodel": "FARE PRICE"
+                              }
+                            ],
+                            "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                            "required": [
+                              "amount"
+                            ],
+                            "properties": {
+                              "amount": {
+                                "type": "number",
+                                "format": "float",
+                                "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                              },
+                              "taxPercentageUsed": {
+                                "type": "number",
+                                "description": "the travelled distance. Only if applicable.",
+                                "format": "float",
+                                "minimum": 0
+                              },
+                              "currencyCode": {
+                                "type": "string",
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "PRICE UNIT"
+                                  }
+                                ],
+                                "description": "ISO 4217 currency code",
+                                "minLength": 3,
+                                "maxLength": 3,
+                                "pattern": "[a-zA-Z]{3}"
+                              },
+                              "vatCountryCode": {
+                                "type": "string",
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "COUNTRY"
+                                  }
+                                ],
+                                "description": "two-letter country codes according to ISO 3166-1",
+                                "maxLength": 2,
+                                "minLength": 2,
+                                "pattern": "[A-Z]{2}"
+                              }
+                            }
+                          },
+                          "products": {
+                            "type": "array",
+                            "description": "product names",
+                            "items": {
+                              "type": "string",
+                              "description": "default string, full names etc (length 0-200)",
+                              "maxLength": 200
+                            }
+                          },
+                          "legs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "mode",
+                                "name"
+                              ],
+                              "properties": {
+                                "mode": {
+                                  "x-semantics": [
+                                    {
+                                      "transmodel": "MODE"
+                                    }
+                                  ],
+                                  "type": "string",
+                                  "description": "These classes are taken from the NeTeX standard, but ALL and UNKNOWN are removed. On the other hand OTHER and PARKING are added.",
+                                  "enum": [
+                                    "AIR",
+                                    "BUS",
+                                    "TROLLEYBUS",
+                                    "TRAM",
+                                    "COACH",
+                                    "RAIL",
+                                    "INTERCITYRAIL",
+                                    "URBANRAIL",
+                                    "METRO",
+                                    "WATER",
+                                    "CABLEWAY",
+                                    "FUNICULAR",
+                                    "TAXI",
+                                    "SELFDRIVE",
+                                    "FOOT",
+                                    "BICYCLE",
+                                    "MOTORCYCLE",
+                                    "CAR",
+                                    "SHUTTLE",
+                                    "OTHER",
+                                    "PARKING",
+                                    "MOPED",
+                                    "STEP",
+                                    "FERRY"
+                                  ]
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "icon": {
+                                  "type": "string",
+                                  "description": "valid URL",
+                                  "format": "uri"
+                                },
+                                "destination": {
+                                  "type": "string",
+                                  "description": "default string, full names etc (length 0-200)",
+                                  "maxLength": 200
+                                },
+                                "travellers": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "description": "default string, full names etc (length 0-200)",
+                                    "maxLength": 200
+                                  }
+                                },
+                                "equipment": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "description": "default string, full names etc (length 0-200)",
+                                    "maxLength": 200
+                                  }
+                                },
+                                "boarding": {
+                                  "type": "object",
+                                  "properties": {
+                                    "onboardStayDuration": {
+                                      "description": "duration, ISO 8601 compliant",
+                                      "type": "string",
+                                      "pattern": "/^(-?)P(?=\\d|T\\d)(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)([DW]))?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?)?$/"
+                                    },
+                                    "delayedAlightingAllowed": {
+                                      "type": "boolean"
+                                    },
+                                    "overnightStayAllowed": {
+                                      "type": "boolean"
+                                    },
+                                    "earlyBoardingAllowed": {
+                                      "type": "boolean"
+                                    }
+                                  }
+                                },
+                                "accomodation": {
+                                  "type": "object",
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                      "description": "short string, display names (length 0-75)",
+                                      "maxLength": 75
+                                    },
+                                    "accomodationClass": {
+                                      "x-semantics": [
+                                        {
+                                          "transmodel": "CLASS OF USE"
+                                        }
+                                      ],
+                                      "type": "string",
+                                      "description": "A classification of fare and other service classes by category of user entitled to use them.",
+                                      "enum": [
+                                        "FIRST_CLASS",
+                                        "SECOND_CLASS",
+                                        "THIRD_CLASS",
+                                        "ECONOMY_CLASS",
+                                        "BUSINESS_CLASS",
+                                        "TURISTA",
+                                        "PREFERENTE",
+                                        "PREMIUM_CLASS",
+                                        "ANY",
+                                        "UNKNOWN"
+                                      ]
+                                    },
+                                    "accomodationGender": {
+                                      "type": "string",
+                                      "enum": [
+                                        "M",
+                                        "F",
+                                        "X",
+                                        "U"
+                                      ]
+                                    },
+                                    "sleeper": {
+                                      "type": "boolean"
+                                    },
+                                    "nuisances": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "enum": [
+                                          "no_smoking",
+                                          "smoking",
+                                          "mobile_phone_use_zone",
+                                          "mobile_phone_free_zone",
+                                          "family_area",
+                                          "breast_feeding_friendly",
+                                          "child_free_area",
+                                          "animals_allowed",
+                                          "no_animals"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "labels": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "MOST_FLEXIBLE",
+                                "NON_FLEXIBLE",
+                                "MOST_ECO_FRIENDLY"
+                              ]
+                            }
+                          },
+                          "distribution": {
+                            "type": "object",
+                            "x-semantics": [
+                              {
+                                "transmodel": "DISTRIBUTION VALIDITY PARAMETERS"
+                              }
+                            ],
+                            "properties": {
+                              "fulfilmentMethod": {
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "TYPE OF TRAVEL DOCUMENT"
+                                  }
+                                ],
+                                "type": "string",
+                                "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execute must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
+                                "enum": [
+                                  "BARCODE",
+                                  "QRCODE",
+                                  "AZTECCODE",
+                                  "REMOTE",
+                                  "DEEP_LINK",
+                                  "KEY",
+                                  "OTHER"
+                                ]
+                              },
+                              "distributionChannel": {
+                                "type": "string",
+                                "description": "default string, full names etc (length 0-200)",
+                                "maxLength": 200
+                              }
+                            }
+                          },
+                          "cancellation": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "CANCELLING"
+                              }
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "cancellable": {
+                                "type": "boolean",
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "allowed"
+                                  }
+                                ],
+                                "description": "is it possible to cancel this package?"
+                              },
+                              "fee": {
+                                "type": "object",
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "FARE PRICE"
+                                  }
+                                ],
+                                "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                                "required": [
+                                  "amount"
+                                ],
+                                "properties": {
+                                  "amount": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                  },
+                                  "taxPercentageUsed": {
+                                    "type": "number",
+                                    "description": "the travelled distance. Only if applicable.",
+                                    "format": "float",
+                                    "minimum": 0
+                                  },
+                                  "currencyCode": {
+                                    "type": "string",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "PRICE UNIT"
+                                      }
+                                    ],
+                                    "description": "ISO 4217 currency code",
+                                    "minLength": 3,
+                                    "maxLength": 3,
+                                    "pattern": "[a-zA-Z]{3}"
+                                  },
+                                  "vatCountryCode": {
+                                    "type": "string",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "COUNTRY"
+                                      }
+                                    ],
+                                    "description": "two-letter country codes according to ISO 3166-1",
+                                    "maxLength": 2,
+                                    "minLength": 2,
+                                    "pattern": "[A-Z]{2}"
+                                  }
+                                }
+                              },
+                              "feePercentage": {
+                                "description": "percentage of the offered price you have to pay when you cancel this purchased package",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              }
+                            }
+                          },
+                          "exchangeable": {
+                            "type": "boolean",
+                            "default": true,
+                            "x-semantics": [
+                              {
+                                "transmodel": "EXCHANGING.exchangeable"
+                              }
+                            ]
+                          },
+                          "exchanging": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "EXCHANGING"
+                              }
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "numberOfExchangesAllowed": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "refundable": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "REFUNDING"
+                              }
+                            ],
+                            "type": "boolean",
+                            "default": true
+                          },
+                          "transferrable": {
+                            "type": "boolean",
+                            "x-semantics": [
+                              {
+                                "transmodel": "TRANSFERABILITY.canTransfer"
+                              }
+                            ],
+                            "default": true
+                          },
+                          "transfer": {
+                            "x-semantics": [
+                              {
+                                "transmodel": "TRANSFERABILITY"
+                              }
+                            ],
+                            "type": "object",
+                            "properties": {
+                              "fee": {
+                                "type": "object",
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "FARE PRICE"
+                                  }
+                                ],
+                                "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                                "required": [
+                                  "amount"
+                                ],
+                                "properties": {
+                                  "amount": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                  },
+                                  "taxPercentageUsed": {
+                                    "type": "number",
+                                    "description": "the travelled distance. Only if applicable.",
+                                    "format": "float",
+                                    "minimum": 0
+                                  },
+                                  "currencyCode": {
+                                    "type": "string",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "PRICE UNIT"
+                                      }
+                                    ],
+                                    "description": "ISO 4217 currency code",
+                                    "minLength": 3,
+                                    "maxLength": 3,
+                                    "pattern": "[a-zA-Z]{3}"
+                                  },
+                                  "vatCountryCode": {
+                                    "type": "string",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "COUNTRY"
+                                      }
+                                    ],
+                                    "description": "two-letter country codes according to ISO 3166-1",
+                                    "maxLength": 2,
+                                    "minLength": 2,
+                                    "pattern": "[A-Z]{2}"
+                                  }
+                                }
+                              },
+                              "feePercentage": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "maximumNumberOfNamedUsers": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "paymentMethod": {
+                            "type": "object",
+                            "properties": {
+                              "paymentType": {
+                                "type": "string",
+                                "enum": [
+                                  "PREPAID",
+                                  "PAY_WHEN_FINISHED",
+                                  "SUBSCRIPTION_ONLY"
+                                ]
+                              },
+                              "deposit": {
+                                "type": "object",
+                                "x-semantics": [
+                                  {
+                                    "transmodel": "FARE PRICE"
+                                  }
+                                ],
+                                "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                                "required": [
+                                  "amount"
+                                ],
+                                "properties": {
+                                  "amount": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                                  },
+                                  "taxPercentageUsed": {
+                                    "type": "number",
+                                    "description": "the travelled distance. Only if applicable.",
+                                    "format": "float",
+                                    "minimum": 0
+                                  },
+                                  "currencyCode": {
+                                    "type": "string",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "PRICE UNIT"
+                                      }
+                                    ],
+                                    "description": "ISO 4217 currency code",
+                                    "minLength": 3,
+                                    "maxLength": 3,
+                                    "pattern": "[a-zA-Z]{3}"
+                                  },
+                                  "vatCountryCode": {
+                                    "type": "string",
+                                    "x-semantics": [
+                                      {
+                                        "transmodel": "COUNTRY"
+                                      }
+                                    ],
+                                    "description": "two-letter country codes according to ISO 3166-1",
+                                    "maxLength": 2,
+                                    "minLength": 2,
+                                    "pattern": "[A-Z]{2}"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "customFields": {
+                      "type": "object",
+                      "description": "dictionary for extra fields (bilatural agreements)",
+                      "additionalProperties": {
+                        "maxLength": 1000,
+                        "maxProperties": 20
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "x-externalDocs": {
+                "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+              },
+              "required": [
+                "href",
+                "rel"
+              ],
+              "properties": {
+                "rel": {
+                  "type": "string",
+                  "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+                },
+                "href": {
+                  "type": "string",
+                  "description": "valid URL",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "short string, display names (length 0-75)",
+                  "maxLength": 75
+                },
+                "method": {
+                  "type": "string",
+                  "description": "to indicate the http method.",
+                  "default": "GET",
+                  "enum": [
+                    "POST",
+                    "GET",
+                    "DELETE",
+                    "PATCH"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "the description of the external data source"
+                },
+                "body": {
+                  "type": "object",
+                  "description": "the (prefilled) body for the request"
+                },
+                "headers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "mandatory": {
+                  "description": "is this link informative, or must it be used?",
+                  "type": "boolean"
+                },
+                "hash": {
+                  "description": "to validate that the content of the link hasn't been changed.",
+                  "type": "string"
+                },
+                "expires": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                  "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "^(redressOptions)$"
+        },
+        "package": {
+          "type": "string",
+          "description": "default string, full names etc (length 0-200)",
+          "maxLength": 200
+        },
+        "offer": {
+          "type": "string",
+          "description": "default string, full names etc (length 0-200)",
+          "maxLength": 200
+        },
+        "guarantee": {
+          "type": "string",
+          "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+        }
+      }
+    },
+    "numberMatched": {
+      "type": "number"
+    },
+    "numberReturned": {
+      "type": "number"
+    },
+    "links": {
+      "type": "array",
+      "description": "actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources In case it is an alternative, specify clearly in the description what the financial consequences are.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-externalDocs": {
+          "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+        },
+        "required": [
+          "href",
+          "rel"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+          },
+          "href": {
+            "type": "string",
+            "description": "valid URL",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "description": "short string, display names (length 0-75)",
+            "maxLength": 75
+          },
+          "method": {
+            "type": "string",
+            "description": "to indicate the http method.",
+            "default": "GET",
+            "enum": [
+              "POST",
+              "GET",
+              "DELETE",
+              "PATCH"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "the description of the external data source"
+          },
+          "body": {
+            "type": "object",
+            "description": "the (prefilled) body for the request"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "mandatory": {
+            "description": "is this link informative, or must it be used?",
+            "type": "boolean"
+          },
+          "hash": {
+            "description": "to validate that the content of the link hasn't been changed.",
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time",
+            "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+            "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+          }
+        }
+      }
+    }
+  }
+}

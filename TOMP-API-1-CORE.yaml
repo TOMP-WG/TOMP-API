@@ -38,6 +38,9 @@ servers:
   - url: https://example.to.eu/tomp/v2
     description: example url
 
+security:
+  - BearerAuth: []
+
 tags:
   - name: core
     description: Core functions, used in multiple modules
@@ -70,10 +73,6 @@ paths:
       description: Retrieves package details
       x-semantics: 
       - transmodel: "TRAVEL PACKAGE REQUEST"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
@@ -221,7 +220,6 @@ components:
         - type
         - id
         - status
-        - specification
       properties:
         type:
           type: string
@@ -246,7 +244,7 @@ components:
           description: contains offered packages, so it is only applicable when the type is package. 
             When a package only contains one offer, this property should be neglected. All references in the offers
             refer to the products the packageProperties.
-            The offers can be retrieved using the /collections/offers/items?offerId={reference} endpoint.
+            Optional - the offers can be retrieved using the /collections/offers/items?offerId={reference} endpoint.
           type: array
           items:
             $ref: "#/components/schemas/summary"
@@ -799,7 +797,7 @@ components:
           type: string
           pattern: "^(card)$"
         cardType:
-          $ref: "#/components/schemas/cardType"
+          $ref: "#/components/schemas/cardTypeReference"
           description: the type of card, like a credit card, ID card, etc.
         cardNumber:
           $ref: "#/components/schemas/shortString"
@@ -813,8 +811,6 @@ components:
         endValidity:
           $ref: "#/components/schemas/date"
           description: this card is valid until this date
-        country:
-          $ref: "#/components/schemas/country"
 
     cardType:
       x-semantics:
@@ -1259,6 +1255,55 @@ components:
           items:
             description: visual ID (like license plate) of the asset that is used by this traveller
             $ref: "#/components/schemas/assetReference"
+
+    customer:
+      x-semantics:
+      - transmodel: TRANSPORT CUSTOMER
+      description: A user that wishes to purchase a package
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/customerReference"
+          description: The identifier the MP uses to identify the customer. Could be an external referenced ID, like a ABT account number
+        initials:
+          $ref: "#/components/schemas/tinyString"
+          description: Initials of the customer
+        firstName:
+          $ref: "#/components/schemas/shortString"
+          description: First name of the customer
+        lastName:
+          $ref: "#/components/schemas/shortString"
+          description: Last name of the customer
+        middleName:
+          $ref: "#/components/schemas/tinyString"
+          description: Middle name of the customer
+        prefix:
+          $ref: "#/components/schemas/tinyString"
+          description: prefix of the customer, like titles
+        postfix:
+          $ref: "#/components/schemas/tinyString"
+          description: postfix of the customer, like titles
+        phoneNumber:
+          $ref: "#/components/schemas/normalString"
+        email:
+          $ref: "#/components/schemas/normalString"
+          description: the email address of the customer
+        dateOfBirth:
+          $ref: "#/components/schemas/date"
+        placeOfBirth:
+          $ref: "#/components/schemas/shortString"
+        countryOfBirth:
+          $ref: "#/components/schemas/shortString"
+        address:
+          $ref: "#/components/schemas/place"
+        photo:
+          type: string
+          maxLength: 10000
+          x-format: byte-array
+        customFields:
+          $ref: "#/components/schemas/customProperties"
 
     fareStructure:
       x-semantics:
@@ -2151,6 +2196,9 @@ components:
         you can use this token to identify you at endpoints.
       scheme: bearer
       bearerFormat: JWT
+    BasicAuth:
+      type: http
+      scheme: basic
     OAuth:
       type: oauth2
       description: This flow facilitates to get access tokens based on username/password.

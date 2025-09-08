@@ -30,10 +30,6 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       x-semantics: 
@@ -56,10 +52,6 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -82,7 +74,6 @@ paths:
       security:
         - BearerAuth: []
         - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       x-semantics: 
@@ -105,7 +96,6 @@ paths:
       security:
         - BearerAuth: []
         - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       x-semantics: 
@@ -140,10 +130,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -161,10 +147,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -182,10 +164,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - purchase
       requestBody:
@@ -206,10 +184,6 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalLegId"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - after sales
       x-semantics: 
@@ -240,7 +214,7 @@ components:
                 - offer
                 properties:
                   customer:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
                   offer:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
                   paymentMethod:
@@ -280,7 +254,9 @@ components:
                 type: object
                 properties:
                   customer:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
+                  location:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
                   products:
                     type: array
                     items:
@@ -318,11 +294,14 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - assets
                 properties:
                   customer:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
                   assets:
                     type: array
+                    minItems: 1
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
                   distribution:
@@ -425,7 +404,7 @@ components:
         Content-Language:
           $ref: 'TOMP-API-1-CORE.yaml#/components/headers/contentLanguage'
       content:
-        application/json:
+        application/geo+json:
           schema:
             $ref: "#/components/schemas/travelDocuments"
 

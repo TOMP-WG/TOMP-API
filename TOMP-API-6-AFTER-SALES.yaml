@@ -31,7 +31,7 @@ paths:
           description: the id of the package that contains a purchased product
           required: true
           schema:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
         - name: offerId
           in: query
           description: the offer with a guarantee
@@ -62,10 +62,12 @@ paths:
           required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
+        - name: supportTicket
+          in: query
+          description: reference to support ticket(s) to claim redress options
+          explode: true
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"
       tags:
         - after sales
       x-semantics:
@@ -85,10 +87,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       x-semantics:
       - transmodel: REDRESS QUERY
       requestBody:
@@ -108,10 +106,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       requestBody:
         $ref: "#/components/requestBodies/redressOptionRequest"
       responses:
@@ -127,10 +121,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - after sales
       requestBody:
@@ -179,10 +169,12 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/paymentCategory"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
+        - name: onBehalveOf
+          in: headers
+          description: the identity of the reseller. Only to be used in a PSP (externalized payments) setup.
+          required: false
+          schema:
+            type: string
       tags:
         - after sales
       responses:
@@ -199,10 +191,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - after sales
       requestBody:
@@ -226,10 +214,6 @@ paths:
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - after sales
       x-semantics:
@@ -319,7 +303,7 @@ components:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
           required: true
       content:
-        application/json:
+        application/geo+json:
           schema:
             $ref: "#/components/schemas/redressOptions"
 
@@ -333,7 +317,7 @@ components:
         Version:
           $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
       content:
-        application/json:
+        application/geo+json:
           schema:
             $ref: "#/components/schemas/payments"    
 

@@ -1,0 +1,483 @@
+{
+  "x-semantics": [
+    {
+      "transmodel": "none"
+    }
+  ],
+  "description": "a list of offers.",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^(FeatureCollection)$"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "pattern": "^(Feature)$"
+          },
+          "id": {
+            "type": "string",
+            "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+          },
+          "properties": {
+            "x-semantics": [
+              {
+                "transmodel": "none"
+              }
+            ],
+            "allOf": [
+              {
+                "type": "object",
+                "x-semantics": [
+                  {
+                    "transmodel": "FARE PRICE"
+                  }
+                ],
+                "description": "an amount of money, usable in fares, fare calculations or in extra costs.",
+                "required": [
+                  "amount"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "This should be in the base unit as defined by the ISO 4217 currency code with the appropriate number of decimal places and omitting the currency symbol. e.g. if the price is in US Dollars the price would be 9.95. This is inclusive VAT"
+                  },
+                  "taxPercentageUsed": {
+                    "type": "number",
+                    "description": "the travelled distance. Only if applicable.",
+                    "format": "float",
+                    "minimum": 0
+                  },
+                  "currencyCode": {
+                    "type": "string",
+                    "x-semantics": [
+                      {
+                        "transmodel": "PRICE UNIT"
+                      }
+                    ],
+                    "description": "ISO 4217 currency code",
+                    "minLength": 3,
+                    "maxLength": 3,
+                    "pattern": "[a-zA-Z]{3}"
+                  },
+                  "vatCountryCode": {
+                    "type": "string",
+                    "x-semantics": [
+                      {
+                        "transmodel": "COUNTRY"
+                      }
+                    ],
+                    "description": "two-letter country codes according to ISO 3166-1",
+                    "maxLength": 2,
+                    "minLength": 2,
+                    "pattern": "[A-Z]{2}"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                    "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+                  },
+                  "category": {
+                    "x-semantics": [
+                      {
+                        "transmodel": "none"
+                      }
+                    ],
+                    "type": "string",
+                    "description": "The category of the journalled item <br> _ALL_ - for filtering purposes only<br>\n<h2>TO initiated payments </h2> To request these payments, use the notifications, send a notification containing the payment confirmation.<br> _DEPOSIT_ - a deposit, to refund, use _REFUND_<br> _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br> _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br> _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br> _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br> _FINE_ - a fine that arrived later on<br> _OTHER_ASSET_USED_ - additional costs for a replaced asset<br> _FARE_ - the normal costs of the purchased and executed leg(s)<br> _OTHER_ - unspecified<br>\n_CREDIT_ - generic CREDIT, e.g. for kick-backs <br> _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br> _REFUND_ - refund of the deposit or upfront paid fare<br> _REBATE_ - (partial) rebate of the fare<br> _REIMBURSEMENT_ - reimbursement of the fare<br>",
+                    "enum": [
+                      "ALL",
+                      "DAMAGE",
+                      "LOSS",
+                      "STOLEN",
+                      "EXTRA_USAGE",
+                      "REFUND",
+                      "REBATE",
+                      "REIMBURSEMENT",
+                      "FINE",
+                      "OTHER_ASSET_USED",
+                      "CREDIT",
+                      "VOUCHER",
+                      "DEPOSIT",
+                      "OTHER",
+                      "FARE"
+                    ]
+                  },
+                  "state": {
+                    "x-semantics": [
+                      {
+                        "transmodel": "none"
+                      }
+                    ],
+                    "type": "string",
+                    "description": "the state of the payment detail",
+                    "enum": [
+                      "TO_INVOICE",
+                      "INVOICING",
+                      "INVOICED"
+                    ]
+                  },
+                  "expirationDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                    "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                  },
+                  "sequenceId": {
+                    "type": "integer",
+                    "description": "for really small numbers (0-10)",
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "invoiceId": {
+                    "type": "string",
+                    "description": "short string, display names (length 0-75)",
+                    "maxLength": 75
+                  },
+                  "invoiceDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                    "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "description": "long string, memos etc (length 0-10.000)",
+                    "maxLength": 10000
+                  },
+                  "units": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "unitCategory": {
+                          "type": "string",
+                          "enum": [
+                            "DISTANCE",
+                            "DURATION",
+                            "USAGE",
+                            "OTHER"
+                          ]
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "enum": [
+                            "KM",
+                            "MILE",
+                            "HOURS",
+                            "MINUTES",
+                            "DAYS",
+                            "LITER",
+                            "KILOWATTHOUR",
+                            "CO2_COMPENSATION",
+                            "OTHER"
+                          ]
+                        },
+                        "amount": {
+                          "type": "number",
+                          "description": "the travelled distance. Only if applicable.",
+                          "format": "float",
+                          "minimum": 0
+                        }
+                      }
+                    }
+                  },
+                  "vatNumber": {
+                    "type": "string",
+                    "description": "short string, display names (length 0-75)",
+                    "maxLength": 75
+                  },
+                  "bankAccount": {
+                    "x-semantics": [
+                      {
+                        "transmodel": "none"
+                      }
+                    ],
+                    "type": "object",
+                    "description": "bank account",
+                    "additionalProperties": false,
+                    "required": [
+                      "name",
+                      "number"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "short string, display names (length 0-75)",
+                        "maxLength": 75
+                      },
+                      "number": {
+                        "type": "string",
+                        "description": "short string, display names (length 0-75)",
+                        "maxLength": 75
+                      },
+                      "country": {
+                        "type": "string",
+                        "x-semantics": [
+                          {
+                            "transmodel": "COUNTRY"
+                          }
+                        ],
+                        "description": "two-letter country codes according to ISO 3166-1",
+                        "maxLength": 2,
+                        "minLength": 2,
+                        "pattern": "[A-Z]{2}"
+                      },
+                      "bankIdentification": {
+                        "type": "string",
+                        "description": "short string, display names (length 0-75)",
+                        "maxLength": 75
+                      }
+                    }
+                  },
+                  "customFields": {
+                    "type": "object",
+                    "description": "dictionary for extra fields (bilatural agreements)",
+                    "additionalProperties": {
+                      "maxLength": 1000,
+                      "maxProperties": 20
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "x-externalDocs": {
+                "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+              },
+              "required": [
+                "href",
+                "rel"
+              ],
+              "properties": {
+                "rel": {
+                  "type": "string",
+                  "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+                },
+                "href": {
+                  "type": "string",
+                  "description": "valid URL",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "short string, display names (length 0-75)",
+                  "maxLength": 75
+                },
+                "method": {
+                  "type": "string",
+                  "description": "to indicate the http method.",
+                  "default": "GET",
+                  "enum": [
+                    "POST",
+                    "GET",
+                    "DELETE",
+                    "PATCH"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "the description of the external data source"
+                },
+                "body": {
+                  "type": "object",
+                  "description": "the (prefilled) body for the request"
+                },
+                "headers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "mandatory": {
+                  "description": "is this link informative, or must it be used?",
+                  "type": "boolean"
+                },
+                "hash": {
+                  "description": "to validate that the content of the link hasn't been changed.",
+                  "type": "string"
+                },
+                "expires": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                  "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "description": "this object contains the filter parameters",
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "^(paymentCollection)$"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+        },
+        "invoiceState": {
+          "x-semantics": [
+            {
+              "transmodel": "none"
+            }
+          ],
+          "type": "string",
+          "description": "the state of the payment detail",
+          "enum": [
+            "TO_INVOICE",
+            "INVOICING",
+            "INVOICED"
+          ]
+        },
+        "package": {
+          "type": "string",
+          "description": "default string, full names etc (length 0-200)",
+          "maxLength": 200
+        },
+        "category": {
+          "x-semantics": [
+            {
+              "transmodel": "none"
+            }
+          ],
+          "type": "string",
+          "description": "The category of the journalled item <br> _ALL_ - for filtering purposes only<br>\n<h2>TO initiated payments </h2> To request these payments, use the notifications, send a notification containing the payment confirmation.<br> _DEPOSIT_ - a deposit, to refund, use _REFUND_<br> _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br> _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br> _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br> _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br> _FINE_ - a fine that arrived later on<br> _OTHER_ASSET_USED_ - additional costs for a replaced asset<br> _FARE_ - the normal costs of the purchased and executed leg(s)<br> _OTHER_ - unspecified<br>\n_CREDIT_ - generic CREDIT, e.g. for kick-backs <br> _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br> _REFUND_ - refund of the deposit or upfront paid fare<br> _REBATE_ - (partial) rebate of the fare<br> _REIMBURSEMENT_ - reimbursement of the fare<br>",
+          "enum": [
+            "ALL",
+            "DAMAGE",
+            "LOSS",
+            "STOLEN",
+            "EXTRA_USAGE",
+            "REFUND",
+            "REBATE",
+            "REIMBURSEMENT",
+            "FINE",
+            "OTHER_ASSET_USED",
+            "CREDIT",
+            "VOUCHER",
+            "DEPOSIT",
+            "OTHER",
+            "FARE"
+          ]
+        }
+      }
+    },
+    "numberMatched": {
+      "type": "number"
+    },
+    "numberReturned": {
+      "type": "number"
+    },
+    "links": {
+      "type": "array",
+      "description": "actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources In case it is an alternative, specify clearly in the description what the financial consequences are.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-externalDocs": {
+          "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+        },
+        "required": [
+          "href",
+          "rel"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+          },
+          "href": {
+            "type": "string",
+            "description": "valid URL",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "description": "short string, display names (length 0-75)",
+            "maxLength": 75
+          },
+          "method": {
+            "type": "string",
+            "description": "to indicate the http method.",
+            "default": "GET",
+            "enum": [
+              "POST",
+              "GET",
+              "DELETE",
+              "PATCH"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "the description of the external data source"
+          },
+          "body": {
+            "type": "object",
+            "description": "the (prefilled) body for the request"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "mandatory": {
+            "description": "is this link informative, or must it be used?",
+            "type": "boolean"
+          },
+          "hash": {
+            "description": "to validate that the content of the link hasn't been changed.",
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time",
+            "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+            "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+          }
+        }
+      }
+    }
+  }
+}

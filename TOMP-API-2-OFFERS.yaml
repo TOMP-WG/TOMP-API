@@ -25,12 +25,12 @@ paths:
       operationId: searchOffers
       summary: "Search for offers"
       description: Returns offers based on travel specification, trip pattern, location, asset, product and user preferences.
+        In case of a shallow integration, can even be offered as an endpoint without authentication.
+      security:
+      - BearerAuth: []
+      - OpenData: []
       x-semantics: 
       - transmodel: STOP, COMMON, SINGLE, REPEATED FARE QUERY
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       parameters:
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -57,10 +57,6 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offerId"
-      security:
-        - BearerAuth: []
-        - OAuth: []
-        - OAuthPKI: []
       tags:
         - offer
       responses:
@@ -201,7 +197,7 @@ components:
             type: string
             pattern: "^(offer)$"
           properties:
-            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageProperties"
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/summary"
 
     offerCollectionProperties:
       allOf:
