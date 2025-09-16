@@ -15,7 +15,7 @@ tags:
     description: This part of the API facilitates communication from the TO to the MP.
 
 paths:
-  /processes/notification/execute:
+  /processes/notification/execution:
     post:
       operationId: postNotification
       summary: "Notification endpoint"
@@ -33,7 +33,7 @@ paths:
         default:
           $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/request-confirmation/execute:
+  /processes/request-confirmation/execution:
     post:
       operationId: postConfirmation
       summary: "Confirmation endpoint"
@@ -52,7 +52,7 @@ paths:
           description: Negative response on the request, details in the error object
           $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"          
 
-  /processes/request-payment/execute:
+  /processes/request-payment/execution:
     post:
       operationId: paymentRequest
       summary: "Payment request endpoint"

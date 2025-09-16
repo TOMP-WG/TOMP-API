@@ -22,7 +22,7 @@ tags:
       The result of each of these endpoints (except for the release) must contain an expiry date in the header.
 
 paths:
-  /processes/select-offers/execute:
+  /processes/select-offers/execution:
     post:
       operationId: selectOffersRequest
       summary: "Select offer(s) into a package"
@@ -85,7 +85,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/update-traveller/execute:
+  /processes/update-traveller/execution:
     post:
       operationId: updateTravellerRequest
       parameters:
@@ -103,7 +103,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/update-travel-specification/execute:
+  /processes/update-travel-specification/execution:
     post:
       operationId: updateTravelSpecificationRequest
       parameters:
@@ -121,7 +121,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/assign-asset/execute:
+  /processes/assign-asset/execution:
     post:
       operationId: assignAssetRequest
       parameters:
@@ -139,7 +139,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/assign-ancillary/execute:
+  /processes/assign-ancillary/execution:
     post:
       operationId: assignAncillaryRequest
       parameters:
@@ -157,7 +157,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"          
 
-  /processes/release-package/execute:
+  /processes/release-package/execution:
     post:
       operationId: releasePackageRequest
       summary: "Release the complete package"
@@ -174,7 +174,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/remove-offer/execute:
+  /processes/remove-offer/execution:
     post:
       operationId: removeOfferRequest
       summary: "Remove an offer from the package"

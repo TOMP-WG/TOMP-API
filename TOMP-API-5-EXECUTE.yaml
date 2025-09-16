@@ -12,17 +12,17 @@ info:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
   x-modules:
-    - execute
+    - execution
     
 tags:
-  - name: execute
+  - name: execution
     description: This part of the API facilitates changing operational parts of the trip, like starting, 
       stopping legs or initiate new legs from a product.
       For modifications of the package (travellers, assignment of assets (seats), ancillaries), 
       use the endpoint specified in the pre-sales module.
 
 paths:
-  /processes/{legOperation}-leg/execute:
+  /processes/{legOperation}-leg/execution:
     post:
       operationId: legOperation
       summary: "Perform an operation on a leg"
@@ -47,7 +47,7 @@ paths:
         - BearerAuth: []
         - OAuth: []
       tags:
-        - execute
+        - execution
       requestBody:
         $ref: "#/components/requestBodies/legRequest"
       responses:
@@ -56,7 +56,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/{assetOperation}-asset/execute:
+  /processes/{assetOperation}-asset/execution:
     post:
       operationId: assetOperation
       summary: "Perform an operation on a asset"
@@ -78,7 +78,7 @@ paths:
         - BearerAuth: []
         - OAuth: []
       tags:
-        - execute
+        - execution
       requestBody:
         $ref: "#/components/requestBodies/assetRequest"
       responses:
@@ -90,7 +90,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/{productOperation}-product/execute:
+  /processes/{productOperation}-product/execution:
     post:
       operationId: productOperation
       summary: "Perform an operation on a product"
@@ -109,7 +109,7 @@ paths:
         - BearerAuth: []
         - OAuth: []
       tags:
-        - execute
+        - execution
       requestBody:
         $ref: "#/components/requestBodies/productRequest"
       responses:
@@ -120,19 +120,19 @@ paths:
 
   # in PRE-SALES:
     # /collections/assets/items
-    # /processes/assign-asset/execute
+    # /processes/assign-asset/execution
     # /collections/ancillaries/items
-    # /processes/assign-ancillary/execute
-    # /processes/update-traveller/execute
-    # /processes/update-travel-specification/execute to update start or end time of a leg
+    # /processes/assign-ancillary/execution
+    # /processes/update-traveller/execution
+    # /processes/update-travel-specification/execution to update start or end time of a leg
 
   # IN PURCHASE:
     # /collections/travel-documents/items
 
   # IN AFTER-SALES:
     # /collections/redress-options/items for a specific traveller
-    # /processes/claim-redress-option/execute
-    # /processes/confirm-redress-option/execute
+    # /processes/claim-redress-option/execution
+    # /processes/confirm-redress-option/execution
 
 components:
   requestBodies:

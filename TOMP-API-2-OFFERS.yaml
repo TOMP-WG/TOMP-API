@@ -20,7 +20,7 @@ tags:
      sophisticated searches, the search-offers must be used. Each result must have an expiry-date in the header.
 
 paths:
-  /processes/search-offers/execute:
+  /processes/search-offers/execution:
     post:
       operationId: searchOffers
       summary: "Search for offers"

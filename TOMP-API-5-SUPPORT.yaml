@@ -37,7 +37,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/request-support/execute:
+  /processes/request-support/execution:
     post:
       operationId: requestSupport
       summary: "Create a support ticket"

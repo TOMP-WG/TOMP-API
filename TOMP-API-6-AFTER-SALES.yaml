@@ -78,7 +78,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/claim-redress-option/execute:
+  /processes/claim-redress-option/execution:
     post:
       operationId: redressOptionRequest
       description: redress options must be claimed & confirmed
@@ -97,7 +97,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/confirm-redress-option/execute:
+  /processes/confirm-redress-option/execution:
     post:
       operationId: confirmRedressOptionRequest
       description: confirm the claimed redress option
@@ -114,7 +114,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/refund-deposit/execute:
+  /processes/refund-deposit/execution:
     post:
       operationId: refundDepositRequest
       summary: "Request to refund a deposit"
@@ -183,7 +183,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/confirm-payment/execute:
+  /processes/confirm-payment/execution:
     post:
       operationId: confirmPaymentEntry
       summary: "Confirm a financial transaction"
@@ -201,7 +201,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/cancel-package/execute:
+  /processes/cancel-package/execution:
     post:
       operationId: cancelPackageOperation
       summary: "Cancel a package in confirmed state for (technical issues)."
@@ -418,7 +418,7 @@ components:
         _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br>
         _FINE_ - a fine that arrived later on<br>
         _OTHER_ASSET_USED_ - additional costs for a replaced asset<br>
-        _FARE_ - the normal costs of the purchased and executed leg(s)<br>
+        _FARE_ - the normal costs of the purchased and executiond leg(s)<br>
         _OTHER_ - unspecified<br>
 
         _CREDIT_ - generic CREDIT, e.g. for kick-backs <br>

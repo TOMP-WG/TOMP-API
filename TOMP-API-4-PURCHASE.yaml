@@ -20,7 +20,7 @@ tags:
     description: This part of the API facilitates purchasing offer(s), a package, a product or start the usage of an asset.
 
 paths:
-  /processes/purchase-offers/execute:
+  /processes/purchase-offers/execution:
     post:
       operationId: purchaseOffersRequest
       summary: "Perform an purchase of offer(s)"
@@ -42,7 +42,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/purchase-package/execute:
+  /processes/purchase-package/execution:
     post:
       operationId: purchasePackageRequest
       summary: "Perform an purchase of a package"
@@ -64,7 +64,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/purchase-product/execute:
+  /processes/purchase-product/execution:
     post:
       operationId: purchaseProductRequest
       summary: "Perform an purchase of a product"
@@ -86,7 +86,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/use-asset/execute:
+  /processes/use-asset/execution:
     post:
       operationId: useAssetRequest
       summary: "Request to use an asset"
@@ -123,7 +123,7 @@ paths:
                 "200":
                   description: Results received successfully        
 
-  /processes/rollback-purchase/execute:
+  /processes/rollback-purchase/execution:
     post:
       operationId: rollbackPurchaseRequest
       summary: "Rollback a purchase, before the rollbackExpiryTime has ended"
@@ -140,7 +140,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
 
-  /processes/confirm-purchase/execute:
+  /processes/confirm-purchase/execution:
     post:
       operationId: confirmPurchaseRequest
       summary: "Confirm the purchase, before the rollbackExpiryTime has ended"
@@ -157,7 +157,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"       
 
-  /processes/extend-expiry-time/execute:
+  /processes/extend-expiry-time/execution:
     post:
       operationId: extendExpiryTimeRequest
       summary: "Request additional time to complete the purchase"
@@ -194,7 +194,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  # /processes/release-package/execute is described in the PRE-SALES
+  # /processes/release-package/execution is described in the PRE-SALES
 
 components:
   requestBodies:
@@ -252,6 +252,8 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - products
                 properties:
                   customer:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
@@ -259,6 +261,7 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
                   products:
                     type: array
+                    minItems: 1
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
                   distribution:
