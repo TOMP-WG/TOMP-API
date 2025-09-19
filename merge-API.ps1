@@ -75,7 +75,18 @@ $join = -join("yaml-merge ", $join, " .\TOMP-API-1-CORE.yaml > .\TOMP-API-BOM.ya
 Write-Host $join
 Invoke-Expression $join
 
-Get-Content .\TOMP-API-BOM.yaml | Out-File .\TOMP-API.yaml -Encoding utf8
+#$content = Get-Content -Path .\TOMP-API-BOM.yaml -Raw
+#Set-Content -Path .\TOMP-API.yaml -Value $content -Encoding utf8
+
+$in  = '.\TOMP-API-BOM.yaml'
+$out = '.\TOMP-API.yaml'
+
+$text = Get-Content $in -Raw
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+$sw = New-Object System.IO.StreamWriter($out, $false, $utf8NoBom)
+$sw.Write($text)
+$sw.Close()
+
 Remove-Item .\TOMP-API-BOM.yaml
 
 Remove-Item -LiteralPath $path -Recurse -Force -Confirm:$false

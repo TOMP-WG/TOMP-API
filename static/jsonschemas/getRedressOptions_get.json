@@ -195,7 +195,7 @@
                             }
                           ],
                           "type": "string",
-                          "description": "The category of the journalled item <br> _ALL_ - for filtering purposes only<br>\n<h2>TO initiated payments </h2> To request these payments, use the notifications, send a notification containing the payment confirmation.<br> _DEPOSIT_ - a deposit, to refund, use _REFUND_<br> _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br> _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br> _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br> _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br> _FINE_ - a fine that arrived later on<br> _OTHER_ASSET_USED_ - additional costs for a replaced asset<br> _FARE_ - the normal costs of the purchased and executed leg(s)<br> _OTHER_ - unspecified<br>\n_CREDIT_ - generic CREDIT, e.g. for kick-backs <br> _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br> _REFUND_ - refund of the deposit or upfront paid fare<br> _REBATE_ - (partial) rebate of the fare<br> _REIMBURSEMENT_ - reimbursement of the fare<br>",
+                          "description": "The category of the journalled item <br> _ALL_ - for filtering purposes only<br>\n<h2>TO initiated payments </h2> To request these payments, use the notifications, send a notification containing the payment confirmation.<br> _DEPOSIT_ - a deposit, to refund, use _REFUND_<br> _DAMAGE_ - extra costs that must be paid by the MP due to damage to the asset or ancillaries<br> _LOSS_ - extra costs that must be paid by the MP due to loss of asset or ancillaries<br> _STOLEN_ - the asset (and ancillaries) are stolen and should be paid for<br> _EXTRA_USAGE_ - the asset is paid for in advance, additional usage must be paid for (can also be a refund when used less! The amount should be negative in that case)<br> _FINE_ - a fine that arrived later on<br> _OTHER_ASSET_USED_ - additional costs for a replaced asset<br> _FARE_ - the normal costs of the purchased and executiond leg(s)<br> _OTHER_ - unspecified<br>\n_CREDIT_ - generic CREDIT, e.g. for kick-backs <br> _VOUCHER_ - part of the fare that is covered by a voucher (no need to pay)<br> _REFUND_ - refund of the deposit or upfront paid fare<br> _REBATE_ - (partial) rebate of the fare<br> _REIMBURSEMENT_ - reimbursement of the fare<br>",
                           "enum": [
                             "ALL",
                             "DAMAGE",
@@ -707,7 +707,7 @@
                                 }
                               ],
                               "type": "string",
-                              "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execute must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
+                              "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execution must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
                               "enum": [
                                 "BARCODE",
                                 "QRCODE",
@@ -1626,7 +1626,7 @@
                       }
                     },
                     "offers": {
-                      "description": "contains offered packages, so it is only applicable when the type is package. When a package only contains one offer, this property should be neglected. All references in the offers refer to the products the packageProperties. The offers can be retrieved using the /collections/offers/items?offerId={reference} endpoint.",
+                      "description": "contains offered packages, so it is only applicable when the type is package. When a package only contains one offer, this property should be neglected. All references in the offers refer to the products the packageProperties. Optional - the offers can be retrieved using the /collections/offers/items?offerId={reference} endpoint.",
                       "type": "array",
                       "items": {
                         "type": "object",
@@ -1928,7 +1928,7 @@
                                   }
                                 ],
                                 "type": "string",
-                                "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execute must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
+                                "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execution must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
                                 "enum": [
                                   "BARCODE",
                                   "QRCODE",

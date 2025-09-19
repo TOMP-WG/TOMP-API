@@ -18,7 +18,7 @@
           "transmodel": "TRANSPORT CUSTOMER"
         }
       ],
-      "description": "A MaaS user that wishes to purchase a package, only use the fields required by purchase conditions",
+      "description": "A user that wishes to purchase a package",
       "type": "object",
       "required": [
         "id"
@@ -179,7 +179,6 @@
         "photo": {
           "type": "string",
           "maxLength": 10000,
-          "description": "base64 encoded",
           "x-format": "byte-array"
         },
         "customFields": {

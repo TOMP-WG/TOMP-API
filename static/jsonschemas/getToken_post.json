@@ -1,13 +1,12 @@
 {
   "type": "object",
+  "required": [
+    "access_token"
+  ],
   "properties": {
     "access_token": {
       "type": "string",
       "description": "The issued access token."
-    },
-    "refresh_token": {
-      "type": "string",
-      "description": "The optional refresh token."
     },
     "token_type": {
       "type": "string",

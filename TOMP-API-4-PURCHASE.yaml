@@ -112,8 +112,8 @@ paths:
           '{$request.body#/subscriber/successUri}':
             post:
               parameters:
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/rollbackExpires"
-                - $ref: "TOMP-API-1-CORE.yaml#/components/headers/signedDigest"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/rollbackExpires"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
               requestBody:
                 content:
                   application/json:
@@ -185,7 +185,7 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalLegId"
       tags:
-        - after sales
+        - purchase
       x-semantics: 
       - transmodel: FULFILMENT QUERY
       responses:

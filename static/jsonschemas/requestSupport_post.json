@@ -39,7 +39,7 @@
     },
     "supportType": {
       "type": "string",
-      "description": "these are the currently enlisted support requests<br> _BROKEN_DOWN_ The asset doesn't work anymore<br> _NOT_AT_LOCATION_ The asset isn't available at the specified time/location<br> _MISSING_AFTER_PAUSE_ The asset is missing (stolen?)<br> _NOT_CLEAN_ The asset is not clean<br> _NOT_AVAILABLE_ The asset is at the location, but unreachable<br> _UNABLE_TO_OPEN_ The asset cannot be unlocked (malfunctioning)<br> _UNABLE_TO_CLOSE_ The asset cannot be closed (malfunctioning)<br> _ACCIDENT_ Accident occurred<br> _OTHER_ unspecified<br> _REPORT_DAMAGE_ Oeps. Photo sent with slight damage<br>",
+      "description": "these are the currently enlisted support requests<br> _BROKEN_DOWN_ The asset doesn't work anymore<br> _NOT_AT_LOCATION_ The asset isn't available at the specified time/location<br> _MISSING_AFTER_PAUSE_ The asset is missing (stolen?)<br> _NOT_CLEAN_ The asset is not clean<br> _NOT_AVAILABLE_ The asset is at the location, but unreachable<br> _UNABLE_TO_OPEN_ The asset cannot be unlocked (malfunctioning)<br> _UNABLE_TO_CLOSE_ The asset cannot be closed (malfunctioning)<br> _ACCIDENT_ Accident occurred<br> _OTHER_ unspecified<br> _REPORT_DAMAGE_ Oeps. Photo sent with slight damage<br> _EVIDENCE_ Send evidence to the TO for redress functions<br>",
       "enum": [
         "BROKEN_DOWN",
         "NOT_AT_LOCATION",
@@ -50,7 +50,8 @@
         "UNABLE_TO_CLOSE",
         "ACCIDENT",
         "OTHER",
-        "REPORT_DAMAGE"
+        "REPORT_DAMAGE",
+        "EVIDENCE"
       ]
     },
     "context": {
@@ -114,7 +115,7 @@
     },
     "urls": {
       "type": "array",
-      "description": "urls to clarify the support request e.g. pictures showing damage",
+      "description": "urls to clarify the support request e.g. pictures showing damage or digital scans with evidence documents",
       "maxItems": 10,
       "items": {
         "type": "string",

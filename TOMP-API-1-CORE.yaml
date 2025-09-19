@@ -44,8 +44,6 @@ security:
 tags:
   - name: core
     description: Core functions, used in multiple modules
-  - name: discovery
-    description: URLS to comply to OGC, to describe the interface
 
 paths:
   /collections/datasources/items:

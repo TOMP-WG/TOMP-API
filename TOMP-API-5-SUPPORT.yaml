@@ -157,6 +157,7 @@ components:
             _ACCIDENT_ Accident occurred<br>
             _OTHER_ unspecified<br>
             _REPORT_DAMAGE_ Oeps. Photo sent with slight damage<br>
+            _REQUEST_ASSISTANCE_ request personal assistance, e.g. to get into the train<br>
             _EVIDENCE_ Send evidence to the TO for redress functions<br>
           enum: [ BROKEN_DOWN,
                   NOT_AT_LOCATION,
@@ -168,6 +169,7 @@ components:
                   ACCIDENT,
                   OTHER,
                   REPORT_DAMAGE,
+                  REQUEST_ASSISTANCE,
                   EVIDENCE
                 ]
                 

@@ -170,7 +170,7 @@ paths:
           schema:
             $ref: "#/components/schemas/paymentCategory"
         - name: onBehalveOf
-          in: headers
+          in: header
           description: the identity of the reseller. Only to be used in a PSP (externalized payments) setup.
           required: false
           schema:
