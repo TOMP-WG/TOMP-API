@@ -51,7 +51,7 @@ paths:
       security:
       - OpenData: []
       operationId: getDataSources
-      summary: "Retrieves all (external) datasources, that are used in requests and responses"
+      summary: "Retrieves all (external) datasources, used in requests and responses"
       description: Retrieves all datasources
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
@@ -70,7 +70,7 @@ paths:
       summary: "Get package details"
       description: Retrieves package details
       x-semantics: 
-      - transmodel: "TRAVEL PACKAGE REQUEST"
+      - transmodel: TRAVEL PACKAGE REQUEST
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
         - $ref: "#/components/parameters/authorization"
@@ -87,7 +87,7 @@ components:
   requestBodies:
     packageRequest:
       x-semantics: 
-        class: "transmodel:TRAVEL PACKAGE REQUEST"
+        transmodel: TRAVEL PACKAGE REQUEST
       content:
         application/json:
           schema:    
@@ -1030,9 +1030,13 @@ components:
       x-semantics:
       - transmodel: DISTRIBUTION VALIDITY PARAMETERS
       properties:
-        fulfilmentMethod:
+        accessType:
+          x-semantics:
+          - transmodel: TYPE OF TRAVEL DOCUMENT
           $ref: "#/components/schemas/typeOfTravelDocument"
         distributionChannel:
+          x-semantics:
+          - transmodel: DISTRIBUTION CHANNEL
           $ref: "#/components/schemas/normalString"
 
     summary:
@@ -1515,7 +1519,7 @@ components:
       x-semantics:
       - transmodel: TYPE OF TRAVEL DOCUMENT
       type: string
-      description: A way to open/access the asset. <br><br>
+      description: A way to open/access the asset OR a proof of travel rights<br><br>
         _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br>
         _QRCODE_ a QR code can be retrieved from the links<br>
         _AZTECCODE_ an Aztec code can be retrieved from the links<br>
