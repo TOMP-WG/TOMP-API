@@ -11,9 +11,9 @@ info:
   license:
     name: Apache 2.0
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  tags:
-  - name: discovery
-    description: URLS to comply to OGC, to describe the interface
+tags:
+- name: discovery
+  description: URLS to comply to OGC, to describe the interface
 
 paths:
   /:

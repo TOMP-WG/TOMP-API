@@ -113,6 +113,8 @@ paths:
             post:
               parameters:
                 - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/rollbackExpires"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
+                - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
                 - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
               requestBody:
                 content:

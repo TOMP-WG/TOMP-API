@@ -2135,6 +2135,14 @@ components:
         type: string
       required: false
 
+    rollbackExpires:
+      name: rollbackExpires
+      in: header
+      description: until this timestamp the rollback of the purchase is allowed to perform without financial consequences
+      schema:
+        $ref: "#/components/schemas/httpDate"
+      required: false
+
   headers:
     contentLanguage:
       description: The language/localization of user-facing content, One IETF BCP 47 (RFC 5646) language tag (nl-NL)
@@ -2180,7 +2188,7 @@ components:
       description: until this timestamp the rollback of the purchase is allowed to perform without financial consequences
       schema:
         $ref: "#/components/schemas/httpDate"
-      required: true
+      required: false
 
   securitySchemes:
     OpenData:
