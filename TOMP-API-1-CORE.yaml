@@ -1051,6 +1051,11 @@ components:
         price:
           $ref: "#/components/schemas/amountOfMoney"
 
+        estimatedPrice:
+          type: boolean
+          description: is this an estimated price; the final price is not known yet. 
+            Use the 'fare' link (ref /collections/fares/) in the links section get calculation details.
+
         products:
           type: array
           description: product names
