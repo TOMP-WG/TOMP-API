@@ -150,6 +150,9 @@ components:
             * _RESUMED_ leg is resumed  <br>
             * _ENDED_ leg is in finishing state  <br><br>
 
+            Financial notifications<br>
+            * _PRICE_FINAL_ the final price is known, the fare can be retrieved using the link in the links section<br>
+
             TO Process notifications<br>
             When a call to the TO responds with a 202 (accepted), an asynchronous process starts<br>
             and the TO will notify with SUCCESS or FAILURE to indicate that the process has been completed<br>
@@ -183,6 +186,8 @@ components:
               PAUSED,
               RESUMED,
               ENDED, 
+
+              PRICE_FINAL,
 
               SUCCESS,
               FAILURE,
