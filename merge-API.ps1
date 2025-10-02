@@ -25,6 +25,13 @@ If ($args[0] -eq 'all') {
     $ask = 'n'
 }
 
+If ($args[0] -eq 'mp') {
+    Write-Host "merge mp files"
+    $files = @()
+    $drafts = Get-ChildItem -Path "./MP modules/" -Filter "TOMP-API-*.yaml"
+    $ask = 'n'
+}
+
 Write-Host $files
 
 ForEach ($arg in $files){
@@ -52,6 +59,7 @@ ForEach ($arg in $files){
         if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {
             $dest = ".\work\$($arg)"
             $dest = $dest -replace "\\draft modules\\", "\\"
+            $dest = $dest -replace "\\MP modules\\", "\\"
             Write-Host $dest
             
             (gc .\$arg) -replace 'TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII $dest
@@ -63,10 +71,20 @@ ForEach ($arg in $files){
 }
 
 ForEach ($arg in $drafts){
-    $confirmation = Read-Host "Add $($arg) [y/N]"
+    If ($args[0] -eq 'mp') {
+        $confirmation = 'y'
+    }
+    else {
+        $confirmation = Read-Host "Add $($arg) [y/N]"
+    }
 
     if ($confirmation -eq 'y') {
-        (gc ".\draft modules\$arg") -replace '../TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII .\work\$arg
+        If ($args[0] -eq 'mp') {
+            (gc ".\MP modules\$arg") -replace '../TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII .\work\$arg
+        }
+        else {
+            (gc ".\draft modules\$arg") -replace '../TOMP-API-1-CORE.yaml', '' | Out-File -encoding ASCII .\work\$arg
+        }
         $join = -join($join, " .\work\", $arg );
     }
 }
@@ -80,6 +98,10 @@ Invoke-Expression $join
 
 $in  = '.\TOMP-API-BOM.yaml'
 $out = '.\TOMP-API.yaml'
+
+If ($args[0] -eq 'mp') {
+    $out = '.\TOMP-API-MP.yaml'
+}
 
 $text = Get-Content $in -Raw
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
