@@ -236,7 +236,7 @@ components:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
                   age:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
-                    description: Age of the traveler, may be approximate
+                    description: Age of the traveller, may be approximate
                   fullName:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
                     description: the name of the traveller, can be used to validate against ID cards

@@ -464,10 +464,10 @@ components:
         _NOT_STARTED_ the leg is not started, initial state<br>
         _PREPARING_ the _PREPARE_ operation has been received<br>
         _READY_TO_USE_ the leg is ready to use<br>
-        _IN_USE_ the travelers are on their way<br>
+        _IN_USE_ the travellers are on their way<br>
         _PAUSED_ the asset is paused<br>
         _ENDING_ the end-leg request is received, the offboarding process has is started<br>
-        _ENDED_ the travelers have arrived at their destination, leg is final<br>
+        _ENDED_ the travellers have arrived at their destination, leg is final<br>
         _ISSUE_REPORTED_ due to an issue, there is (temporarily) no progress to report, when the issue isn't solved, this is a final state<br>
         _CANCELLED_ the leg has been cancelled, before execution<br>
         _ABENDED_ the leg is abnormally ended (e.g. due to an issue)
@@ -1217,7 +1217,7 @@ components:
       properties:
         isValidated:
           type: boolean
-          description: Whether this traveler's identity and properties have been verified by the MaaS provider
+          description: Whether this traveller's identity and properties have been verified by the MaaS provider
 
         # in case of non-anonymous travellers (INDIVIDUAL TRAVELLER)
         name:
@@ -1225,7 +1225,7 @@ components:
         age:
           $ref: "#/components/schemas/shortInt"
           minimum: 0
-          description: Age of the traveler, may be approximate
+          description: Age of the traveller, may be approximate
         fullName:
           $ref: "#/components/schemas/normalString"
           description: the name of the traveller, can be used to validate against ID cards

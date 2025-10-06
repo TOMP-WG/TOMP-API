@@ -505,6 +505,7 @@ components:
       required:
         - validity
         - travelDocumentType
+        - type
       properties:
         id:
           type: string
@@ -513,6 +514,14 @@ components:
           pattern: "^(travelDocument)$"
         validity:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTimeRange"
+        package:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+        leg:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+        asset:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+        traveller:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
         travelDocumentType:
           $ref: "TOMP-API-1-CORE.yaml#/components/schemas/typeOfTravelDocument"
       oneOf:
