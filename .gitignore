@@ -10,3 +10,4 @@ tools/create_endpoint_jsonschema/Scripts/*
 tools/filter_endpoints/Lib/*
 tools/filter_endpoints/Scripts/*
 TOMP-API-MP.yaml
+tools/filter_endpoints/*.yaml
