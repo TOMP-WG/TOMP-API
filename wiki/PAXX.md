@@ -1,0 +1,9 @@
+# Description
+PAXX is a MaaS provider app and multimodal trip planner. The app will not just give advice but also let users book and can show access tokens where applicable. Among the travel modes we use in the planner will be various forms of shared mobility. In the trip planner we will include some option for staying somewhere for a while, which could be in the middle of a trip using shared mobility (e.g. go to an appointment for an hour and then go back).
+
+# Requirements w.r.t. shared mobility
+In the planning phase we want to show the user many different options, both for the route they might take and for the brand/type of shared mobility they may use. For this we need the nearby vehicles available given the A->B trip and associated departure and arrival time (or A->? trip for floating bicycles).
+This could be immediate availability or for some time in the future, in which case we could use options like 1) paying more to reserve a vehicle at the specified time or 2) being able to give a likelihood of a vehicle being available at the given time.
+
+<p>For booking we don't have any further requirements on the TSP to know anything about the entire trip we're planning, only the starting location, destination point/ area/ station and the time at each - essentially just the leg in question. We also see bookings also as not for a specific vehicle but for any vehicle at the requested location that fulfils the user's requirements.
+We would like the process to be as smooth as possible, so the web hooks for availability updates and booking stages are important so shown trips are actually bookable. Booking should also be able to take place without a complex sign-up process, required deposit or long background checks for the selected TSP(s). In our view this should be solved with the universal MaaS user id's and shared fraud list, and not be something that happens on a per-booking basis.

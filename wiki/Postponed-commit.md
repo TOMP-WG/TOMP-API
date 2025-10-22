@@ -1,0 +1,5 @@
+[home](https://github.com/TOMP-WG/TOMP-API/wiki/) > [Planning phase](Planning-phase.md) > [Postponed commit](Postponed-commit.md)  
+
+Postponed commit is an important condition, because it has implications to the work flow. Postponed commit should be added whenever the TO cannot directly guarantee the leg. For instance, a taxi company, who needs an acceptance of a cab driver before the leg can be committed. This condition is also reflected in the scenarios field of the GET /operator/meta, but this implies that all planned trips are 'postponed commits'. In some cases there is a mix: fx if the taxi company is guaranteeing legs in the inner city, while it takes the 'postponed commit' approach in the outskirts. 
+
+The postponed commit scenario is handled in the [Booking-phase](Booking-phase.md), but if you use this scenario, add the conditionPostponedCommit to the result of the planning (in both cases, booking-intent=true and booking-intent=false), to notify the MP of the TO's behaviour.
