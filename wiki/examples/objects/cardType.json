@@ -1,0 +1,10 @@
+{
+  "type": "cardType",
+  "id": "identifier",
+  "cardCategory": "DISCOUNT",
+  "subType": "example-string",
+  "modes": [
+    "AIR",
+    "AIR"
+  ]
+}

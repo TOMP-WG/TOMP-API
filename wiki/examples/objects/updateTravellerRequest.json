@@ -1,0 +1,8 @@
+{
+  "inputs": {
+    "traveller": "example-string",
+    "package": "example-string",
+    "age": 0,
+    "fullName": "example-string"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "title": "example-string",
+  "description": "example-string",
+  "keywords": [
+    "example-string",
+    "example-string"
+  ],
+  "schema": {},
+  "minOccurs": 1,
+  "maxOccurs": "example-string"
+}

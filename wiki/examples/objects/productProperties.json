@@ -1,0 +1,10 @@
+{
+  "id": "identifier",
+  "type": "product",
+  "name": "example-string",
+  "description": "example-string",
+  "parts": [
+    "example-string",
+    "example-string"
+  ]
+}

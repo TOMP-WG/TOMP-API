@@ -1,0 +1,33 @@
+{
+  "products": [
+    {
+      "id": "identifier",
+      "type": "product",
+      "name": "example-string",
+      "description": "example-string",
+      "parts": []
+    },
+    {
+      "id": "identifier",
+      "type": "product",
+      "name": "example-string",
+      "description": "example-string",
+      "parts": []
+    }
+  ],
+  "places": [],
+  "ancillaries": [
+    {
+      "id": "identifier",
+      "type": "ancillary",
+      "name": "example-string",
+      "description": "example-string"
+    },
+    {
+      "id": "identifier",
+      "type": "ancillary",
+      "name": "example-string",
+      "description": "example-string"
+    }
+  ]
+}

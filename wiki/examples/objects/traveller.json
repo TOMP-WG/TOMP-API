@@ -1,0 +1,15 @@
+{
+  "type": "traveller",
+  "id": "identifier",
+  "characteristics": {
+    "isValidated": true,
+    "name": "example-string",
+    "age": 0
+  },
+  "requirements": {
+    "mode": "AIR",
+    "subMode": "example-string",
+    "class": "FIRST_CLASS"
+  },
+  "profile": "example-string"
+}

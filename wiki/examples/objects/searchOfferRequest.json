@@ -1,0 +1,42 @@
+{
+  "type": "searchOffer",
+  "specification": "example-string",
+  "requirements": {
+    "mode": "AIR",
+    "subMode": "example-string",
+    "class": "FIRST_CLASS"
+  },
+  "travellers": [
+    {
+      "type": "traveller",
+      "id": "identifier",
+      "characteristics": {
+        "isValidated": null,
+        "name": null,
+        "age": null
+      },
+      "requirements": {
+        "mode": null,
+        "subMode": null,
+        "class": null
+      },
+      "profile": "example-string"
+    },
+    {
+      "type": "traveller",
+      "id": "identifier",
+      "characteristics": {
+        "isValidated": null,
+        "name": null,
+        "age": null
+      },
+      "requirements": {
+        "mode": null,
+        "subMode": null,
+        "class": null
+      },
+      "profile": "example-string"
+    }
+  ],
+  "places": []
+}

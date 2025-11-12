@@ -1,0 +1,8 @@
+{
+  "inputs": {
+    "package": "example-string",
+    "leg": "example-string",
+    "startTime": "2024-01-15T10:30:00Z",
+    "endTime": "2024-01-15T10:30:00Z"
+  }
+}

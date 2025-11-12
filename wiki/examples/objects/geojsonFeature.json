@@ -1,0 +1,27 @@
+{
+  "type": "Feature",
+  "properties": {
+    "type": "example-string",
+    "id": "identifier"
+  },
+  "id": "identifier",
+  "geometry": {
+    "type": "Point|LineString|Polygon|MultiPolygon"
+  },
+  "links": [
+    {
+      "href": "https://example.com",
+      "rel": "example-string",
+      "type": "example-string",
+      "method": "POST",
+      "description": "example-string"
+    },
+    {
+      "href": "https://example.com",
+      "rel": "example-string",
+      "type": "example-string",
+      "method": "POST",
+      "description": "example-string"
+    }
+  ]
+}

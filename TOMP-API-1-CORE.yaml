@@ -144,7 +144,7 @@ components:
         Content-Language:
           $ref: "#/components/headers/contentLanguage"
         Expires:
-          description: this field MUST be there whenever the package hasn't been purchased.
+          description: this field MUST be there whenever the package hasn`t been purchased.
           schema:
             $ref: "#/components/schemas/httpDate"
           required: false
@@ -634,8 +634,10 @@ components:
 
     ancillary:
       type: object
+      required:
+      - id
       x-semantics:
-      - transmodel: ANCILLARY PRODUCT (?)
+      - transmodel: ANCILLARY PRODUCT
       properties:
         type: 
           type: string
@@ -862,7 +864,6 @@ components:
       description: driver or usage license for a specific user. Contains the number and the assetType you're allowed to operate (e.g. driver license for CAR)
       required:
         - number
-        - type
       properties:
         type:
           type: string
@@ -879,13 +880,13 @@ components:
       x-semantics:
       - transmodel: TYPE OF DRIVER PERMIT
       type: object
-      description: A category of license to use a certain asset class
+      description: A category of license to use a certain asset class.
       required:
-        - mode
-        - type
+        - modes
       properties:
         type:
           type: string
+          description: required when delivered in /collections/license-types/items.
           pattern: "^(licenseType)$"
         modes:
           type: array
@@ -1774,9 +1775,11 @@ components:
           description: is this link informative, or must it be used?
           type: boolean
         hash:
-          description: to validate that the content of the link hasn't been changed.
+          description: to validate that the content of the link hasn`t been changed.
           type: string
         expires:
+          $ref: "#/components/schemas/dateTime"
+        availableFrom:
           $ref: "#/components/schemas/dateTime"
 
     # complex data types
@@ -2131,7 +2134,7 @@ components:
       name: publicKey
       in: header
       description: the public key of the sending party, can be used to validate the signed digest (it should deliver the digest)
-      x-example: '{"certificate": "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...\n-----END CERTIFICATE-----"}'
+      x-example: { "certificate": "-----BEGIN CERTIFICATE-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...-----END CERTIFICATE-----" }
       schema:
         type: string
       required: false

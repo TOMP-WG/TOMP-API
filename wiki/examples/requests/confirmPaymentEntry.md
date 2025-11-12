@@ -1,0 +1,8 @@
+```json
+{
+  "inputs": {
+    "paymentId": "string"
+  }
+}
+```
+

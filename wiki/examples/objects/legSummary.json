@@ -1,0 +1,10 @@
+{
+  "mode": "AIR",
+  "name": "example-string",
+  "icon": "https://example.com",
+  "destination": "example-string",
+  "travellers": [
+    "example-string",
+    "example-string"
+  ]
+}

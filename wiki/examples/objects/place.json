@@ -1,0 +1,7 @@
+{
+  "id": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+  "addressLine1": "example-string",
+  "type": "place",
+  "addressLine2": "example-string",
+  "street": "example-string"
+}

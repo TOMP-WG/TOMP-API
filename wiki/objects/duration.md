@@ -1,0 +1,14 @@
+# duration
+
+duration, ISO 8601 compliant
+
+**Type:** `string`
+
+---
+
+## Example
+
+```json
+"/-?P?=\\d|T\\d?:\\d+Y??:\\d+M??:\\d+[DW]??:T?:\\d+H??:\\d+M??:\\d+?:\\.\\d+?S??/"
+```
+

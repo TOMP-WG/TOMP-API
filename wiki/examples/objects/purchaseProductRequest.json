@@ -1,0 +1,23 @@
+{
+  "inputs": {
+    "products": [
+      "example-string"
+    ],
+    "customer": {
+      "id": "identifier",
+      "initials": "example-string",
+      "firstName": "example-string",
+      "lastName": "example-string"
+    },
+    "location": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+    "distribution": {
+      "accessType": "BARCODE",
+      "distributionChannel": "example-string"
+    }
+  },
+  "subscriber": {
+    "successUri": "https://example.com",
+    "inProgressUri": "https://example.com",
+    "failedUri": "https://example.com"
+  }
+}

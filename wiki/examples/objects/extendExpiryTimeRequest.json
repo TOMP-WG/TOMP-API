@@ -1,0 +1,12 @@
+{
+  "inputs": {
+    "package": "example-string",
+    "reason": "PURCHASE_PENDING",
+    "origin": "TO"
+  },
+  "subscriber": {
+    "successUri": "https://example.com",
+    "inProgressUri": "https://example.com",
+    "failedUri": "https://example.com"
+  }
+}

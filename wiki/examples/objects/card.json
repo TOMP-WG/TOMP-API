@@ -1,0 +1,8 @@
+{
+  "type": "card",
+  "cardType": "example-string",
+  "cardNumber": "example-string",
+  "description": "example-string",
+  "additionalNumber": "example-string",
+  "endValidity": "full-date"
+}

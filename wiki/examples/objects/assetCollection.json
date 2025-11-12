@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "asset",
+        "visualId": "Virtual Bingo"
+      },
+      "id": "775574ea-1522-404e-be99-a6227562f8d6",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [52.3429,31.3429]
+      },
+      "links": [
+        {
+          "href": "https://example.com/tomp/v2/processes/use-asset/execution",
+          "rel": "use-asset",
+          "type": "application/geo+json",
+          "method": "POST",
+          "description": "start using this asset"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "station"
+      },
+      "id": "BrooklinStreet",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.342,-13.3492]
+      }
+    }
+  ],
+  "properties": {
+    "type": "assetCollection"
+  }
+}

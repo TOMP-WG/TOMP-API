@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "identifier",
+      "type": "Feature",
+      "properties": {
+        "type": null,
+        "id": null,
+        "packageState": null
+      }
+    },
+    {
+      "id": "identifier",
+      "type": "Feature",
+      "properties": {
+        "type": null,
+        "id": null,
+        "packageState": null
+      }
+    }
+  ],
+  "properties": {
+    "type": "redressOptions",
+    "package": "example-string",
+    "offer": "example-string"
+  },
+  "numberMatched": 3.14
+}

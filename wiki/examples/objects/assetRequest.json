@@ -1,0 +1,13 @@
+{
+  "inputs": {
+    "asset": "example-string",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "package": "example-string",
+    "leg": "example-string"
+  },
+  "subscriber": {
+    "successUri": "https://example.com",
+    "inProgressUri": "https://example.com",
+    "failedUri": "https://example.com"
+  }
+}

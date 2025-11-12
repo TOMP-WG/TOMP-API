@@ -1,0 +1,19 @@
+{
+  "amount": 3.14,
+  "taxPercentageUsed": 21,
+  "currencyCode": "EUR",
+  "elements": [
+    {
+      "amount": 3.14,
+      "type": "FIXED"
+    },
+    {
+      "amount": 0.21,
+      "type": "FLEX",
+      "units": "KM",
+      "amountOfUnits": 1
+    }
+  ],
+  "estimated": true,
+  "description": "Simple fare (21cts/km), with start tariff"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "identifier",
+  "specification": {
+    "type": "travelSpecification",
+    "from": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+    "via": []
+  },
+  "price": {
+    "amount": 3.14,
+    "taxPercentageUsed": 0,
+    "currencyCode": "[a-zA-Z]{3}",
+    "vatCountryCode": "[A-Z]{2}"
+  }
+}

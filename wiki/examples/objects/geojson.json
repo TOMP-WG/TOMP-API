@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "type": null,
+        "id": null
+      },
+      "id": "identifier",
+      "geometry": {
+        "type": null
+      },
+      "links": []
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": null,
+        "id": null
+      },
+      "id": "identifier",
+      "geometry": {
+        "type": null
+      },
+      "links": []
+    }
+  ],
+  "properties": {
+    "type": "example-string",
+    "id": "identifier",
+    "definitions": {
+      "products": [],
+      "places": [],
+      "ancillaries": []
+    }
+  }
+}

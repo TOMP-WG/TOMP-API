@@ -1,0 +1,13 @@
+{
+  "supportType": "BROKEN_DOWN",
+  "type": "supportTicket",
+  "location": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "id": "identifier",
+  "status": "ISSUE_REQUESTED",
+  "context": {
+    "asset": "example-string",
+    "leg": "example-string",
+    "product": "example-string"
+  }
+}

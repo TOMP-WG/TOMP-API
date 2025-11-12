@@ -46,7 +46,7 @@ paths:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
         - name: guaranteeId
           in: query
-          description: the guarantee that haven't been met
+          description: the unfulfilled guarantee 
           required: false
           schema:
             $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortString"
@@ -269,8 +269,8 @@ components:
                 properties:
                   package:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
-                  offer:
-                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
 
     confirmPaymentRequest:
       x-semantics:
@@ -284,6 +284,8 @@ components:
             properties:
               inputs:
                 type: object
+                required:
+                - paymentId
                 properties:
                   paymentId:
                     $ref: "TOMP-API-1-CORE.yaml#/components/schemas/uuid"                    

@@ -16,8 +16,7 @@ info:
     
 tags:
   - name: offer
-    description: This part of the API facilitates in supplying offers. Offers can be obtained in a simple way (the GET), for more 
-     sophisticated searches, the search-offers must be used. Each result must have an expiry-date in the header.
+    description: This part of the API facilitates in supplying offers.
 
 paths:
   /processes/search-offers/execution:

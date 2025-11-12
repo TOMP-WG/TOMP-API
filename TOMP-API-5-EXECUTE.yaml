@@ -178,6 +178,8 @@ components:
                     minItems: 1
                     items:
                       $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"                     
+                  class:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/classOfUse"
 
     assetRequest:
       x-semantics:

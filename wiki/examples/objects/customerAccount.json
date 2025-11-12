@@ -1,0 +1,10 @@
+{
+  "id": "identifier",
+  "customer": {
+    "id": "identifier",
+    "initials": "example-string",
+    "firstName": "example-string",
+    "lastName": "example-string"
+  },
+  "creationDate": "2024-01-15T10:30:00Z"
+}

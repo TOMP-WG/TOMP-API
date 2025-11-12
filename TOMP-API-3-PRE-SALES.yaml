@@ -44,7 +44,7 @@ paths:
   /collections/assets/items:
     get:
       operationId: requestAssets
-      summary: "Request the assets available for a leg"
+      summary: "Request available assets for a leg"
       x-semantics: 
       - transmodel: TRAVEL PACKAGE SPOT AVAILABILITY QUERY
       parameters:
@@ -66,7 +66,7 @@ paths:
   /collections/ancillaries/items:
     get:
       operationId: requestAncillaries
-      summary: "Request the ancillaries available for a leg"
+      summary: "Request available ancillaries for a leg"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
@@ -93,6 +93,7 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
+      summary: update details of a traveller
       x-semantics:
       - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
@@ -111,6 +112,7 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
+      summary: update start/end location or start/end time
       x-semantics:
       - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
@@ -129,6 +131,7 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
+      summary: Assign an asset to a package (and a leg). It could also replace another asset or remove one        
       x-semantics: 
       - transmodel: TRAVEL PACKAGE SPOT RESERVATION QUERY, TRAVEL PACKAGE SPOT CANCELLATION QUERY, TRAVEL PACKAGE ALTERATION QUERY 
       requestBody:
@@ -147,6 +150,7 @@ paths:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
+      summary: Assign an ancillary to a package (and a leg). It could also replace another ancillary or remove one        
       x-semantics: 
       - transmodel: TRAVEL PACKAGE ALTERATION QUERY
       requestBody:
@@ -449,6 +453,8 @@ components:
                   $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillary"
         properties:
           type: object
+          required:
+          - type
           additionalProperties: true
           properties:
             type:
