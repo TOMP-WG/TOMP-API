@@ -48,7 +48,7 @@ To begin implementing TOMP-API:
 
 1. **Documentation**: The latest version of the API is available on [SwaggerHub](https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/). 
 2. **Blueprint**: We've written new ones for v2, per mode: [Blue print v2](https://github.com/TOMP-WG/TOMP-API/tree/master/documents)
-3. **Wiki**: Explore the [TOMP-API Wiki](https://github.com/TOMP-WG/TOMP-API/wiki/) for implementation guidance.
+3. **Wiki**: Explore the [TOMP-API Wiki](/wiki/home.md) for implementation guidance.
 4. **code-snippets**: there are some code snippets (mostly Python available to speed up your implementation).
 5. **static output**: we already prepared all static output from some endpoints (meta-data).
 
