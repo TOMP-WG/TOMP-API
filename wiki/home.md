@@ -1,3 +1,5 @@
+[home](home.md)
+
 # TOMP-API
 
 Welcome to the TOMP-API wiki pages. In this wiki you will find all detailed information about all the modules, endpoints and concepts used in the TOMP-API, but be aware of the fact that you'll probably only need a small selection of it.
