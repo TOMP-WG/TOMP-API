@@ -47,8 +47,8 @@ stateDiagram-v2
     OFFERED --> PENDING : purchase-offer
     PENDING --> CONFIRMED : confirm-purchase
     PENDING --> ROLLBACK : rollback-purchase
-    PENDING --> EXPIRED : timeout, mandatory confirm link
-    PENDING --> CONFIRMED : timeout, optional <br> confirm link <br> or no confirm link
+    PENDING --> EXPIRED : timeout, <br>mandatory confirm link
+    PENDING --> CONFIRMED : timeout, <br>optional confirm link
 ```
 
 | state | rel | end-state | href | remarks | |
@@ -67,8 +67,8 @@ stateDiagram-v2
     [*] --> OFFERED
     OFFERED --> OFFERED : pre sales operation
     OFFERED --> RELEASED : release offer
-    OFFERED --> CONFIRMED : purchase package
-    OFFERED --> PENDING : purchase package
+    OFFERED --> CONFIRMED : purchase package<br>continue flow 1
+    OFFERED --> PENDING : purchase package<br>continue flow 2
     OFFERED --> EXPIRED : timeout
 ```
 
