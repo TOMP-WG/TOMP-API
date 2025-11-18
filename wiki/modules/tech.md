@@ -1,10 +1,4 @@
-# tech module
-
-technical functions of the API, also used in dataspaces
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ technical functions of the API, also used in dataspaces
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET /capabilities -> <a href="../objects/capabilitiesResponse.md">capabilitiesResponse</a></h3><div style="margin-left:20px"><i>data spaces capabilities check</i><br>data space compliancy
+</details></span>
+
+# tech module
+
+technical functions of the API, also used in dataspaces
+
+<h3>GET /capabilities -> <a href="../objects/capabilitiesResponse.md">capabilitiesResponse</a></h3><div style="margin-left:20px"><i>data spaces capabilities check</i><br>data space compliancy
 
 <details><summary><i>Parameters</i></summary>
 

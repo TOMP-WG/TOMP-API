@@ -1,10 +1,4 @@
-# discovery module
-
-URLS to comply to OGC, to describe the interface
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ URLS to comply to OGC, to describe the interface
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET / -> <a href="../objects/landingPage.md">landingPage</a></h3><div style="margin-left:20px"><i>Landing page</i><br>Gives a (technical & human readable) output describing how this API must be used. If  the parameter f=html is supplied, a human readable page must be responded.
+</details></span>
+
+# discovery module
+
+URLS to comply to OGC, to describe the interface
+
+<h3>GET / -> <a href="../objects/landingPage.md">landingPage</a></h3><div style="margin-left:20px"><i>Landing page</i><br>Gives a (technical & human readable) output describing how this API must be used. If  the parameter f=html is supplied, a human readable page must be responded.
 
 <details><summary><i>Parameters</i></summary>
 

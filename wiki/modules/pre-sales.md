@@ -1,10 +1,4 @@
-# pre sales module
-
-Module that can be used 'pre-sales'; in the pre-purchase state. Calling one of these endpoints, will put the package in a pre-purchased state (might reserve resources). The package must be released (when the intention of purchasing it is removed) or it expires. The result of each of these endpoints (except for the release) must contain an expiry date in the header.
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ Module that can be used 'pre-sales'; in the pre-purchase state. Calling one of t
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET /collections/ancillaries/items?packageId=...&legId=... -> <a href="../objects/ancillaryCollection.md">ancillaryCollection</a></h3><div style="margin-left:20px"><i>Request available ancillaries for a leg</i><br><details><summary><i>Parameters</i></summary>
+</details></span>
+
+# pre sales module
+
+Module that can be used 'pre-sales'; in the pre-purchase state. Calling one of these endpoints, will put the package in a pre-purchased state (might reserve resources). The package must be released (when the intention of purchasing it is removed) or it expires. The result of each of these endpoints (except for the release) must contain an expiry date in the header.
+
+<h3>GET /collections/ancillaries/items?packageId=...&legId=... -> <a href="../objects/ancillaryCollection.md">ancillaryCollection</a></h3><div style="margin-left:20px"><i>Request available ancillaries for a leg</i><br><details><summary><i>Parameters</i></summary>
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|

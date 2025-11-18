@@ -1,10 +1,4 @@
-# customer management module
-
-the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly manage the customer account on the TO side .
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly m
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>POST /collections/customers/items <a href="../objects/customer.md">customer</a> -> <a href="../objects/customerAccount.md">customerAccount</a> -> <a href="../objects/customerAccount.md">customerAccount</a></h3><div style="margin-left:20px"><i>Create a TO CUSTOMER ACCOUNT for the customer</i><br>creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
+</details></span>
+
+# customer management module
+
+the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly manage the customer account on the TO side .
+
+<h3>POST /collections/customers/items <a href="../objects/customer.md">customer</a> -> <a href="../objects/customerAccount.md">customerAccount</a> -> <a href="../objects/customerAccount.md">customerAccount</a></h3><div style="margin-left:20px"><i>Create a TO CUSTOMER ACCOUNT for the customer</i><br>creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
 
 <details><summary><i>Request Body</i></summary>
 

@@ -1,10 +1,4 @@
-# support module
-
-This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ This part of the API facilitates in handling exceptions, like delays, flat tires
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET /collections/support-tickets/items?packageId=...&legId=...</h3><div style="margin-left:20px"><i>Get for support tickets of a package/leg</i><br>returns support tickets in their current state, based on the parameters
+</details></span>
+
+# support module
+
+This part of the API facilitates in handling exceptions, like delays, flat tires, accidents or broken equipment reports.
+
+<h3>GET /collections/support-tickets/items?packageId=...&legId=...</h3><div style="margin-left:20px"><i>Get for support tickets of a package/leg</i><br>returns support tickets in their current state, based on the parameters
 
 <details><summary><i>Parameters</i></summary>
 

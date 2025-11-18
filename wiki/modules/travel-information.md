@@ -1,10 +1,4 @@
-# travel information module
-
-Traveller information that is not (yet) (completely) available in other standards
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ Traveller information that is not (yet) (completely) available in other standard
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET /collections/card-types/items -> <a href="../objects/cardTypeCollection.md">cardTypeCollection</a></h3><div style="margin-left:20px"><i>Retrieves all accepted card types</i><br><details><summary><i>Responses</i></summary>
+</details></span>
+
+# travel information module
+
+Traveller information that is not (yet) (completely) available in other standards
+
+<h3>GET /collections/card-types/items -> <a href="../objects/cardTypeCollection.md">cardTypeCollection</a></h3><div style="margin-left:20px"><i>Retrieves all accepted card types</i><br><details><summary><i>Responses</i></summary>
 
 | Code | Content type | Type | Description |
 |------|-------|-------|-------------|

@@ -1,10 +1,4 @@
-# purchase module
-
-This part of the API facilitates purchasing offer(s), a package, a product or start the usage of an asset.
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ This part of the API facilitates purchasing offer(s), a package, a product or st
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details>
+</details></span>
+
+# purchase module
+
+This part of the API facilitates purchasing offer(s), a package, a product or start the usage of an asset.
+
+
 
 [flow](purchase-flow.md)
 

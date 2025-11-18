@@ -1,10 +1,4 @@
-# offer module
-
-This part of the API facilitates in supplying offers.
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ This part of the API facilitates in supplying offers.
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET /collections/offers/items?offerId=... -> <a href="../objects/package.md">package</a></h3><div style="margin-left:20px"><i>Get offer details</i><br><details><summary><i>Parameters</i></summary>
+</details></span>
+
+# offer module
+
+This part of the API facilitates in supplying offers.
+
+<h3>GET /collections/offers/items?offerId=... -> <a href="../objects/package.md">package</a></h3><div style="margin-left:20px"><i>Get offer details</i><br><details><summary><i>Parameters</i></summary>
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|

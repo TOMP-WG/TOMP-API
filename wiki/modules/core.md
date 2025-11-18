@@ -1,10 +1,4 @@
-# core module
-
-Core functions, used in multiple modules
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ Core functions, used in multiple modules
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>GET /collections/datasources/items -> <a href="../objects/link.md">link</a></h3><div style="margin-left:20px"><i>Retrieves all (external) datasources, used in requests and responses</i><br>Retrieves all datasources
+</details></span>
+
+# core module
+
+Core functions, used in multiple modules
+
+<h3>GET /collections/datasources/items -> <a href="../objects/link.md">link</a></h3><div style="margin-left:20px"><i>Retrieves all (external) datasources, used in requests and responses</i><br>Retrieves all datasources
 
 <details><summary><i>Responses</i></summary>
 

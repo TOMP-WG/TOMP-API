@@ -1,10 +1,4 @@
-# execution module
-
-This part of the API facilitates changing operational parts of the trip, like starting, stopping legs or initiate new legs from a product. For modifications of the package (travellers, assignment of assets (seats), ancillaries), use the endpoint specified in the pre-sales module.
-
-<details><summary><a>modules</a></summary>  
-
-*  [module overview](../modules.md)  
+<span style="display: inline-block; white-space: nowrap;"><a href="../home.md">home</a><details style="display: inline;"><summary><a href="../modules.md">modules</a></summary>
 *  [core](core.md)  
 *  [offer](offer.md)  
 *  [pre-sales](pre-sales.md)  
@@ -17,7 +11,13 @@ This part of the API facilitates changing operational parts of the trip, like st
 *  [discovery](discovery.md)  
 *  [tech](tech.md)  
 
-</details><h3>POST /processes/{assetOperation}-asset/execution?assetOperation=... <a href="../objects/assetRequest.md">assetRequest</a> -> <a href="../objects/package.md">package</a></h3><div style="margin-left:20px"><i>Perform an operation on a asset</i><br><details><summary><i>Parameters</i></summary>
+</details></span>
+
+# execution module
+
+This part of the API facilitates changing operational parts of the trip, like starting, stopping legs or initiate new legs from a product. For modifications of the package (travellers, assignment of assets (seats), ancillaries), use the endpoint specified in the pre-sales module.
+
+<h3>POST /processes/{assetOperation}-asset/execution?assetOperation=... <a href="../objects/assetRequest.md">assetRequest</a> -> <a href="../objects/package.md">package</a></h3><div style="margin-left:20px"><i>Perform an operation on a asset</i><br><details><summary><i>Parameters</i></summary>
 
 | Name | In | Type | Required | Description |
 |------|-------|------|----------|-------------|
