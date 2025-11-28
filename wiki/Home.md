@@ -1,7 +1,7 @@
 # Introduction
 Welcome to the TOMP-API WIKI pages. This page contains the information for implementing the TOMP-API. The [Blueprint](Introduction.md) describes in free format the idea of how the TOMP API was set up.  
   
-The latest released version is Dragonfly - 1.6.0. The OpenApi (former: swagger) file can be found [here](https://github.com/TOMP-WG/TOMP-API/blob/master/TOMP-API.yaml.md).
+The latest released version is Dragonfly - 1.6.0. The OpenApi (former: swagger) file can be found [here](https://github.com/TOMP-WG/TOMP-API/blob/master/TOMP-API.yaml).
 
 ### What functionality does the TOMP-API cover? 
 Look at our [Use cases](Use-cases.md).  
