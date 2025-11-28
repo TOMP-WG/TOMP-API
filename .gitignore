@@ -1,0 +1,13 @@
+.vscode/
+.venv/
+TOMP-API.yaml
+tools/create_meta_data/output/*
+jsonata/node_modules/*
+jsonata/node_modules/.package-lock.json
+jsonata/package-lock.json
+tools/create_endpoint_jsonschema/Lib/*
+tools/create_endpoint_jsonschema/Scripts/*
+tools/filter_endpoints/Lib/*
+tools/filter_endpoints/Scripts/*
+TOMP-API-MP.yaml
+tools/filter_endpoints/*.yaml

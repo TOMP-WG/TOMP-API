@@ -1,0 +1,4 @@
+```json
+"a short string"
+```
+

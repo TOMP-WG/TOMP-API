@@ -1,0 +1,222 @@
+{
+  "x-semantics": [
+    {
+      "transmodel": "CUSTOMER ACCOUNT"
+    }
+  ],
+  "description": "A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "default string, full names etc (length 0-200)",
+      "maxLength": 200
+    },
+    "customer": {
+      "x-semantics": [
+        {
+          "transmodel": "TRANSPORT CUSTOMER"
+        }
+      ],
+      "description": "A user that wishes to purchase a package",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "default string, full names etc (length 0-200)",
+          "maxLength": 200
+        },
+        "initials": {
+          "type": "string",
+          "description": "real short string, codes (length 0-10)",
+          "maxLength": 10
+        },
+        "firstName": {
+          "type": "string",
+          "description": "short string, display names (length 0-75)",
+          "maxLength": 75
+        },
+        "lastName": {
+          "type": "string",
+          "description": "short string, display names (length 0-75)",
+          "maxLength": 75
+        },
+        "middleName": {
+          "type": "string",
+          "description": "real short string, codes (length 0-10)",
+          "maxLength": 10
+        },
+        "prefix": {
+          "type": "string",
+          "description": "real short string, codes (length 0-10)",
+          "maxLength": 10
+        },
+        "postfix": {
+          "type": "string",
+          "description": "real short string, codes (length 0-10)",
+          "maxLength": 10
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "default string, full names etc (length 0-200)",
+          "maxLength": 200
+        },
+        "email": {
+          "type": "string",
+          "description": "default string, full names etc (length 0-200)",
+          "maxLength": 200
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "full-date",
+          "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, full-date (2019-10-12)"
+        },
+        "placeOfBirth": {
+          "type": "string",
+          "description": "short string, display names (length 0-75)",
+          "maxLength": 75
+        },
+        "countryOfBirth": {
+          "type": "string",
+          "description": "short string, display names (length 0-75)",
+          "maxLength": 75
+        },
+        "address": {
+          "x-semantics": [
+            {
+              "transmodel": "POSTAL ADDRESS"
+            }
+          ],
+          "type": "object",
+          "description": "address parts, where addressLine1 and 2 should contain the complete address, matches Content-Language",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "addressLine1"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "this string references to information that can be found in the `data sources`. Enlist all prefixes (=rel) from the /collections/datasources/items that apply to a place/location. Default it matches already with 'GPS' (no entry required in the datasources). In case of a custom place (like home address), you can use the 'P:' prefix and add the address to the **places** list of the request/offer/package.",
+              "maxLength": 200,
+              "x-example-format": "^(GPS:|GBFS:stations:)",
+              "pattern": "^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\\-_.]+$"
+            },
+            "type": {
+              "type": "string",
+              "pattern": "^(place)$"
+            },
+            "addressLine1": {
+              "type": "string",
+              "description": "long string, memos etc (length 0-10.000)",
+              "maxLength": 10000
+            },
+            "addressLine2": {
+              "type": "string",
+              "description": "long string, memos etc (length 0-10.000)",
+              "maxLength": 10000
+            },
+            "street": {
+              "type": "string",
+              "description": "default string, full names etc (length 0-200)",
+              "maxLength": 200
+            },
+            "houseNumber": {
+              "type": "integer",
+              "description": "default length for an integer (0-1000)",
+              "default": 0,
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "houseNumberAddition": {
+              "type": "string",
+              "description": "real short string, codes (length 0-10)",
+              "maxLength": 10
+            },
+            "postalCode": {
+              "type": "string",
+              "description": "short string, display names (length 0-75)",
+              "maxLength": 75
+            },
+            "city": {
+              "type": "string",
+              "description": "short string, display names (length 0-75)",
+              "maxLength": 75
+            },
+            "province": {
+              "type": "string",
+              "description": "short string, display names (length 0-75)",
+              "maxLength": 75
+            },
+            "state": {
+              "type": "string",
+              "description": "short string, display names (length 0-75)",
+              "maxLength": 75
+            },
+            "country": {
+              "type": "string",
+              "x-semantics": [
+                {
+                  "transmodel": "COUNTRY"
+                }
+              ],
+              "description": "two-letter country codes according to ISO 3166-1",
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "[A-Z]{2}"
+            },
+            "additionalInfo": {
+              "type": "string",
+              "description": "long string, memos etc (length 0-10.000)",
+              "maxLength": 10000
+            }
+          }
+        },
+        "photo": {
+          "type": "string",
+          "maxLength": 10000,
+          "x-format": "byte-array"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "dictionary for extra fields (bilatural agreements)",
+          "additionalProperties": {
+            "maxLength": 1000,
+            "maxProperties": 20
+          }
+        }
+      }
+    },
+    "creationDate": {
+      "type": "string",
+      "format": "date-time",
+      "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+    },
+    "modificationDate": {
+      "type": "string",
+      "format": "date-time",
+      "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+    },
+    "status": {
+      "x-semantics": [
+        {
+          "transmodel": "CUSTOMER ACCOUNT . status"
+        }
+      ],
+      "type": "string",
+      "description": "status of a CUSTOMER ACCOUNT<br> _CREATED_ the customer account has been created but is not ready to create a purchase yet<br> _TO_PENDING_VALIDATION_ the customer account is pending a verification of identity and properties by the TO. No purchases can be made in this step<br> _OTP_REQUIRED_ the TO has sent an OTP to the customer's phone or email address and is expecting it to activate the account. No purchases can be made in this step<br> _ACTIVE_ the customer account is active and can continue to purchase offers<br> _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>",
+      "enum": [
+        "CREATED",
+        "TO_PENDING_VALIDATION",
+        "ACTIVE",
+        "BLOCKED"
+      ]
+    }
+  }
+}

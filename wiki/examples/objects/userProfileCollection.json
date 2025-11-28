@@ -1,0 +1,30 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "name": null,
+        "type": null,
+        "ageGroup": null,
+        "age": null,
+        "length": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "name": null,
+        "type": null,
+        "ageGroup": null,
+        "age": null,
+        "length": null
+      }
+    }
+  ],
+  "properties": {
+    "type": "user_profiles"
+  }
+}

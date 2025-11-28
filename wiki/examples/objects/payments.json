@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "amount": 3.14,
+        "taxPercentageUsed": 0,
+        "currencyCode": "[a-zA-Z]{3}",
+        "vatCountryCode": "[A-Z]{2}",
+        "id": "identifier",
+        "category": "ALL",
+        "state": "TO_INVOICE"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "amount": 3.14,
+        "taxPercentageUsed": 0,
+        "currencyCode": "[a-zA-Z]{3}",
+        "vatCountryCode": "[A-Z]{2}",
+        "id": "identifier",
+        "category": "ALL",
+        "state": "TO_INVOICE"
+      }
+    }
+  ],
+  "properties": {
+    "type": "paymentCollection",
+    "limit": 42,
+    "offset": 42
+  }
+}

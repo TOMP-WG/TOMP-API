@@ -1,0 +1,473 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-modules:
+    - pre-sales
+
+tags:
+  - name: pre sales
+    description: Module that can be used 'pre-sales'; in the pre-purchase state. Calling one of these endpoints,
+      will put the package in a pre-purchased state (might reserve resources). The package must be released 
+      (when the intention of purchasing it is removed) or it expires. 
+      The result of each of these endpoints (except for the release) must contain an expiry date in the header.
+
+paths:
+  /processes/select-offers/execution:
+    post:
+      operationId: selectOffersRequest
+      summary: "Select offer(s) into a package"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE CREATION QUERY
+      requestBody:
+        $ref: "#/components/requestBodies/selectOffersRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/assets/items:
+    get:
+      operationId: requestAssets
+      summary: "Request available assets for a leg"
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE SPOT AVAILABILITY QUERY
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
+      tags:
+        - pre sales
+      responses:
+        "200":
+          $ref: "#/components/responses/assetsResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/ancillaries/items:
+    get:
+      operationId: requestAncillaries
+      summary: "Request available ancillaries for a leg"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
+      tags:
+        - pre sales
+      x-semantics: 
+      - transmodel:TRAVEL PACKAGE ANCILLARY AVAILABILITY QUERY (?)
+      responses:
+        "200":
+          $ref: "#/components/responses/ancillariesResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/update-traveller/execution:
+    post:
+      operationId: updateTravellerRequest
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      summary: update details of a traveller
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
+      requestBody:
+        $ref: "#/components/requestBodies/updateTravellerRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/update-travel-specification/execution:
+    post:
+      operationId: updateTravelSpecificationRequest
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      summary: update start/end location or start/end time
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
+      requestBody:
+        $ref: "#/components/requestBodies/updateTravelSpecificationRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/assign-asset/execution:
+    post:
+      operationId: assignAssetRequest
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      summary: Assign an asset to a package (and a leg). It could also replace another asset or remove one        
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE SPOT RESERVATION QUERY, TRAVEL PACKAGE SPOT CANCELLATION QUERY, TRAVEL PACKAGE ALTERATION QUERY 
+      requestBody:
+        $ref: "#/components/requestBodies/assignAssetRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/assign-ancillary/execution:
+    post:
+      operationId: assignAncillaryRequest
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      summary: Assign an ancillary to a package (and a leg). It could also replace another ancillary or remove one        
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
+      requestBody:
+        $ref: "#/components/requestBodies/assignAncillaryRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"          
+
+  /processes/release-package/execution:
+    post:
+      operationId: releasePackageRequest
+      summary: "Release the complete package"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      requestBody:
+        $ref: "TOMP-API-1-CORE.yaml#/components/requestBodies/packageRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/remove-offer/execution:
+    post:
+      operationId: removeOfferRequest
+      summary: "Remove an offer from the package"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - pre sales
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
+      requestBody:
+        $ref: "#/components/requestBodies/removeOfferRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  # remove traveller: start again with search-offers
+
+components:
+  requestBodies:
+    selectOffersRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE CREATION REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  offers:
+                    type: array
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+
+    updateTravellerRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - traveller
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  traveller:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerReference"
+                  age:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
+                    description: Age of the traveller, may be approximate
+                  fullName:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/normalString"
+                    description: the name of the traveller, can be used to validate against ID cards
+                  characteristics:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerCharacteristics"
+                    description: the COMPLETE set of entitlements, replaces the previous set of
+                      entitlements of this traveller
+
+    updateTravelSpecificationRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  startTime:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                    description: The intended departure time.
+                      If left out and no endTime is set, the current time should be assumed.
+                      If only the arrival time is specified, this is an implicit request for a guaranteed arrival at that time.
+                  endTime:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                    description: The intended arrival time, at the `to place`. When the **startTime** is not set, and **endTime** is set, it is an implicit request for an arrival time guarantee.
+
+    assignAssetRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE SPOT RESERVATION REQUEST, TRAVEL PACKAGE SPOT CANCELLATION REQUEST, TRAVEL PACKAGE ALTERATION REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - leg
+                - asset
+                description: this can be used to assign an asset (/seat) to a leg, by
+                  using the field `asset`. If you want to replace an asset, fill the field
+                  `replacesAsset` with the asset to replace and `asset` with the new one.
+                  If you want to remove an assigned asset from a leg, fill `asset` with 'null' and
+                  fill `replacesAsset` with the asset to remove.
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  asset:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  replacesAsset:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  
+    assignAncillaryRequest:
+      x-semantics: 
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - leg
+                description: this can be used to assign an ancillary to a leg, by
+                  using the field `ancillary`. If you want to replace an ancillary, fill the field
+                  `replacesAncillary` with the ancillary to replace and `ancillary` with the new one.
+                  If you want to remove an assigned ancillary from a leg, fill `ancillary` with 'null' and
+                  fill `replacesAncillary` with the ancillary to remove.
+                properties:
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  ancillary:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
+                  replacesAncillary:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillaryReference"
+
+    removeOfferRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST, TRAVEL PACKAGE SPOT CANCELLATION REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    description: reference to the package to remove the offer of
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  offer:
+                    description: reference to the offer to remove from the specified package
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/offerReference"
+
+  responses:
+    assetsResponse:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE SPOT AVAILABILITY DELIVERY
+      description: a list of assets
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/geo+json:
+          schema:
+            $ref: "#/components/schemas/assetCollection"
+
+    ancillariesResponse:
+      description: a list of ancillaries
+      x-semantics:
+      - transmodel: none
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/geo+json:
+          schema:
+            $ref: "#/components/schemas/ancillaryCollection"
+
+  schemas:
+    assetCollection:
+      description: a list of available assets.
+      x-semantics:
+      - transmodel: VEHICLEs, SPOTs, PARKING BAYs, RECHARGING STATIONs
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            allOf:
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeature"
+            - type: object
+              properties:
+                properties:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/asset"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              pattern: "^(assetCollection)$"
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+    ancillaryCollection:
+      description: a list of available ancillaries.
+      x-semantics:
+      - transmodel: ANCILLARY PRODUCTs
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            allOf:
+            - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeature"
+            - type: object
+              properties:
+                properties:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/ancillary"
+        properties:
+          type: object
+          required:
+          - type
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              pattern: "^(ancillaryCollection)$"
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"   

@@ -1,0 +1,51 @@
+{
+    "title": "example TOMP v2.0 implementation",
+    "description": "as mentioned in the title",
+    "links": [
+        {
+            "href": "/conformance",
+            "rel": "conformance"
+        },
+        {
+            "href": "/api",
+            "rel": "service-desc"
+        },
+        {
+            "href": "/collections",
+            "rel": "data"
+        },
+        {
+            "href": "/processes",
+            "rel": "processes"
+        },
+        {
+            "href": "/processes/search-offers/execute",
+            "rel": "search offers",
+            "method": "POST",
+            "body": {},
+            "headers": []
+        },
+        {
+            "href": "/processes/purchase-package/execute",
+            "rel": "second class ticket",
+            "description": "Buy a second class ticket (from, to, start time, name).",
+            "method": "POST",
+            "body": {
+                "from": "",
+                "to": "",
+                "startTime": "",
+                "parameters":
+                  [
+                    {
+                      "usage": [{ "type": "USER_PROFILE", "ageGroup": "ADULT" }],
+                      "validities": [{ "type": "SERVICE", "class": "SECOND" }]
+                    }
+                  ]
+              },
+            "headers": [
+                { "Autorization": "Bearer {{access_token}}" }
+            ]
+        }
+        
+    ]
+}

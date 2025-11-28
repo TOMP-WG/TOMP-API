@@ -1,0 +1,137 @@
+# offerCollection
+
+**Type:** `object`
+
+---
+
+## Composition (allOf)
+
+This schema is composed of **all** of the following schemas:
+
+1. [geojson](geojson.md)
+   - Properties: `type`, `features`, `properties`, `numberMatched`, `numberReturned`, `links`
+2. object
+   - a list of offers.
+   - Properties: `features`, `properties`
+
+## Example
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "offer",
+      "properties": {
+        "id": "identifier",
+        "specification": {
+          "type": "travelSpecification",
+          "from": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+          "via": []
+        },
+        "price": {
+          "amount": 3.14,
+          "taxPercentageUsed": 0,
+          "currencyCode": "[a-zA-Z]{3}",
+          "vatCountryCode": "[A-Z]{2}"
+        }
+      },
+      "id": "identifier",
+      "geometry": {
+        "type": "Point|LineString|Polygon|MultiPolygon"
+      },
+      "links": [
+        {
+          "href": "https://example.com",
+          "rel": "example-string",
+          "type": "example-string",
+          "method": "POST",
+          "description": "example-string"
+        },
+        {
+          "href": "https://example.com",
+          "rel": "example-string",
+          "type": "example-string",
+          "method": "POST",
+          "description": "example-string"
+        }
+      ]
+    },
+    {
+      "type": "offer",
+      "properties": {
+        "id": "identifier",
+        "specification": {
+          "type": "travelSpecification",
+          "from": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+          "via": []
+        },
+        "price": {
+          "amount": 3.14,
+          "taxPercentageUsed": 0,
+          "currencyCode": "[a-zA-Z]{3}",
+          "vatCountryCode": "[A-Z]{2}"
+        }
+      },
+      "id": "identifier",
+      "geometry": {
+        "type": "Point|LineString|Polygon|MultiPolygon"
+      },
+      "links": [
+        {
+          "href": "https://example.com",
+          "rel": "example-string",
+          "type": "example-string",
+          "method": "POST",
+          "description": "example-string"
+        },
+        {
+          "href": "https://example.com",
+          "rel": "example-string",
+          "type": "example-string",
+          "method": "POST",
+          "description": "example-string"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "type": "example-string",
+    "id": "identifier",
+    "definitions": {
+      "products": [
+        {
+          "id": null,
+          "type": null,
+          "name": null,
+          "description": null,
+          "parts": null
+        },
+        {
+          "id": null,
+          "type": null,
+          "name": null,
+          "description": null,
+          "parts": null
+        }
+      ],
+      "places": [],
+      "ancillaries": [
+        {
+          "id": null,
+          "type": null,
+          "name": null,
+          "description": null
+        },
+        {
+          "id": null,
+          "type": null,
+          "name": null,
+          "description": null
+        }
+      ]
+    }
+  }
+}
+```
+

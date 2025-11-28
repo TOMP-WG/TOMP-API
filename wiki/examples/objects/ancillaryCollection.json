@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "ancillary",
+        "name": "Simple child seat",
+        "description": "can carry a child up to 12 kilo"
+      },
+      "id": "a08e8360-a070-41cf-801f-c66ca69c32cc",
+      "links": [
+        {
+          "href": "https://example.com/tomp/v2/processes/assign-ancillary/execution",
+          "rel": "assign-ancillary",
+          "body": { "inputs": { "ancillary": "a08e8360-a070-41cf-801f-c66ca69c32cc",
+                                "package": "2b35e746-1a0b-4826-bb41-d733ca025e31" } },
+          "type": "application/geo+json",
+          "method": "POST"
+        }
+      ] 
+    }
+  ],
+  "properties": {
+    "type": "ancillaryCollection"
+  }
+}

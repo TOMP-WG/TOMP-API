@@ -1,0 +1,11 @@
+{
+  "name": "parameter1",
+  "value": [
+    "value 1",
+    "value 2"
+  ]
+},
+{
+  "name": "parameter2",
+  "value": "value 3"
+}

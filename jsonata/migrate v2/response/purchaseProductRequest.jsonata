@@ -1,0 +1,23 @@
+{
+  "travelers": [
+        { "referenceNumber": inputs.travellers.id
+        , "licenseTypes": $map(inputs.travellers.entitlements[type='license']
+            , function($c) {  { "assetClass": $c.modes[0], "issuingCountry": $c.issuingCountry }  } )
+        }  ],
+  "useAssetTypes": [
+    inputs.products
+  ],
+  "customer": {
+    "referenceNumber": inputs.customer,
+    "licenses": [
+      {
+        "assetClass": inputs.travellers[0].entitlements[type='license'].modes[0],
+        "issuingCountry": inputs.travellers[0].entitlements[type='license'].issuingCountry,
+        "number": inputs.travellers[0].entitlements[type='license'].licenseNumber,
+        "licenseCode": inputs.travellers[0].entitlements[type='license'].licenseCode,
+        "validUntil": inputs.travellers[0].entitlements[type='license'].endValidity
+      }
+    ]
+  },
+  "callbackUrl": subscriber.successUri
+}

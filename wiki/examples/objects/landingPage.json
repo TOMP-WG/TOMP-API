@@ -1,0 +1,30 @@
+{
+  "title": "example-string",
+  "description": "example-string",
+  "links": [
+    {
+      "href": "https://example.com",
+      "rel": "example-string",
+      "type": "example-string",
+      "method": "POST",
+      "description": "example-string"
+    },
+    {
+      "href": "https://example.com",
+      "rel": "example-string",
+      "type": "example-string",
+      "method": "POST",
+      "description": "example-string"
+    }
+  ],
+  "processIdentifiers": [
+    {
+      "module": "offers",
+      "identifiers": []
+    },
+    {
+      "module": "offers",
+      "identifiers": []
+    }
+  ]
+}

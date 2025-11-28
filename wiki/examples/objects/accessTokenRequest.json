@@ -1,0 +1,7 @@
+{
+  "grant_type": "example-string",
+  "scope": "example-string",
+  "client_id": "example-string",
+  "client_assertion_type": "example-string",
+  "client_assertion": "example-string"
+}

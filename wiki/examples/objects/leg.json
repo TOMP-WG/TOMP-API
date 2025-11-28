@@ -1,0 +1,27 @@
+{
+  "type": "Feature",
+  "properties": {
+    "id": "a2163410-261b-4932-acd5-0cc3f887affe",
+    "type": "leg",
+    "specification": {
+      "type": "travelSpecification",
+      "from": "P:LocationA", 
+      // In the 'places' list of the featurecollection (offer list or package), there must be a place with id 'LocationA'
+      "via": []
+    },
+    "sequenceNumber": 0,
+    "mode": "BIKE",
+    "status": "NOT_STARTED"
+  },
+  "id": "a2163410-261b-4932-acd5-0cc3f887affe",
+  "geometry": { "type": "LineString", "coordinates": [...] },
+  "links": [
+    {
+      "href": "https://example.com/tomp/v1/processes/start-leg/execution",
+      "rel": "start-leg",
+      "type": "application/geo+json",
+      "method": "POST",
+      "description": "start the leg"
+    }
+  ]
+}

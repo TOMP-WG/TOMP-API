@@ -1,0 +1,40 @@
+{
+  "links": [
+    {
+      "href": "https://example.com",
+      "rel": "example-string",
+      "type": "example-string",
+      "method": "POST",
+      "description": "example-string"
+    },
+    {
+      "href": "https://example.com",
+      "rel": "example-string",
+      "type": "example-string",
+      "method": "POST",
+      "description": "example-string"
+    }
+  ],
+  "collections": [
+    {
+      "id": "identifier",
+      "links": [],
+      "title": "example-string",
+      "description": "example-string",
+      "extent": {
+        "spatial": null,
+        "temporal": null
+      }
+    },
+    {
+      "id": "identifier",
+      "links": [],
+      "title": "example-string",
+      "description": "example-string",
+      "extent": {
+        "spatial": null,
+        "temporal": null
+      }
+    }
+  ]
+}

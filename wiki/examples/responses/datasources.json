@@ -1,0 +1,12 @@
+[
+    {
+      "rel": "GBFS:vehicles",
+      "type": "application/json",
+      "href": "/v2/GBFS/vehicles.json"
+    },
+    {
+      "rel": "ARR:ScheduledStopPoint",
+      "type": "application/xml+netex",
+      "href": "https://data.ndovloket.nl/netex/arr/NeTEx_ARR_NL_20240903_20240904_1420.xml.gz#NeTEx_ARR_NL_20240903_20240904_1420.xml"
+    }
+  ]

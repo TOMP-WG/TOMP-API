@@ -1,0 +1,9 @@
+{
+  "time": "inputs.timestamp",
+  "event": "START",
+  "userLocation": {
+    "coordinates": {
+        "lng": $number($split($substring(inputs.location,4), ',')[0]),
+        "lat": $number($split($substring(inputs.location,3), ',')[1]) } 
+  }
+}

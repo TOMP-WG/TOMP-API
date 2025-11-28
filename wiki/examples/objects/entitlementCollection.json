@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "id": null,
+        "type": null,
+        "description": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "id": null,
+        "type": null,
+        "description": null
+      }
+    }
+  ],
+  "properties": {
+    "type": "entitlements"
+  }
+}

@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-modules:
+    - tech
+
+tags:
+  - name: tech
+    description: technical functions of the API, also used in dataspaces
+
+paths:
+  /health:
+    get:
+      operationId: ping
+      tags:
+        - tech
+      summary: "is the API up and running?"
+      description: "This is a healthcheck ENDPOINT"
+      responses:
+        "204":
+          description: successful operation
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /oauth/token:
+    post:
+      summary: "Token Endpoint"
+      operationId: getToken
+      tags:
+      - tech
+      security:
+        - BasicAuth: [] # username/password
+        - BearerAuth: [] # fixed JWT token
+        - OAuth: [] # OAuth2 client credential flow
+        - OAuthPKI: [] # mTLS
+      description: This endpoint is used to obtain an access token and optionally an ID token 
+        through different OAuth 2.0 grant types, including Client Credentials Flow.
+        Whenever the mTLS flow is taken, the properties will be ignored, and the access token 
+        will be generated based on the credentials in the certificate (O or CN).
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  enum: [client_credentials, password, refresh_token]
+                  description: "The grant type: 'client_credentials', 'password', or 'refresh_token'."
+                  default: client_credentials
+                username:
+                  type: string
+                  description: "The username"
+                password:
+                  type: string
+                  description: "The password"
+                client_id:
+                  type: string
+                  description: "The client ID (Client Credentials Flow)"
+                client_secret:
+                  type: string
+                  description: "The client secret (Client Credentials Flow)"
+      responses:
+        '200':
+          description: "Successful token issuance."
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - access_token
+                properties:
+                  access_token:
+                    type: string
+                    description: "The issued access token."
+                  token_type:
+                    type: string
+                    description: "The type of the token."
+                    default: "Bearer"
+                  expires_in:
+                    type: integer
+                    description: "The lifetime of the access token in seconds."
+        '400':
+          description: "Bad Request: Invalid request or wrong grant type."
+        '401':
+          description: "Unauthorized: Invalid client ID or secret."
+        '500':
+          description: "Internal Server Error: Something went wrong."

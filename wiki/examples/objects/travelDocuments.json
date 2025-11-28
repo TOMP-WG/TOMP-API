@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "validity": null,
+        "travelDocumentType": null,
+        "type": null,
+        "id": null,
+        "package": null,
+        "leg": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "validity": null,
+        "travelDocumentType": null,
+        "type": null,
+        "id": null,
+        "package": null,
+        "leg": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,264 @@
+{
+  "x-semantics": [
+    {
+      "transmodel": "TRAVEL DOCUMENTs"
+    }
+  ],
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^(FeatureCollection)$"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "pattern": "^(Feature)$"
+          },
+          "id": {
+            "type": "string",
+            "x-preferred-pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "description": "https://en.wikipedia.org/wiki/Universally_unique_identifier see also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)"
+          },
+          "properties": {
+            "x-semantics": [
+              {
+                "transmodel": "TRAVEL DOCUMENT"
+              }
+            ],
+            "type": "object",
+            "required": [
+              "validity",
+              "travelDocumentType"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "pattern": "^(travelDocument)$"
+              },
+              "validity": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                  "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                }
+              },
+              "travelDocumentType": {
+                "x-semantics": [
+                  {
+                    "transmodel": "TYPE OF TRAVEL DOCUMENT"
+                  }
+                ],
+                "type": "string",
+                "description": "A way to open/access the asset. <br><br> _BARCODE_ a barcode can be retrieved from the links and used to access the purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execution must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions) to open the asset<br>",
+                "enum": [
+                  "BARCODE",
+                  "QRCODE",
+                  "AZTECCODE",
+                  "REMOTE",
+                  "DEEP_LINK",
+                  "KEY",
+                  "OTHER"
+                ]
+              }
+            },
+            "oneOf": [
+              {
+                "x-semantics": [
+                  {
+                    "transmodel": "none"
+                  }
+                ],
+                "description": "External ticket, can be accessed using the links collection, with rel=ticket the mediatype tells what it refers to.",
+                "type": "object",
+                "properties": {
+                  "customFields": {
+                    "type": "object",
+                    "description": "dictionary for extra fields (bilatural agreements)",
+                    "additionalProperties": {
+                      "maxLength": 1000,
+                      "maxProperties": 20
+                    }
+                  }
+                }
+              },
+              {
+                "x-semantics": [
+                  {
+                    "transmodel": "none"
+                  }
+                ],
+                "description": "Binary information, like a image or certificate",
+                "type": "object",
+                "required": [
+                  "contentType",
+                  "base64"
+                ],
+                "properties": {
+                  "contentType": {
+                    "description": "the media type (IANA)",
+                    "type": "string"
+                  },
+                  "base64": {
+                    "type": "string",
+                    "description": "long string, memos etc (length 0-10.000)",
+                    "maxLength": 10000
+                  }
+                }
+              },
+              {
+                "x-semantics": [
+                  {
+                    "transmodel": "none"
+                  }
+                ],
+                "description": "Axa EKey information",
+                "type": "object",
+                "required": [
+                  "ekey",
+                  "lock"
+                ],
+                "properties": {
+                  "ekey": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "description": "long string, memos etc (length 0-10.000)",
+                        "maxLength": 10000
+                      },
+                      "passkey": {
+                        "type": "string",
+                        "description": "long string, memos etc (length 0-10.000)",
+                        "maxLength": 10000
+                      }
+                    }
+                  },
+                  "lock": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "bdAddress": {
+                        "type": "string",
+                        "description": "long string, memos etc (length 0-10.000)",
+                        "maxLength": 10000
+                      },
+                      "deviceName": {
+                        "type": "string",
+                        "description": "default string, full names etc (length 0-200)",
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "dictionary for extra fields (bilatural agreements)",
+                "additionalProperties": {
+                  "maxLength": 1000,
+                  "maxProperties": 20
+                }
+              }
+            ],
+            "discriminator": {
+              "propertyName": "travelDocumentType",
+              "mapping": {
+                "LINK": "#/components/schemas/externalDigitalTicket",
+                "BARCODE": "#/components/schemas/binaryTicket",
+                "QRCODE": "#/components/schemas/binaryTicket",
+                "AZTECCODE": "#/components/schemas/binaryTicket",
+                "EKEY": "#/components/schemas/eKey",
+                "OTHER": "#/components/schemas/customProperties"
+              }
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "x-externalDocs": {
+                "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+              },
+              "required": [
+                "href",
+                "rel"
+              ],
+              "properties": {
+                "rel": {
+                  "type": "string",
+                  "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+                },
+                "href": {
+                  "type": "string",
+                  "description": "valid URL",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "short string, display names (length 0-75)",
+                  "maxLength": 75
+                },
+                "method": {
+                  "type": "string",
+                  "description": "to indicate the http method.",
+                  "default": "GET",
+                  "enum": [
+                    "POST",
+                    "GET",
+                    "DELETE",
+                    "PATCH"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "the description of the external data source"
+                },
+                "body": {
+                  "type": "object",
+                  "description": "the (prefilled) body for the request"
+                },
+                "headers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "mandatory": {
+                  "description": "is this link informative, or must it be used?",
+                  "type": "boolean"
+                },
+                "hash": {
+                  "description": "to validate that the content of the link hasn't been changed.",
+                  "type": "string"
+                },
+                "expires": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                  "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

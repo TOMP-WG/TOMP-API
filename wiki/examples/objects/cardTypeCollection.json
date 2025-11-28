@@ -1,0 +1,30 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "type": null,
+        "id": null,
+        "cardCategory": null,
+        "subType": null,
+        "modes": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "type": null,
+        "id": null,
+        "cardCategory": null,
+        "subType": null,
+        "modes": null
+      }
+    }
+  ],
+  "properties": {
+    "type": "card_types"
+  }
+}

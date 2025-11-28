@@ -1,0 +1,93 @@
+{
+  "type": "OfferCollection",
+  "offers": [
+$map(options, function($option) {
+{
+      "type": "offer",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ $option.from.coordinates.lng, $option.from.coordinates.lat ],          
+          [ $option.to.coordinates.lng, $option.to.coordinates.lat ]
+        ]
+      }
+      , "id": $option.id
+      , "properties": {
+            "type": "offer",
+            "id": $option.id,
+            "summary": {
+                "from": "GPS:" & $leg[0].from.coordinates.lng & "," & $leg[0].from.coordinates.lat
+              , "to": "GPS:" & $leg[0].to.coordinates.lng & "," & $leg[0].to.coordinates.lat
+              , "startTime": $leg[0].departureTime
+              , "endTime": $leg[0].arrivalTime,
+              , "price": { "amount": 3.56, "currency": "EUR" }
+              , "distribution": { "fulfilmentMethod": "e-ticket" }
+              , "refundable": true
+            }
+            "legs": $map($option.legs, function($leg) { 
+{ "type": "leg"
+, "id": $leg.id
+, "from": "GPS:" & $leg.from.coordinates.lng & "," & $leg.from.coordinates.lat
+, "to": "GPS:" & $leg.to.coordinates.lng & "," & $leg.to.coordinates.lat
+, "startTime": $leg.departureTime
+, "endTime": $leg.arrivalTime
+, "travellers": $leg.travelerReferenceNumbers
+, "sequenceNumber": $leg.legSequenceNumber
+, "state": $leg.state
+, "mode": $leg.assetType.assetClass
+, "usedProduct": $leg.assetType.id
+, "usedAncillaries": [ $map($leg.asset.overriddenProperties.ancillaries, function($anc){ $anc.category & '-' & $anc.number } ) ]
+, "usedAssets": [ $map($leg.asset, function($asset){ $asset.id } ) ]
+, "operatorId": $leg.suboperator.maasId
+, "operatorName": $leg.suboperator.name
+}
+                    } ),
+            "products":  $map($option.legs, function($leg) { $leg.assetType.id } )
+      }, "links": []
+}
+})
+    ],
+  "properties": {
+      "type": "offers",
+      "products": $map(*.legs, 
+function($leg){ {
+    "type": "product",
+    "id": $leg.assetType.id,
+    "productName": $leg.assetType.sharedProperties.name
+} 
+}),
+      "places": [],
+      "ancillaries": $map(**.ancillaries, 
+function($anc){ {
+    "type": "ancillary",
+    "id": $anc.category & '-' & $anc.number,
+    "productName": $anc.category & '-' & $anc.number
+} 
+}),
+      "assets": $map(*.legs, 
+function($leg){ {
+    "type": "asset",
+    "id": $leg.asset.id,
+    "visualId": $leg.asset.licensePlate,
+    "mode": $leg.assetType.assetClass,
+    "subMode": $leg.assetType.assetSubClass
+} 
+}),
+      "travellers": $map(**.customer, 
+function($cust){ {
+    "type": "traveller",
+    "id": $cust.id,
+    "entitlements": $append($map($cust.cardTypes, function($ct) { 
+        { "type": "card_type"
+        , "cardType": $ct.type 
+        , "subType": $ct.subType } } ),
+        $map($cust.licenseTypes, function($lt) { 
+        { "type": "license_type"
+        , "licenseCode": $lt.assetClass 
+        , "issuingCountry": $lt.issuingCountry } } )
+    ) 
+} 
+})
+  },
+  "links": []
+}

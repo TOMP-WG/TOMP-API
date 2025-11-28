@@ -1,0 +1,173 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "links"
+  ],
+  "properties": {
+    "id": {
+      "description": "identifier of the collection used, for example, in URIs",
+      "type": "string"
+    },
+    "title": {
+      "description": "human readable title of the collection",
+      "type": "string"
+    },
+    "description": {
+      "description": "a description of the features in the collection",
+      "type": "string"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "x-externalDocs": {
+          "url": "http://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/schemas/link.yaml"
+        },
+        "required": [
+          "href",
+          "rel"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "the action that can be performed OR part of the URI allowed values include the 'processId's, prefixes for the referenced data sources, prefixes for deeplinks ('apple' and 'android'), OGC compliant ones (alternative, next, etc)"
+          },
+          "href": {
+            "type": "string",
+            "description": "valid URL",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "description": "short string, display names (length 0-75)",
+            "maxLength": 75
+          },
+          "method": {
+            "type": "string",
+            "description": "to indicate the http method.",
+            "default": "GET",
+            "enum": [
+              "POST",
+              "GET",
+              "DELETE",
+              "PATCH"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "the description of the external data source"
+          },
+          "body": {
+            "type": "object",
+            "description": "the (prefilled) body for the request"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "mandatory": {
+            "description": "is this link informative, or must it be used?",
+            "type": "boolean"
+          },
+          "hash": {
+            "description": "to validate that the content of the link hasn't been changed.",
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time",
+            "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+            "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+          }
+        }
+      }
+    },
+    "extent": {
+      "type": "object",
+      "description": "The extent of the features in the collection. In the Core only spatial and temporal\nextents are specified. Extensions may add additional members to represent other\nextents, for example, thermal or pressure ranges.",
+      "properties": {
+        "spatial": {
+          "description": "The spatial extent of the features in the collection.",
+          "type": "object",
+          "properties": {
+            "bbox": {
+              "description": "One or more bounding boxes that describe the spatial extent of the dataset.\nIn the Core only a single bounding box is supported. Extensions may support\nadditional areas. If multiple areas are provided, the union of the bounding\nboxes describes the spatial extent.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "description": "Each bounding box is provided as four or six numbers, depending on\nwhether the coordinate reference system includes a vertical axis\n(height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nThe coordinate reference system of the values is WGS 84 longitude/latitude\n(http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate\nreference system is specified in `crs`.\n\nFor WGS 84 longitude/latitude the values are in most cases the sequence of\nminimum longitude, minimum latitude, maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value\n(west-most box edge) is larger than the third value (east-most box edge).\n\nIf the vertical axis is included, the third and the sixth number are\nthe bottom and the top of the 3-dimensional bounding box.\n\nIf a feature has multiple spatial geometry properties, it is the decision of the\nserver whether only a single spatial geometry property is used to determine\nthe extent or all relevant geometries.",
+                "type": "array",
+                "oneOf": [
+                  {
+                    "minItems": 4,
+                    "maxItems": 4
+                  },
+                  {
+                    "minItems": 6,
+                    "maxItems": 6
+                  }
+                ],
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "crs": {
+              "description": "Coordinate reference system of the coordinates in the spatial extent\n(property `bbox`). The default reference system is WGS 84 longitude/latitude.\nIn the Core this is the only supported coordinate reference system.\nExtensions may support additional coordinate reference systems and add\nadditional enum values.",
+              "type": "string",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+              ],
+              "default": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+            }
+          }
+        },
+        "temporal": {
+          "description": "The temporal extent of the features in the collection.",
+          "type": "object",
+          "properties": {
+            "interval": {
+              "description": "One or more time intervals that describe the temporal extent of the dataset.\nThe value `null` is supported and indicates an unbounded interval end.\nIn the Core only a single time interval is supported. Extensions may support\nmultiple intervals. If multiple intervals are provided, the union of the\nintervals describes the temporal extent.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "description": "Begin and end times of the time interval. The timestamps are in the\ntemporal coordinate reference system specified in `trs`. By default\nthis is the Gregorian calendar.",
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+                  "description": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)"
+                }
+              }
+            },
+            "trs": {
+              "description": "Coordinate reference system of the coordinates in the temporal extent\n(property `interval`). The default reference system is the Gregorian calendar.\nIn the Core this is the only supported temporal coordinate reference system.\nExtensions may support additional temporal coordinate reference systems and add\nadditional enum values.",
+              "type": "string",
+              "enum": [
+                "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
+              ],
+              "default": "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
+            }
+          }
+        }
+      }
+    },
+    "crs": {
+      "description": "the list of coordinate reference systems supported by the service",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+      ]
+    }
+  }
+}

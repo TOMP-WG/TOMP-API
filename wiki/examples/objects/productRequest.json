@@ -1,0 +1,8 @@
+{
+  "inputs": {
+    "package": "example-string",
+    "product": "example-string",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "location": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+"
+  }
+}

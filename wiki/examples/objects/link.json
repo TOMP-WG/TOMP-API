@@ -1,0 +1,7 @@
+{
+  "href": "https://example.com/tomp/v2/end-leg/execution",
+  "rel": "end-leg",
+  "type": "application/geo+json",
+  "method": "POST",
+  "body": { "inputs": { "package": "7645e96a-efce-4e87-b665-2a96b93f013b", "leg": "c25f3f81-acdc-4427-9982-fa23e6971aca" } }
+}

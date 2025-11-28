@@ -1,0 +1,31 @@
+```json
+{
+    "inputs": {
+      "customer": "EDK:39424",
+      "products": [
+        "GBFS:Vehicle_types:NormalBike"
+      ],
+      "travellers": [
+        {
+          "type": "traveller",
+          "id": "Traveller 1",
+          "entitlements": [
+            {
+              "type": "license",
+              "modes": [
+                "CAR"
+              ],
+              "licenseCode": "A",
+              "issuingCountry": "NL",
+              "licenseNumber": "someNumber",
+              "endValidity": "tomorrow"
+            }
+          ],
+          "isValidated": true,
+          "age": 20,
+          "userProfile": "ADULT"
+        }
+      ]
+    }
+  }
+```

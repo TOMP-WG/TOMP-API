@@ -1,0 +1,273 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-modules:
+    - execution
+    
+tags:
+  - name: execution
+    description: This part of the API facilitates changing operational parts of the trip, like starting, 
+      stopping legs or initiate new legs from a product.
+      For modifications of the package (travellers, assignment of assets (seats), ancillaries), 
+      use the endpoint specified in the pre-sales module.
+
+paths:
+  /processes/{legOperation}-leg/execution:
+    post:
+      operationId: legOperation
+      summary: "Perform an operation on a leg"
+      description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - name: legOperation
+          in: path
+          description: OPERATION on a specified leg
+          required: true
+          schema:
+            type: string
+            description: the possible operations on a leg.
+            enum: [ start,
+                    pause,
+                    resume,
+                    end,
+                    extend,
+                    postpone ]
+      security:
+        - BearerAuth: []
+        - OAuth: []
+      tags:
+        - execution
+      requestBody:
+        $ref: "#/components/requestBodies/legRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/{assetOperation}-asset/execution:
+    post:
+      operationId: assetOperation
+      summary: "Perform an operation on a asset"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - name: assetOperation
+          in: path
+          description: OPERATION on a specified asset
+          required: true
+          schema:
+            type: string
+            description: Operations on an asset, the enlisted operations are default, you can extend (outside the TOMP-API).
+            x-enum:
+             - lock
+             - unlock
+             - open-trunk
+      security:
+        - BearerAuth: []
+        - OAuth: []
+      tags:
+        - execution
+      requestBody:
+        $ref: "#/components/requestBodies/assetRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        "503":
+          description: In case of temporary malfunctioning, this response can be send (e.g. bluetooth lock jammed). See also https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+          $ref: "#/components/responses/retryErrorResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /processes/{productOperation}-product/execution:
+    post:
+      operationId: productOperation
+      summary: "Perform an operation on a product"
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - name: productOperation
+          in: path
+          description: OPERATION on a specified product
+          required: true
+          schema:
+            type: string
+            description: possible operations on a product
+            enum: [ activate, initiate-leg ]
+      security:
+        - BearerAuth: []
+        - OAuth: []
+      tags:
+        - execution
+      requestBody:
+        $ref: "#/components/requestBodies/productRequest"
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  # in PRE-SALES:
+    # /collections/assets/items
+    # /processes/assign-asset/execution
+    # /collections/ancillaries/items
+    # /processes/assign-ancillary/execution
+    # /processes/update-traveller/execution
+    # /processes/update-travel-specification/execution to update start or end time of a leg
+
+  # IN PURCHASE:
+    # /collections/travel-documents/items
+
+  # IN AFTER-SALES:
+    # /collections/redress-options/items for a specific traveller
+    # /processes/claim-redress-option/execution
+    # /processes/confirm-redress-option/execution
+
+components:
+  requestBodies:
+    legRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - leg
+                properties:
+                  timestamp:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  assetLocation: 
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  userLocation: 
+                    description: This field might lead to GDPR issues. Be aware, use it with caution.
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  currentCharge:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                    description: percentage of charge available
+                  time:
+                    description: time to extend or postpone
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/duration"
+                  comment:
+                    type: string
+                    description: free text, should match Content-Language
+                  evidence:
+                    type: array
+                    minItems: 1
+                    items:
+                      $ref: "TOMP-API-1-CORE.yaml#/components/schemas/link"                     
+                  class:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/classOfUse"
+
+    assetRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - asset
+                properties:
+                  timestamp:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  leg:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/legReference"
+                  asset:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/assetReference"
+                  location: 
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+
+    productRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - product
+                properties:
+                  timestamp:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+                  location: 
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
+                  package:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+                  product:
+                    $ref: "TOMP-API-1-CORE.yaml#/components/schemas/productReference"
+
+  responses:
+    retryErrorResponse:
+      x-semantics:
+      - transmodel: none
+      description: Bad request. See https://github.com/TOMP-WG/TOMP-API/wiki/Error-handling-in-TOMP for further explanation of error code.
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Retry-After:
+          description: A date after which to retry. See the Date header for more details on the HTTP date format.
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                maxItems: 10
+                items:
+                  $ref: "TOMP-API-1-CORE.yaml#/components/schemas/error"

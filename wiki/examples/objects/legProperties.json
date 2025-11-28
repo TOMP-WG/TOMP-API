@@ -1,0 +1,12 @@
+{
+  "id": "identifier",
+  "type": "leg",
+  "specification": {
+    "type": "travelSpecification",
+    "from": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+    "via": []
+  },
+  "sequenceNumber": 0,
+  "mode": "AIR",
+  "status": "NOT_STARTED"
+}

@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "modes": null,
+        "type": null,
+        "licenseCategory": null,
+        "licenseCode": null
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "modes": null,
+        "type": null,
+        "licenseCategory": null,
+        "licenseCode": null
+      }
+    }
+  ],
+  "properties": {
+    "type": "license_types"
+  }
+}

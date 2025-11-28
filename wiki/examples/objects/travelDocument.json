@@ -1,0 +1,11 @@
+{
+  "validity": [
+    "2024-01-15T10:30:00Z",
+    "2024-01-15T10:30:00Z"
+  ],
+  "travelDocumentType": "BARCODE",
+  "type": "travelDocument",
+  "id": "identifier",
+  "package": "example-string",
+  "leg": "example-string"
+}

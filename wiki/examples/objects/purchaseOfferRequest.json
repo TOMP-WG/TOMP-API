@@ -1,0 +1,21 @@
+{
+  "inputs": {
+    "offer": "example-string",
+    "customer": {
+      "id": "identifier",
+      "initials": "example-string",
+      "firstName": "example-string",
+      "lastName": "example-string"
+    },
+    "paymentMethod": "PREPAID",
+    "distribution": {
+      "accessType": "BARCODE",
+      "distributionChannel": "example-string"
+    }
+  },
+  "subscriber": {
+    "successUri": "https://example.com",
+    "inProgressUri": "https://example.com",
+    "failedUri": "https://example.com"
+  }
+}

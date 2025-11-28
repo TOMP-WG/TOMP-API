@@ -1,0 +1,59 @@
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from cryptography.x509 import load_pem_x509_certificate
+from flask import Flask, request, jsonify
+import jwt
+from datetime import datetime, timedelta
+
+app = Flask(__name__)
+
+SECRET_KEY = "my_secret_key"  
+
+def get_common_name(cert_pem):
+    try:
+        cert = load_pem_x509_certificate(cert_pem.encode('utf-8'), default_backend())
+        subject = cert.subject
+        for attribute in subject:
+            if attribute.oid == '2.5.4.3':  # OID = Common Name (CN)
+                return attribute.value
+        
+        return None
+    except Exception as e:
+        raise ValueError(f"Error extracting common name: {str(e)}")
+
+@app.route('/auth/token', methods=['POST'])
+def generate_jwt():
+    try:
+        data = request.json
+        if 'certificate' in data:
+            cert_pem = data.get('certificate')
+        
+            if not cert_pem:
+                return jsonify({"error": "PKI certificate is required"}), 400
+
+            common_name = get_common_name(cert_pem)
+
+            if not common_name:
+                return jsonify({"error": "No Common Name (CN) found in the certificate"}), 400
+
+        else:
+            user = data.get('user')
+            pw = data.get('password)
+
+            if not validate_user(user, pw):
+                return jsonify({"error": "Invalid username/password combination"}), 400
+
+            common_name = user
+
+        payload = {
+            "sub": common_name,                 
+            "name": common_name,                
+            "iat": datetime.utcnow(),           
+            "exp": datetime.utcnow() + timedelta(minutes=15)  
+        }
+
+        token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        return jsonify({"jwt": token})
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500

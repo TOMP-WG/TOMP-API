@@ -1,0 +1,6 @@
+{
+  "name": "example-string",
+  "number": "example-string",
+  "country": "[A-Z]{2}",
+  "bankIdentification": "example-string"
+}

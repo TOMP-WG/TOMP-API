@@ -1,0 +1,459 @@
+{
+  "type": "package",
+  "elements": [
+    {
+      "type": "leg",
+      "geometry": {
+        "coordinates": [
+          0,
+          0
+        ]
+      },
+      "properties": {
+        "type": "leg",
+        "from": "GPS:",
+        "to": "P:",
+        "startTime": "2025-05-14T08:36:24.651Z",
+        "endTime": "2025-05-14T08:36:24.651Z",
+        "id": "string",
+        "sequenceNumber": 0,
+        "state": "NOT_STARTED",
+        "price": {
+          "amount": 0,
+          "taxPercentageUsed": 0,
+          "currencyCode": "hGZ",
+          "vatCountryCode": "EO"
+        },
+        "mode": "AIR",
+        "travellers": [
+          "string"
+        ],
+        "product": "string",
+        "ancillaries": [
+          "string"
+        ],
+        "assets": [
+          "string"
+        ],
+        "operatorId": "string",
+        "operatorName": "string",
+        "memo": "string",
+        "extraInfo": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "validities": {
+          "distribution": {
+            "fulfilmentMethod": "string",
+            "distributionChannel": "string"
+          },
+          "cancellation": {
+            "allowed": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "Usm",
+              "vatCountryCode": "YV"
+            },
+            "feePercentage": 100
+          },
+          "exchanging": {
+            "exchangeable": true,
+            "numberOfExchangesAllowed": 0
+          },
+          "refundable": true,
+          "transfer": {
+            "canTransfer": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "SOm",
+              "vatCountryCode": "XQ"
+            },
+            "feePercentage": 100,
+            "maximumNumberOfNamedUsers": 0
+          },
+          "payment": {
+            "paymentType": "prepaid",
+            "deposit": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "sUC",
+              "vatCountryCode": "HB"
+            }
+          },
+          "equipment": [
+            "string"
+          ],
+          "boarding": {
+            "onboardStayDuration": "/PT479703227027243263121328146H/",
+            "delayedAlightingAllowed": true,
+            "overnightStayAllowed": true,
+            "earlyBoardingAllowed": true
+          },
+          "accomodation": {
+            "name": "string",
+            "accomodationClass": "FIRST_CLASS",
+            "accomodationGender": "M",
+            "sleeper": true,
+            "nuisances": [
+              "no_smoking"
+            ]
+          }
+        }
+      },
+      "id": "string",
+      "links": [
+        {
+          "rel": "string",
+          "href": "string",
+          "type": "string",
+          "method": "POST",
+          "description": "string",
+          "body": {},
+          "headers": {
+            "additionalProp1": "string",
+            "additionalProp2": "string",
+            "additionalProp3": "string"
+          },
+          "isMandatory": true,
+          "hash": "string",
+          "expires": "2025-05-14T08:36:24.651Z"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "type": "travel_specification",
+    "from": "P:",
+    "via": [
+      "P:"
+    ],
+    "to": "GPS:",
+    "startTime": "2025-05-14T08:36:24.651Z",
+    "endTime": "2025-05-14T08:36:24.651Z",
+    "id": "string",
+    "status": "OFFERED",
+    "packageLabels": [
+      "CHEAPEST"
+    ],
+    "price": {
+      "amount": 0,
+      "taxPercentageUsed": 0,
+      "currencyCode": "IxP",
+      "vatCountryCode": "UO"
+    },
+    "offers": [
+      "string"
+    ],
+    "legs": [
+      {
+        "type": "travel_specification",
+        "from": "P:",
+        "via": [
+          "P:"
+        ],
+        "to": "d:",
+        "startTime": "2025-05-14T08:36:24.651Z",
+        "endTime": "2025-05-14T08:36:24.651Z",
+        "id": "string",
+        "sequenceNumber": 0,
+        "state": "NOT_STARTED",
+        "price": {
+          "amount": 0,
+          "taxPercentageUsed": 0,
+          "currencyCode": "TWN",
+          "vatCountryCode": "PI"
+        },
+        "mode": "AIR",
+        "travellers": [
+          "string"
+        ],
+        "product": "string",
+        "ancillaries": [
+          "string"
+        ],
+        "assets": [
+          "string"
+        ],
+        "operatorId": "string",
+        "operatorName": "string",
+        "memo": "string",
+        "extraInfo": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "validities": {
+          "distribution": {
+            "fulfilmentMethod": "string",
+            "distributionChannel": "string"
+          },
+          "cancellation": {
+            "allowed": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "oQl",
+              "vatCountryCode": "GJ"
+            },
+            "feePercentage": 100
+          },
+          "exchanging": {
+            "exchangeable": true,
+            "numberOfExchangesAllowed": 0
+          },
+          "refundable": true,
+          "transfer": {
+            "canTransfer": true,
+            "fee": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "PBi",
+              "vatCountryCode": "MM"
+            },
+            "feePercentage": 100,
+            "maximumNumberOfNamedUsers": 0
+          },
+          "payment": {
+            "paymentType": "prepaid",
+            "deposit": {
+              "amount": 0,
+              "taxPercentageUsed": 0,
+              "currencyCode": "iUu",
+              "vatCountryCode": "RZ"
+            }
+          },
+          "equipment": [
+            "string"
+          ],
+          "boarding": {
+            "onboardStayDuration": "/P30950110508148136064712526583406Y1914013010407585992231173136675336M/",
+            "delayedAlightingAllowed": true,
+            "overnightStayAllowed": true,
+            "earlyBoardingAllowed": true
+          },
+          "accomodation": {
+            "name": "string",
+            "accomodationClass": "FIRST_CLASS",
+            "accomodationGender": "M",
+            "sleeper": true,
+            "nuisances": [
+              "no_smoking"
+            ]
+          }
+        }
+      }
+    ],
+    "products": [
+      {
+        "type": "product",
+        "id": "string",
+        "productName": "string",
+        "guarantees": [
+          {
+            "id": "string",
+            "name": "string",
+            "organisation": "string",
+            "type": "ALTERNATIVE_JOURNEY"
+          }
+        ]
+      }
+    ],
+    "places": [
+      {
+        "placeId": "r:",
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "street": "string",
+        "houseNumber": 0,
+        "houseNumberAddition": "string",
+        "postalCode": "string",
+        "city": "string",
+        "province": "string",
+        "state": "string",
+        "country": "AY",
+        "additionalInfo": "string",
+        "previousLegInfo": {
+          "operator": "string",
+          "product": "string",
+          "asset": "string"
+        }
+      }
+    ],
+    "ancillaries": [
+      {
+        "type": "ancillary",
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "product": "string",
+        "image": "string"
+      }
+    ],
+    "assets": [
+      {
+        "type": "asset",
+        "id": "string",
+        "visualId": "string",
+        "product": "string",
+        "mode": "AIR",
+        "subMode": "string",
+        "eco": {
+          "energyLabel": "A",
+          "ecoLabel": [
+            {
+              "ecoSticker": "string",
+              "countryCode": "AQ"
+            }
+          ],
+          "co2Emission": 0
+        },
+        "cargo": {
+          "description": "string",
+          "volume": 0,
+          "weight": 0
+        },
+        "appSupport": {
+          "displayName": "string",
+          "description": "string",
+          "image": "string",
+          "icon": "string",
+          "accessMethods": [
+            "LINK"
+          ]
+        },
+        "equipment": [
+          "string"
+        ],
+        "extraInfo": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        }
+      }
+    ],
+    "travellers": [
+      {
+        "type": "traveller",
+        "id": "string",
+        "name": "string",
+        "entitlements": [
+          {
+            "id": "string",
+            "type": "entitlement",
+            "description": "string"
+          },
+          {
+            "id": "string",
+            "type": "card_type",
+            "cardType": "DISCOUNT",
+            "subType": "string",
+            "relatedProduct": "string",
+            "transportOrganisations": [
+              "string"
+            ],
+            "additionalProp1": {}
+          },
+          {
+            "id": "string",
+            "type": "card_type",
+            "cardType": "DISCOUNT",
+            "subType": "string",
+            "relatedProduct": "string",
+            "transportOrganisations": [
+              "string"
+            ],
+            "cardNumber": "string",
+            "description": "string",
+            "additionalNumber": "string",
+            "endValidity": "string",
+            "country": "ID",
+            "additionalProp1": {}
+          },
+          {
+            "type": "license_type",
+            "modes": [
+              "AIR"
+            ],
+            "licenseCode": "string",
+            "issuingCountry": "IO",
+            "additionalProp1": {}
+          },
+          {
+            "type": "license_type",
+            "modes": [
+              "AIR"
+            ],
+            "licenseCode": "string",
+            "issuingCountry": "SM",
+            "licenseNumber": "string",
+            "endValidity": "string",
+            "additionalProp1": {}
+          },
+          {
+            "type": "used_asset",
+            "asset": "string"
+          }
+        ],
+        "requirements": {
+          "mode": "AIR",
+          "subMode": "string",
+          "class": "FIRST_CLASS",
+          "operators": [
+            "string"
+          ],
+          "product": "string",
+          "assets": [
+            "string"
+          ],
+          "zones": [
+            "string"
+          ],
+          "prmNeeds": {
+            "encumbranceNeed": "pushchair",
+            "medicalNeed": "heart_condition",
+            "mobilityNeed": "wheelchair",
+            "psychoSensoryNeed": "visual_impaired"
+          },
+          "avoid": {
+            "zones": [
+              "string"
+            ],
+            "places": [
+              "P:"
+            ],
+            "lines": [
+              "string"
+            ]
+          },
+          "additionalProp1": {}
+        },
+        "isValidated": true,
+        "age": 0,
+        "fullName": "string",
+        "customerReference": "string",
+        "userProfile": "string"
+      }
+    ]
+  },
+  "links": [
+    {
+      "rel": "string",
+      "href": "string",
+      "type": "string",
+      "method": "POST",
+      "description": "string",
+      "body": {},
+      "headers": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "isMandatory": true,
+      "hash": "string",
+      "expires": "2025-05-14T08:36:24.653Z"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-modules:
+    - customer management
+    
+tags:
+  - name: customer management
+    description: the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to explicitly manage the customer account on the TO side .
+
+paths:
+  /collections/customers/items:
+    parameters:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+    post:
+      summary: "Create a TO CUSTOMER ACCOUNT for the customer"
+      operationId: createCustomer
+      description: creates a CUSTOMER ACCOUNT that can be later used for purchase of a trip
+      tags:
+        - customer management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
+      responses:
+        "201":
+          description: a new customer is created.
+          $ref: "#/components/responses/customerResponse"
+        "200":
+          description: this IS NOT THE DEFAULT response. Only to return if the customer already existed on the TO side,
+            based on email address, phone number or other supplied details.
+          $ref: "#/components/responses/customerResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+  
+  /collections/customers/items/{customerId}:
+    parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+    get:
+      summary: "Get the customer account from the TO system"
+      tags:
+        - customer management
+      operationId: getCustomer
+      responses:
+        "200":
+          $ref: "#/components/responses/customerResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+    patch:
+      summary: "Update the CUSTOMER ACCOUNT on the TO system"
+      description: updates the defined fields of the CUSTOMER ACCOUNT.<br>
+      tags:
+        - customer management
+      operationId: updateCustomer
+      requestBody:
+        content:
+          application/merge-patch+json:
+            schema:
+              description: Patch object for Customer resource as defined by https://datatracker.ietf.org/doc/html/rfc7396
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
+      responses:
+        "200":
+          $ref: "#/components/responses/customerResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+    delete:
+      summary: "Delete the CUSTOMER ACCOUNT from the TO system."
+      description: The timeline of deletion of the customer account depends on the TO processes, it could be instant, weeks or months.
+      tags:
+        - customer management
+      operationId: deleteCustomer
+      responses:
+        "200":
+          description:  CUSTOMER ACCOUNT deleted successfully
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+components:
+  responses:
+    customerResponse:
+      description: Customer Account
+      x-semantics:
+      - transmodel: none
+      headers:
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/customerAccount"
+
+  schemas:
+    customerAccount:
+      x-semantics:
+      - transmodel: CUSTOMER ACCOUNT
+      description: A registration of the TRANSPORT CUSTOMER with an ACCOUNT PROVIDER to obtain travel services.
+      type: object
+      properties:
+        id:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customerReference"
+        customer:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customer"
+        creationDate:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+          description: The date in which the CUSTOMER ACCOUNT has been created
+        modificationDate:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/dateTime"
+          description: Last modification date of CUSTOMER ACCOUNT.
+        status:
+          $ref: "#/components/schemas/customerAccountStatus"
+          description: The status of the CUSTOMER ACCOUNT
+
+    customerAccountStatus:
+      x-semantics:
+      - transmodel: CUSTOMER ACCOUNT . status
+      type: string
+      description: status of a CUSTOMER ACCOUNT<br>
+        _CREATED_ the customer account has been created but is not ready to create a purchase yet<br>
+        _TO_PENDING_VALIDATION_ the customer account is pending a verification of identity and properties by the TO. No purchases can be made in this step<br>
+        _OTP_REQUIRED_ the TO has sent an OTP to the customer's phone or email address and is expecting it to activate the account. No purchases can be made in this step<br>
+        _ACTIVE_ the customer account is active and can continue to purchase offers<br>
+        _BLOCKED_ the customer account has been blocked by the TO and can no longer use this TO<br>
+      enum: [ CREATED, TO_PENDING_VALIDATION, ACTIVE, BLOCKED ]

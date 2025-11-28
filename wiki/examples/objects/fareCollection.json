@@ -1,0 +1,28 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "userProfile": null,
+        "cardType": null,
+        "entitlement": null
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "identifier",
+      "properties": {
+        "userProfile": null,
+        "cardType": null,
+        "entitlement": null
+      }
+    }
+  ],
+  "properties": {
+    "type": "fares",
+    "userProfile": "example-string",
+    "cardType": "example-string"
+  }
+}

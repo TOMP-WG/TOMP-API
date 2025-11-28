@@ -1,0 +1,63 @@
+{
+    "type": "FeatureCollection",
+    "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
+    "features": [
+        {
+            "type": "Feature",
+            "id": "376e1083-92df-44e5-a1bf-d5570507b8",
+            "properties": {
+                "id": "376e1083-92df-44e5-a1bf-d5570507b8",
+                "type": "leg",
+                "product": "GBFS:vehicle_types:SMALL_CAR",
+                "from": "...",
+                "startTime": "..."
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        23.343,
+                        51.6923
+                    ],
+                    [
+                        34.233,
+                        42.3943
+                    ]
+                ]
+            },
+            "links": []
+        }
+    ],
+    "properties": {
+        "type": "package",
+        "id": "376e1083-92df-44e5-a1bf-d5570507b8ff",
+        "from": "...",
+        "startTime": "...",
+        "legs": [ {} ],
+        "products": [],
+        "travellers": []
+    },
+    "links": [
+        {
+            "rel": "rollback",
+            "method": "POST",
+            "href": "/processes/rollback-package/execute",
+            "body": { "packageId" : "376e1083-92df-44e5-a1bf-d5570507b8ff" },
+            "type": "application/json"
+        },
+        {
+            "rel": "confirm",
+            "method": "POST",
+            "href": "/processes/confirm-package/execute?f=geojson",
+            "body": { "packageId" : "376e1083-92df-44e5-a1bf-d5570507b8ff" },
+            "type": "application/geo+json"
+        },
+        {
+            "rel": "extend_expiry_time",
+            "method": "POST",
+            "href": "/processes/extend-expiry-time/execute",
+            "body": { "packageId" : "376e1083-92df-44e5-a1bf-d5570507b8ff" },
+            "type": "application/json"
+        }
+    ]
+}

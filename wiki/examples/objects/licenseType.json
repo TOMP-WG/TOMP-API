@@ -1,0 +1,9 @@
+{
+  "modes": [
+    "AIR",
+    "AIR"
+  ],
+  "type": "licenseType",
+  "licenseCategory": "DRIVER_LICENSE",
+  "licenseCode": "example-string"
+}

@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-modules:
+    - offers
+    
+tags:
+  - name: offer
+    description: This part of the API facilitates in supplying offers.
+
+paths:
+  /processes/search-offers/execution:
+    post:
+      operationId: searchOffers
+      summary: "Search for offers"
+      description: Returns offers based on travel specification, trip pattern, location, asset, product and user preferences.
+        In case of a shallow integration, can even be offered as an endpoint without authentication.
+      security:
+      - BearerAuth: []
+      - OpenData: []
+      x-semantics: 
+      - transmodel: STOP, COMMON, SINGLE, REPEATED FARE QUERY
+      parameters:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
+      tags:
+        - offer
+      requestBody:
+        $ref: "#/components/requestBodies/searchOfferRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/offersResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/offers/items:
+    get:
+      operationId: requestOffer
+      summary: "Get offer details"
+      x-semantics:
+      - transmodel: SALES OFFER PACKAGE QUERY
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offerId"
+      tags:
+        - offer
+      responses:
+        "200":
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/packageResponse"
+        default:
+          $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+          
+components:
+  requestBodies:
+    searchOfferRequest:
+      x-semantics:
+      - transmodel: TRIP REQUEST
+      content:
+        application/json:
+          schema:    
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: "#/components/schemas/searchOfferRequest"
+
+  responses:
+    offersResponse:
+      description: a list of offers
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/geo+json:
+          schema:
+            $ref: "#/components/schemas/offerCollection"
+    
+    offerResponse:
+      description: a single offer
+      headers:
+        Version:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+        Expires:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/httpDate"
+          required: true
+      content:
+        application/geo+json:
+          schema:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/package"
+
+  schemas:
+    searchOfferRequest:
+      type: object
+      x-semantics:
+      - transmodel: TRIP REQUEST
+      required:
+      - type
+      - specification
+      description: A package planning request, resulting in offers
+      properties:
+        type:
+          type: string
+          pattern: "^(searchOffer)$"
+        specification:
+          oneOf:
+          - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
+          - $ref: "#/components/schemas/tripPattern"
+          discriminator:
+            propertyName: type
+            mapping:
+              travel_specification: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
+              trip_pattern: "#/components/schemas/tripPattern"
+        requirements:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travellerRequirements"
+        travellers:
+          type: array
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/traveller"
+        places:
+          description: Places that are not specified in an external data source (like a home address)
+          type: array
+          minItems: 0
+          maxItems: 5
+          items:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/place"
+        packageToExchange:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
+        customFields:
+          $ref: "TOMP-API-1-CORE.yaml#/components/schemas/customProperties"
+
+    tripPattern:
+      x-semantics:
+      - transmodel: TRIP PATTERN
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/travelSpecification"
+      - type: object
+        properties:
+          type:
+            type: string
+            pattern: "^(tripPattern)$"
+          serviceJourneys:
+            type: array
+            items:
+              $ref: "TOMP-API-1-CORE.yaml#/components/schemas/serviceJourneyReference"
+          travelDate:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/date"
+
+    offerCollection:
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojson"
+      - type: object
+        description: a list of offers.
+        x-semantics:
+        - transmodel: TRIP DELIVERY
+        properties:
+          features:
+            type: array
+            items:
+              $ref: "#/components/schemas/offerFeature"
+          properties:
+            $ref: "#/components/schemas/offerCollectionProperties"
+
+    offerFeature:
+      allOf:
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonFeature"
+      - type: object
+        description: a single offer, the 'package' in a single feature
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            pattern: "^(offer)$"
+          properties:
+            $ref: "TOMP-API-1-CORE.yaml#/components/schemas/summary"
+
+    offerCollectionProperties:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            pattern: "^(OfferCollection)$"
+      - $ref: "TOMP-API-1-CORE.yaml#/components/schemas/geojsonCollectionProperties"

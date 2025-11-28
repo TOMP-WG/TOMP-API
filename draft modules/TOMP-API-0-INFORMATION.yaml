@@ -1,0 +1,465 @@
+openapi: 3.1.0
+info:
+  title: Transport Operator MaaS Provider API
+  description: "<h2>Context</h2>
+    <p>This API allows technical communication between Transport Operators (TO) and MaaS providers (MP, and other resellers), to fulfill a complete MaaS user journey<br>
+    For more information: <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-entry-page'>TOMP-API wiki</a>, and <a href='https://github.com/TOMP-WG/TOMP-API/wiki/OpenAPI-code-convention'>Coding conventions</a>"
+  version: "2.0.0"
+  contact:
+    name: TOMP working group
+    url: https://github.com/TOMP-WG/TOMP-API
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+  - url: https://example.to.eu/tomp/v2
+    description: example url
+
+tags:
+  - name: travel information
+    description: Traveller information that is not (yet) (completely) available in other standards
+
+paths:
+  /collections/entitlements/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getEntitlements
+      summary: "Retrieves all accepted entitlements"
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - travel information
+      responses:
+        "200":
+          $ref: "#/components/responses/entitlementsResponse"
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/card-types/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getCardTypes
+      summary: "Retrieves all accepted card types"
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - travel information
+      responses:
+        "200":
+          $ref: "#/components/responses/cardTypesResponse"
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/license-types/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getLicenseTypes
+      summary: "Retrieves all accepted license types"
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - travel information
+      responses:
+        "200":
+          $ref: "#/components/responses/licenseTypesResponse"
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/user-profiles/items:
+    get:
+      security:
+      - OpenData: []
+      operationId: getUserProfiles
+      summary: "Retrieves all user profile definitions"
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+      tags:
+        - travel information
+      responses:
+        "200":
+          $ref: "#/components/responses/userProfilesResponse"
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+  /collections/fares/items:
+    get:
+      operationId: getFare
+      summary: "Retrieve fare information for a product, user profile, entitlement, and card type.
+        The reseller should identify itself with an authorization token (to get specific prices)"
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/productId"
+        - in: query
+          name: user-profile
+          description: user profile name, as specified in the user profiles
+          required: false
+          explode: false
+          schema:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+        - in: query
+          name: entitlement
+          description: entitlement id
+          required: false
+          explode: false
+          schema:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/entitlementReference"
+        - in: query
+          name: card-type
+          description: card type
+          required: false
+          explode: false
+          schema:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/cardTypeReference"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/limit"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/offset"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/bbox"
+      security:
+        - BearerAuth: []
+        - OpenData: []
+      tags:
+        - travel information
+      responses:
+        "200":
+          $ref: "#/components/responses/fareCollectionResponse"
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
+components:
+  responses:
+    userProfilesResponse:
+      description: a list of user profiles
+      headers:
+        Version:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/userProfileCollection"
+
+    cardTypesResponse:
+      description: a list of accepted card types
+      headers:
+        Version:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/cardTypeCollection"
+
+    licenseTypesResponse:
+      description: a list of accepted license types
+      headers:
+        Version:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/licenseTypeCollection"
+
+    entitlementsResponse:
+      description: a list of accepted entitlements
+      headers:
+        Version:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/version"
+        Content-Language:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage"
+      content:
+        application/json:
+          schema: 
+            $ref: "#/components/schemas/entitlementCollection"
+
+    fareCollectionResponse:
+      description: fares per user profile / entitlement / card type
+      headers:
+        Version:
+          $ref: '../TOMP-API-1-CORE.yaml#/components/headers/version'
+        Content-Language:
+          $ref: '../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage'
+        Digest:
+          $ref: '../TOMP-API-1-CORE.yaml#/components/headers/digest'
+        PublicKey:
+          $ref: '../TOMP-API-1-CORE.yaml#/components/headers/publicKey'
+        SignedDigest:
+          $ref: '../TOMP-API-1-CORE.yaml#/components/headers/signedDigest'
+      content:
+        application/json:
+          schema:
+             $ref: "#/components/schemas/fareCollection"
+
+  schemas:
+    fareCollection:
+      description: A collection of fares for a product, user profile, entitlement, and card type.
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                pattern: "^(Feature)$"
+              id:
+                type: string
+              properties:
+                type: object
+                additionalProperties: true 
+                properties:
+                  userProfile:
+                    $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+                  cardType:
+                    $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/cardTypeReference"
+                  entitlement:
+                    $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/entitlementReference"
+                  validity:
+                    $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/dateTimeRange"
+                  fare:
+                    $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/fareStructure"
+        properties:
+          type: object
+          additionalProperties: true
+          description: add the used query parameters in here (proof)
+          properties:
+            type:
+              type: string
+              enum: [fares]
+            userProfile:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+            cardType:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/cardTypeReference"
+            entitlement:
+              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/entitlementReference"
+            limit:
+              type: integer
+              description: The maximum number of items to return.
+            offset:
+              type: integer
+              description: The offset for pagination.
+            bbox:
+              type: array
+              items:
+                type: number
+              minItems: 4
+              maxItems: 4
+              description: Bounding box for spatial filtering, in the format [minLon, minLat, maxLon, maxLat].
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+
+    userProfileCollection:
+      description: a list of user profiles.
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                pattern: "^(Feature)$"
+              id:
+                type: string
+              properties:
+                $ref: "#/components/schemas/userProfile"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [user_profiles]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+    userProfile:
+      x-semantics:
+      - transmodel: USER PROFILE
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        type:
+          type: string
+          pattern: "^(userProfile)$"
+        name:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/userProfileReference"
+        ageGroup:
+          type: string
+          enum: [ ANYONE, INFANT, CHILD, YOUTH, ADULT, SENIOR ]
+          description: The age group of the user profile, used to determine applicable fares and discounts.
+        age:
+          $ref: "#/components/schemas/range"
+        length:
+          $ref: "#/components/schemas/range"
+        weight:
+          $ref: "#/components/schemas/range"
+        monthDayOnWhichAgeApplies:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/shortInt"
+        localResident:
+          type: boolean
+        genderLimitation:
+          type: string
+          enum: [SAME_SEX, FEMALE_ONLY, MALE_ONLY, BOTH]
+        discountBasis:
+          type: string
+          enum: [DISCOUNT, FREE, FULL_RATE]
+
+    range:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: number
+
+    cardTypeCollection:
+      description: a list of accepted card types.
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                pattern: "^(Feature)$"
+              id:
+                type: string
+              properties:
+                $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/cardType"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [card_types]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+    licenseTypeCollection:
+      description: a list of accepted license types.
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            type: object
+            properties: 
+              type:
+                type: string
+                pattern: "^(Feature)$"
+              properties:
+                $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/licenseType"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [license_types]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/link"
+
+    entitlementCollection:
+      description: a list of accepted entitlements.
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: "^(FeatureCollection)$"
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                pattern: "^(Feature)$"
+              id:
+                type: string
+              properties:
+                $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/entitlementGiven"
+        properties:
+          type: object
+          additionalProperties: true
+          properties:
+            type:
+              type: string
+              enum: [entitlements]
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description:
+            actions that can be performed on this package, but also alternative (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what the financial consequences are.
+          items:
+            $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/link"

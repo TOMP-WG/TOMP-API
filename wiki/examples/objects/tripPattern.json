@@ -1,0 +1,10 @@
+{
+  "type": "tripPattern",
+  "from": "GPS|gps|{datasource-prefix}|P:[a-zA-Z0-9\\-_.]+",
+  "via": [],
+  "serviceJourneys": [
+    "example-string",
+    "example-string"
+  ],
+  "travelDate": "full-date"
+}

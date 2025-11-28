@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "Leg",
+        "id": "5d260584-9f78-4204-884b-3dd899a68f57"
+      },
+      "id": "5d260584-9f78-4204-884b-3dd899a68f57",
+      "geometry": {
+        "type": "LineString",
+        "geometry": [
+          [
+            [
+              6.169639,
+              52.253279
+            ],
+            [
+              6.05623,
+              52.63473
+            ]
+          ]
+        ]
+      },
+      "links": []
+    }
+  ],
+  "properties": {
+    "type": "offer",
+    "id": "aff11b01-c888-44ff-b6f5-d0aed162f605",
+    "status": "OFFERED",
+    "summary": {
+      "id": "aff11b01-c888-44ff-b6f5-d0aed162f605",
+      "specification": {
+        "type": "travelSpecification",
+        "from": "GPS:52.342392,41.43i4234"
+      },
+      "price": {
+        "amount": 5.54,
+        "currencyCode": "EUR"
+      }
+    },
+    "price": {
+      "amount": 5.54,
+      "taxPercentageUsed": 21,
+      "currencyCode": "EUR",
+      "elements": [
+        {
+          "amount": 3.14,
+          "type": "FIXED"
+        },
+        {
+          "amount": 2.40,
+          "type": "FLEX",
+          "priceCondition": "DEFAULT",
+          "units": "HRS",
+          "amountOfUnits": 1
+        }
+      ],
+      "estimated": true,
+      "description": "Estimated price for one hour of usage"
+    }
+  }
+}
