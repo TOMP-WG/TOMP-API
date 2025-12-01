@@ -3,7 +3,7 @@
     "@apidevtools/swagger-parser": "^10.1.1",
     "axios": "^1.9.0",
     "body-parser": "^2.2.0",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "jsonata": "^2.0.6",
     "node-fetch": "^3.3.2",
     "openapi-sampler": "^1.6.1",
