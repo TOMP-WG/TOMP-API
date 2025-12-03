@@ -65,34 +65,35 @@ The working group meetings take place every month with the goal to develop and s
 <td style="width: 220px;">
 <b>Base modules</b>
 <ul>
-  <li title="Enables requesting offers."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/offer.md">Offer</a></li>
-  <li title="Facilitates the purchase of (mobility) services."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/purchase.md">Purchase</a></li>
-  <li title="Manages the execution phase of the trip."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/execution.md">Execute</a></li>
+  <li title="Enables requesting offers."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md#offer-module--pre-sales-module">Offer</a></li>
+  <li title="Facilitates the purchase of (mobility) services."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md#purchase-module">Purchase</a></li>
+  <li title="Manages the execution phase of the trip."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md#execution-module">Execute</a></li>
 </ul>
-
 <b>Functional additions</b>
 <ul>
-  <li title="Allows to reserve an offer and modify it before purchasing it."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/pre-sales.md">Pre sales</a></li>
-  <li title="Offers customer support functionalities."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/support.md">Support</a></li>
-  <li title="Manages after sales processes, like refunding or revokation of tickets."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/after-sales.md">After sales</a></li>
+  <li title="Allows to reserve an offer and modify it before purchasing it."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md#offer-module--pre-sales-module">Pre sales</a></li>
+  <li title="Offers customer support functionalities."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md#support-module">Support</a></li>
+  <li title="Manages after sales processes, like refunding or revokation of tickets."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md#after-sales-module-including-payment.md">After sales</a></li>
 </ul>
-
 <b>Supportive modules</b>
 <ul>
   <li title="To become OGC compliant, you need to implement these endpoints."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/discovery.md">Discovery</a></li>
   <li title="Handles user-related information and preferences."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/customer-management.md">Customer Management</a></li>
   <li title="(draft) data exchange that is not yet standardized yet (like user profiles, license and card types)."><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules/travel-information.md">Information</a></li>
 </ul>
-
 <b>Reseller module (MP)</b>
 <ul>
   <li title="The part of the API that must be implemented by the reseller/MP, to cope with messages sent by the TO or driver. It contains also confirmation and payment requests.">Notify</li>
 </ul>
+<b>Per mode</b><br>
+<ul><li><a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/modules.md">Details</a></li></ul>
 
-<h3>License</h3>
-This project is licensed under the Apache-2.0 License.
+<b>License</b><br>
+<a href="http://www.apache.org/licenses/LICENSE-2.0">
+  <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0">
+</a>
 
-<h3>Code of conduct</h3>
+<b>Code of conduct</b><br>
 <a href="https://github.com/TOMP-WG/TOMP-API/blob/master/code_of_conduct.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant 2.1 badge"></a>
 
   </tr>
