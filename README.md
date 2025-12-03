@@ -1,4 +1,4 @@
-<table>
+<table border="0" style="border-collapse: collapse; border: none;">
   <tr>
     <th width="80%" style="text-align: left !important;">
       <img align="center" src="https://github.com/TOMP-WG/website/blob/master/wiki/images/TOMP%20WG%20grey.png" width="300" style="display: inline-block;">
