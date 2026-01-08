@@ -144,7 +144,7 @@ paths:
         default:
           $ref: "TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
-  /processes/{processID}:
+  /processes/{processId}:
     get:
       security:
       - OpenData: []
@@ -159,9 +159,36 @@ paths:
         description. For more information, see <a href="https://docs.ogc.org/is/18-062/18-062.html#sc_process_description">Section 7.10</a>.
       operationId: getProcessDescription
       parameters:
-      - name: processID
+      - name: processId
         in: path
         required: true
+        description: |
+          - search-offers: [offer] search for available offers based on a travel specification, products or assets and traveller information
+          - update-traveller: [pre-sales] update traveller information, like personal data, cards and licenses
+          - update-travel-specification: [pre-sales, execution] update travel specification (times, locations)
+          - remove-offer: [pre-sales] remove an offer from a package
+          - assign-asset: [pre-sales, execution] assign an asset to a package / leg. The asset can be a vehicle,
+            a bike, a scooter, or any other physical object needed to execute the package
+          - assign-ancillary: [pre-sales, execution] assign an ancillary to a package / leg
+          - select-offers: [pre-sales] select one or more offers to be included in a package
+          - purchase-offers: [purchase after offer] purchase an offer(s) to create a purchased (PENDING or CONFIRMED) package
+          - release-package: [purchase] release a PENDING package 
+          - purchase-package: [purchase after pre-sales] purchase a package 
+          - confirm-purchase: [purchase] confirm a PENDING package
+          - rollback-purchase: [purchase] rollback a PENDING package
+          - extend-expiry-time: [purchase] extend the expiry time of a PENDING package
+          - start-leg: [execution] start a leg
+          - pause-leg: [execution] pause a leg
+          - resume-leg: [execution] resume a leg
+          - end-leg: [execution] end a leg
+          - postpone-leg: [execution] postpone a leg
+          - extend-leg: [execution] extend a leg
+          - request-support: [support] request support
+          - cancel-package: [after sales] cancel a package
+          - claim-redress-option: [after sales] claim a redress option
+          - confirm-redress-option: [after sales] confirm a redress option
+          - refund-deposit: [after sales] refund a deposit
+          - confirm-payment: [after sales] confirm a payment
         schema:
           type: string
           enum: 
@@ -171,7 +198,8 @@ paths:
           - remove-offer
           - assign-asset
           - assign-ancillary
-          - purchase-offer
+          - select-offers
+          - purchase-offers
           - release-package
           - purchase-package
           - confirm-purchase
@@ -204,12 +232,32 @@ components:
     collectionId:
       name: collectionId
       in: path
-      description: local identifier of a collection
       required: true
+      description: |
+        - datasources: to get external data source definitions, used throughout the API (references)
+
+        Operational collections:
+        - packages: to get a single package (packageId is needed in the request)
+        - offers: to get a single offer (offerId is needed in the request)
+        - assets: to get (available) assets for a leg, like seats, vehicles, bikes or scooters
+        - ancillaries: to get (available) ancillaries for a leg, like insurances, meals or extra luggage
+        - travel-documents: to get travel documents, like tickets or boarding passes
+        - customers: to get customer information
+        - support-tickets: to get support tickets
+        - payments: to get payment information
+        - redress-options: to get redress options (vouchers, refunds)
+
+        Travel information collections:
+        - entitlements: to get entitlement definitions, like subscriptions, discounts or passes
+        - card-types: to get supported card types for user profiles (like OV-chipkaart, bank-cards)
+        - license-types: to get supported license types for user profiles (like driving licenses)
+        - user-profiles: to get user profile definitions (age groups, special needs)
+        - fares: to get a fare, based on origin, destination, time, and user-profile
+        
       schema:
         type: string
         description: these are all collections exposed when fully implemented
-        enum: [packages, offers, assets, ancillaries, support-tickets, payments, refund-options]
+        enum: [packages, offers, assets, ancillaries, travel-documents, customers, entitlements, card-types, license-types, user-profiles, fares, datasources, support-tickets, payments, redress-options]
 
   responses:
     landingPageResponse:
