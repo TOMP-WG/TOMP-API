@@ -18,10 +18,10 @@ Secondly, we have created some tooling to cherrypick your required functionality
 
 ## Quick start Discovery & Reuse
 
-> a. In the generic quick start guide, you should have selected 'discovery module: y'. Otherwise, redo the process.  
+> a. In the generic quick start guide, you should have selected 'discovery module: y'. If you didn't, redo the process.  
 > b. The discovery module complies to the OGC API Core, displaying meta data, but this meta-data can be derived from the specification.  
-> c. To do so, use the python tool that can be found in /tools/create_meta_data. It will create the necessary output (machine readable only) for the required discovery endpoints.  
-> d. Be aware of the fact that you still need to create the human readable variant (.html).
+> c. Use the recipe described in [/tools/ogc_tools](https://github.com/TOMP-WG/TOMP-API/tree/master/tools/ogc_tools) to generate all content for your implementations to become OGC compliant.
+> d. Be aware of the fact that you still need to update the human readable variant (.html).
 
 ## General structure
 

@@ -50,7 +50,7 @@ The working group meetings take place every month with the goal to develop and s
   </li>
   <li>
     <strong>our quick start guide</strong>
-    <a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/home.md">here</a>
+    <a href="https://github.com/TOMP-WG/TOMP-API/blob/master/wiki/home.md#quick-start-guide">here</a>
   </li>
   <li>
     <strong>code-snippets</strong>:
@@ -58,7 +58,7 @@ The working group meetings take place every month with the goal to develop and s
   </li>
   <li>
     <strong>static output</strong>:
-    we already prepared all static output from most meta-data endpoints. You can include them directly in your solution.
+    You can generate your static OGC compliancy files, use the recipe <a href="https://github.com/TOMP-WG/TOMP-API/tree/master/tools/ogc_tools">here</a>
   </li>
 </ol>
 
