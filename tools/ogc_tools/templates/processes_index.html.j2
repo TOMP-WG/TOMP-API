@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <title>OGC API - Processes</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem; vertical-align: top; }
+    th { background: #f6f6f6; text-align: left; }
+    code { background: #f2f2f2; padding: 0.1rem 0.2rem; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Processes</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>processId</th>
+        <th>Description</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in process_list.processes %}
+      <tr>
+        <td><code>{{ p.id }}</code></td>
+        <td>{{ p.title }} - {{ p.description }}</td>
+        <td>
+          <ul>
+            <li><a href="{{ p.id }}.html">HTML</a></li>
+            <li><a href="{{ p.id }}.json">JSON</a></li>
+          </ul>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

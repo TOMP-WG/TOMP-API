@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <title>Process {{ process.id }}</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+    code { background: #f2f2f2; padding: 0.1rem 0.2rem; }
+    pre { background: #0b1020; color: #e7e7e7; padding: 1rem; overflow: auto; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .card { border: 1px solid #ddd; padding: 1rem; border-radius: 6px; }
+    ul { margin: 0.25rem 0 0 1.2rem; }
+  </style>
+</head>
+<body>
+  <p><a href="../processes.html">← back</a></p>
+
+  <h1><code>{{ process.id }}</code></h1>
+  <p>{{ process.title }}</p>
+  <p>{{ process.description }}</p>
+
+  <div class="card">
+    <h2>Links</h2>
+    <ul>
+      {% for l in process.links %}
+        <li><code>{{ l.method }}</code> <a href="{{ l.href }}">{{ l.rel }}</a> <small>({{ l.type }})</small></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Inputs</h2>
+      {% if process.inputs and process.inputs|length > 0 %}
+        <ul>
+          {% for name, inp in process.inputs.items() %}
+            <li>
+              <code>{{ name }}</code>
+              {% if inp.minOccurs == 1 %}<strong>(required)</strong>{% endif %}
+              {% if inp.description %}<div><small>{{ inp.description }}</small></div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p><em>Geen inputs gevonden.</em></p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Outputs</h2>
+      {% if process.outputs and process.outputs|length > 0 %}
+        <ul>
+          {% for name, out in process.outputs.items() %}
+            <li><code>{{ name }}</code> — <small>{{ out.description }}</small></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p><em>Geen outputs gevonden.</em></p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>JSON</h2>
+    <pre>{{ process | tojson(indent=2) }}</pre>
+  </div>
+</body>
+</html>
