@@ -97,7 +97,7 @@ Invoke-Expression $join
 #Set-Content -Path .\TOMP-API.yaml -Value $content -Encoding utf8
 
 $in  = '.\TOMP-API-BOM.yaml'
-$out = '.\TOMP-API.yaml'
+$out = "$($PWD.Path)\TOMP-API.yaml"
 
 If ($args[0] -eq 'mp') {
     $out = '.\TOMP-API-MP.yaml'
