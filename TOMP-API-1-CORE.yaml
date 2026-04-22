@@ -1610,7 +1610,8 @@ components:
       items:
         type: number
         format: float
-        minimum: 0.0
+        minimum: -180.0
+        maximum: 180.0
 
     geojsonPoint:
       type: object
