@@ -2568,12 +2568,14 @@ components:
           type: number
           example: 6.169639
           format: float
-          minimum: 0
+          minimum: -180.0
+          maximum: 180.0  
         lat:
           type: number
           example: 52.253279
           format: float
-          minimum: 0
+          minimum: -90.0
+          maximum: 90.0
         alt:
           type: number
           description: altitude, in meters above sea level
