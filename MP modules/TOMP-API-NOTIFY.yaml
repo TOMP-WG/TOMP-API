@@ -209,30 +209,7 @@ components:
               $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/packageReference"
 
         assetInfo:
-          type: object
-          properties:
-            location:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/placeReference"
-            assetState:
-              type: string
-              description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
-              enum: [IN_USE, PAUSED]
-              default: IN_USE
-            distance:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/float"
-              description: the travelled distance, in km. Only if applicable.
-            distanceUnits:
-              type: string
-              enum: [KM, MILE]
-            duration:
-              $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/normalInt"
-              description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
-            currentCharge:
-              type: integer
-              minimum: 0
-              maximum: 100
-              description: percentage of charge available
-
+          $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/assetInfo"
         links:
           $ref: "../TOMP-API-1-CORE.yaml#/components/schemas/links"
         message:

@@ -133,6 +133,49 @@ paths:
         default:
           $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
 
+  /collections/asset-info/items:
+    get:
+      operationId: getAssetInfo
+      summary: "Retrieve asset info for assets that are assigned to a leg. Only 
+      legs are included that were created on behalf of the calling party."
+      parameters:
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/optionalLegId"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/limit"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/offset"
+        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/bbox"
+      security:
+        - BearerAuth: []
+        - OpenData: []
+      tags:
+        - travel information
+      responses:
+        "200":
+          description: asset info
+          headers:
+            Version:
+              $ref: '../TOMP-API-1-CORE.yaml#/components/headers/version'
+            Content-Language:
+              $ref: '../TOMP-API-1-CORE.yaml#/components/headers/contentLanguage'
+            Digest:
+              $ref: '../TOMP-API-1-CORE.yaml#/components/headers/digest'
+            PublicKey:
+              $ref: '../TOMP-API-1-CORE.yaml#/components/headers/publicKey'
+            SignedDigest:
+              $ref: '../TOMP-API-1-CORE.yaml#/components/headers/signedDigest'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assets:
+                    type: array
+                    items:
+                      $ref: '../TOMP-API-1-CORE.yaml#/components/schemas/assetInfo'
+        default:
+          $ref: "../TOMP-API-1-CORE.yaml#/components/responses/errorResponse"
+
 components:
   responses:
     userProfilesResponse:
