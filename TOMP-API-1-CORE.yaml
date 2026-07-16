@@ -669,10 +669,10 @@ components:
           pattern: "^(asset)$"
         id:
           $ref: "#/components/schemas/assetReference"
-          description: Identifier of an asset. Can be an external reference, but also a (internal) ID
+          description: Identifier of an asset. Can be an external reference, but also a (internal) ID. If the asset can me moved by the user e.g. a shared bike, the id is rotated to a random string after each rental to protect user privacy.
         visualId:
           $ref: "#/components/schemas/shortString"
-          description: for instance, a license plate or seat number.
+          description: For instance, a license plate or seat number. Only provided if the asset is available for renting/booking.
 
         product:
           $ref: "#/components/schemas/productReference"
@@ -712,7 +712,7 @@ components:
       properties:
         id:
           $ref: "#/components/schemas/assetReference"
-          description: Identifier of an asset. Can be an external reference, but also a (internal) ID
+          description: Identifier of an asset. Can be an external reference, but also a (internal) ID. If the asset can me moved by the user e.g. a shared bike, the id is rotated to a random string after each rental to protect user privacy.
         location:
           $ref: "#/components/schemas/placeReference"
         assetState:
