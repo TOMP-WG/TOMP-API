@@ -669,10 +669,10 @@ components:
           pattern: "^(asset)$"
         id:
           $ref: "#/components/schemas/assetReference"
-          description: Identifier of an asset. Can be an external reference, but also a (internal) ID
+          description: Identifier of an asset. Can be an external reference, but also a (internal) ID. If the asset can me moved by the user e.g. a shared bike, the id is rotated to a random string after each rental to protect user privacy.
         visualId:
           $ref: "#/components/schemas/shortString"
-          description: for instance, a license plate or seat number.
+          description: For instance, a license plate or seat number. Only provided if the asset is available for renting/booking.
 
         product:
           $ref: "#/components/schemas/productReference"
@@ -703,6 +703,37 @@ components:
           $ref: "#/components/schemas/customProperties"
         fee:
           $ref: "#/components/schemas/fareStructure"
+
+    assetInfo:
+      x-semantics:
+      - transmodel: VEHICLE, PARKING BAY, CYCLE STORAGE EQUIPMENT, VEHICLE CHARGING, EQUIPMENT
+      type: object
+      description: asset status information
+      properties:
+        id:
+          $ref: "#/components/schemas/assetReference"
+          description: Identifier of an asset. Can be an external reference, but also a (internal) ID. If the asset can me moved by the user e.g. a shared bike, the id is rotated to a random string after each rental to protect user privacy.
+        location:
+          $ref: "#/components/schemas/placeReference"
+        assetState:
+          type: string
+          description: in case the fare is dependent on being in use or being paused, this field must be used. Default IN_USE
+          enum: [IN_USE, PAUSED]
+          default: IN_USE
+        distance:
+          $ref: "#/components/schemas/float"
+          description: the travelled distance, in km. Only if applicable.
+        distanceUnits:
+          type: string
+          enum: [KM, MILE]
+        duration:
+          $ref: "#/components/schemas/normalInt"
+          description: the time in seconds that the assed is used OR to reach the pickup location (ETA). Only if applicable.
+        currentCharge:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: percentage of charge available
 
     cargoLimits:
       x-semantics:
