@@ -904,6 +904,123 @@ components:
         customFields:
           $ref: "#/components/schemas/customProperties"
 
+    verifiableCredential:
+      x-semantics:
+      - transmodel: EVIDENCE
+      type: object
+      description: A W3C Verifiable Credential (VC) or Verifiable Presentation (VP), submitted as digital,
+        cryptographically verifiable proof of a claim about the traveller (e.g. a digital driver license,
+        an entitlement, a card or an age/identity claim). A VC is a single, issuer-signed credential.
+        A VP is a (possibly selectively disclosed) presentation, wrapping one or more credentials, signed by the holder.
+        Optionally, a VP can be bound to a **challenge**/**domain** (proof of possession), to let whoever collected
+        it from the holder's wallet confirm it's not a replayed copy - see those properties for how this fits the
+        preferred TOMP architecture, where the **TO** never talks to the traveller's wallet directly.
+      required:
+        - type
+        - format
+        - credential
+      examples:
+      # Dutch example: a W3C JWT-VC proving a driver license (category B), issued by RDW.
+      - type: VERIFIABLE_CREDENTIAL
+        format: JWT_VC
+        proves: LICENSE
+        subject: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnXv1Ch1zy"
+        credential: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDp3ZWI6cmR3Lm5sI2tleS0xIn0.eyJpc3MiOiJkaWQ6d2ViOnJkdy5ubCIsInN1YiI6ImRpZDprZXk6ejZNa2hhWGdCWkR2b3REa0w1MjU3ZmFpenRpR2lDMlF0S0xHcGJublh2MUNoMXp5IiwibmJmIjoxNzAwMDAwMDAwLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiRHJpdmVyTGljZW5zZUNyZWRlbnRpYWwiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6a2V5Ono2TWtoYVhnQlpEdm90RGtMNTI1N2ZhaXp0aUdpQzJRdEtMR3Bibm5YdjFDaDF6eSIsImxpY2Vuc2VDYXRlZ29yeSI6IkIiLCJsaWNlbnNlTnVtYmVyIjoiTkwtMTIzNDU2NyIsImlzc3VpbmdDb3VudHJ5IjoiTkwifX19.hqm-Gv0e1sJ4yBnxvkJfRzWHqWdpKUhzJ4fGm0X3n8w"
+        issuer: "did:web:rdw.nl"
+      # Dutch example (as actually collected): the VC above, wrapped in a holder-signed Verifiable Presentation.
+      # In the preferred TOMP architecture, the MP - not the TO - runs this OpenID4VP exchange directly with the
+      # traveller's own wallet app (the TO has no app/session on the traveller's device to do this itself), so
+      # "domain" here is the MP's own client_id/redirect_uri, and "challenge" the nonce the MP issued and verified.
+      # The MP then simply relays this already-verified VP onward to the TO as opaque evidence - the TO trusts that
+      # relay instead of re-challenging the wallet, and only re-verifies the signatures (both RDW's and the holder's)
+      # and that this evidence is correctly attached to the matching traveller in this request (see "subject").
+      - type: VERIFIABLE_PRESENTATION
+        format: JWT_VP
+        proves: LICENSE
+        subject: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnXv1Ch1zy"
+        domain: "https://app.example-mp.nl"
+        challenge: "4f9c2e71-8b3a-4c2d-9e4a-7a5b6c1d2e3f"
+        credential: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDprZXk6ejZNa2hhWGdCWkR2b3REa0w1MjU3ZmFpenRpR2lDMlF0S0xHcGJublh2MUNoMXp5I3o2TWtoYVhnQlpEdm90RGtMNTI1N2ZhaXp0aUdpQzJRdEtMR3Bibm5YdjFDaDF6eSJ9.eyJpc3MiOiJkaWQ6a2V5Ono2TWtoYVhnQlpEdm90RGtMNTI1N2ZhaXp0aUdpQzJRdEtMR3Bibm5YdjFDaDF6eSIsInN1YiI6ImRpZDprZXk6ejZNa2hhWGdCWkR2b3REa0w1MjU3ZmFpenRpR2lDMlF0S0xHcGJublh2MUNoMXp5IiwiYXVkIjoiaHR0cHM6Ly9hcHAuZXhhbXBsZS1tcC5ubCIsIm5vbmNlIjoiNGY5YzJlNzEtOGIzYS00YzJkLTllNGEtN2E1YjZjMWQyZTNmIiwibmJmIjoxNzAwMDAwMTAwLCJ2cCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVQcmVzZW50YXRpb24iXSwidmVyaWZpYWJsZUNyZWRlbnRpYWwiOlsiZXlKaGJHY2lPaUpGVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0lzSW10cFpDSTZJbVJwWkRwM1pXSTZjbVIzTG01c0kydGxlUzB4SW4wLmV5SnBjM01pT2lKa2FXUTZkMlZpT25Ka2R5NXViQ0lzSW5OMVlpSTZJbVJwWkRwclpYazZlalpOYTJoaFdHZENXa1IyYjNSRWEwdzFNalUzWm1GcGVuUnBSMmxETWxGMFMweEhjR0p1YmxoMk1VTm9NWHA1SWl3aWJtSm1Jam94TnpBd01EQXdNREF3TENKMll5STZleUpBWTI5dWRHVjRkQ0k2V3lKb2RIUndjem92TDNkM2R5NTNNeTV2Y21jdk1qQXhPQzlqY21Wa1pXNTBhV0ZzY3k5Mk1TSmRMQ0owZVhCbElqcGJJbFpsY21sbWFXRmliR1ZEY21Wa1pXNTBhV0ZzSWl3aVJISnBkbVZ5VEdsalpXNXpaVU55WldSbGJuUnBZV3dpWFN3aVkzSmxaR1Z1ZEdsaGJGTjFZbXBsWTNRaU9uc2lhV1FpT2lKa2FXUTZhMlY1T25vMlRXdG9ZVmhuUWxwRWRtOTBSR3RNTlRJMU4yWmhhWHAwYVVkcFF6SlJkRXRNUjNCaWJtNVlkakZEYURGNmVTSXNJbXhwWTJWdWMyVkRZWFJsWjI5eWVTSTZJa0lpTENKc2FXTmxibk5sVG5WdFltVnlJam9pVGt3dE1USXpORFUyTnlJc0ltbHpjM1ZwYm1kRGIzVnVkSEo1SWpvaVRrd2lmWDE5LmhxbS1HdjBlMXNKNHlCbnh2a0pmUnpXSHFXZHBLVWh6SjRmR20wWDNuOHciXX19.ZFz1y2Kz3nX9sV2hQ4pR8tW6oM1aB7cE0dG5jK3lN9q"
+        issuer: "did:web:rdw.nl"
+      # Danish example: an ISO/IEC 18013-5 mdoc (CBOR, base64url-encoded) proving a driving licence (category B),
+      # as used by the Danish kørekort-app and the upcoming EUDI Wallet (AltID).
+      - type: VERIFIABLE_CREDENTIAL
+        format: MDOC
+        proves: LICENSE
+        subject: "DK-9876543"
+        credential: "omdkb2NUeXBldW9yZy5pc28uMTgwMTMuNS4xLm1ETGxpc3N1ZXJTaWduZWSiam5hbWVTcGFjZXOhcW9yZy5pc28uMTgwMTMuNS4xh6JxZWxlbWVudElkZW50aWZpZXJrZmFtaWx5X25hbWVsZWxlbWVudFZhbHVlaEFuZGVyc2VuonFlbGVtZW50SWRlbnRpZmllcmpnaXZlbl9uYW1lbGVsZW1lbnRWYWx1ZWRBbm5honFlbGVtZW50SWRlbnRpZmllcmpiaXJ0aF9kYXRlbGVsZW1lbnRWYWx1ZWoxOTkwLTA1LTEyonFlbGVtZW50SWRlbnRpZmllcm9pc3N1aW5nX2NvdW50cnlsZWxlbWVudFZhbHVlYkRLonFlbGVtZW50SWRlbnRpZmllcnFpc3N1aW5nX2F1dGhvcml0eWxlbGVtZW50VmFsdWVyRsOmcmRzZWxzc3R5cmVsc2VuonFlbGVtZW50SWRlbnRpZmllcm9kb2N1bWVudF9udW1iZXJsZWxlbWVudFZhbHVlakRLLTk4NzY1NDOicWVsZW1lbnRJZGVudGlmaWVycmRyaXZpbmdfcHJpdmlsZWdlc2xlbGVtZW50VmFsdWWBo3V2ZWhpY2xlX2NhdGVnb3J5X2NvZGVhQmppc3N1ZV9kYXRlajIwMTItMDYtMDFrZXhwaXJ5X2RhdGVqMjAzMi0wNi0wMWppc3N1ZXJBdXRoeC9DT1NFX1NpZ24xKC4uLnNpZ25hdHVyZSBvbWl0dGVkIGZvciBicmV2aXR5Li4uKQ"
+        issuer: "Færdselsstyrelsen (DK)"
+      properties:
+        type:
+          type: string
+          enum: [ VERIFIABLE_CREDENTIAL, VERIFIABLE_PRESENTATION ]
+          description: whether **credential** contains a single issuer-signed Verifiable Credential (VC),
+            or a holder-signed Verifiable Presentation (VP) that bundles one or more credentials.
+          example: VERIFIABLE_CREDENTIAL
+        format:
+          type: string
+          enum: [ JWT_VC, JWT_VP, LDP_VC, LDP_VP, SD_JWT, MDOC ]
+          description: the serialization/proof format of **credential**.
+            _JWT_VC_/_JWT_VP_ - JOSE/JWT compact serialization.
+            _LDP_VC_/_LDP_VP_ - JSON-LD with a Linked Data Proof.
+            _SD_JWT_ - Selective Disclosure JWT (SD-JWT VC), as used by the EU Digital Identity (EUDI) Wallet.
+            _MDOC_ - an ISO/IEC 18013-5 mobile document (mdoc), CBOR-encoded and PKI/COSE-signed; used by
+            e.g. mobile driving licences (mDL) such as the Danish kørekort-app, and also supported by the EUDI Wallet.
+          example: JWT_VC
+        proves:
+          type: string
+          enum: [ LICENSE, AGE, IDENTITY, ENTITLEMENT, CARD, OTHER ]
+          description: the traveller claim this evidence is submitted as proof for, e.g. a driver **license**.
+            The exact details (e.g. the license category) are a claim inside **credential** itself (see its description),
+            not a separate plaintext field, so they can't be spoofed independently from the signed proof.
+          example: LICENSE
+        subject:
+          $ref: "#/components/schemas/normalString"
+          description: holder/subject identifier (e.g. a DID, or for an _MDOC_ the document number) that this credential
+            was issued to, repeated here in plaintext only to let an MP/TO quickly route or correlate the credential to
+            this traveller. This is NOT a substitute for verification - in the preferred TOMP architecture the TO has no
+            app/session of its own on the traveller's device, so it cannot independently re-challenge the wallet to
+            confirm this binding - it can only cryptographically verify **credential** itself (the signatures prove the
+            evidence is genuine and unaltered) and trust that whoever attached it to this traveller in this request
+            (normally the MP, see **domain**) correctly matched it to them.
+          example: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnXv1Ch1zy"
+        domain:
+          $ref: "#/components/schemas/normalString"
+          description: only applicable when **type** is _VERIFIABLE_PRESENTATION_ - the relying party this presentation
+            was created for, e.g. its OpenID4VP client ID or app/redirect URI. Equivalent to the `aud` claim of a
+            _JWT_VP_, or the `domain` property of a Data Integrity proof. The holder's wallet includes this when
+            signing the presentation, so it cannot be replayed against a different relying party.
+            In the preferred TOMP architecture this is the **MP**, not the TO - the MP owns the app/session on the
+            traveller's device and is therefore the one that runs the OpenID4VP exchange directly with their wallet
+            (deep link on the same device, or a QR code for a cross-device flow). The TO has no such channel to the
+            traveller, so it never issues its own challenge - it receives the MP's already-completed VP as opaque
+            evidence in this request, and relies on the MP having verified **challenge**/**domain** itself.
+          example: "https://app.example-mp.nl"
+        challenge:
+          $ref: "#/components/schemas/normalString"
+          description: only applicable when **type** is _VERIFIABLE_PRESENTATION_ - a one-time value (nonce) issued by
+            whichever party plays verifier (see **domain**), that the holder's wallet includes when signing the
+            presentation. Equivalent to the `nonce` claim of a _JWT_VP_, or the `challenge` property of a Data
+            Integrity proof. The verifier MUST check this matches the challenge it issued, and was not seen before, to
+            detect replay of a previously captured VP. How the challenge is issued/exchanged with the wallet (e.g. via
+            a deep link or QR code, per OpenID4VP) is implementation-specific and out of scope for this schema.
+          example: "4f9c2e71-8b3a-4c2d-9e4a-7a5b6c1d2e3f"
+        credential:
+          type: string
+          description: the encoded VC, VP or mdoc. For a _JWT_VC_ this is a header.payload.signature JWT, whose payload
+            carries (among others) `sub` (the holder) and `vc.credentialSubject` (the actual claim, e.g.
+            `licenseCategory`/`licenseNumber` for a driver license). For an _MDOC_ this is the base64url-encoded,
+            CBOR-serialized `IssuerSigned` structure of an ISO/IEC 18013-5 mobile document, whose `nameSpaces` carry
+            the disclosed data elements (e.g. `driving_privileges`) and whose `issuerAuth` holds the COSE_Sign1 signature.
+            In both cases, the claims only become trustworthy after the signature has been verified against **issuer**'s key.
+          example: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDp3ZWI6cmR3Lm5sI2tleS0xIn0.eyJpc3MiOiJkaWQ6d2ViOnJkdy5ubCIsInN1YiI6ImRpZDprZXk6ejZNa2hhWGdCWkR2b3REa0w1MjU3ZmFpenRpR2lDMlF0S0xHcGJublh2MUNoMXp5IiwibmJmIjoxNzAwMDAwMDAwLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiRHJpdmVyTGljZW5zZUNyZWRlbnRpYWwiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6a2V5Ono2TWtoYVhnQlpEdm90RGtMNTI1N2ZhaXp0aUdpQzJRdEtMR3Bibm5YdjFDaDF6eSIsImxpY2Vuc2VDYXRlZ29yeSI6IkIiLCJsaWNlbnNlTnVtYmVyIjoiTkwtMTIzNDU2NyIsImlzc3VpbmdDb3VudHJ5IjoiTkwifX19.hqm-Gv0e1sJ4yBnxvkJfRzWHqWdpKUhzJ4fGm0X3n8w"
+        issuer:
+          $ref: "#/components/schemas/normalString"
+          description: DID or other identifier of the credential issuer, when not already (verifiably) contained in **credential**.
+          example: "did:web:rdw.nl"
+        customFields:
+          $ref: "#/components/schemas/customProperties"
+
     travellerRequirements:
       type: object
       properties:
@@ -1258,6 +1375,12 @@ components:
           description: licenses that are applicable to this traveller
           items:
             $ref: "#/components/schemas/license"
+        verifiableCredentials:
+          type: array
+          description: Verifiable Credentials (VC) or Verifiable Presentations (VP) submitted as digital proof
+            of this traveller's identity, age, entitlements, cards or licenses (e.g. a digitally signed driver license).
+          items:
+            $ref: "#/components/schemas/verifiableCredential"
         assets:
           type: array
           items:
