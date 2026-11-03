@@ -257,6 +257,12 @@ paths:
           schema:
             type: string
             format: date-time
+        - name: customerId
+          description: the identifier that the TO uses to identify this customer.
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/parameters/customerId"
         - name: min-price
           description: minimum search price, for the whole trip
           in: query
