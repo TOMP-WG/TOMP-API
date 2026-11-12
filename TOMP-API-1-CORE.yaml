@@ -55,7 +55,6 @@ paths:
       description: Retrieves all datasources
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
       tags:
         - core
       responses:
@@ -73,7 +72,6 @@ paths:
       - transmodel: TRAVEL PACKAGE REQUEST
       parameters:
         - $ref: "#/components/parameters/acceptLanguage"
-        - $ref: "#/components/parameters/authorization"
         - $ref: "#/components/parameters/packageId"
       tags:
         - core
@@ -1865,7 +1863,7 @@ components:
     # base types
     date:
       type: string
-      format: full-date
+      format: date
       x-pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
       description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, full-date (2019-10-12)
 
@@ -1994,14 +1992,6 @@ components:
       x-externalDocs:
         description: "A comma-separated list of BCP 47 (RFC 5646) language tags and optional weights as described in IETF RFC7231 section 5.3.5. A list of the languages/localizations the user would like to see the results in. 
           For user privacy and ease of use on the TO side, this list should be kept as short as possible"
-
-    authorization:
-      in: header
-      name: authorization
-      required: true
-      schema:
-        type: string
-      description: Header field, JWT must be supplied
 
     legId:
       in: query

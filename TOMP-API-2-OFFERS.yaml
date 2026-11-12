@@ -32,7 +32,6 @@ paths:
       - transmodel: STOP, COMMON, SINGLE, REPEATED FARE QUERY
       parameters:
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
       - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
@@ -54,7 +53,6 @@ paths:
       - transmodel: SALES OFFER PACKAGE QUERY
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offerId"
       tags:
         - offer

@@ -2,3 +2,7 @@
 .venv/
 .github/
 TOMP-API.yaml
+sandbox/node_modules/
+sandbox/.env
+sandbox/.data/
+sandbox/logs/

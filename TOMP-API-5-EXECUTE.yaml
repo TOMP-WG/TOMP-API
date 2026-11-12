@@ -29,7 +29,6 @@ paths:
       description: This endpoint must be used to alter the state of a LEG, using OPERATION requests.
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - name: legOperation
           in: path
           description: OPERATION on a specified leg
@@ -62,7 +61,6 @@ paths:
       summary: "Perform an operation on a asset"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - name: assetOperation
           in: path
           description: OPERATION on a specified asset
@@ -96,7 +94,6 @@ paths:
       summary: "Perform an operation on a product"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - name: productOperation
           in: path
           description: OPERATION on a specified product

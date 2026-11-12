@@ -21,9 +21,13 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   x-modules:
   - offers
+  - pre-sales
   - purchase
   - execution
   - support
+  - after-sales
+  - tech
+  - customer management
   x-working-team-1:
   - Matthias Wirtz (Hacon)
   - Alberto Capponi (Nord-com)
@@ -34,10 +38,16 @@ servers:
 - url: https://example.to.eu/tomp/v2
   description: example url
 tags:
+- name: discovery
+  description: URLS to comply to OGC, to describe the interface
 - name: offer
-  description: This part of the API facilitates in supplying offers. Offers can be
-    obtained in a simple way (the GET), for more sophisticated searches, the search-offers
-    must be used. Each result must have an expiry-date in the header.
+  description: This part of the API facilitates in supplying offers.
+- name: pre sales
+  description: Module that can be used 'pre-sales'; in the pre-purchase state. Calling
+    one of these endpoints, will put the package in a pre-purchased state (might reserve
+    resources). The package must be released (when the intention of purchasing it
+    is removed) or it expires. The result of each of these endpoints (except for the
+    release) must contain an expiry date in the header.
 - name: purchase
   description: This part of the API facilitates purchasing offer(s), a package, a
     product or start the usage of an asset.
@@ -49,6 +59,14 @@ tags:
 - name: support
   description: This part of the API facilitates in handling exceptions, like delays,
     flat tires, accidents or broken equipment reports.
+- name: after sales
+  description: This part of the API describes how the financial settlement should
+    be done. All kinds of fares, fees, debits, and credits are described.
+- name: tech
+  description: technical functions of the API, also used in dataspaces
+- name: customer management
+  description: the <u>CUSTOMER MANAGEMENT MODULE</u> contains the functionality to
+    explicitly manage the customer account on the TO side .
 - name: core
   description: Core functions, used in multiple modules
 security:
@@ -68,7 +86,6 @@ paths:
       - transmodel: STOP, COMMON, SINGLE, REPEATED FARE QUERY
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/bbox'
@@ -81,13 +98,49 @@ paths:
           $ref: '#/components/responses/offersResponse'
         default:
           $ref: '#/components/responses/errorResponse'
+  /processes/assign-asset/execution:
+    post:
+      operationId: assignAssetRequest
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - pre sales
+      summary: Assign an asset to a package (and a leg). It could also replace another
+        asset or remove one
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE SPOT RESERVATION QUERY, TRAVEL PACKAGE SPOT CANCELLATION
+          QUERY, TRAVEL PACKAGE ALTERATION QUERY
+      requestBody:
+        $ref: '#/components/requestBodies/assignAssetRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/packageResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/assign-ancillary/execution:
+    post:
+      operationId: assignAncillaryRequest
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - pre sales
+      summary: Assign an ancillary to a package (and a leg). It could also replace
+        another ancillary or remove one
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION QUERY
+      requestBody:
+        $ref: '#/components/requestBodies/assignAncillaryRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/packageResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
   /processes/purchase-offers/execution:
     post:
       operationId: purchaseOffersRequest
       summary: Perform an purchase of offer(s)
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       - $ref: '#/components/parameters/digest'
       - $ref: '#/components/parameters/publicKey'
       - $ref: '#/components/parameters/signedDigest'
@@ -108,7 +161,6 @@ paths:
       summary: Perform an purchase of a product
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       security:
       - BearerAuth: []
       - OAuth: []
@@ -129,7 +181,6 @@ paths:
       summary: Request to use an asset
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       security:
       - BearerAuth: []
       - OAuth: []
@@ -144,21 +195,51 @@ paths:
           $ref: '#/components/responses/purchaseResponse'
         default:
           $ref: '#/components/responses/errorResponse'
-      callbacks:
-        jobCompleted:
-          '{$request.body#/subscriber/successUri}':
-            post:
-              parameters:
-              - $ref: '#/components/parameters/rollbackExpires'
-              - $ref: '#/components/parameters/signedDigest'
-              requestBody:
-                content:
-                  application/json:
-                    schema:
-                      $ref: '#/components/schemas/package'
-              responses:
-                '200':
-                  description: Results received successfully
+  /processes/rollback-purchase/execution:
+    post:
+      operationId: rollbackPurchaseRequest
+      summary: Rollback a purchase, before the rollbackExpiryTime has ended
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - purchase
+      requestBody:
+        $ref: '#/components/requestBodies/packageRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/packageResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/confirm-purchase/execution:
+    post:
+      operationId: confirmPurchaseRequest
+      summary: Confirm the purchase, before the rollbackExpiryTime has ended
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - purchase
+      requestBody:
+        $ref: '#/components/requestBodies/packageRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/purchaseResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/extend-expiry-time/execution:
+    post:
+      operationId: extendExpiryTimeRequest
+      summary: Request additional time to complete the purchase
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - purchase
+      requestBody:
+        $ref: '#/components/requestBodies/extendExpiryTimeRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/packageResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
   /collections/travel-documents/items:
     get:
       operationId: getTravelDocuments
@@ -166,7 +247,6 @@ paths:
       description: Returns travel documents for a package or leg
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       - $ref: '#/components/parameters/packageId'
       - $ref: '#/components/parameters/optionalLegId'
       tags:
@@ -186,7 +266,6 @@ paths:
         requests.
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       - name: legOperation
         in: path
         description: OPERATION on a specified leg
@@ -219,7 +298,6 @@ paths:
       summary: Perform an operation on a asset
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       - name: assetOperation
         in: path
         description: OPERATION on a specified asset
@@ -255,7 +333,6 @@ paths:
       description: returns support tickets in their current state, based on the parameters
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       - $ref: '#/components/parameters/packageId'
       - $ref: '#/components/parameters/legId'
       - $ref: '#/components/parameters/supportTicketStatus'
@@ -273,7 +350,6 @@ paths:
       description: creates a request for SUPPORT from end user via MP
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       tags:
       - support
       requestBody:
@@ -292,17 +368,188 @@ paths:
                 $ref: '#/components/schemas/supportTicket'
         default:
           $ref: '#/components/responses/errorResponse'
+  /collections/redress-options/items:
+    get:
+      operationId: getRedressOptions
+      summary: Retrieve redress options for a guarantee
+      description: Returns possible refund or replacement options for a guarantee
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - name: packageId
+        in: query
+        description: the id of the package that contains a purchased product
+        required: true
+        schema:
+          $ref: '#/components/schemas/packageReference'
+      - name: offerId
+        in: query
+        description: the offer with a guarantee
+        required: false
+        schema:
+          $ref: '#/components/schemas/offerReference'
+      - name: legId
+        in: query
+        description: the offer with a guarantee
+        required: false
+        schema:
+          $ref: '#/components/schemas/legReference'
+      - name: guaranteeId
+        in: query
+        description: the unfulfilled guarantee
+        required: false
+        schema:
+          $ref: '#/components/schemas/shortString'
+      - name: travellerId
+        in: query
+        description: to request redresses for a single traveller
+        required: false
+        schema:
+          $ref: '#/components/schemas/travellerReference'
+      - name: ancillaryId
+        in: query
+        description: to request redresses for a not-used ancillary or ancillary to
+          remove
+        required: false
+        schema:
+          $ref: '#/components/schemas/ancillaryReference'
+      - name: supportTicket
+        in: query
+        description: reference to support ticket(s) to claim redress options
+        explode: true
+        schema:
+          $ref: '#/components/schemas/uuid'
+      tags:
+      - after sales
+      x-semantics:
+      - transmodel: REFUND QUERY
+      responses:
+        '200':
+          $ref: '#/components/responses/redressResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/claim-redress-option/execution:
+    post:
+      operationId: redressOptionRequest
+      description: redress options must be claimed & confirmed
+      tags:
+      - after sales
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      x-semantics:
+      - transmodel: REDRESS QUERY
+      requestBody:
+        $ref: '#/components/requestBodies/redressOptionRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/packageResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/confirm-redress-option/execution:
+    post:
+      operationId: confirmRedressOptionRequest
+      description: confirm the claimed redress option
+      tags:
+      - after sales
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      requestBody:
+        $ref: '#/components/requestBodies/redressOptionRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/packageResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/refund-deposit/execution:
+    post:
+      operationId: refundDepositRequest
+      summary: Request to refund a deposit
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - after sales
+      requestBody:
+        $ref: '#/components/requestBodies/refundDepositRequest'
+      responses:
+        '204':
+          description: the payment is acknowledged
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /collections/payments/items:
+    get:
+      operationId: getPaymentOverview
+      summary: Retrieve financial details
+      description: Returns all the JOURNAL ENTRIES that should be paid
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - name: startTime
+        in: query
+        description: start of the selection
+        required: false
+        schema:
+          $ref: '#/components/schemas/dateTime'
+      - name: endTime
+        in: query
+        description: end of the selection
+        required: false
+        schema:
+          $ref: '#/components/schemas/dateTime'
+      - name: invoiceState
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/paymentState'
+      - name: package
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/packageReference'
+      - name: category
+        in: query
+        description: type of PAYMENT DETAIL (e.g. fare, addition costs, fines, ...)
+        required: false
+        schema:
+          $ref: '#/components/schemas/paymentCategory'
+      - name: onBehalveOf
+        in: header
+        description: the identity of the reseller. Only to be used in a PSP (externalized
+          payments) setup.
+        required: false
+        schema:
+          type: string
+      tags:
+      - after sales
+      responses:
+        '200':
+          $ref: '#/components/responses/paymentResponse'
+        default:
+          $ref: '#/components/responses/errorResponse'
+  /processes/confirm-payment/execution:
+    post:
+      operationId: confirmPaymentEntry
+      summary: Confirm a financial transaction
+      description: The MP (reseller) confirms a payment
+      parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      tags:
+      - after sales
+      requestBody:
+        $ref: '#/components/requestBodies/confirmPaymentRequest'
+      responses:
+        '204':
+          description: the payment is acknowledged
+        default:
+          $ref: '#/components/responses/errorResponse'
   /collections/datasources/items:
     get:
       security:
       - OpenData: []
       operationId: getDataSources
-      summary: Retrieves all (external) datasources, that are used in requests and
-        responses
+      summary: Retrieves all (external) datasources, used in requests and responses
       description: Retrieves all datasources
       parameters:
       - $ref: '#/components/parameters/acceptLanguage'
-      - $ref: '#/components/parameters/authorization'
       tags:
       - core
       responses:
@@ -311,242 +558,199 @@ paths:
         default:
           $ref: '#/components/responses/errorResponse'
 components:
-  requestBodies:
-    searchOfferRequest:
-      x-semantics:
-      - transmodel: TRIP REQUEST
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                $ref: '#/components/schemas/searchOfferRequest'
-    purchaseOfferRequest:
-      x-semantics:
-      - transmodel: TRAVEL PACKAGE PURCHASE REQUEST (?)
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                type: object
-                required:
-                - offer
-                properties:
-                  customer:
-                    $ref: '#/components/schemas/customer'
-                  offer:
-                    $ref: '#/components/schemas/packageReference'
-                  paymentMethod:
-                    $ref: '#/components/schemas/typeOfPaymentMethod'
-                  distribution:
-                    $ref: '#/components/schemas/distribution'
-                  travellers:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/traveller'
-              subscriber:
-                type: object
-                required:
-                - successUrl
-                properties:
-                  successUri:
-                    type: string
-                    format: uri
-                  inProgressUri:
-                    type: string
-                    format: uri
-                  failedUri:
-                    type: string
-                    format: uri
-    purchaseProductRequest:
-      x-semantics:
-      - transmodel: TRAVEL PACKAGE PURCHASE REQUEST (?)
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                type: object
-                required:
-                - products
-                properties:
-                  customer:
-                    $ref: '#/components/schemas/customer'
-                  location:
-                    $ref: '#/components/schemas/placeReference'
-                  products:
-                    type: array
-                    minItems: 1
-                    items:
-                      $ref: '#/components/schemas/productReference'
-                  distribution:
-                    $ref: '#/components/schemas/distribution'
-                  traveller:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/traveller'
-              subscriber:
-                type: object
-                required:
-                - successUrl
-                properties:
-                  successUri:
-                    type: string
-                    format: uri
-                  inProgressUri:
-                    type: string
-                    format: uri
-                  failedUri:
-                    type: string
-                    format: uri
-    useAssetRequest:
-      x-semantics:
-      - transmodel: none
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                type: object
-                required:
-                - assets
-                properties:
-                  customer:
-                    $ref: '#/components/schemas/customer'
-                  assets:
-                    type: array
-                    minItems: 1
-                    items:
-                      $ref: '#/components/schemas/assetReference'
-                  distribution:
-                    $ref: '#/components/schemas/distribution'
-                  paymentMethod:
-                    $ref: '#/components/schemas/typeOfPaymentMethod'
-                  travellers:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/traveller'
-              subscriber:
-                type: object
-                required:
-                - successUrl
-                properties:
-                  successUri:
-                    type: string
-                    format: uri
-                  inProgressUri:
-                    type: string
-                    format: uri
-                  failedUri:
-                    type: string
-                    format: uri
-    legRequest:
-      x-semantics:
-      - transmodel: none
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                type: object
-                required:
-                - leg
-                properties:
-                  timestamp:
-                    $ref: '#/components/schemas/dateTime'
-                  package:
-                    $ref: '#/components/schemas/packageReference'
-                  leg:
-                    $ref: '#/components/schemas/legReference'
-                  assetLocation:
-                    $ref: '#/components/schemas/placeReference'
-                  userLocation:
-                    description: This field might lead to GDPR issues. Be aware, use
-                      it with caution.
-                    $ref: '#/components/schemas/placeReference'
-                  currentCharge:
-                    type: integer
-                    minimum: 0
-                    maximum: 100
-                    description: percentage of charge available
-                  time:
-                    description: time to extend or postpone
-                    $ref: '#/components/schemas/duration'
-                  comment:
-                    type: string
-                    description: free text, should match Content-Language
-                  evidence:
-                    type: array
-                    minItems: 1
-                    items:
-                      $ref: '#/components/schemas/link'
-    assetRequest:
-      x-semantics:
-      - transmodel: none
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                type: object
-                required:
-                - asset
-                properties:
-                  timestamp:
-                    $ref: '#/components/schemas/dateTime'
-                  package:
-                    $ref: '#/components/schemas/packageReference'
-                  leg:
-                    $ref: '#/components/schemas/legReference'
-                  asset:
-                    $ref: '#/components/schemas/assetReference'
-                  location:
-                    $ref: '#/components/schemas/placeReference'
-              subscriber:
-                type: object
-                required:
-                - successUrl
-                properties:
-                  successUri:
-                    type: string
-                    format: uri
-                  inProgressUri:
-                    type: string
-                    format: uri
-                  failedUri:
-                    type: string
-                    format: uri
-    supportRequest:
+  parameters:
+    acceptLanguage:
+      in: header
+      name: Accept-Language
+      required: true
+      schema:
+        $ref: '#/components/schemas/shortString'
+      x-externalDocs:
+        description: A comma-separated list of BCP 47 (RFC 5646) language tags and
+          optional weights as described in IETF RFC7231 section 5.3.5. A list of the
+          languages/localizations the user would like to see the results in.  For
+          user privacy and ease of use on the TO side, this list should be kept as
+          short as possible
+    limit:
+      in: query
+      name: limit
+      description: 'The optional limit parameter limits the number of items that are
+        presented in the response document.
+
+
+        Only items are counted that are on the first level of the collection in the
+        response document.
+
+        Nested objects contained within the explicitly requested items shall not be
+        counted.
+
+
+        Minimum = 1. Maximum = 10000. Default = 100.'
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 100
+      style: form
+      explode: false
+    offset:
+      name: offset
+      in: query
+      description: 'The optional offset parameter representing the starting index
+        of the returned collection.
+
+
+        Only items are counted that are on the first level of the collection in the
+        response document.
+
+        Nested objects contained within the explicitly requested items shall not be
+        counted.
+
+
+        Default = 0.'
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      style: form
+      explode: false
+    bbox:
+      name: bbox
+      in: query
+      description: 'Only features that have a geometry that intersects the bounding
+        box are selected.
+
+        The bounding box is provided as four or six numbers, depending on whether
+        the
+
+        coordinate reference system includes a vertical axis (height or depth):
+
+
+        * Lower left corner, coordinate axis 1
+
+        * Lower left corner, coordinate axis 2
+
+        * Minimum value, coordinate axis 3 (optional)
+
+        * Upper right corner, coordinate axis 1
+
+        * Upper right corner, coordinate axis 2
+
+        * Maximum value, coordinate axis 3 (optional)
+
+
+        If the value consists of four numbers, the coordinate reference system is
+
+        WGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84)
+
+        unless a different coordinate reference system is specified in the parameter
+        `bbox-crs`.
+
+
+        If the value consists of six numbers, the coordinate reference system is WGS
+        84
+
+        longitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h)
+
+        unless a different coordinate reference system is specified in the parameter
+        `bbox-crs`.
+
+
+        The query parameter `bbox-crs` is specified in OGC API - Features - Part 2:
+        Coordinate
+
+        Reference Systems by Reference.
+
+
+        For WGS 84 longitude/latitude the values are in most cases the sequence of
+
+        minimum longitude, minimum latitude, maximum longitude and maximum latitude.
+
+        However, in cases where the box spans the antimeridian the first value
+
+        (west-most box edge) is larger than the third value (east-most box edge).
+
+
+        If the vertical axis is included, the third and the sixth number are
+
+        the bottom and the top of the 3-dimensional bounding box.
+
+
+        If a feature has multiple spatial geometry properties, it is the decision
+        of the
+
+        server whether only a single spatial geometry property is used to determine
+
+        the extent or all relevant geometries.'
+      required: false
+      schema:
+        type: array
+        oneOf:
+        - minItems: 4
+          maxItems: 4
+        - minItems: 6
+          maxItems: 6
+        items:
+          type: number
+      style: form
+      explode: false
+    digest:
+      name: digest
+      in: header
+      description: the hash of the body, SHA-256 ("SHA-256=3q2+7w==:")
+      schema:
+        type: string
+      required: false
+    publicKey:
+      name: publicKey
+      in: header
+      description: the public key of the sending party, can be used to validate the
+        signed digest (it should deliver the digest)
+      x-example:
+        certificate: '-----BEGIN CERTIFICATE-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...-----END
+          CERTIFICATE-----'
+      schema:
+        type: string
+      required: false
+    signedDigest:
+      name: signedDigest
+      in: header
+      description: the signed hash of complete response, using the private key, SHA-256
+        base64 encoded
+      schema:
+        type: string
+      required: false
+    packageId:
+      in: query
+      name: packageId
+      schema:
+        type: string
+      required: true
+      description: the identifier of a package
+    optionalLegId:
+      in: query
+      name: legId
+      description: leg identifier
+      required: false
+      schema:
+        $ref: '#/components/schemas/uuid'
+    legId:
+      in: query
+      name: legId
+      description: leg identifier
+      required: true
+      schema:
+        $ref: '#/components/schemas/uuid'
+    supportTicketStatus:
       x-semantics:
       - transmodel: none
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-            - inputs
-            properties:
-              inputs:
-                $ref: '#/components/schemas/supportTicket'
+      name: supportTicketStatus
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/supportTicketStatus'
   responses:
     offersResponse:
       description: a list of offers
@@ -581,6 +785,30 @@ components:
                 maxItems: 10
                 items:
                   $ref: '#/components/schemas/error'
+    packageResponse:
+      description: a single instance of a package
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE DELIVERY
+      headers:
+        Version:
+          $ref: '#/components/headers/version'
+        Content-Language:
+          $ref: '#/components/headers/contentLanguage'
+        Expires:
+          description: this field MUST be there whenever the package hasn`t been purchased.
+          schema:
+            $ref: '#/components/schemas/httpDate'
+          required: false
+        digest:
+          $ref: '#/components/headers/digest'
+        publicKey:
+          $ref: '#/components/headers/publicKey'
+        signedDigest:
+          $ref: '#/components/headers/signedDigest'
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/package'
     purchaseResponse:
       x-semantics:
       - transmodel: TRAVEL PACKAGE PURCHASE DELIVERY
@@ -616,30 +844,6 @@ components:
         application/geo+json:
           schema:
             $ref: '#/components/schemas/travelDocuments'
-    packageResponse:
-      description: a single instance of a package
-      x-semantics:
-      - transmodel: TRAVEL PACKAGE DELIVERY
-      headers:
-        Version:
-          $ref: '#/components/headers/version'
-        Content-Language:
-          $ref: '#/components/headers/contentLanguage'
-        Expires:
-          description: this field MUST be there whenever the package hasn't been purchased.
-          schema:
-            $ref: '#/components/schemas/httpDate'
-          required: false
-        digest:
-          $ref: '#/components/headers/digest'
-        publicKey:
-          $ref: '#/components/headers/publicKey'
-        signedDigest:
-          $ref: '#/components/headers/signedDigest'
-      content:
-        application/geo+json:
-          schema:
-            $ref: '#/components/schemas/package'
     retryErrorResponse:
       x-semantics:
       - transmodel: none
@@ -703,6 +907,36 @@ components:
                   in the description what the financial consequences are.
                 items:
                   $ref: '#/components/schemas/link'
+    redressResponse:
+      x-semantics:
+      - transmodel: none
+      description: a list of redress options
+      headers:
+        Version:
+          $ref: '#/components/headers/version'
+        Content-Language:
+          $ref: '#/components/headers/contentLanguage'
+        Expires:
+          schema:
+            $ref: '#/components/schemas/httpDate'
+          required: true
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/redressOptions'
+    paymentResponse:
+      x-semantics:
+      - transmodel: none
+      description: journal entries
+      headers:
+        Content-Language:
+          $ref: '#/components/headers/contentLanguage'
+        Version:
+          $ref: '#/components/headers/version'
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/payments'
     dataSourceResponse:
       description: a list of datasources, the 'rel' contains the prefix to use in
         data (to create a URN), like 'gps:' for coordinates ('gps' is always allowed).
@@ -730,16 +964,6 @@ components:
               Netherlands used by Arriva,  it allows you to refer to a stop point
               by its ID, like 'ARR:ScheduledStopPoint:1234'.
   schemas:
-    package:
-      allOf:
-      - $ref: '#/components/schemas/geojson'
-      - type: object
-        description: a package to execute a trip
-        required:
-        - properties
-        properties:
-          properties:
-            $ref: '#/components/schemas/packageProperties'
     supportTicket:
       x-semantics:
       - transmodel: none
@@ -835,10 +1059,78 @@ components:
           description: the sequence number of the status of tickets on this issue
         links:
           $ref: '#/components/schemas/links'
+    packageReference:
+      $ref: '#/components/schemas/normalString'
+    offerReference:
+      $ref: '#/components/schemas/normalString'
+    legReference:
+      $ref: '#/components/schemas/normalString'
     shortString:
       type: string
       description: short string, display names (length 0-75)
       maxLength: 75
+    travellerReference:
+      $ref: '#/components/schemas/normalString'
+    ancillaryReference:
+      $ref: '#/components/schemas/normalString'
+    uuid:
+      type: string
+      x-preferred-pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+      description: https://en.wikipedia.org/wiki/Universally_unique_identifier see
+        also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)
+    dateTime:
+      type: string
+      format: date-time
+      x-pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$
+      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)
+    paymentState:
+      x-semantics:
+      - transmodel: none
+      type: string
+      description: the state of the payment detail
+      enum:
+      - TO_INVOICE
+      - INVOICING
+      - INVOICED
+    paymentCategory:
+      x-semantics:
+      - transmodel: none
+      type: string
+      description: 'The category of the journalled item <br> _ALL_ - for filtering
+        purposes only<br>
+
+        <h2>TO initiated payments </h2> To request these payments, use the notifications,
+        send a notification containing the payment confirmation.<br> _DEPOSIT_ - a
+        deposit, to refund, use _REFUND_<br> _DAMAGE_ - extra costs that must be paid
+        by the MP due to damage to the asset or ancillaries<br> _LOSS_ - extra costs
+        that must be paid by the MP due to loss of asset or ancillaries<br> _STOLEN_
+        - the asset (and ancillaries) are stolen and should be paid for<br> _EXTRA_USAGE_
+        - the asset is paid for in advance, additional usage must be paid for (can
+        also be a refund when used less! The amount should be negative in that case)<br>
+        _FINE_ - a fine that arrived later on<br> _OTHER_ASSET_USED_ - additional
+        costs for a replaced asset<br> _FARE_ - the normal costs of the purchased
+        and executiond leg(s)<br> _OTHER_ - unspecified<br>
+
+        _CREDIT_ - generic CREDIT, e.g. for kick-backs <br> _VOUCHER_ - part of the
+        fare that is covered by a voucher (no need to pay)<br> _REFUND_ - refund of
+        the deposit or upfront paid fare<br> _REBATE_ - (partial) rebate of the fare<br>
+        _REIMBURSEMENT_ - reimbursement of the fare<br>'
+      enum:
+      - ALL
+      - DAMAGE
+      - LOSS
+      - STOLEN
+      - EXTRA_USAGE
+      - REFUND
+      - REBATE
+      - REIMBURSEMENT
+      - FINE
+      - OTHER_ASSET_USED
+      - CREDIT
+      - VOUCHER
+      - DEPOSIT
+      - OTHER
+      - FARE
     searchOfferRequest:
       type: object
       x-semantics:
@@ -938,6 +1230,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/link'
+    assetReference:
+      $ref: '#/components/schemas/normalString'
+    package:
+      allOf:
+      - $ref: '#/components/schemas/geojson'
+      - type: object
+        description: a package to execute a trip
+        required:
+        - properties
+        properties:
+          properties:
+            $ref: '#/components/schemas/packageProperties'
     customer:
       x-semantics:
       - transmodel: TRANSPORT CUSTOMER
@@ -987,8 +1291,6 @@ components:
           x-format: byte-array
         customFields:
           $ref: '#/components/schemas/customProperties'
-    packageReference:
-      $ref: '#/components/schemas/normalString'
     typeOfPaymentMethod:
       type: string
       enum:
@@ -1000,9 +1302,13 @@ components:
       x-semantics:
       - transmodel: DISTRIBUTION VALIDITY PARAMETERS
       properties:
-        fulfilmentMethod:
+        accessType:
+          x-semantics:
+          - transmodel: TYPE OF TRAVEL DOCUMENT
           $ref: '#/components/schemas/typeOfTravelDocument'
         distributionChannel:
+          x-semantics:
+          - transmodel: DISTRIBUTION CHANNEL
           $ref: '#/components/schemas/normalString'
     traveller:
       type: object
@@ -1040,80 +1346,6 @@ components:
       pattern: ^(GPS|gps|{datasource-prefix}|P):[a-zA-Z0-9\-_.]+$
     productReference:
       $ref: '#/components/schemas/normalString'
-    assetReference:
-      $ref: '#/components/schemas/normalString'
-    geojson:
-      type: object
-      properties:
-        type:
-          type: string
-          pattern: ^(FeatureCollection)$
-        features:
-          type: array
-          items:
-            $ref: '#/components/schemas/geojsonFeature'
-        properties:
-          $ref: '#/components/schemas/geojsonCollectionProperties'
-        numberMatched:
-          type: number
-        numberReturned:
-          type: number
-        links:
-          type: array
-          description: actions that can be performed on this package, but also alternative
-            (rel=alternative+1, alternative+2) offers or references to other resources
-            In case it is an alternative, specify clearly in the description what
-            the financial consequences are.
-          items:
-            $ref: '#/components/schemas/link'
-    packageProperties:
-      type: object
-      x-semantics:
-      - transmodel[type!=offer]: TRAVEL PACKAGE / CUSTOMER PURCHASE PACKAGE
-      - transmodel[type==offer]: SALES OFFER PACKAGE
-      description: a purchased package is a registration of an agreement between end
-        user and TO, to execute a package (=set of legs) according a specification,
-        including all conditions (labels)
-      required:
-      - type
-      - id
-      - status
-      properties:
-        type:
-          type: string
-          pattern: ^(offer|package)$
-        id:
-          $ref: '#/components/schemas/packageReference'
-        status:
-          $ref: '#/components/schemas/packageStatus'
-        summary:
-          $ref: '#/components/schemas/summary'
-        price:
-          $ref: '#/components/schemas/fareStructure'
-        guarantees:
-          type: array
-          items:
-            $ref: '#/components/schemas/guarantee'
-        legs:
-          type: array
-          items:
-            $ref: '#/components/schemas/legProperties'
-        offers:
-          description: contains offered packages, so it is only applicable when the
-            type is package. When a package only contains one offer, this property
-            should be neglected. All references in the offers refer to the products
-            the packageProperties. Optional - the offers can be retrieved using the
-            /collections/offers/items?offerId={reference} endpoint.
-          type: array
-          items:
-            $ref: '#/components/schemas/summary'
-        customFields:
-          $ref: '#/components/schemas/customProperties'
-    uuid:
-      type: string
-      x-preferred-pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
-      description: https://en.wikipedia.org/wiki/Universally_unique_identifier see
-        also https://www.ietf.org/rfc/rfc4122.txt (ae76f51c-a1a6-46af-b9ab-8233564adcae)
     travelDocuments:
       x-semantics:
       - transmodel: TRAVEL DOCUMENTs
@@ -1140,13 +1372,6 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/link'
-    dateTime:
-      type: string
-      format: date-time
-      x-pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$
-      description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, date-time (2019-10-12T07:20:50.52Z)
-    legReference:
-      $ref: '#/components/schemas/normalString'
     duration:
       description: duration, ISO 8601 compliant
       type: string
@@ -1194,17 +1419,36 @@ components:
           description: is this link informative, or must it be used?
           type: boolean
         hash:
-          description: to validate that the content of the link hasn't been changed.
+          description: to validate that the content of the link hasn`t been changed.
           type: string
         expires:
           $ref: '#/components/schemas/dateTime'
+        availableFrom:
+          $ref: '#/components/schemas/dateTime'
+    classOfUse:
+      x-semantics:
+      - transmodel: CLASS OF USE
+      type: string
+      description: A classification of fare and other service classes by category
+        of user entitled to use them.
+      enum:
+      - FIRST_CLASS
+      - SECOND_CLASS
+      - THIRD_CLASS
+      - ECONOMY_CLASS
+      - BUSINESS_CLASS
+      - TURISTA
+      - PREFERENTE
+      - PREMIUM_CLASS
+      - ANY
+      - UNKNOWN
     supportTicketStatus:
       x-semantics:
       - transmodel: none
       type: string
       description: _ISSUE_REQUESTED_ the ticket is new, to be processed by the TO<br>
         _ISSUE_OPEN_ the ticket is open, we're on our way<br> _ISSUE_UPDATE_REQUESTED_
-        we're waiting on a response of the traveler(s)<br> _ISSUE_RESOLVED_ Issue
+        we're waiting on a response of the traveller(s)<br> _ISSUE_RESOLVED_ Issue
         succesfully closed<br> _ISSUE_REVOKED_ Issue revoked<br>
       enum:
       - ISSUE_REQUESTED
@@ -1279,6 +1523,114 @@ components:
       properties:
         links:
           type: array
+          items:
+            $ref: '#/components/schemas/link'
+    redressOptions:
+      x-semantics:
+      - transmodel: TRAVEL REDRESSes
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          pattern: ^(FeatureCollection)$
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                $ref: '#/components/schemas/uuid'
+              type:
+                type: string
+                pattern: ^(Feature)$
+              properties:
+                $ref: '#/components/schemas/redressOption'
+              links:
+                type: array
+                items:
+                  $ref: '#/components/schemas/link'
+        properties:
+          type: object
+          properties:
+            type:
+              type: string
+              pattern: ^(redressOptions)$
+            package:
+              $ref: '#/components/schemas/packageReference'
+            offer:
+              $ref: '#/components/schemas/offerReference'
+            guarantee:
+              $ref: '#/components/schemas/uuid'
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description: actions that can be performed on this package, but also alternative
+            (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what
+            the financial consequences are.
+          items:
+            $ref: '#/components/schemas/link'
+    payments:
+      x-semantics:
+      - transmodel: none
+      description: a list of offers.
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: ^(FeatureCollection)$
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                pattern: ^(Feature)$
+              id:
+                $ref: '#/components/schemas/uuid'
+              properties:
+                $ref: '#/components/schemas/financialDetail'
+              links:
+                type: array
+                items:
+                  $ref: '#/components/schemas/link'
+        properties:
+          type: object
+          description: this object contains the filter parameters
+          properties:
+            type:
+              type: string
+              pattern: ^(paymentCollection)$
+            limit:
+              type: integer
+            offset:
+              type: integer
+            startTime:
+              $ref: '#/components/schemas/dateTime'
+            endTime:
+              $ref: '#/components/schemas/dateTime'
+            invoiceState:
+              $ref: '#/components/schemas/paymentState'
+            package:
+              $ref: '#/components/schemas/packageReference'
+            category:
+              $ref: '#/components/schemas/paymentCategory'
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description: actions that can be performed on this package, but also alternative
+            (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what
+            the financial consequences are.
           items:
             $ref: '#/components/schemas/link'
     travelSpecification:
@@ -1478,6 +1830,30 @@ components:
       additionalProperties:
         maxLength: 1000
         maxProperties: 20
+    geojson:
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: ^(FeatureCollection)$
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/geojsonFeature'
+        properties:
+          $ref: '#/components/schemas/geojsonCollectionProperties'
+        numberMatched:
+          type: number
+        numberReturned:
+          type: number
+        links:
+          type: array
+          description: actions that can be performed on this package, but also alternative
+            (rel=alternative+1, alternative+2) offers or references to other resources
+            In case it is an alternative, specify clearly in the description what
+            the financial consequences are.
+          items:
+            $ref: '#/components/schemas/link'
     offerFeature:
       allOf:
       - $ref: '#/components/schemas/geojsonFeature'
@@ -1505,24 +1881,68 @@ components:
       type: string
       description: real short string, codes (length 0-10)
       maxLength: 10
+    packageProperties:
+      type: object
+      x-semantics:
+      - transmodel[type!=offer]: TRAVEL PACKAGE / CUSTOMER PURCHASE PACKAGE
+      - transmodel[type==offer]: SALES OFFER PACKAGE
+      description: a purchased package is a registration of an agreement between end
+        user and TO, to execute a package (=set of legs) according a specification,
+        including all conditions (labels)
+      required:
+      - type
+      - id
+      - status
+      properties:
+        type:
+          type: string
+          pattern: ^(offer|package)$
+        id:
+          $ref: '#/components/schemas/packageReference'
+        status:
+          $ref: '#/components/schemas/packageStatus'
+        summary:
+          $ref: '#/components/schemas/summary'
+        price:
+          $ref: '#/components/schemas/fareStructure'
+        guarantees:
+          type: array
+          items:
+            $ref: '#/components/schemas/guarantee'
+        legs:
+          type: array
+          items:
+            $ref: '#/components/schemas/legProperties'
+        offers:
+          description: contains offered packages, so it is only applicable when the
+            type is package. When a package only contains one offer, this property
+            should be neglected. All references in the offers refer to the products
+            the packageProperties. Optional - the offers can be retrieved using the
+            /collections/offers/items?offerId={reference} endpoint.
+          type: array
+          items:
+            $ref: '#/components/schemas/summary'
+        customFields:
+          $ref: '#/components/schemas/customProperties'
     customerReference:
       $ref: '#/components/schemas/normalString'
     date:
       type: string
-      format: full-date
+      format: date
       x-pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
       description: https://www.rfc-editor.org/rfc/rfc3339#section-5.6, full-date (2019-10-12)
     typeOfTravelDocument:
       x-semantics:
       - transmodel: TYPE OF TRAVEL DOCUMENT
       type: string
-      description: A way to open/access the asset. <br><br> _BARCODE_ a barcode can
-        be retrieved from the links and used to access the purchased service<br> _QRCODE_
-        a QR code can be retrieved from the links<br> _AZTECCODE_ an Aztec code can
-        be retrieved from the links<br> _REMOTE_ the /processes/start-leg/execution
-        must be used to open the asset<br> _DEEP_LINK_ a deep link into a proprietary
-        app is provided in the links to open the asset (NFC, Bluetooth)<br> _KEY_
-        a physical key must be obtained (see instructions) to open the asset<br>
+      description: A way to open/access the asset OR a proof of travel rights<br><br>
+        _BARCODE_ a barcode can be retrieved from the links and used to access the
+        purchased service<br> _QRCODE_ a QR code can be retrieved from the links<br>
+        _AZTECCODE_ an Aztec code can be retrieved from the links<br> _REMOTE_ the
+        /processes/start-leg/execution must be used to open the asset<br> _DEEP_LINK_
+        a deep link into a proprietary app is provided in the links to open the asset
+        (NFC, Bluetooth)<br> _KEY_ a physical key must be obtained (see instructions)
+        to open the asset<br>
       enum:
       - BARCODE
       - QRCODE
@@ -1531,21 +1951,19 @@ components:
       - DEEP_LINK
       - KEY
       - OTHER
-    travellerReference:
-      $ref: '#/components/schemas/normalString'
     travellerCharacteristics:
       type: object
       properties:
         isValidated:
           type: boolean
-          description: Whether this traveler's identity and properties have been verified
-            by the MaaS provider
+          description: Whether this traveller's identity and properties have been
+            verified by the MaaS provider
         name:
           $ref: '#/components/schemas/normalString'
         age:
           $ref: '#/components/schemas/shortInt'
           minimum: 0
-          description: Age of the traveler, may be approximate
+          description: Age of the traveller, may be approximate
         fullName:
           $ref: '#/components/schemas/normalString'
           description: the name of the traveller, can be used to validate against
@@ -1586,6 +2004,240 @@ components:
             $ref: '#/components/schemas/assetReference'
     userProfileReference:
       $ref: '#/components/schemas/normalString'
+    travelDocument:
+      x-semantics:
+      - transmodel: TRAVEL DOCUMENT
+      type: object
+      required:
+      - validity
+      - travelDocumentType
+      - type
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          pattern: ^(travelDocument)$
+        validity:
+          $ref: '#/components/schemas/dateTimeRange'
+        package:
+          $ref: '#/components/schemas/packageReference'
+        leg:
+          $ref: '#/components/schemas/legReference'
+        asset:
+          $ref: '#/components/schemas/assetReference'
+        traveller:
+          $ref: '#/components/schemas/travellerReference'
+        travelDocumentType:
+          $ref: '#/components/schemas/typeOfTravelDocument'
+      oneOf:
+      - $ref: '#/components/schemas/externalDigitalTicket'
+      - $ref: '#/components/schemas/binaryTicket'
+      - $ref: '#/components/schemas/eKey'
+      - $ref: '#/components/schemas/customProperties'
+      discriminator:
+        propertyName: travelDocumentType
+        mapping:
+          LINK: '#/components/schemas/externalDigitalTicket'
+          BARCODE: '#/components/schemas/binaryTicket'
+          QRCODE: '#/components/schemas/binaryTicket'
+          AZTECCODE: '#/components/schemas/binaryTicket'
+          EKEY: '#/components/schemas/eKey'
+          OTHER: '#/components/schemas/customProperties'
+    redressOption:
+      x-semantics:
+      - transmodel: TRAVEL REDRESS
+      type: object
+      properties:
+        type:
+          type: string
+          pattern: ^(RedressOption)$
+        id:
+          $ref: '#/components/schemas/uuid'
+        packageState:
+          $ref: '#/components/schemas/packageStatus'
+        redressType:
+          type: string
+          enum:
+          - PACKAGE_REFUND
+          - OFFER_REFUND
+          - LEG_REFUND
+          - ANCILLARY_REFUND
+          - REPLACEMENT
+        reason:
+          $ref: '#/components/schemas/guarantee'
+        compensations:
+          type: array
+          items:
+            $ref: '#/components/schemas/financialDetail'
+        replacements:
+          type: array
+          items:
+            $ref: '#/components/schemas/packageProperties'
+    financialDetail:
+      x-semantics:
+      - transmodel: none
+      allOf:
+      - $ref: '#/components/schemas/amountOfMoney'
+      - type: object
+        properties:
+          id:
+            $ref: '#/components/schemas/uuid'
+            description: id of the JOURNAL ENTRY, the LEG id should be used
+          category:
+            $ref: '#/components/schemas/paymentCategory'
+          state:
+            $ref: '#/components/schemas/paymentState'
+          expirationDate:
+            $ref: '#/components/schemas/dateTime'
+          sequenceId:
+            $ref: '#/components/schemas/tinyInt'
+            description: sequence id of the JOURNAL ENTRY, in combination with **id**
+              unique from TO perspective.
+          invoiceId:
+            $ref: '#/components/schemas/shortString'
+            description: the number of the invoice. Should be filled in when invoiced
+              (**state**=_INVOICED_).
+          invoiceDate:
+            $ref: '#/components/schemas/dateTime'
+          comment:
+            $ref: '#/components/schemas/longString'
+          units:
+            type: array
+            items:
+              type: object
+              properties:
+                unitCategory:
+                  type: string
+                  enum:
+                  - DISTANCE
+                  - DURATION
+                  - USAGE
+                  - OTHER
+                description:
+                  type: string
+                unit:
+                  type: string
+                  enum:
+                  - KM
+                  - MILE
+                  - HOURS
+                  - MINUTES
+                  - DAYS
+                  - LITER
+                  - KILOWATTHOUR
+                  - CO2_COMPENSATION
+                  - OTHER
+                amount:
+                  $ref: '#/components/schemas/float'
+          vatNumber:
+            $ref: '#/components/schemas/shortString'
+            description: VAT identification number.
+          bankAccount:
+            $ref: '#/components/schemas/bankAccount'
+            description: this account will be used
+          customFields:
+            $ref: '#/components/schemas/customProperties'
+    serviceJourneyReference:
+      $ref: '#/components/schemas/normalString'
+    mode:
+      x-semantics:
+      - transmodel: MODE
+      type: string
+      description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN
+        are removed. On the other hand OTHER and PARKING are added.
+      enum:
+      - AIR
+      - BUS
+      - TROLLEYBUS
+      - TRAM
+      - COACH
+      - RAIL
+      - INTERCITYRAIL
+      - URBANRAIL
+      - METRO
+      - WATER
+      - CABLEWAY
+      - FUNICULAR
+      - TAXI
+      - SELFDRIVE
+      - FOOT
+      - BICYCLE
+      - MOTORCYCLE
+      - CAR
+      - SHUTTLE
+      - OTHER
+      - PARKING
+      - MOPED
+      - STEP
+      - FERRY
+    operatorReference:
+      $ref: '#/components/schemas/normalString'
+    zoneReference:
+      $ref: '#/components/schemas/normalString'
+    lineReference:
+      $ref: '#/components/schemas/normalString'
+    float:
+      type: number
+      description: the travelled distance. Only if applicable.
+      format: float
+      minimum: 0
+    prmNeeds:
+      type: object
+      x-semantics:
+      - transmodel: TYPE OF USER NEEDS
+      properties:
+        encumbranceNeed:
+          type: string
+          enum:
+          - pushchair
+          - baggage_trolley
+          - oversized_baggage
+          - luggage_encumbrance
+          - guide_dog
+          - other_animal
+          - bike
+        medicalNeed:
+          type: string
+          enum:
+          - heart_condition
+          - other
+        mobilityNeed:
+          type: string
+          enum:
+          - wheelchair
+          - assisted_wheelchair
+          - motorized_wheelchair
+          - mobility_scooter
+          - road_mobility_scooter
+          - walking_frame
+          - restricted_mobility
+          - other
+        psychoSensoryNeed:
+          type: string
+          enum:
+          - visual_impaired
+          - auditory_impaired
+          - cognitive_impaired
+          - averse_to_lifts
+          - averse_to_escalators
+          - averse_to_confined_spaces
+          - averse_to_crowds
+          - other
+    normalInt:
+      type: integer
+      description: default length for an integer (0-1000)
+      default: 0
+      minimum: 0
+      maximum: 1000
+    country:
+      type: string
+      x-semantics:
+      - transmodel: COUNTRY
+      description: two-letter country codes according to ISO 3166-1
+      maxLength: 2
+      minLength: 2
+      pattern: '[A-Z]{2}'
     geojsonFeature:
       type: object
       required:
@@ -1618,35 +2270,6 @@ components:
           $ref: '#/components/schemas/shortString'
         definitions:
           $ref: '#/components/schemas/definitions'
-    packageStatus:
-      x-semantics:
-      - transmodel: CUSTOMER PURCHASE STATUS
-      type: string
-      description: The life-cycle state of the package<br> _OFFERED_ the package is
-        offered (pre-sales) <br> _PENDING_ the purchase of the package is not confirmed
-        (the end user has shown intentions to purchase this offer), must be finalized
-        with the package-confirm operation (purchase)<br> _CONFIRMED_ a purchased
-        package. Both parties agreed to deliver services in return of payment<br>
-        _CANCELLED_ the package is cancelled before it is executed. The agreement
-        will specify whether there is a refund, or under which conditions<br> _ROLLBACK_
-        the package is purchased, but before the Rollback-Expires timestamp has passed,
-        therefore no financial consequences<br> _EXPIRED_ the MP didn't respond on
-        time, the package offer has been expired<br> _STARTED_ the package is started,
-        the <u>trip execution</u> module is needed now to manage the execution of
-        the package<br> _ENDED_ the package has ended, the trip has been executed<br>
-        _RELEASED_ for internal archiving, the package has not been purchased.<br>
-        _SETTLED_ final exit state, services delivered & financial settlement succeeded.
-      enum:
-      - OFFERED
-      - PENDING
-      - CONFIRMED
-      - ROLLBACK
-      - RELEASED
-      - EXPIRED
-      - CANCELLED
-      - STARTED
-      - ENDED
-      - SETTLED
     summary:
       type: object
       properties:
@@ -1656,6 +2279,11 @@ components:
           $ref: '#/components/schemas/travelSpecification'
         price:
           $ref: '#/components/schemas/amountOfMoney'
+        estimatedPrice:
+          type: boolean
+          description: is this an estimated price; the final price is not known yet.
+            Use the 'fare' link (ref /collections/fares/) in the links section get
+            calculation details.
         products:
           type: array
           description: product names
@@ -1738,6 +2366,35 @@ components:
             deposit:
               $ref: '#/components/schemas/amountOfMoney'
               description: the amount of money to pay as a deposit.
+    packageStatus:
+      x-semantics:
+      - transmodel: CUSTOMER PURCHASE STATUS
+      type: string
+      description: The life-cycle state of the package<br> _OFFERED_ the package is
+        offered (pre-sales) <br> _PENDING_ the purchase of the package is not confirmed
+        (the end user has shown intentions to purchase this offer), must be finalized
+        with the package-confirm operation (purchase)<br> _CONFIRMED_ a purchased
+        package. Both parties agreed to deliver services in return of payment<br>
+        _CANCELLED_ the package is cancelled before it is executed. The agreement
+        will specify whether there is a refund, or under which conditions<br> _ROLLBACK_
+        the package is purchased, but before the Rollback-Expires timestamp has passed,
+        therefore no financial consequences<br> _EXPIRED_ the MP didn't respond on
+        time, the package offer has been expired<br> _STARTED_ the package is started,
+        the <u>trip execution</u> module is needed now to manage the execution of
+        the package<br> _ENDED_ the package has ended, the trip has been executed<br>
+        _RELEASED_ for internal archiving, the package has not been purchased.<br>
+        _SETTLED_ final exit state, services delivered & financial settlement succeeded.
+      enum:
+      - OFFERED
+      - PENDING
+      - CONFIRMED
+      - ROLLBACK
+      - RELEASED
+      - EXPIRED
+      - CANCELLED
+      - STARTED
+      - ENDED
+      - SETTLED
     fareStructure:
       x-semantics:
       - transmodel: TARIFF
@@ -1913,154 +2570,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/placeReference'
-    travelDocument:
-      x-semantics:
-      - transmodel: TRAVEL DOCUMENT
-      type: object
-      required:
-      - validity
-      - travelDocumentType
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-          pattern: ^(travelDocument)$
-        validity:
-          $ref: '#/components/schemas/dateTimeRange'
-        travelDocumentType:
-          $ref: '#/components/schemas/typeOfTravelDocument'
-      oneOf:
-      - $ref: '#/components/schemas/externalDigitalTicket'
-      - $ref: '#/components/schemas/binaryTicket'
-      - $ref: '#/components/schemas/eKey'
-      - $ref: '#/components/schemas/customProperties'
-      discriminator:
-        propertyName: travelDocumentType
-        mapping:
-          LINK: '#/components/schemas/externalDigitalTicket'
-          BARCODE: '#/components/schemas/binaryTicket'
-          QRCODE: '#/components/schemas/binaryTicket'
-          AZTECCODE: '#/components/schemas/binaryTicket'
-          EKEY: '#/components/schemas/eKey'
-          OTHER: '#/components/schemas/customProperties'
-    serviceJourneyReference:
-      $ref: '#/components/schemas/normalString'
-    mode:
-      x-semantics:
-      - transmodel: MODE
-      type: string
-      description: These classes are taken from the NeTeX standard, but ALL and UNKNOWN
-        are removed. On the other hand OTHER and PARKING are added.
-      enum:
-      - AIR
-      - BUS
-      - TROLLEYBUS
-      - TRAM
-      - COACH
-      - RAIL
-      - INTERCITYRAIL
-      - URBANRAIL
-      - METRO
-      - WATER
-      - CABLEWAY
-      - FUNICULAR
-      - TAXI
-      - SELFDRIVE
-      - FOOT
-      - BICYCLE
-      - MOTORCYCLE
-      - CAR
-      - SHUTTLE
-      - OTHER
-      - PARKING
-      - MOPED
-      - STEP
-      - FERRY
-    classOfUse:
-      x-semantics:
-      - transmodel: CLASS OF USE
-      type: string
-      description: A classification of fare and other service classes by category
-        of user entitled to use them.
-      enum:
-      - FIRST_CLASS
-      - SECOND_CLASS
-      - THIRD_CLASS
-      - ECONOMY_CLASS
-      - BUSINESS_CLASS
-      - TURISTA
-      - PREFERENTE
-      - PREMIUM_CLASS
-      - ANY
-      - UNKNOWN
-    operatorReference:
-      $ref: '#/components/schemas/normalString'
-    zoneReference:
-      $ref: '#/components/schemas/normalString'
-    lineReference:
-      $ref: '#/components/schemas/normalString'
-    float:
-      type: number
-      description: the travelled distance. Only if applicable.
-      format: float
-      minimum: 0
-    prmNeeds:
-      type: object
-      x-semantics:
-      - transmodel: TYPE OF USER NEEDS
-      properties:
-        encumbranceNeed:
-          type: string
-          enum:
-          - pushchair
-          - baggage_trolley
-          - oversized_baggage
-          - luggage_encumbrance
-          - guide_dog
-          - other_animal
-          - bike
-        medicalNeed:
-          type: string
-          enum:
-          - heart_condition
-          - other
-        mobilityNeed:
-          type: string
-          enum:
-          - wheelchair
-          - assisted_wheelchair
-          - motorized_wheelchair
-          - mobility_scooter
-          - road_mobility_scooter
-          - walking_frame
-          - restricted_mobility
-          - other
-        psychoSensoryNeed:
-          type: string
-          enum:
-          - visual_impaired
-          - auditory_impaired
-          - cognitive_impaired
-          - averse_to_lifts
-          - averse_to_escalators
-          - averse_to_confined_spaces
-          - averse_to_crowds
-          - other
-    normalInt:
-      type: integer
-      description: default length for an integer (0-1000)
-      default: 0
-      minimum: 0
-      maximum: 1000
-    country:
-      type: string
-      x-semantics:
-      - transmodel: COUNTRY
-      description: two-letter country codes according to ISO 3166-1
-      maxLength: 2
-      minLength: 2
-      pattern: '[A-Z]{2}'
     entitlementGiven:
       x-semantics:
       - transmodel: ENTITLEMENT GIVEN, COMMERCIAL_PROFILE
@@ -2162,13 +2671,13 @@ components:
       x-semantics:
       - transmodel: TYPE OF DRIVER PERMIT
       type: object
-      description: A category of license to use a certain asset class
+      description: A category of license to use a certain asset class.
       required:
-      - mode
-      - type
+      - modes
       properties:
         type:
           type: string
+          description: required when delivered in /collections/license-types/items.
           pattern: ^(licenseType)$
         modes:
           type: array
@@ -2197,7 +2706,6 @@ components:
         and the assetType you're allowed to operate (e.g. driver license for CAR)
       required:
       - number
-      - type
       properties:
         type:
           type: string
@@ -2210,6 +2718,110 @@ components:
           $ref: '#/components/schemas/shortString'
         endValidity:
           $ref: '#/components/schemas/date'
+    dateTimeRange:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        $ref: '#/components/schemas/dateTime'
+    externalDigitalTicket:
+      x-semantics:
+      - transmodel: none
+      description: External ticket, can be accessed using the links collection, with
+        rel=ticket the mediatype tells what it refers to.
+      type: object
+      properties:
+        customFields:
+          $ref: '#/components/schemas/customProperties'
+          description: Generic travelDocument, non-standardized (yet)
+    binaryTicket:
+      x-semantics:
+      - transmodel: none
+      description: Binary information, like a image or certificate
+      type: object
+      required:
+      - contentType
+      - base64
+      properties:
+        contentType:
+          description: the media type (IANA)
+          type: string
+        base64:
+          $ref: '#/components/schemas/longString'
+          description: base 64 binary data
+    eKey:
+      x-semantics:
+      - transmodel: none
+      description: Axa EKey information
+      type: object
+      required:
+      - ekey
+      - lock
+      properties:
+        ekey:
+          type: object
+          additionalProperties: false
+          properties:
+            key:
+              $ref: '#/components/schemas/longString'
+              description: certificate
+            passkey:
+              $ref: '#/components/schemas/longString'
+              description: one time pass key
+        lock:
+          type: object
+          additionalProperties: false
+          properties:
+            bdAddress:
+              $ref: '#/components/schemas/longString'
+              description: physical address
+            deviceName:
+              $ref: '#/components/schemas/normalString'
+              description: how it advertises itself
+    amountOfMoney:
+      type: object
+      x-semantics:
+      - transmodel: FARE PRICE
+      description: an amount of money, usable in fares, fare calculations or in extra
+        costs.
+      required:
+      - amount
+      properties:
+        amount:
+          type: number
+          format: float
+          description: This should be in the base unit as defined by the ISO 4217
+            currency code with the appropriate number of decimal places and omitting
+            the currency symbol. e.g. if the price is in US Dollars the price would
+            be 9.95. This is inclusive VAT
+        taxPercentageUsed:
+          $ref: '#/components/schemas/float'
+          description: value added tax rate (percentage of amount)
+        currencyCode:
+          $ref: '#/components/schemas/currencyCode'
+        vatCountryCode:
+          $ref: '#/components/schemas/country'
+    bankAccount:
+      x-semantics:
+      - transmodel: none
+      type: object
+      description: bank account
+      additionalProperties: false
+      required:
+      - name
+      - number
+      properties:
+        name:
+          $ref: '#/components/schemas/shortString'
+          description: account name
+        number:
+          $ref: '#/components/schemas/shortString'
+          description: account number
+        country:
+          $ref: '#/components/schemas/country'
+        bankIdentification:
+          $ref: '#/components/schemas/shortString'
+          description: bank identification, like BIC code
     geojsonGeometry:
       type: object
       description: geoJSON geometry
@@ -2271,29 +2883,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/traveller'
-    amountOfMoney:
-      type: object
-      x-semantics:
-      - transmodel: FARE PRICE
-      description: an amount of money, usable in fares, fare calculations or in extra
-        costs.
-      required:
-      - amount
-      properties:
-        amount:
-          type: number
-          format: float
-          description: This should be in the base unit as defined by the ISO 4217
-            currency code with the appropriate number of decimal places and omitting
-            the currency symbol. e.g. if the price is in US Dollars the price would
-            be 9.95. This is inclusive VAT
-        taxPercentageUsed:
-          $ref: '#/components/schemas/float'
-          description: value added tax rate (percentage of amount)
-        currencyCode:
-          $ref: '#/components/schemas/currencyCode'
-        vatCountryCode:
-          $ref: '#/components/schemas/country'
     legSummary:
       type: object
       required:
@@ -2357,12 +2946,6 @@ components:
                 - child_free_area
                 - animals_allowed
                 - no_animals
-    dateTimeRange:
-      type: array
-      minItems: 2
-      maxItems: 2
-      items:
-        $ref: '#/components/schemas/dateTime'
     fareStructureElement:
       x-semantics:
       - transmodel: TIME INTERVAL PRICE, TIME UNIT PRICE, GEOGRAPHICAL UNIT PRICE,
@@ -2465,9 +3048,9 @@ components:
       - transmodel: none
       description: status of a leg<br> _NOT_STARTED_ the leg is not started, initial
         state<br> _PREPARING_ the _PREPARE_ operation has been received<br> _READY_TO_USE_
-        the leg is ready to use<br> _IN_USE_ the travelers are on their way<br> _PAUSED_
+        the leg is ready to use<br> _IN_USE_ the travellers are on their way<br> _PAUSED_
         the asset is paused<br> _ENDING_ the end-leg request is received, the offboarding
-        process has is started<br> _ENDED_ the travelers have arrived at their destination,
+        process has is started<br> _ENDED_ the travellers have arrived at their destination,
         leg is final<br> _ISSUE_REPORTED_ due to an issue, there is (temporarily)
         no progress to report, when the issue isn't solved, this is a final state<br>
         _CANCELLED_ the leg has been cancelled, before execution<br> _ABENDED_ the
@@ -2482,8 +3065,6 @@ components:
       - ISSUE_REPORTED
       - CANCELLED
       - ABENDED
-    ancillaryReference:
-      $ref: '#/components/schemas/normalString'
     label:
       type: string
       enum:
@@ -2502,64 +3083,18 @@ components:
       - MANDATORY_PAUSING_INSTRUCTIONS
       - ROUND_TRIP
       - UPFRONT_PAYMENT
-    externalDigitalTicket:
-      x-semantics:
-      - transmodel: none
-      description: External ticket, can be accessed using the links collection, with
-        rel=ticket the mediatype tells what it refers to.
-      type: object
-      properties:
-        customFields:
-          $ref: '#/components/schemas/customProperties'
-          description: Generic travelDocument, non-standardized (yet)
-    binaryTicket:
-      x-semantics:
-      - transmodel: none
-      description: Binary information, like a image or certificate
-      type: object
-      required:
-      - contentType
-      - base64
-      properties:
-        contentType:
-          description: the media type (IANA)
-          type: string
-        base64:
-          $ref: '#/components/schemas/longString'
-          description: base 64 binary data
-    eKey:
-      x-semantics:
-      - transmodel: none
-      description: Axa EKey information
-      type: object
-      required:
-      - ekey
-      - lock
-      properties:
-        ekey:
-          type: object
-          additionalProperties: false
-          properties:
-            key:
-              $ref: '#/components/schemas/longString'
-              description: certificate
-            passkey:
-              $ref: '#/components/schemas/longString'
-              description: one time pass key
-        lock:
-          type: object
-          additionalProperties: false
-          properties:
-            bdAddress:
-              $ref: '#/components/schemas/longString'
-              description: physical address
-            deviceName:
-              $ref: '#/components/schemas/normalString'
-              description: how it advertises itself
     entitlementReference:
       $ref: '#/components/schemas/normalString'
     cardTypeReference:
       $ref: '#/components/schemas/normalString'
+    currencyCode:
+      type: string
+      x-semantics:
+      - transmodel: PRICE UNIT
+      description: ISO 4217 currency code
+      minLength: 3
+      maxLength: 3
+      pattern: '[a-zA-Z]{3}'
     geojsonPoint:
       type: object
       description: Geojson Coordinate
@@ -2643,8 +3178,10 @@ components:
             $ref: '#/components/schemas/guarantee'
     ancillary:
       type: object
+      required:
+      - id
       x-semantics:
-      - transmodel: ANCILLARY PRODUCT (?)
+      - transmodel: ANCILLARY PRODUCT
       properties:
         type:
           type: string
@@ -2710,14 +3247,6 @@ components:
           $ref: '#/components/schemas/customProperties'
         fee:
           $ref: '#/components/schemas/fareStructure'
-    currencyCode:
-      type: string
-      x-semantics:
-      - transmodel: PRICE UNIT
-      description: ISO 4217 currency code
-      minLength: 3
-      maxLength: 3
-      pattern: '[a-zA-Z]{3}'
     equipmentReference:
       $ref: '#/components/schemas/normalString'
     interval:
@@ -2797,205 +3326,447 @@ components:
           items:
             $ref: '#/components/schemas/typeOfTravelDocument'
           description: how this asset can be opened
-  parameters:
-    acceptLanguage:
-      in: header
-      name: Accept-Language
-      required: true
-      schema:
-        $ref: '#/components/schemas/shortString'
-      x-externalDocs:
-        description: A comma-separated list of BCP 47 (RFC 5646) language tags and
-          optional weights as described in IETF RFC7231 section 5.3.5. A list of the
-          languages/localizations the user would like to see the results in.  For
-          user privacy and ease of use on the TO side, this list should be kept as
-          short as possible
-    authorization:
-      in: header
-      name: authorization
-      required: true
-      schema:
-        type: string
-      description: Header field, JWT must be supplied
-    limit:
-      in: query
-      name: limit
-      description: 'The optional limit parameter limits the number of items that are
-        presented in the response document.
-
-
-        Only items are counted that are on the first level of the collection in the
-        response document.
-
-        Nested objects contained within the explicitly requested items shall not be
-        counted.
-
-
-        Minimum = 1. Maximum = 10000. Default = 100.'
-      required: false
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 10000
-        default: 100
-      style: form
-      explode: false
-    offset:
-      name: offset
-      in: query
-      description: 'The optional offset parameter representing the starting index
-        of the returned collection.
-
-
-        Only items are counted that are on the first level of the collection in the
-        response document.
-
-        Nested objects contained within the explicitly requested items shall not be
-        counted.
-
-
-        Default = 0.'
-      required: false
-      schema:
-        type: integer
-        minimum: 0
-        default: 0
-      style: form
-      explode: false
-    bbox:
-      name: bbox
-      in: query
-      description: 'Only features that have a geometry that intersects the bounding
-        box are selected.
-
-        The bounding box is provided as four or six numbers, depending on whether
-        the
-
-        coordinate reference system includes a vertical axis (height or depth):
-
-
-        * Lower left corner, coordinate axis 1
-
-        * Lower left corner, coordinate axis 2
-
-        * Minimum value, coordinate axis 3 (optional)
-
-        * Upper right corner, coordinate axis 1
-
-        * Upper right corner, coordinate axis 2
-
-        * Maximum value, coordinate axis 3 (optional)
-
-
-        If the value consists of four numbers, the coordinate reference system is
-
-        WGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84)
-
-        unless a different coordinate reference system is specified in the parameter
-        `bbox-crs`.
-
-
-        If the value consists of six numbers, the coordinate reference system is WGS
-        84
-
-        longitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h)
-
-        unless a different coordinate reference system is specified in the parameter
-        `bbox-crs`.
-
-
-        The query parameter `bbox-crs` is specified in OGC API - Features - Part 2:
-        Coordinate
-
-        Reference Systems by Reference.
-
-
-        For WGS 84 longitude/latitude the values are in most cases the sequence of
-
-        minimum longitude, minimum latitude, maximum longitude and maximum latitude.
-
-        However, in cases where the box spans the antimeridian the first value
-
-        (west-most box edge) is larger than the third value (east-most box edge).
-
-
-        If the vertical axis is included, the third and the sixth number are
-
-        the bottom and the top of the 3-dimensional bounding box.
-
-
-        If a feature has multiple spatial geometry properties, it is the decision
-        of the
-
-        server whether only a single spatial geometry property is used to determine
-
-        the extent or all relevant geometries.'
-      required: false
-      schema:
-        type: array
-        oneOf:
-        - minItems: 4
-          maxItems: 4
-        - minItems: 6
-          maxItems: 6
-        items:
-          type: number
-      style: form
-      explode: false
-    digest:
-      name: digest
-      in: header
-      description: the hash of the body, SHA-256 ("SHA-256=3q2+7w==:")
-      schema:
-        type: string
-      required: false
-    publicKey:
-      name: publicKey
-      in: header
-      description: the public key of the sending party, can be used to validate the
-        signed digest (it should deliver the digest)
-      x-example: '{"certificate": "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnZ5...\n-----END
-        CERTIFICATE-----"}'
-      schema:
-        type: string
-      required: false
-    signedDigest:
-      name: signedDigest
-      in: header
-      description: the signed hash of complete response, using the private key, SHA-256
-        base64 encoded
-      schema:
-        type: string
-      required: false
-    packageId:
-      in: query
-      name: packageId
-      schema:
-        type: string
-      required: true
-      description: the identifier of a package
-    optionalLegId:
-      in: query
-      name: legId
-      description: leg identifier
-      required: false
-      schema:
-        $ref: '#/components/schemas/uuid'
-    legId:
-      in: query
-      name: legId
-      description: leg identifier
-      required: true
-      schema:
-        $ref: '#/components/schemas/uuid'
-    supportTicketStatus:
+  requestBodies:
+    searchOfferRequest:
+      x-semantics:
+      - transmodel: TRIP REQUEST
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: '#/components/schemas/searchOfferRequest'
+    assignAssetRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE SPOT RESERVATION REQUEST, TRAVEL PACKAGE SPOT CANCELLATION
+          REQUEST, TRAVEL PACKAGE ALTERATION REQUEST
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - leg
+                - asset
+                description: this can be used to assign an asset (/seat) to a leg,
+                  by using the field `asset`. If you want to replace an asset, fill
+                  the field `replacesAsset` with the asset to replace and `asset`
+                  with the new one. If you want to remove an assigned asset from a
+                  leg, fill `asset` with 'null' and fill `replacesAsset` with the
+                  asset to remove.
+                properties:
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  leg:
+                    $ref: '#/components/schemas/legReference'
+                  asset:
+                    $ref: '#/components/schemas/assetReference'
+                  replacesAsset:
+                    $ref: '#/components/schemas/assetReference'
+    assignAncillaryRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE ALTERATION REQUEST
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - leg
+                description: this can be used to assign an ancillary to a leg, by
+                  using the field `ancillary`. If you want to replace an ancillary,
+                  fill the field `replacesAncillary` with the ancillary to replace
+                  and `ancillary` with the new one. If you want to remove an assigned
+                  ancillary from a leg, fill `ancillary` with 'null' and fill `replacesAncillary`
+                  with the ancillary to remove.
+                properties:
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  leg:
+                    $ref: '#/components/schemas/legReference'
+                  ancillary:
+                    $ref: '#/components/schemas/ancillaryReference'
+                  replacesAncillary:
+                    $ref: '#/components/schemas/ancillaryReference'
+    purchaseOfferRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE PURCHASE REQUEST (?)
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - offer
+                properties:
+                  customer:
+                    $ref: '#/components/schemas/customer'
+                  offer:
+                    $ref: '#/components/schemas/packageReference'
+                  paymentMethod:
+                    $ref: '#/components/schemas/typeOfPaymentMethod'
+                  distribution:
+                    $ref: '#/components/schemas/distribution'
+                  travellers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/traveller'
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+    purchaseProductRequest:
+      x-semantics:
+      - transmodel: TRAVEL PACKAGE PURCHASE REQUEST (?)
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - products
+                properties:
+                  customer:
+                    $ref: '#/components/schemas/customer'
+                  location:
+                    $ref: '#/components/schemas/placeReference'
+                  products:
+                    type: array
+                    minItems: 1
+                    items:
+                      $ref: '#/components/schemas/productReference'
+                  distribution:
+                    $ref: '#/components/schemas/distribution'
+                  traveller:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/traveller'
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+    useAssetRequest:
       x-semantics:
       - transmodel: none
-      name: supportTicketStatus
-      in: query
-      required: false
-      schema:
-        $ref: '#/components/schemas/supportTicketStatus'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - assets
+                properties:
+                  customer:
+                    $ref: '#/components/schemas/customer'
+                  assets:
+                    type: array
+                    minItems: 1
+                    items:
+                      $ref: '#/components/schemas/assetReference'
+                  distribution:
+                    $ref: '#/components/schemas/distribution'
+                  paymentMethod:
+                    $ref: '#/components/schemas/typeOfPaymentMethod'
+                  travellers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/traveller'
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+    packageRequest:
+      x-semantics:
+        transmodel: TRAVEL PACKAGE REQUEST
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+    extendExpiryTimeRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  reason:
+                    type: string
+                    description: in case operation is EXTEND_EXPIRY_TIME, the reason
+                      for extension must be supplied here.<br> _PURCHASE_PENDING_
+                      - The internal purchase process on the MP side is not yet finished<br>
+                      _PAYMENT_PENDING_ - The customer is in the payment process<br>
+                      _OTHER_ - unspecified
+                    enum:
+                    - PURCHASE_PENDING
+                    - PAYMENT_PENDING
+                    - OTHER
+                  origin:
+                    type: string
+                    description: This operation can be done on behalf of another party.
+                      The MP can act on behalf of the END_USER (cancel this booking
+                      for me); to override the default origin. In case this field
+                      is missing, it must be assumed that the events the MP is sending,
+                      this field should contain "MP". And in case the TO is sending,
+                      "TO".
+                    enum:
+                    - TO
+                    - MP
+                    - END_USER
+                    - OTHER
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+    legRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - leg
+                properties:
+                  timestamp:
+                    $ref: '#/components/schemas/dateTime'
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  leg:
+                    $ref: '#/components/schemas/legReference'
+                  assetLocation:
+                    $ref: '#/components/schemas/placeReference'
+                  userLocation:
+                    description: This field might lead to GDPR issues. Be aware, use
+                      it with caution.
+                    $ref: '#/components/schemas/placeReference'
+                  currentCharge:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                    description: percentage of charge available
+                  time:
+                    description: time to extend or postpone
+                    $ref: '#/components/schemas/duration'
+                  comment:
+                    type: string
+                    description: free text, should match Content-Language
+                  evidence:
+                    type: array
+                    minItems: 1
+                    items:
+                      $ref: '#/components/schemas/link'
+                  class:
+                    $ref: '#/components/schemas/classOfUse'
+    assetRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - asset
+                properties:
+                  timestamp:
+                    $ref: '#/components/schemas/dateTime'
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  leg:
+                    $ref: '#/components/schemas/legReference'
+                  asset:
+                    $ref: '#/components/schemas/assetReference'
+                  location:
+                    $ref: '#/components/schemas/placeReference'
+              subscriber:
+                type: object
+                required:
+                - successUrl
+                properties:
+                  successUri:
+                    type: string
+                    format: uri
+                  inProgressUri:
+                    type: string
+                    format: uri
+                  failedUri:
+                    type: string
+                    format: uri
+    supportRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                $ref: '#/components/schemas/supportTicket'
+    redressOptionRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - package
+                - guarantee
+                - option
+                properties:
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  offer:
+                    $ref: '#/components/schemas/offerReference'
+                  guarantee:
+                    $ref: '#/components/schemas/uuid'
+                  option:
+                    $ref: '#/components/schemas/uuid'
+    refundDepositRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                properties:
+                  package:
+                    $ref: '#/components/schemas/packageReference'
+                  leg:
+                    $ref: '#/components/schemas/legReference'
+    confirmPaymentRequest:
+      x-semantics:
+      - transmodel: none
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - inputs
+            properties:
+              inputs:
+                type: object
+                required:
+                - paymentId
+                properties:
+                  paymentId:
+                    $ref: '#/components/schemas/uuid'
   headers:
     contentLanguage:
       description: The language/localization of user-facing content, One IETF BCP
@@ -3012,11 +3783,6 @@ components:
       schema:
         type: string
       required: true
-    expires:
-      description: the offer expires at this timestamp
-      schema:
-        $ref: '#/components/schemas/httpDate'
-      required: false
     digest:
       description: the hash of the body, SHA-256 ("SHA-256=3q2+7w==:")
       schema:
@@ -3035,4 +3801,9 @@ components:
         SHA-256 base64 encoded
       schema:
         type: string
+      required: false
+    expires:
+      description: the offer expires at this timestamp
+      schema:
+        $ref: '#/components/schemas/httpDate'
       required: false
