@@ -1,0 +1,26 @@
+{
+  "name": "tomp-api-sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A sandbox server that simulates the TOMP-API v2 (package/leg) lifecycle with real, persisted, stateful bookings.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "start:reset": "node src/server.js --reset",
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-openapi-validator": "^5.3.9",
+    "js-yaml": "^4.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "swagger-ui-dist": "^5.34.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

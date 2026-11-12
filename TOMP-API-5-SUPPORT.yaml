@@ -25,7 +25,6 @@ paths:
       description: returns support tickets in their current state, based on the parameters
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/legId"
         - $ref: "#/components/parameters/supportTicketStatus"
@@ -44,7 +43,6 @@ paths:
       description: creates a request for SUPPORT from end user via MP
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - support
       requestBody:

@@ -40,7 +40,17 @@ paths:
     get:
       description: This document
       parameters:
-        - $ref: 'TOMP-API-1-CORE.yaml#/components/parameters/f'
+        - name: f
+          in: query
+          required: false
+          description: >-
+            The optional f parameter indicates the output format for this document itself.
+            yaml is valid here (unlike elsewhere) since that's this document's own native format.
+          explode: false
+          schema:
+            type: string
+            default: json
+            enum: [ json, html, yaml ]
       responses:
         '200':
           description: General Success response.
@@ -81,6 +91,8 @@ paths:
       summary: the feature collections in the dataset
       description: returns a collection of available collection (like offers, packages, legs, support-requests and payments)
       operationId: getCollections
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/f"
       responses:
         "200":
           description: A list of available collections
@@ -105,6 +117,7 @@ paths:
       description: a (machine or human) readable description of this collection
       parameters:
         - $ref: "#/components/parameters/collectionId"
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/f"
       responses:
         "200":
           description: description of data delivered by this collection
@@ -129,6 +142,8 @@ paths:
         API - Processes offers, including the link to a more detailed description
         of the process. For more information, see <a href="https://docs.ogc.org/is/18-062/18-062.html#sc_process_list">Section 7.9</a>.
       operationId: getProcesses
+      parameters:
+        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/f"
       responses:
         "200":
           description: Information about the available processes
@@ -217,6 +232,7 @@ paths:
           - confirm-redress-option
           - refund-deposit
           - confirm-payment
+      - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/f"
       responses:
         "200":
           description: A process description.

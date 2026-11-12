@@ -26,7 +26,6 @@ paths:
       summary: "Perform an purchase of offer(s)"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
@@ -48,7 +47,6 @@ paths:
       summary: "Perform an purchase of a package"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/digest"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/publicKey"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/signedDigest"
@@ -70,7 +68,6 @@ paths:
       summary: "Perform an purchase of a product"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -92,7 +89,6 @@ paths:
       summary: "Request to use an asset"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       security:
         - BearerAuth: []
         - OAuth: []
@@ -114,7 +110,6 @@ paths:
       summary: "Rollback a purchase, before the rollbackExpiryTime has ended"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - purchase
       requestBody:
@@ -131,7 +126,6 @@ paths:
       summary: "Confirm the purchase, before the rollbackExpiryTime has ended"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - purchase
       requestBody:
@@ -148,7 +142,6 @@ paths:
       summary: "Request additional time to complete the purchase"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - purchase
       requestBody:
@@ -166,7 +159,6 @@ paths:
       description: Returns travel documents for a package or leg
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/packageId"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/optionalLegId"
       tags:

@@ -22,7 +22,6 @@ paths:
       description: "Notification endpoint. Communication from TO to MP will be done using this endpoint"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - notifications
       requestBody:
@@ -40,7 +39,6 @@ paths:
       description: "Confirmation endpoint. Requesting confirmations from TO to MP will be done using this endpoint"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - notifications
       requestBody:
@@ -58,7 +56,6 @@ paths:
       summary: "Payment request endpoint"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - notifications
       requestBody:

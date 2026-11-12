@@ -29,7 +29,6 @@ paths:
       summary: "Retrieves all accepted entitlements"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - travel information
       responses:
@@ -46,7 +45,6 @@ paths:
       summary: "Retrieves all accepted card types"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - travel information
       responses:
@@ -63,7 +61,6 @@ paths:
       summary: "Retrieves all accepted license types"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - travel information
       responses:
@@ -80,7 +77,6 @@ paths:
       summary: "Retrieves all user profile definitions"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - travel information
       responses:
@@ -96,7 +92,6 @@ paths:
         The reseller should identify itself with an authorization token (to get specific prices)"
       parameters:
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "../TOMP-API-1-CORE.yaml#/components/parameters/productId"
         - in: query
           name: user-profile

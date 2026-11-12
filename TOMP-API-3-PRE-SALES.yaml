@@ -28,7 +28,6 @@ paths:
       summary: "Select offer(s) into a package"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       x-semantics: 
@@ -49,7 +48,6 @@ paths:
       - transmodel: TRAVEL PACKAGE SPOT AVAILABILITY QUERY
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
@@ -69,7 +67,6 @@ paths:
       summary: "Request available ancillaries for a leg"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/bbox"
@@ -90,7 +87,6 @@ paths:
       operationId: updateTravellerRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       summary: update details of a traveller
@@ -109,7 +105,6 @@ paths:
       operationId: updateTravelSpecificationRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       summary: update start/end location or start/end time
@@ -128,7 +123,6 @@ paths:
       operationId: assignAssetRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       summary: Assign an asset to a package (and a leg). It could also replace another asset or remove one        
@@ -147,7 +141,6 @@ paths:
       operationId: assignAncillaryRequest
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       summary: Assign an ancillary to a package (and a leg). It could also replace another ancillary or remove one        
@@ -167,7 +160,6 @@ paths:
       summary: "Release the complete package"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       requestBody:
@@ -184,7 +176,6 @@ paths:
       summary: "Remove an offer from the package"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - pre sales
       x-semantics:

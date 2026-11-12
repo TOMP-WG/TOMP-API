@@ -1,0 +1,1056 @@
+{
+  "info": {
+    "_postman_id": "6f1b2c3a-8e2d-4a1d-9f3e-2b7c9d4e5a10",
+    "name": "TOMP-API Sandbox",
+    "description": "Drives the TOMP-API v2 sandbox server (see ../README.md) through a full, real package/leg lifecycle: search offers, purchase, confirm, start/end a leg, pay and settle - plus rollback/cancel alternatives and negative/error-path checks.\n\nRun the whole collection top-to-bottom (Collection Runner, or `newman run TOMP-API-Sandbox.postman_collection.json`) against a running sandbox (`npm start` in ../, default http://localhost:4010). Folders execute in order:\n\n1. Auth - gets a Bearer token used by every later request (collection-level auth)\n2. Health\n3. Happy Path Lifecycle - the full search -> purchase -> confirm -> execute -> pay -> settle flow, searching from Amsterdam Centraal so the default (`gosharing`) provider's own offer shows up alongside the walking one\n4. Alternative Flows - rollback and cancel, each fetching/purchasing its own fresh offer first so they don't disturb the happy-path package\n5. Error Scenarios - 401/404/409/501/400, the last two of which reuse state left behind by folder 3\n6. Compare Providers (multi-instance) - run `../start-providers.ps1` or `../start-providers.sh` first, then this folder queries each running instance directly by port to show the *same* search returning a different operator's offer (or none, outside its coverage) depending which one you ask. Reuses the token from folder 1 - every instance accepts it as long as they share the sandbox's default JWT secret.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4010", "type": "string" },
+    { "key": "clientId", "value": "demo", "type": "string" },
+    { "key": "clientSecret", "value": "demo", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "offerId", "value": "", "type": "string" },
+    { "key": "packageId", "value": "", "type": "string" },
+    { "key": "legId", "value": "", "type": "string" },
+    { "key": "paymentId", "value": "", "type": "string" },
+    { "key": "altPackageId", "value": "", "type": "string" },
+    { "key": "altPackageId2", "value": "", "type": "string" },
+    { "key": "uberOfferId", "value": "", "type": "string" },
+    { "key": "uberPackageId", "value": "", "type": "string" },
+    { "key": "gosharingOfferId", "value": "", "type": "string" },
+    {
+      "key": "gosharingUrl",
+      "value": "http://localhost:4010",
+      "type": "string",
+      "description": "Shared bicycle, Amsterdam + Utrecht - port assigned by start-providers.ps1/.sh"
+    },
+    {
+      "key": "uberUrl",
+      "value": "http://localhost:4011",
+      "type": "string",
+      "description": "Taxi, Amsterdam + Utrecht - port assigned by start-providers.ps1/.sh"
+    },
+    {
+      "key": "checkUrl",
+      "value": "http://localhost:4012",
+      "type": "string",
+      "description": "Shared bicycle, Amsterdam only - port assigned by start-providers.ps1/.sh"
+    },
+    {
+      "key": "viavanUrl",
+      "value": "http://localhost:4013",
+      "type": "string",
+      "description": "Taxi, Utrecht only - port assigned by start-providers.ps1/.sh"
+    },
+    { "key": "amsterdamFrom", "value": "gps:52.3791,4.9003", "type": "string", "description": "Amsterdam Centraal" },
+    { "key": "amsterdamTo", "value": "gps:52.3550,4.8900", "type": "string", "description": "Amsterdam De Pijp" },
+    { "key": "utrechtFrom", "value": "gps:52.0894,5.1077", "type": "string", "description": "Utrecht Centraal" },
+    { "key": "utrechtTo", "value": "gps:52.0866,5.1704", "type": "string", "description": "Utrecht Science Park" }
+  ],
+  "item": [
+    {
+      "name": "00 - Auth",
+      "item": [
+        {
+          "name": "Get Access Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "client_credentials", "type": "text" },
+                { "key": "client_id", "value": "{{clientId}}", "type": "text" },
+                { "key": "client_secret", "value": "{{clientSecret}}", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/oauth/token",
+            "description": "Issues a dev Bearer JWT. Any non-empty client_id/client_secret pair is accepted unless the sandbox was started with SANDBOX_STRICT_AUTH=true."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has access_token', function () { pm.expect(json.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('accessToken', json.access_token);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Happy Path Lifecycle",
+      "item": [
+        {
+          "name": "1. Search Offers",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {\n    \"type\": \"searchOffer\",\n    \"specification\": {\n      \"type\": \"travel_specification\",\n      \"from\": \"{{amsterdamFrom}}\",\n      \"to\": \"{{amsterdamTo}}\"\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/search-offers/execution",
+            "description": "Generates synthetic offers for a travel specification. Picking up in Amsterdam means the sandbox's active SANDBOX_PROVIDER (gosharing by default) returns its own offer alongside the walking one - see folder 6 to compare providers. Stores the first offer's id as {{offerId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has at least one offer', function () { pm.expect(json.features.length).to.be.above(0); });",
+                  "pm.collectionVariables.set('offerId', json.features[0].id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "2. Get Offer By Id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "en-US", "type": "text" }],
+            "url": "{{baseUrl}}/collections/offers/items?offerId={{offerId}}",
+            "description": "Full offer detail (package-shaped), fetched before purchasing."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Offer status is OFFERED', function () { pm.expect(json.properties.status).to.eql('OFFERED'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "3. Purchase Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"offer\": \"{{offerId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/purchase-offers/execution",
+            "description": "Creates a REAL, persisted package (status PENDING) from the offer. Stores {{packageId}} and {{legId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is PENDING', function () { pm.expect(json.properties.status).to.eql('PENDING'); });",
+                  "var rels = json.links.map(function (l) { return l.rel; });",
+                  "pm.test('PENDING package links to confirm/extend/rollback', function () {",
+                  "  pm.expect(rels).to.include.members(['confirm-purchase', 'extend-expiry-time', 'rollback-purchase']);",
+                  "});",
+                  "pm.collectionVariables.set('packageId', json.properties.id);",
+                  "pm.collectionVariables.set('legId', json.features[0].id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "4. Confirm Purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"package\": \"{{packageId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/confirm-purchase/execution",
+            "description": "PENDING -> CONFIRMED. Also generates the package's FARE payment entry."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is CONFIRMED', function () { pm.expect(json.properties.status).to.eql('CONFIRMED'); });",
+                  "var rels = json.links.map(function (l) { return l.rel; });",
+                  "pm.test('CONFIRMED package links to cancel-package and travel-documents', function () {",
+                  "  pm.expect(rels).to.include.members(['cancel-package', 'travel-documents']);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "5. Start Leg",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"leg\": \"{{legId}}\", \"package\": \"{{packageId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/start-leg/execution",
+            "description": "Leg NOT_STARTED -> IN_USE; package CONFIRMED -> STARTED (derived)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is STARTED', function () { pm.expect(json.properties.status).to.eql('STARTED'); });",
+                  "pm.test('Leg status is IN_USE', function () { pm.expect(json.features[0].properties.status).to.eql('IN_USE'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "6. End Leg",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"leg\": \"{{legId}}\", \"package\": \"{{packageId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/end-leg/execution",
+            "description": "Leg -> ENDED; package -> ENDED (derived, once every leg has ended)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is ENDED', function () { pm.expect(json.properties.status).to.eql('ENDED'); });",
+                  "pm.test('Leg status is ENDED', function () { pm.expect(json.features[0].properties.status).to.eql('ENDED'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "7. List Payments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "en-US", "type": "text" }],
+            "url": "{{baseUrl}}/collections/payments/items?package={{packageId}}",
+            "description": "Journal entries for the package. Stores the first payment's id as {{paymentId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has one payment', function () { pm.expect(json.features.length).to.eql(1); });",
+                  "pm.test('Payment is TO_INVOICE', function () { pm.expect(json.features[0].properties.state).to.eql('TO_INVOICE'); });",
+                  "pm.collectionVariables.set('paymentId', json.features[0].id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "8. Confirm Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"paymentId\": \"{{paymentId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/confirm-payment/execution",
+            "description": "Marks the payment INVOICED. Responds 204 No Content per spec. Package -> SETTLED once every payment is invoiced."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 204', function () { pm.response.to.have.status(204); });"]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "9. Get Package (expect SETTLED)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "en-US", "type": "text" }],
+            "url": "{{baseUrl}}/collections/packages/items?packageId={{packageId}}",
+            "description": "Re-reads the package to prove the state really persisted across the whole flow."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is SETTLED', function () { pm.expect(json.properties.status).to.eql('SETTLED'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Alternative Flows",
+      "item": [
+        {
+          "name": "Rollback Purchase (self-contained)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"package\": \"{{altPackageId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/rollback-purchase/execution",
+            "description": "Purchases its own fresh offer in the pre-request script (so it never disturbs {{packageId}} from the happy-path folder), then rolls it back. PENDING -> ROLLBACK."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function post(path, body, cb) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.collectionVariables.get('baseUrl') + path,",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "      'Content-Type': 'application/json',",
+                  "      'Accept-Language': 'en-US',",
+                  "      'Authorization': 'Bearer ' + pm.collectionVariables.get('accessToken')",
+                  "    },",
+                  "    body: { mode: 'raw', raw: JSON.stringify(body) }",
+                  "  }, cb);",
+                  "}",
+                  "",
+                  "post('/processes/search-offers/execution', {",
+                  "  inputs: { type: 'searchOffer', specification: { type: 'travel_specification', from: pm.collectionVariables.get('amsterdamFrom'), to: pm.collectionVariables.get('amsterdamTo') } }",
+                  "}, function (err, res) {",
+                  "  if (err) { console.error(err); return; }",
+                  "  var offerId = res.json().features[0].id;",
+                  "  post('/processes/purchase-offers/execution', { inputs: { offer: offerId } }, function (err2, res2) {",
+                  "    if (err2) { console.error(err2); return; }",
+                  "    pm.collectionVariables.set('altPackageId', res2.json().properties.id);",
+                  "  });",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is ROLLBACK', function () { pm.expect(json.properties.status).to.eql('ROLLBACK'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Cancel Package (self-contained)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"package\": \"{{altPackageId2}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/cancel-package/execution",
+            "description": "Purchases and confirms its own fresh package in the pre-request script, then cancels it. CONFIRMED -> CANCELLED."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function post(path, body, cb) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.collectionVariables.get('baseUrl') + path,",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "      'Content-Type': 'application/json',",
+                  "      'Accept-Language': 'en-US',",
+                  "      'Authorization': 'Bearer ' + pm.collectionVariables.get('accessToken')",
+                  "    },",
+                  "    body: { mode: 'raw', raw: JSON.stringify(body) }",
+                  "  }, cb);",
+                  "}",
+                  "",
+                  "post('/processes/search-offers/execution', {",
+                  "  inputs: { type: 'searchOffer', specification: { type: 'travel_specification', from: pm.collectionVariables.get('amsterdamFrom'), to: pm.collectionVariables.get('amsterdamTo') } }",
+                  "}, function (err, res) {",
+                  "  if (err) { console.error(err); return; }",
+                  "  var offerId = res.json().features[0].id;",
+                  "  post('/processes/purchase-offers/execution', { inputs: { offer: offerId } }, function (err2, res2) {",
+                  "    if (err2) { console.error(err2); return; }",
+                  "    var packageId = res2.json().properties.id;",
+                  "    post('/processes/confirm-purchase/execution', { inputs: { package: packageId } }, function (err3) {",
+                  "      if (err3) { console.error(err3); return; }",
+                  "      pm.collectionVariables.set('altPackageId2', packageId);",
+                  "    });",
+                  "  });",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is CANCELLED', function () { pm.expect(json.properties.status).to.eql('CANCELLED'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Error Scenarios",
+      "item": [
+        {
+          "name": "Missing Bearer Token -> 401",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"type\": \"searchOffer\", \"specification\": { \"type\": \"travel_specification\" } }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/search-offers/execution",
+            "description": "No Authorization header at all -> 401 in the TOMP error envelope."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Error type is AUTH', function () { pm.expect(json.errors[0].type).to.eql('AUTH'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Unknown Package Id -> 404",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "en-US", "type": "text" }],
+            "url": "{{baseUrl}}/collections/packages/items?packageId=does-not-exist",
+            "description": "No package with this id has ever been created -> 404."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', function () { pm.response.to.have.status(404); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Error type is NOTFOUND', function () { pm.expect(json.errors[0].type).to.eql('NOTFOUND'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Invalid State Transition -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"package\": \"{{packageId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/confirm-purchase/execution",
+            "description": "Depends on folder 02 having run first: {{packageId}} is now SETTLED, so confirming it again is an illegal transition -> 409."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', function () { pm.response.to.have.status(409); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Error type is STATE', function () { pm.expect(json.errors[0].type).to.eql('STATE'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Out of Scope Leg Operation -> 501",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"leg\": \"{{legId}}\", \"package\": \"{{packageId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/extend-leg/execution",
+            "description": "extend-leg is a valid legOperation per the spec's enum, but is out of scope for this sandbox -> 501."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 501', function () { pm.response.to.have.status(501); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Error type is SCOPE', function () { pm.expect(json.errors[0].type).to.eql('SCOPE'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Missing Required Field -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/processes/purchase-offers/execution",
+            "description": "inputs.offer is required by the spec's requestBody schema -> 400 (caught by express-openapi-validator)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 400', function () { pm.response.to.have.status(400); });"]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Compare Providers (multi-instance)",
+      "description": "Needs several sandbox instances running first - `../start-providers.ps1` (Windows) or `../start-providers.sh` (bash), which by default bring up gosharing/uber/check/viavan on :4010-:4013. Every request here targets one instance directly by port instead of {{baseUrl}}, reusing the token from folder 00 (all instances accept it as long as they share the default JWT secret). Deselect this folder in Collection Runner (or skip it with newman's `--folder`) if you're only running a single instance - its requests will fail to connect otherwise.",
+      "item": [
+        {
+          "name": "GoSharing (:4010) - Health",
+          "request": { "method": "GET", "header": [], "url": "{{gosharingUrl}}/health" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Provider is gosharing', function () { pm.expect(json.provider.key).to.eql('gosharing'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GoSharing (:4010) - Search Offers (Amsterdam)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {\n    \"type\": \"searchOffer\",\n    \"specification\": {\n      \"type\": \"travel_specification\",\n      \"from\": \"{{amsterdamFrom}}\",\n      \"to\": \"{{amsterdamTo}}\"\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{gosharingUrl}}/processes/search-offers/execution",
+            "description": "GoSharing covers Amsterdam -> walking offer plus a GoSharing BICYCLE offer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "var modes = json.features.map(function (f) { return f.properties.legs[0].mode; });",
+                  "var names = json.features.map(function (f) { return f.properties.legs[0].name; }).join(' ');",
+                  "pm.test('Has a BICYCLE offer', function () { pm.expect(modes).to.include('BICYCLE'); });",
+                  "pm.test('Offer is from GoSharing', function () { pm.expect(names).to.include('GoSharing'); });",
+                  "var bikeOffer = json.features.find(function (f) { return f.properties.legs[0].mode === 'BICYCLE'; });",
+                  "var bikeRels = bikeOffer.links.map(function (l) { return l.rel; });",
+                  "pm.test('BICYCLE offer links straight to purchase-offers', function () { pm.expect(bikeRels).to.include('purchase-offers'); });",
+                  "pm.collectionVariables.set('gosharingOfferId', bikeOffer.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GoSharing (:4010) - Purchase, Confirm and Unlock the Bike",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"offer\": \"{{gosharingOfferId}}\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{gosharingUrl}}/processes/purchase-offers/execution",
+            "description": "Purchases the BICYCLE offer directly (self-service mode); the test script then confirms it and fetches its travel documents to show the unlock-data link used to open the bike."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is PENDING', function () { pm.expect(json.properties.status).to.eql('PENDING'); });",
+                  "var packageId = json.properties.id;",
+                  "",
+                  "pm.sendRequest({",
+                  "  url: pm.collectionVariables.get('gosharingUrl') + '/processes/confirm-purchase/execution',",
+                  "  method: 'POST',",
+                  "  header: {",
+                  "    'Content-Type': 'application/json',",
+                  "    'Accept-Language': 'en-US',",
+                  "    'Authorization': 'Bearer ' + pm.collectionVariables.get('accessToken')",
+                  "  },",
+                  "  body: { mode: 'raw', raw: JSON.stringify({ inputs: { package: packageId } }) }",
+                  "}, function (err, confirmRes) {",
+                  "  if (err) { console.error(err); return; }",
+                  "  pm.test('Confirm: status is CONFIRMED', function () {",
+                  "    pm.expect(confirmRes.json().properties.status).to.eql('CONFIRMED');",
+                  "  });",
+                  "",
+                  "  pm.sendRequest({",
+                  "    url: pm.collectionVariables.get('gosharingUrl') + '/collections/travel-documents/items?packageId=' + packageId,",
+                  "    method: 'GET',",
+                  "    header: {",
+                  "      'Accept-Language': 'en-US',",
+                  "      'Authorization': 'Bearer ' + pm.collectionVariables.get('accessToken')",
+                  "    }",
+                  "  }, function (err2, docsRes) {",
+                  "    if (err2) { console.error(err2); return; }",
+                  "    var docsJson = docsRes.json();",
+                  "    pm.test('Travel documents: one DEEP_LINK document with an unlock-data link', function () {",
+                  "      pm.expect(docsJson.features.length).to.eql(1);",
+                  "      pm.expect(docsJson.features[0].properties.travelDocumentType).to.eql('DEEP_LINK');",
+                  "      var docRels = docsJson.features[0].links.map(function (l) { return l.rel; });",
+                  "      pm.expect(docRels).to.include('unlock-data');",
+                  "    });",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Uber (:4011) - Health",
+          "request": { "method": "GET", "header": [], "url": "{{uberUrl}}/health" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Provider is uber', function () { pm.expect(json.provider.key).to.eql('uber'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Uber (:4011) - Search Offers (Utrecht)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {\n    \"type\": \"searchOffer\",\n    \"specification\": {\n      \"type\": \"travel_specification\",\n      \"from\": \"{{utrechtFrom}}\",\n      \"to\": \"{{utrechtTo}}\"\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{uberUrl}}/processes/search-offers/execution",
+            "description": "Uber covers both cities -> walking offer plus an Uber TAXI offer here in Utrecht."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "var modes = json.features.map(function (f) { return f.properties.legs[0].mode; });",
+                  "var names = json.features.map(function (f) { return f.properties.legs[0].name; }).join(' ');",
+                  "pm.test('Has a TAXI offer', function () { pm.expect(modes).to.include('TAXI'); });",
+                  "pm.test('Offer is from Uber', function () { pm.expect(names).to.include('Uber'); });",
+                  "var taxiOffer = json.features.find(function (f) { return f.properties.legs[0].mode === 'TAXI'; });",
+                  "var taxiRels = taxiOffer.links.map(function (l) { return l.rel; });",
+                  "pm.test('TAXI offer links to select-offers, not purchase-offers', function () {",
+                  "  pm.expect(taxiRels).to.include('select-offers');",
+                  "  pm.expect(taxiRels).to.not.include('purchase-offers');",
+                  "});",
+                  "pm.collectionVariables.set('uberOfferId', taxiOffer.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Uber (:4011) - Select Offer (reserve taxi ride)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": { \"offers\": [\"{{uberOfferId}}\"] }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{uberUrl}}/processes/select-offers/execution",
+            "description": "A taxi ride has to be reserved before it's bought - this is the process the TAXI offer's select-offers link points at. Creates a PENDING package, same as purchase-offers would, but without purchasing it outright. The test script then purchases, confirms and fetches the boarding code for it."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Package status is PENDING', function () { pm.expect(json.properties.status).to.eql('PENDING'); });",
+                  "var rels = json.links.map(function (l) { return l.rel; });",
+                  "pm.test('Reservation links to purchase-package only', function () {",
+                  "  pm.expect(rels).to.include('purchase-package');",
+                  "  pm.expect(rels).to.not.include('confirm-purchase');",
+                  "});",
+                  "var packageId = json.properties.id;",
+                  "pm.collectionVariables.set('uberPackageId', packageId);",
+                  "",
+                  "function post(path, body, cb) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.collectionVariables.get('uberUrl') + path,",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "      'Content-Type': 'application/json',",
+                  "      'Accept-Language': 'en-US',",
+                  "      'Authorization': 'Bearer ' + pm.collectionVariables.get('accessToken')",
+                  "    },",
+                  "    body: { mode: 'raw', raw: JSON.stringify(body) }",
+                  "  }, cb);",
+                  "}",
+                  "",
+                  "post('/processes/purchase-package/execution', { inputs: { package: packageId } }, function (err, purchaseRes) {",
+                  "  if (err) { console.error(err); return; }",
+                  "  var purchaseJson = purchaseRes.json();",
+                  "  pm.test('Purchase-package: still PENDING, now with confirm/extend/rollback links', function () {",
+                  "    pm.expect(purchaseJson.properties.status).to.eql('PENDING');",
+                  "    var purchaseRels = purchaseJson.links.map(function (l) { return l.rel; });",
+                  "    pm.expect(purchaseRels).to.include.members(['confirm-purchase', 'extend-expiry-time', 'rollback-purchase']);",
+                  "  });",
+                  "",
+                  "  post('/processes/confirm-purchase/execution', { inputs: { package: packageId } }, function (err2, confirmRes) {",
+                  "    if (err2) { console.error(err2); return; }",
+                  "    pm.test('Confirm: status is CONFIRMED', function () {",
+                  "      pm.expect(confirmRes.json().properties.status).to.eql('CONFIRMED');",
+                  "    });",
+                  "",
+                  "    pm.sendRequest({",
+                  "      url: pm.collectionVariables.get('uberUrl') + '/collections/travel-documents/items?packageId=' + packageId,",
+                  "      method: 'GET',",
+                  "      header: {",
+                  "        'Accept-Language': 'en-US',",
+                  "        'Authorization': 'Bearer ' + pm.collectionVariables.get('accessToken')",
+                  "      }",
+                  "    }, function (err3, docsRes) {",
+                  "      if (err3) { console.error(err3); return; }",
+                  "      var docsJson = docsRes.json();",
+                  "      pm.test('Travel documents: one BARCODE document with a boarding-code link', function () {",
+                  "        pm.expect(docsJson.features.length).to.eql(1);",
+                  "        pm.expect(docsJson.features[0].properties.travelDocumentType).to.eql('BARCODE');",
+                  "        var docRels = docsJson.features[0].links.map(function (l) { return l.rel; });",
+                  "        pm.expect(docRels).to.include('boarding-code');",
+                  "      });",
+                  "    });",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Check (:4012) - Search Offers (Amsterdam)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {\n    \"type\": \"searchOffer\",\n    \"specification\": {\n      \"type\": \"travel_specification\",\n      \"from\": \"{{amsterdamFrom}}\",\n      \"to\": \"{{amsterdamTo}}\"\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{checkUrl}}/processes/search-offers/execution",
+            "description": "Check covers Amsterdam only -> walking offer plus a Check BICYCLE offer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "var modes = json.features.map(function (f) { return f.properties.legs[0].mode; });",
+                  "var names = json.features.map(function (f) { return f.properties.legs[0].name; }).join(' ');",
+                  "pm.test('Has a BICYCLE offer', function () { pm.expect(modes).to.include('BICYCLE'); });",
+                  "pm.test('Offer is from Check', function () { pm.expect(names).to.include('Check'); });",
+                  "var bikeOffer = json.features.find(function (f) { return f.properties.legs[0].mode === 'BICYCLE'; });",
+                  "var bikeRels = bikeOffer.links.map(function (l) { return l.rel; });",
+                  "pm.test('BICYCLE offer links straight to purchase-offers', function () { pm.expect(bikeRels).to.include('purchase-offers'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Check (:4012) - Search Offers (Utrecht) -> no coverage",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {\n    \"type\": \"searchOffer\",\n    \"specification\": {\n      \"type\": \"travel_specification\",\n      \"from\": \"{{utrechtFrom}}\",\n      \"to\": \"{{utrechtTo}}\"\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{checkUrl}}/processes/search-offers/execution",
+            "description": "Check doesn't cover Utrecht, so only the operator-agnostic walking offer comes back."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Only the walking offer', function () {",
+                  "  pm.expect(json.features.length).to.eql(1);",
+                  "  pm.expect(json.features[0].properties.legs[0].mode).to.eql('FOOT');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "ViaVan (:4013) - Search Offers (Utrecht)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept-Language", "value": "en-US", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": {\n    \"type\": \"searchOffer\",\n    \"specification\": {\n      \"type\": \"travel_specification\",\n      \"from\": \"{{utrechtFrom}}\",\n      \"to\": \"{{utrechtTo}}\"\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{viavanUrl}}/processes/search-offers/execution",
+            "description": "ViaVan covers Utrecht only -> walking offer plus a ViaVan TAXI offer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "var modes = json.features.map(function (f) { return f.properties.legs[0].mode; });",
+                  "var names = json.features.map(function (f) { return f.properties.legs[0].name; }).join(' ');",
+                  "pm.test('Has a TAXI offer', function () { pm.expect(modes).to.include('TAXI'); });",
+                  "pm.test('Offer is from ViaVan', function () { pm.expect(names).to.include('ViaVan'); });",
+                  "var taxiOffer = json.features.find(function (f) { return f.properties.legs[0].mode === 'TAXI'; });",
+                  "var taxiRels = taxiOffer.links.map(function (l) { return l.rel; });",
+                  "pm.test('TAXI offer links to select-offers, not purchase-offers', function () {",
+                  "  pm.expect(taxiRels).to.include('select-offers');",
+                  "  pm.expect(taxiRels).to.not.include('purchase-offers');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}

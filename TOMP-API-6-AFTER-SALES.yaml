@@ -25,7 +25,6 @@ paths:
       description: Returns possible refund or replacement options for a guarantee
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - name: packageId
           in: query
           description: the id of the package that contains a purchased product
@@ -86,7 +85,6 @@ paths:
         - after sales
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       x-semantics:
       - transmodel: REDRESS QUERY
       requestBody:
@@ -105,7 +103,6 @@ paths:
         - after sales
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       requestBody:
         $ref: "#/components/requestBodies/redressOptionRequest"
       responses:
@@ -120,7 +117,6 @@ paths:
       summary: "Request to refund a deposit"
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - after sales
       requestBody:
@@ -138,7 +134,6 @@ paths:
       description: Returns all the JOURNAL ENTRIES that should be paid
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/limit"
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/offset"
         - name: startTime
@@ -190,7 +185,6 @@ paths:
       description: The MP (reseller) confirms a payment
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - after sales
       requestBody:
@@ -213,7 +207,6 @@ paths:
         During the purchase you rollback a package.<br>
       parameters:
         - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/acceptLanguage"
-        - $ref: "TOMP-API-1-CORE.yaml#/components/parameters/authorization"
       tags:
         - after sales
       x-semantics:
